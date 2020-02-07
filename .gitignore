@@ -19,6 +19,7 @@ version.cmt
 genConf/
 QMTest/
 InstallArea/
+install/
 patches/
 test_results/
 
@@ -47,7 +48,7 @@ DoxyWarnings.log
 
 .build/
 build-dir/
-build.*/
+build*/
 .eclipse/
 CMakeFiles/
 CTestTestfile.cmake
