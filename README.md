@@ -1,0 +1,3 @@
+# K4FWCore: Core Gaudi components for the Key4HEP software framework
+
+...
