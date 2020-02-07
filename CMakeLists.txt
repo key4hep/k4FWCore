@@ -19,4 +19,4 @@ if(NOT CMAKE_CXX_STANDARD MATCHES "14|17")
 endif()
 
 gaudi_project(K4FWCore v0r1
-              USE Gaudi v32r0 )
+              USE Gaudi v32r2 )
