@@ -13,7 +13,10 @@ StatusCode PodioOutput::initialize() {
 
   // check whether we have the PodioEvtSvc active
   m_podioDataSvc = dynamic_cast<PodioDataSvc*>(evtSvc().get());
-  if (0 == m_podioDataSvc) return StatusCode::FAILURE;
+  if (nullptr  == m_podioDataSvc) {
+    error() << "Could not get DataSvc!" << endmsg;
+    return StatusCode::FAILURE;
+  }
 
   m_file = std::unique_ptr<TFile>(TFile::Open(m_filename.value().c_str(), "RECREATE", "data file"));
   // Both trees are written to the ROOT file and owned by it
