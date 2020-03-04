@@ -53,23 +53,7 @@ void PodioOutput::createBranches(const std::vector<std::pair<std::string, podio:
                                  bool prepare) {
   for (auto& collNamePair : collections) {
     auto collName = collNamePair.first;
-    // TODO: we need the class name in a better way
-    std::string className(typeid(*(collNamePair.second)).name());
-    size_t pos = className.find_first_not_of("0123456789");
-    className.erase(0, pos);
-    // demangling the namespace: due to namespace additional characters were introduced:
-    // e.g. N3fcc18TrackHit
-    // remove any number+char before the namespace:
-    pos = className.find_first_of("0123456789");
-    size_t pos1 = className.find_first_not_of("0123456789", pos);
-    className.erase(0, pos1);
-    // replace any numbers between namespace and class with "::"
-    pos = className.find_first_of("0123456789");
-    pos1 = className.find_first_not_of("0123456789", pos);
-    className.replace(pos, pos1 - pos, "::");
-
-    pos = className.find("Collection");
-    className.erase(pos, pos + 10);
+    std::string className( collNamePair.second->getValueTypeName() ) ;
     std::string collClassName = "vector<" + className + "Data>";
     int isOn = 0;
     if (m_switch.isOn(collName)) {
