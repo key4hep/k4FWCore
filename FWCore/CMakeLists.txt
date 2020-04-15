@@ -13,7 +13,7 @@ gaudi_install_python_modules()
 gaudi_add_library(FWCore
 		  src/*.cpp
                   INCLUDE_DIRS podio ROOT
-                  LINK_LIBRARIES GaudiAlgLib GaudiKernel podio::podio ROOT
+                  LINK_LIBRARIES GaudiAlgLib GaudiKernel podio::podioRootIO ROOT
                   PUBLIC_HEADERS FWCore)
 
 gaudi_add_module(FWCorePlugins
