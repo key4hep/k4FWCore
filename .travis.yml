@@ -52,7 +52,7 @@ install:
 # command to run tests
 script:
   - docker run -ti --name CI_CONTAINER -v $PKGDIR:/workspace -e COMPILER_TYPE=$COMPILER -e LCG_RELEASE=${LCG_RELEASE} -e STANDARD=${STANDARD} -e COMPILER_VERSION=${COMPILER_VERSION} ${CVMFS_REPOS} -d clicdp/cc7-lcg bash 
-  - docker exec -ti CI_CONTAINER  /bin/bash -c "cd /workspace; ./.k4fwcore-ci.d/compile_and_test.sh"
+  - docker exec -ti CI_CONTAINER  /bin/bash -c "cd /workspace; ln -s /usr/lib64/liblzma.so.5.2.2 /usr/lib64/liblzma.so;   ./.k4fwcore-ci.d/compile_and_test.sh"
 
 
 # Don't send e-mail notifications
