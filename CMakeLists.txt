@@ -2,11 +2,14 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.5)
 
 
 find_package(ROOT COMPONENTS RIO Tree)
+find_package(podio)
+find_package(EDM4HEP)
 
 #---------------------------------------------------------------
 # Load macros and functions for Gaudi-based projects
 find_package(GaudiProject)
 #---------------------------------------------------------------
+
 
 include(GNUInstallDirs)
 

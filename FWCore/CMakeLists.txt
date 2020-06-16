@@ -3,7 +3,6 @@
 ################################################################################
 gaudi_subdir(FWCore v1r0)
 
-find_package(podio)
 
 # this declaration will not be needed in the future
 gaudi_depends_on_subdirs(GaudiAlg GaudiKernel)
@@ -13,7 +12,7 @@ gaudi_install_python_modules()
 gaudi_add_library(FWCore
 		  src/*.cpp
                   INCLUDE_DIRS podio ROOT
-                  LINK_LIBRARIES GaudiAlgLib GaudiKernel podio::podioRootIO ROOT
+                  LINK_LIBRARIES GaudiAlgLib GaudiKernel ROOT podio::podioRootIO EDM4HEP::edm4hep
                   PUBLIC_HEADERS FWCore)
 
 gaudi_add_module(FWCorePlugins
