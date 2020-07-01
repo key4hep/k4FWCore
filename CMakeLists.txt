@@ -20,3 +20,8 @@ endif()
 
 gaudi_project(K4FWCore v0r1
               USE Gaudi v32r2 )
+
+option(ENABLE_CPACK "Whether or not to use cpack config" OFF)
+if(ENABLE_CPACK)
+  include(cmake/K4FWCoreCPack.cmake)
+endif()
