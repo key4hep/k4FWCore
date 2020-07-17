@@ -2,6 +2,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.5)
 
 
 find_package(ROOT COMPONENTS RIO Tree)
+find_package(podio)
 
 #---------------------------------------------------------------
 # Load macros and functions for Gaudi-based projects

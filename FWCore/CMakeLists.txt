@@ -3,7 +3,6 @@
 ################################################################################
 gaudi_subdir(FWCore v1r0)
 
-find_package(podio)
 
 # this declaration will not be needed in the future
 gaudi_depends_on_subdirs(GaudiAlg GaudiKernel)
