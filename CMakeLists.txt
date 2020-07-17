@@ -3,11 +3,13 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.5)
 
 find_package(ROOT COMPONENTS RIO Tree)
 find_package(podio)
+find_package(EDM4HEP REQUIRED)
 
 #---------------------------------------------------------------
 # Load macros and functions for Gaudi-based projects
 find_package(GaudiProject)
 #---------------------------------------------------------------
+
 
 include(GNUInstallDirs)
 
@@ -20,7 +22,7 @@ if(NOT CMAKE_CXX_STANDARD MATCHES "14|17")
 endif()
 
 gaudi_project(K4FWCore v0r1
-              USE Gaudi v32r2 )
+              USE Gaudi v33r1 )
 
 option(ENABLE_CPACK "Whether or not to use cpack config" OFF)
 if(ENABLE_CPACK)
