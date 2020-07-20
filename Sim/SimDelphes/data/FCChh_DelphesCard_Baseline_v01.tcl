@@ -63,7 +63,6 @@ set ExecutionPath {
 
   UniqueObjectFinder
 
-  TreeWriter
 }
 
 #################################

@@ -26,7 +26,7 @@ StatusCode ParticleGunPtEta::initialize() {
   auto pd = Pythia8::ParticleData();
   info() << "Particle type chosen randomly from :";
   for (auto icode: m_pdgCodes) {
-    info() << " " << icode;
+    info() << " " << icode << " with mass " << pd.m0(icode);
     m_masses.push_back(pd.m0(icode));
   }
   info() << endmsg;
@@ -84,6 +84,11 @@ StatusCode ParticleGunPtEta::execute() {
   double momentumP2 = px*px + py*py + pz*pz;
   particle.setMass(m_masses[currentType]);
   particle.setPDG(m_pdgCodes[currentType]);
+  particle.setGeneratorStatus(1);
+  /// lookup charge in particle properties
+  HepPDT::ParticleID particleID(m_pdgCodes[currentType]);
+  particle.setCharge(particleID.charge());
+
   debug() << " -> " << m_pdgCodes[currentType] << endmsg << "   P   = " << sqrt(momentumP2) << endmsg;
   /// additional branches in rootfile
   if (m_writeParticleGunBranches) { 

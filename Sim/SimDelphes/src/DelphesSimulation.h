@@ -20,10 +20,14 @@ class HepMCDelphesConverter;
 class Candidate;
 class ExRootTreeBranch;
 class ExRootConfReader;
+class ExRootConfParam;
 class ExRootTreeWriter;
 
 namespace edm4hep {
 class MCParticleCollection;
+class ReconstructedParticleCollection;
+class MCRecoParticleAssociationCollection;
+class ParticleIDCollection;
 }
 
 // Forward ROOT
@@ -37,34 +41,32 @@ class DelphesSimulation : public GaudiAlgorithm {
 
 public:
   DelphesSimulation(const std::string& name, ISvcLocator* svcLoc);
-
   virtual StatusCode initialize();
-
   virtual StatusCode execute();
-
   virtual StatusCode finalize();
 
 private:
   Gaudi::Property<std::string> m_DelphesCard{this, "DelphesCard", "",
                                              "Name of Delphes tcl config file with detector and simulation parameters"};
-
-  // Delphes
-  std::unique_ptr<Delphes> m_Delphes{nullptr};
-
+  // Data Input
   DataHandle<edm4hep::MCParticleCollection> m_handleGenParticles{"MCParticles", Gaudi::DataHandle::Reader, this};
+  DataHandle<edm4hep::ReconstructedParticleCollection> m_handleRecoParticles{"RecoParticlesDelphes", Gaudi::DataHandle::Writer, this};
+  DataHandle<edm4hep::ReconstructedParticleCollection> m_handleRecoJets{"RecoJetsDelphes", Gaudi::DataHandle::Writer, this};
+  DataHandle<edm4hep::ReconstructedParticleCollection> m_handleRecoSubJets{"RecoSubJetsDelphes", Gaudi::DataHandle::Writer, this};
+  DataHandle<edm4hep::ReconstructedParticleCollection> m_handleMissingET{"MissingETDelphes", Gaudi::DataHandle::Writer, this};
+  DataHandle<edm4hep::ParticleIDCollection> m_handleScalarHT{"ScalarHTDelphes", Gaudi::DataHandle::Writer, this};
+  DataHandle<edm4hep::ParticleIDCollection> m_handleRecoTags{"RecoTagsDelphes", Gaudi::DataHandle::Writer, this};
+  DataHandle<edm4hep::MCRecoParticleAssociationCollection> m_handleMCRecoParticleAssociation{"MCRecoParticleAssociation", Gaudi::DataHandle::Writer, this};
+  
   int m_eventCounter{0};
-
-  // Delphes ROOT output
-  TFile* m_outRootFile{nullptr};
-  /// Name of Delphes Root output file, if defined, the Delphes standard tree write out in addition to FCC output
+  Delphes* m_Delphes{nullptr};
+  DelphesFactory* m_factory;
   std::unique_ptr<ExRootConfReader> m_confReader{nullptr};
-  //Gaudi::Property<std::vector<std::string>> m_saveToolNames{this, "outputs"};
-  //std::vector<IDelphesSaveOutputTool*> m_saveTools;
-
   // Arrays used by Delphes and internally for initial particles
   TObjArray* m_allParticles{nullptr};
   TObjArray* m_stableParticles{nullptr};
   TObjArray* m_partons{nullptr};
+  ExRootConfParam* m_branches;
 };
 
 #endif  // #define _DELPHESSIMULATION_H

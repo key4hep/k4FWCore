@@ -36,7 +36,7 @@ private:
   Gaudi::Property<double> m_maxEta{this, "EtaMax", 3.5, "Upper limit for the flat pseudorapidity distribution of generated particles."};
   Gaudi::Property<double> m_minPhi{this, "PhiMin", 0. * Gaudi::Units::rad, "Lower limit for the flat azimuth distribution of generated particles"};
   Gaudi::Property<double> m_maxPhi{this, "PhiMax", Gaudi::Units::twopi* Gaudi::Units::rad, "Upper limit for the azimuth distribution of generated particles"};
-  Gaudi::Property<std::vector<int>> m_pdgCodes{this, "PdgCodes", {-211}, "List of PDG codes to produce."};
+  Gaudi::Property<std::vector<int>> m_pdgCodes{this, "PdgCodes", {13}, "List of PDG codes to produce."};
   Gaudi::Property<bool> m_writeParticleGunBranches{this, "writeParticleGunBranches", {true}, "Write additional Branches with Particle Properties (eta, pt)"};
   /// optional additional branches (switched on by  m_writeParticleGunBranches)
   std::unique_ptr<DataHandle<float>> m_datahandle_particlegun_pt;

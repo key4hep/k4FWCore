@@ -14,11 +14,20 @@
 #include "modules/Delphes.h"
 
 
+#include "edm4hep/ReconstructedParticleCollection.h"
+#include "edm4hep/MCParticleCollection.h"
+#include "edm4hep/MCRecoParticleAssociationCollection.h"
+#include "edm4hep/ParticleIDCollection.h"
+
 // ROOT
 #include "TFile.h"
 #include "TObjArray.h"
 #include "TRandom.h"
 #include "TStopwatch.h"
+
+
+#include "DelphesUtils.h"
+
 
 DECLARE_COMPONENT(DelphesSimulation)
 
@@ -27,93 +36,128 @@ DelphesSimulation::DelphesSimulation(const std::string& name, ISvcLocator* svcLo
 }
 
 StatusCode DelphesSimulation::initialize() {
-  //gRandom->SetSeed(1234);
-
-  // Read Delphes configuration card (deleted by finalize())
   m_confReader = std::unique_ptr<ExRootConfReader>(new ExRootConfReader);
   m_confReader->ReadFile(m_DelphesCard.value().c_str());
-
-  // Instance of Delphes (deleted by finalize())
-  m_Delphes = std::unique_ptr<Delphes>(new Delphes("Delphes"));
+  m_Delphes = new Delphes("Delphes");
   m_Delphes->SetConfReader(m_confReader.get());
-
-  // Delphes needs data structure to be defined (ROOT tree) (deleted by finalize())
-  //m_treeWriter = new ExRootTreeWriter(m_outRootFile, "DelphesSim");
-  //m_branchEvent = m_treeWriter->NewBranch("Event", HepMCEvent::Class());
-  //m_Delphes->SetTreeWriter(m_treeWriter);
-
-  // Define event readers
-  //
-  //  HepMC reader --> reads either from a file or directly from data store (deleted by finalize())
-  //m_hepMCConverter = std::unique_ptr<HepMCDelphesConverter>(new HepMCDelphesConverter);
-
+  m_factory = m_Delphes->GetFactory();
   // Create following arrays of Delphes objects --> starting objects
   m_allParticles = m_Delphes->ExportArray("allParticles");
   m_stableParticles = m_Delphes->ExportArray("stableParticles");
   m_partons = m_Delphes->ExportArray("partons");
-
   // Init Delphes - read in configuration & define modules to be executed
   m_Delphes->InitTask();
-
-  // Print Delphes modules to be used
+  m_branches = new ExRootConfParam(m_confReader->GetParam("TreeWriter::Branch"));
   ExRootConfParam param = m_confReader->GetParam("::ExecutionPath");
-  Long_t size = param.GetSize();
+  // Print Delphes modules to be used
   debug() << "Delphes simulation will use the following modules: " << endmsg;
-  for (Long_t k = 0; k < size; ++k) {
-
-    TString name = param[k].GetString();
-    debug() << "-- Module: " << name << endmsg;
+  for (size_t k = 0; k < param.GetSize(); ++k) {
+    debug() << "-- Module: " << param[k].GetString() << endmsg;
   }
-
-  m_eventCounter = 0;
-
-  //m_treeWriter->Clear();
   m_Delphes->Clear();
-
-  //for (auto& toolname : m_saveToolNames) {
-    //m_saveTools.push_back(tool<IDelphesSaveOutputTool>(toolname));
-    // FIXME: check StatusCode once the m_saveTools is a ToolHandleArray
-    // if (!) {
-    //   error() << "Unable to retrieve the output saving tool." << endmsg;
-    //   return StatusCode::FAILURE;
-    // }
-
   return StatusCode::SUCCESS;
 }
 
 StatusCode DelphesSimulation::execute() {
+  m_Delphes->Clear();
+  info() << "DelphesEvent " << m_eventCounter << endmsg;
+  // convert input particles to delphes candidates
+  const edm4hep::MCParticleCollection* coll = m_handleGenParticles.get();
 
-  //
-  // Read event & initialize event variables
-  TStopwatch readStopWatch;
-  readStopWatch.Start();
+  for (auto p : *coll) {
+    std::cout << p << std::endl;
+    Candidate* cand = m_factory->NewCandidate();
+    auto _pdgCode = p.getPDG();
+    cand->PID = _pdgCode;
+    cand->Status = p.getGeneratorStatus();
+    auto _mom = p.getMomentum();
+    cand->Momentum.SetXYZM(_mom[0], _mom[1], _mom[2], p.getMass());
+    auto _pos = p.getVertex();
+    cand->Position.SetXYZT(_pos[0], _pos[1], _pos[2], p.getTime());
+    cand->IsPU = 0;
+    cand->Charge = p.getCharge();
+    cand->M1 = -1;
+    cand->M2 = -1;
+    cand->D1 = -1;
+    cand->D2 = -1;
+    m_allParticles->Add(cand);
+    if (cand->Status == 1) {
+      m_stableParticles->Add(cand);
+    } else if (_pdgCode <= 5 || _pdgCode == 21 || _pdgCode == 15) {
+      m_partons->Add(cand);
+    }
+  }
 
-  StatusCode sc;
 
-  // Read event
-  //const HepMC::GenEvent* hepMCEvent = m_hepmcHandle.get();
-
-  //sc = m_hepMCConverter->hepMCEventToArrays(
-  //    hepMCEvent, *m_Delphes->GetFactory(), *m_allParticles, *m_stableParticles, *m_partons);
-  //if (!sc.isSuccess()) {
-  //  return sc;
-  //}
   m_eventCounter++;
-  readStopWatch.Stop();
-
-  //
-  // Process event
-  TStopwatch procStopWatch;
-
-  // Delphes process
-  procStopWatch.Start();
   m_Delphes->ProcessTask();
-  procStopWatch.Stop();
+
+  int maxEvents = m_confReader->GetInt("::MaxEvents", 0);
+  auto branches = *m_branches;
+  int nParams = branches.GetSize();
+
+
+  auto coll_recoParticles = m_handleRecoParticles.createAndPut();
+  auto coll_recoJets = m_handleRecoJets.createAndPut();
+  auto coll_recoSubJets = m_handleRecoSubJets.createAndPut();
+  auto coll_recoTags = m_handleRecoTags.createAndPut();
+  auto coll_scalarHT = m_handleScalarHT.createAndPut();
+  auto coll_missingET = m_handleMissingET.createAndPut();
+  auto coll_mcRecoParticleAssociations = m_handleMCRecoParticleAssociation.createAndPut();
+
+  for(int b = 0; b < nParams; b += 3) {
+    TString input = branches[b].GetString();
+    TString name = branches[b + 1].GetString();
+    TString className = branches[b + 2].GetString();
+    std::string _name;
+    const TObjArray* delphesColl = m_Delphes->ImportArray(input);
+
+
+    if (className == "Track") {
+     //std::cout <<  input << "\t" << name << "\t" << className << "\t" << delphesColl->GetEntries() << std::endl;
+      for (int j = 0; j < delphesColl->GetEntries(); j++) {
+        auto cand = static_cast<Candidate*>(delphesColl->At(j));
+        auto track = convertTrack(cand, 2 /*magFieldBz [T]*/); 
+      }
+    } else if (className == "Electron" || className == "Photon" || className == "Muon") {
+      for (int iCand = 0; iCand < delphesCollection->GetEntriesFast(); ++iCand) {
+      auto* delphesCand = static_cast<Candidate*>(delphesCollection->At(iCand));
+
+      auto cand = coll_recoParticles->create();
+      cand.setCharge(delphesCand->Charge);
+      cand.setMass(delphesCand->Mass);
+      cand.setMomentum({
+        (float) delphesCand->Momentum.Px(),
+        (float) delphesCand->Momentum.Py(),
+        (float) delphesCand->Momentum.Pz()
+      });
+      cand.setVertex({
+          (float) delphesCand->Position.X(),
+          (float) delphesCand->Position.Y(),
+          (float) delphesCand->Position.Z()});
+        cand.setPDG(delphesCand->PID); // delphes uses whatever hepevt.idhep provides
+      }
+    } else if (className == "Jet") {
+      for (int iCand = 0; iCand < delphesCollection->GetEntriesFast(); ++iCand) {
+      auto* delphesCand = static_cast<Candidate*>(delphesCollection->At(iCand));
+
+      auto jet = coll_recoJets->create();
+      jet.setCharge(delphesCand->Charge);
+      jet.setMomentum({(float) delphesCand->Momentum.Px(),
+                       (float) delphesCand->Momentum.Py(),
+                       (float) delphesCand->Momentum.Pz()});
+      jet.setEnergy(delphesCand->Momentum.E());
+
+      }
+    }
+  }
+
+
+
 
 
 
   m_Delphes->Clear();
-
   return StatusCode::SUCCESS;
 }
 
@@ -125,7 +169,7 @@ StatusCode DelphesSimulation::finalize() {
 
   debug() << "Exiting Delphes..." << endmsg;
 
-  if (m_Delphes.get() != nullptr) m_Delphes.reset();                // Releases also the memory allocated by treeWriter
+  //if (m_Delphes != nullptr) m_Delphes.reset();                // Releases also the memory allocated by treeWriter
   if (m_confReader.get() != nullptr) m_confReader.reset();
 
   return GaudiAlgorithm::finalize();
