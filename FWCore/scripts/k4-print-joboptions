@@ -55,7 +55,7 @@ def dump_joboptions(filename):
           print(_sanitize(e))
 
 
-parser = argparse.ArgumentParser(description='FCC Job Options Writer')
+parser = argparse.ArgumentParser(description='K4 Job Options Writer')
 parser.add_argument( dest='filename', type=str, help="name of file to read")
 
 if __name__ == "__main__":

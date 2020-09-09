@@ -1,5 +1,6 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
+from __future__ import print_function
 import os
 import sys
 import argparse
@@ -35,7 +36,7 @@ if __name__ == "__main__":
       else:
         break
 
-    parser = argparse.ArgumentParser(description="Run job in the FCC framework")
+    parser = argparse.ArgumentParser(description="Run job in the Key4HEP framework")
     parser.add_argument("config_files", nargs="*",
                       help="Gaudi config (python) files describing the job")
     parser.add_argument("--dry-run", action="store_true",
@@ -63,8 +64,8 @@ if __name__ == "__main__":
     # print a doc line showing the configured algorithms
     if run_with_options_file:
       for alg in ApplicationMgr().TopAlg:
-        print ' --> ', alg.name(), 
-      print "",'\n'
+        print(' --> ', alg.name(), )
+      print("",'\n')
 
       option_db = {}
 
@@ -79,7 +80,7 @@ if __name__ == "__main__":
               if not "Audit" in prop:
                 # do not want to deal with other components / datahandles for now
                   if not hasattr(props[prop][0], '__slots__'):
-                    #print conf.name(), prop, props[prop]
+                    #print(conf.name(), prop, props[prop])
                     try: # TODO: remove once duplicate elements sorted out
                       propvalue = props[prop][0]
 
@@ -90,12 +91,12 @@ if __name__ == "__main__":
                       proptype = type(props[prop][0])
                       # if the property is a list of something, we need to set argparse nargs to '+'
                       propnargs = "?"
-                      #print "proptype", proptype
+                      #print("proptype", proptype)
                       if proptype == list:
                         # tricky edgecase: if the default is an empty list there is no way to get the type
                         if len(propvalue) == 0:
                           # just skip for now
-                          #print "Warning: argparse cannot deduce type for property %s of %s. Needs to be set in options file." % (prop, conf.name())
+                          #print("Warning: argparse cannot deduce type for property %s of %s. Needs to be set in options file." % (prop, conf.name()))
                           continue
                         else:
                           # deduce type from first item of the list
@@ -116,17 +117,17 @@ if __name__ == "__main__":
     if opts.list:
         from Gaudi import Configuration
         cfgDb = Configuration.cfgDb
-        print "Available components:\n%s" % (21 * "=")
+        print("Available components:\n%s" % (21 * "="))
         for item in sorted(cfgDb):
             if True: # another option could filter Gaudi components here
-              print "  %s (from %s)" % (item, cfgDb[item]["lib"])
+              print("  %s (from %s)" % (item, cfgDb[item]["lib"]))
             else:
                 if not "Gaudi" in cfgDb[item]["lib"]:
-                  print "  %s (from %s)" % (item, cfgDb[item]["lib"])
+                  print("  %s (from %s)" % (item, cfgDb[item]["lib"]))
         sys.exit()
 
     if not run_with_options_file:
-      print "usage: fccrun [gaudi_config.py ...] Specify a gaudi options file to run"
+      print("usage: " + os.path.basename(__file__) + " [gaudi_config.py ...] Specify a gaudi options file to run")
       sys.exit()
 
     # turn namespace into dict
