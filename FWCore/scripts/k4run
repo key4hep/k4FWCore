@@ -64,7 +64,7 @@ if __name__ == "__main__":
     # print a doc line showing the configured algorithms
     if run_with_options_file:
       for alg in ApplicationMgr().TopAlg:
-        print(' --> ', alg.name(), )
+        print(' --> ', alg.name(), end='')
       print("",'\n')
 
       option_db = {}
