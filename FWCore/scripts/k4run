@@ -31,7 +31,7 @@ if __name__ == "__main__":
     run_with_options_file = False
     for f in sys.argv[1:]:
       if f[0] != '-':
-        execfile(f)
+        exec(open(f).read())
         run_with_options_file = True
       else:
         break
@@ -70,7 +70,7 @@ if __name__ == "__main__":
       option_db = {}
 
       # loop over all components that were configured in the options file
-      for conf in ApplicationMgr.allConfigurables.values():
+      for conf in list(ApplicationMgr.allConfigurables.values()):
         # skip public tools and the applicationmgr itself
         if "ToolSvc" not in conf.name() and "ApplicationMgr" not in conf.name():
           props = conf.getPropertiesWithDescription() #dict propertyname: (propertyvalue, propertydescription)
