@@ -4,12 +4,8 @@
 #include "FWCore/DataWrapper.h"
 #include "FWCore/PodioDataSvc.h"
 
-#include "GaudiKernel/AlgTool.h"
-#include "GaudiKernel/Algorithm.h"
-#include <GaudiKernel/DataObjectHandle.h>
-#include <GaudiKernel/GaudiException.h>
-#include <GaudiKernel/Property.h>
-#include <GaudiKernel/ServiceLocatorHelper.h>
+#include "Gaudi/Algorithm.h"
+#include "GaudiKernel/DataObjectHandle.h"
 
 #include "TTree.h"
 
