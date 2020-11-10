@@ -6,7 +6,6 @@ gaudi_subdir(k4FWCore v1r0)
 find_package(podio)
 
 gaudi_install_scripts()
-gaudi_install_python_modules()
 
 
 gaudi_add_module(k4FWCore
