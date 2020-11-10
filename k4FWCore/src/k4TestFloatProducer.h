@@ -16,7 +16,7 @@ class PodioDataSvc;
 class k4TestFloatProducer : public GaudiAlgorithm {
 
 public:
-  FWFloatProducer(const std::string& name, ISvcLocator* svcLoc);
+  k4TestFloatProducer(const std::string& name, ISvcLocator* svcLoc);
 
   virtual StatusCode initialize();
   virtual StatusCode execute();
