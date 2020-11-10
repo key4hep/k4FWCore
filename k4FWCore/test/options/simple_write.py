@@ -3,17 +3,17 @@ from Gaudi.Configuration import *
 from Configurables import ApplicationMgr
 
 app = ApplicationMgr()
-app.EvtSel = "None"
+app.EvtSel = "NONE"
 app.EvtMax = 10;
 
-from Configurables import K4DataSvc
-ApplicationMgr().ExtSvc += [K4DataSvc("EventDataSvc")]
+from Configurables import k4DataSvc
+dataservice = k4DataSvc("EventDataSvc")
+ApplicationMgr().ExtSvc += [dataservice]
 
-from Configurables import FWFloatProducer
-
-fprod = FWFloatProducer()
+from Configurables import k4TestFloatProducer
+fprod = k4TestFloatProducer()
 fprod.FloatValue = 5.4321
-fprod.FloatValueHandle.Path = "floatvalue"
+fprod.Float.Path = "floatvalue"
 ApplicationMgr().TopAlg += [fprod]
 
 from Configurables import PodioOutput
