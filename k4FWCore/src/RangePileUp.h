@@ -1,7 +1,7 @@
 #ifndef GENERATION_RANGEPILEUP_H
 #define GENERATION_RANGEPILEUP_H
 
-#include "FWCore/IPileUpTool.h"
+#include "k4FWCore/IPileUpTool.h"
 #include "GaudiAlg/GaudiTool.h"
 
 /** @class RangePileUp 

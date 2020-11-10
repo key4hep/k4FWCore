@@ -3,8 +3,8 @@
 #include "TFile.h"
 #include "TROOT.h"
 
-#include "FWCore/DataWrapper.h"
-#include "FWCore/PodioDataSvc.h"
+#include "k4FWCore/DataWrapper.h"
+#include "k4FWCore/PodioDataSvc.h"
 
 DECLARE_COMPONENT(PodioInput)
 

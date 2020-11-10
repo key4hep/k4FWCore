@@ -8,10 +8,10 @@
 #include <vector>
 
 // forward declarations
-// from FWCore:
+// from k4FWCore:
 class PodioDataSvc;
 
-/** @class PodioInput FWCore/components/PodioInput.h PodioInput.h
+/** @class PodioInput 
  *
  *  Class that allows to read ROOT files written with PodioOutput
  *

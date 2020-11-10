@@ -1,7 +1,7 @@
 #ifndef FWCORE_FWFLOATPRODUCER_H
 #define FWCORE_FWFLOATPRODUCER_H
 
-#include "FWCore/DataHandle.h"
+#include "k4FWCore/DataHandle.h"
 #include "GaudiAlg/GaudiAlgorithm.h"
 
 
