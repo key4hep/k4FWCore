@@ -1,9 +1,9 @@
 #ifndef FWCORE_PILEUPOVERLAYALG_H
 #define FWCORE_PILEUPOVERLAYALG_H
 
-#include "FWCore/DataHandle.h"
-#include "FWCore/IEDMMergeTool.h"
-#include "FWCore/IPileUpTool.h"
+#include "k4FWCore/DataHandle.h"
+#include "k4FWCore/IEDMMergeTool.h"
+#include "k4FWCore/IPileUpTool.h"
 #include "GaudiAlg/GaudiAlgorithm.h"
 #include "GaudiKernel/RndmGenerators.h"
 

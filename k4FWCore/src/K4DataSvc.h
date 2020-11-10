@@ -2,7 +2,7 @@
 #ifndef FWCORE_K4DATASVC_H
 #define FWCORE_K4DATASVC_H
 
-#include "FWCore/PodioDataSvc.h"
+#include "k4FWCore/PodioDataSvc.h"
 
 class K4DataSvc : public PodioDataSvc {
 

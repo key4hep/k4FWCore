@@ -1,7 +1,7 @@
 #ifndef GENERATION_CONSTPILEUP_H
 #define GENERATION_CONSTPILEUP_H
 
-#include "FWCore/IPileUpTool.h"
+#include "k4FWCore/IPileUpTool.h"
 #include "GaudiAlg/GaudiTool.h"
 
 /** @class ConstPileUp 

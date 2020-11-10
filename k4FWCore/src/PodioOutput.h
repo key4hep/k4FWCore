@@ -1,7 +1,7 @@
 #ifndef FWCORE_PODIOOUTPUT_H
 #define FWCORE_PODIOOUTPUT_H
 
-#include "FWCore/KeepDropSwitch.h"
+#include "k4FWCore/KeepDropSwitch.h"
 #include "GaudiAlg/GaudiAlgorithm.h"
 #include "podio/CollectionBase.h"
 

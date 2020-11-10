@@ -1,6 +1,6 @@
 #include "FWFloatProducer.h"
 #include "GaudiKernel/IJobOptionsSvc.h"
-#include "FWCore/PodioDataSvc.h"
+#include "k4FWCore/PodioDataSvc.h"
 
 DECLARE_COMPONENT(FWFloatProducer)
 
