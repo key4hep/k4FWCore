@@ -4,9 +4,6 @@
 #include "k4FWCore/DataHandle.h"
 #include "GaudiAlg/GaudiAlgorithm.h"
 
-
-// forward declarations
-class PodioDataSvc;
 /***
  * Simple test algorithm which outputs a single float each event 
  * The value of the float can be set in the options,
