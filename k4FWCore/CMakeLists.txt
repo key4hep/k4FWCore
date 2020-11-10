@@ -10,7 +10,7 @@ gaudi_install_scripts()
 
 gaudi_add_library(k4FWCore
                  src/*.cpp
-                 LINK_LIBRARIES GaudiKernel podio::podioRootIO
+                 LINK_LIBRARIES GaudiAlgLib GaudiKernel podio::podioRootIO
                   PUBLIC_HEADERS k4FWCore
                   )
 
