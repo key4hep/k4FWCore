@@ -1,8 +1,8 @@
-#ifndef FWCORE_DATAHANDLE_H
-#define FWCORE_DATAHANDLE_H
+#ifndef K4FWCORE_DATAHANDLE_H
+#define K4FWCORE_DATAHANDLE_H
 
-#include "FWCore/DataWrapper.h"
-#include "FWCore/PodioDataSvc.h"
+#include "k4FWCore/DataWrapper.h"
+#include "k4FWCore/PodioDataSvc.h"
 
 #include "Gaudi/Algorithm.h"
 #include "GaudiKernel/DataObjectHandle.h"
