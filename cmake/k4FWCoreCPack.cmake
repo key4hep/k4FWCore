@@ -1,5 +1,5 @@
-set(CPACK_PACKAGE_DESCRIPTION "K4FWCore: core components of the key4hep framework")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "K4FWCore: core components of the key4hep framework")
+set(CPACK_PACKAGE_DESCRIPTION "k4FWCore: core components of the key4hep framework")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "k4FWCore: core components of the key4hep framework")
 set(CPACK_PACKAGE_VENDOR "HEP Software Foundation")
 set(CPACK_PACKAGE_VERSION ${K4FWCORE_VERSION})
 set(CPACK_PACKAGE_VERSION_MAJOR ${K4FWCORE_MAJOR_VERSION})
@@ -41,7 +41,7 @@ elseif(HSF_DEFAULT_BUILDTYPE STREQUAL "relwithdebinfo")
 endif()
 
 set(CPACK_PACKAGE_RELOCATABLE True)
-set(CPACK_PACKAGE_INSTALL_DIRECTORY "K4FWCore")
-set(CPACK_PACKAGE_FILE_NAME "K4FWCore")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "k4FWCore")
+set(CPACK_PACKAGE_FILE_NAME "k4FWCore")
 
 include(CPack)

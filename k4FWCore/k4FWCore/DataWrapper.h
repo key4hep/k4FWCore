@@ -1,5 +1,5 @@
-#ifndef FWCORE_DATAWRAPPER_H
-#define FWCORE_DATAWRAPPER_H
+#ifndef K4FWCORE_DATAWRAPPER_H
+#define K4FWCORE_DATAWRAPPER_H
 
 #include <type_traits>
 
