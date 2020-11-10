@@ -1,6 +1,4 @@
 #include "k4TestFloatProducer.h"
-#include "GaudiKernel/IJobOptionsSvc.h"
-#include "k4FWCore/PodioDataSvc.h"
 
 DECLARE_COMPONENT(k4TestFloatProducer)
 
