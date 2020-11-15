@@ -71,7 +71,7 @@ DataHandle<T>::DataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode
     : DataObjectHandle<DataWrapper<T>>(descriptor, a, fatherAlg), m_eds("EventDataSvc", "DataHandle") {
 
   if (a == Gaudi::DataHandle::Writer) {
-    m_eds.retrieve();
+    StatusCode sc = m_eds.retrieve();
     PodioDataSvc* pds;
     pds = dynamic_cast<PodioDataSvc*>( m_eds.get());
     m_dataPtr = nullptr;
@@ -155,7 +155,7 @@ const T* DataHandle<T>::get() {
 //---------------------------------------------------------------------------
 template <typename T>
 void DataHandle<T>::put(T* objectp) {
-  DataWrapper<T>* dw = new DataWrapper<T>();
+  std::unique_ptr<DataWrapper<T>> dw = std::make_unique<DataWrapper<T>>();
   // in case T is of primitive type, we must not change the pointer address
   // (see comments in ctor) instead copy the value of T into allocated memory
   if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
@@ -164,7 +164,7 @@ void DataHandle<T>::put(T* objectp) {
     m_dataPtr = objectp;
   }
   dw->setData(objectp);
-  DataObjectHandle<DataWrapper<T>>::put(dw);
+  DataObjectHandle<DataWrapper<T>>::put(std::move(dw));
 
 }
 //---------------------------------------------------------------------------
@@ -183,9 +183,9 @@ T* DataHandle<T>::createAndPut() {
 // temporary to allow property declaration
 namespace Gaudi {
 template <class T>
-class Property<::DataHandle<T>&> : public ::DataObjectHandleProperty {
+class Property<::DataHandle<T>&> : public ::DataHandleProperty {
 public:
-  Property(const std::string& name, ::DataHandle<T>& value) : ::DataObjectHandleProperty(name, value) {}
+  Property(const std::string& name, ::DataHandle<T>& value) : ::DataHandleProperty(name, value) {}
 
   /// virtual Destructor
   virtual ~Property() {}

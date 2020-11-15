@@ -64,16 +64,18 @@ StatusCode PodioDataSvc::clearStore() {
 }
 
 void PodioDataSvc::endOfRead() {
+  StatusCode sc;
   if (m_eventMax != -1) {
     m_provider.clearCaches();
     m_reader.endOfEvent();
     if (m_eventNum++ > m_eventMax) {
       info() << "Reached end of file with event " << m_eventMax << endmsg;
       IEventProcessor* eventProcessor;
-      service("ApplicationMgr", eventProcessor);
-      eventProcessor->stopRun();
+      sc = service("ApplicationMgr", eventProcessor);
+      sc = eventProcessor->stopRun();
     }
   }
+  // todo: figure out sthg to do with sc (added to silence -Wunused-result)
 }
 
 void PodioDataSvc::setCollectionIDs(podio::CollectionIDTable* collectionIds) {

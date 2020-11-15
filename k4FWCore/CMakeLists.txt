@@ -1,23 +1,44 @@
 ################################################################################
 # Package: k4FWCore
 ################################################################################
-gaudi_subdir(k4FWCore v1r0)
 
 find_package(podio)
 
-gaudi_install_scripts()
+gaudi_install(SCRIPTS)
 
 
 gaudi_add_library(k4FWCore
-                 src/*.cpp
-                 LINK_LIBRARIES GaudiAlgLib GaudiKernel podio::podioRootIO
-                  PUBLIC_HEADERS k4FWCore
+		  SOURCES src/PodioDataSvc.cpp
+              src/KeepDropSwitch.cpp
+                  LINK GaudiAlgLib GaudiKernel podio::podioRootIO ROOT::Core ROOT::RIO ROOT::Tree
                   )
+target_include_directories(k4FWCore PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
+
+
+
+file(GLOB k4fwcore_plugin_sources components/*.cpp)
 gaudi_add_module(k4FWCorePlugins
-                 components/*.cpp
-                 LINK_LIBRARIES GaudiAlgLib GaudiKernel k4FWCore)
+                 SOURCES ${k4fwcore_plugin_sources}
+                 LINK GaudiAlgLib GaudiKernel k4FWCore ROOT::Core ROOT::RIO ROOT::Tree)
+target_include_directories(k4FWCorePlugins PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
-gaudi_add_test(k4FWWriteTest
-               WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-               FRAMEWORK test/options/simple_write.py)
+
+install(TARGETS k4FWCore k4FWCorePlugins
+  EXPORT k4FWCoreTargets
+  RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT bin
+  LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT shlib
+  COMPONENT dev)
+
+
+if(BUILD_TESTING)
+enable_testing()
+endif()
+add_test(NAME WriteTest 
+         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+         COMMAND ${CMAKE_BINARY_DIR}/run ${PROJECT_SOURCE_DIR}/k4FWCore/scripts/k4run k4FWCore/test/options/simple_write.py)
+
