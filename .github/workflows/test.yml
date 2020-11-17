@@ -34,62 +34,30 @@ jobs:
 
     - name: Start container
       run: |
-        docker run -it --name CI_container -v ${GITHUB_WORKSPACE}:/Package -v /cvmfs:/cvmfs:shared -d clicdp/cc7-lcg /bin/bash
+        docker run -it --name CI_container -v ${GITHUB_WORKSPACE}:/Package -v /cvmfs:/cvmfs:shared -d centos:centos7 /bin/bash
     - name: Setup container
       run: |
-        docker exec CI_container /bin/bash -c " ln -s /usr/lib64/liblzma.so.5.2.2 /usr/lib64/liblzma.so;"
+        docker exec CI_container /bin/bash -c 'cd ./Package;\
+        yum install -q -y file git make automake glibc-devel unzip patch python3 bzip2 rsync which diffutils crontabs;\
+        curl -L -o spack.tar.gz https://gitlab.cern.ch/key4hep/k4-deploy/-/jobs/artifacts/master/raw/key4hep-spack_centos7-cvmfs.tar.gz?job=setup_spack_push; \
+        tar xfz spack.tar.gz;'
 
-    - name: CMake Configure
+    - name: Compile And Test
       run: |
         docker exec CI_container /bin/bash -c 'cd ./Package;\
-        mkdir -p build install;\
-        source ${{ matrix.SETUP }};\
-        cd build;\
-        cmake -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_CXX_STANDARD=17  -DCMAKE_CXX_FLAGS=" -fdiagnostics-color=always " -G Ninja ..;\
+        source spack/share/spack/setup-env.sh;\
+        spack dev-build --test=all k4fwcore@master;\
         '
 
-    - name: Compile
+    - name: Downstream Package CMake Test
       run: |
         docker exec CI_container /bin/bash -c 'cd ./Package;\
-        source ${{ matrix.SETUP }};\
+        source /cvmfs/sw.hsf.org/contrib/linux-centos7-broadwell/gcc-8.3.0/setup.sh;\
+        source spack/share/spack/setup-env.sh;\
+        spack load k4fwcore@master;\
+        spack load cmake;\
+        cd test/downstream-project-cmake-test;\
+        mkdir build install;\
         cd build;\
-        ninja -k0;\
-        '
-
-    - name: Install
-      run: |
-        docker exec CI_container /bin/bash -c ' \
-        cd ./Package;\
-        source ${{ matrix.SETUP }};\
-        cd build;\
-        ninja -k0 install;\
-        '
-
-    - name: Test
-      run: |
-        docker exec CI_container /bin/bash -c ' \
-          cd ./Package;\
-          source ${{ matrix.SETUP }};
-          cd build;\
-          ctest -j `getconf _NPROCESSORS_ONLN`;\
-          '
-
-    - name: Downstream Test
-      run: |
-        docker exec CI_container /bin/bash -c ' \
-          cd ./Package;\ 
-          source ${{ matrix.SETUP }};\
-          export CMAKE_PREFIX_PATH=$PWD/install/:$CMAKE_PREFIX_PATH;\
-          cd build;\
-          git clone --depth=1 https://github.com/key4hep/k4-project-template;\
-          cd k4-project-template;\
-          mkdir build install;\
-          cd build;\
-          cmake -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_CXX_STANDARD=17 ..&&  \
-          make -j `getconf _NPROCESSORS_ONLN`&&\
-          make install&&\
-          ctest --output-on-failure;\
-          '
-
-
-
+        cmake ..;\
+        make'

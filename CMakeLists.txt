@@ -10,6 +10,7 @@ find_package(Gaudi)
 #---------------------------------------------------------------
 
 include(GNUInstallDirs)
+include(CTest)
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/InstallArea/ CACHE PATH
@@ -42,4 +43,3 @@ install(EXPORT ${PROJECT_NAME}Targets
 
 gaudi_install(CMAKE cmake/${PROJECT_NAME}Config.cmake)
 
-include(CTest)
