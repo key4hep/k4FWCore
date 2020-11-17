@@ -39,57 +39,15 @@ jobs:
       run: |
         docker exec CI_container /bin/bash -c " ln -s /usr/lib64/liblzma.so.5.2.2 /usr/lib64/liblzma.so;"
 
-    - name: CMake Configure
-      run: |
-        docker exec CI_container /bin/bash -c 'cd ./Package;\
-        mkdir -p build install;\
-        source ${{ matrix.SETUP }};\
-        cd build;\
-        cmake -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_CXX_STANDARD=17  -DCMAKE_CXX_FLAGS=" -fdiagnostics-color=always " -G Ninja ..;\
-        '
 
-    - name: Compile
+    - name: Compile And Test
       run: |
         docker exec CI_container /bin/bash -c 'cd ./Package;\
         source ${{ matrix.SETUP }};\
-        cd build;\
-        ninja -k0;\
+        source ./.k4fwcore-ci.d/compile_and_test.sh
         '
 
-    - name: Install
-      run: |
-        docker exec CI_container /bin/bash -c ' \
-        cd ./Package;\
-        source ${{ matrix.SETUP }};\
-        cd build;\
-        ninja -k0 install;\
-        '
 
-    - name: Test
-      run: |
-        docker exec CI_container /bin/bash -c ' \
-          cd ./Package;\
-          source ${{ matrix.SETUP }};
-          cd build;\
-          ctest -j `getconf _NPROCESSORS_ONLN`;\
-          '
-
-    - name: Downstream Test
-      run: |
-        docker exec CI_container /bin/bash -c ' \
-          cd ./Package;\ 
-          source ${{ matrix.SETUP }};\
-          export CMAKE_PREFIX_PATH=$PWD/install/:$CMAKE_PREFIX_PATH;\
-          cd build;\
-          git clone --depth=1 https://github.com/key4hep/k4-project-template;\
-          cd k4-project-template;\
-          mkdir build install;\
-          cd build;\
-          cmake -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_CXX_STANDARD=17 ..&&  \
-          make -j `getconf _NPROCESSORS_ONLN`&&\
-          make install&&\
-          ctest --output-on-failure;\
-          '
 
 
 
