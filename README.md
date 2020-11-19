@@ -1,17 +1,16 @@
-# K4FWCore
+# k4FWCore (Key4HEP FrameWork Core)
 
 
-K4FWCore (Key4HEP FrameWork Core) is a package comprising core Gaudi components for the Key4HEP software framework
+k4FWCore is a Gaudi package that  provides the PodioDataService, that allows to use podio-based event data models like edm4hep in gaudi workflows.
 
 
 ## Components
 
 ### Basic I/O
 
-#### PodioDataSvc
+#### k4DataSvc
 
-
-Data service extended to handle PODIO types and collections.
+Component wrapping the PodioDataService to handle PODIO types and collections.
 
 
 #### PodioInput 
@@ -26,27 +25,6 @@ Algorithm to write data to output file on disk.
 
 Algorithm with a simple float as output, for testing and adding parameters to jobs. 
 
-### Background Overlay
-
-
-#### PileupOverlayAlg
-
-Algorithm that overlays its input with data from an external (background) data source. 
-
-#### RangePileup
-
-Tool to specify pile-up parameters.
-
-#### ConstPileUp
-
-Tool to specify pile-up parameters.
-
-#### PoissonPileUp
-
-Tool to specify pile-up parameters.
-
-
-
 
 ## Dependencies
 
@@ -56,18 +34,16 @@ Tool to specify pile-up parameters.
 
 * Gaudi
 
-## Installation
+## Installation and downstream usage.
 
-K4FWCore is a Gaudi-based project and uses the Gaudi CMake configuration
+k4FWCore is a cmake project. After setting up the dependencies (use for example `source /cvmfs/sw.hsf.org/key4hep/setup.sh`) 
 
 
 ```
 mkdir build install
 cd build;
-cmake .. -DCMAKE_INSTALL_PREFIX=../install
+cmake ..
 make install
-
-
 ```
 
 
