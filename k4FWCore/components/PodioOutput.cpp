@@ -22,6 +22,7 @@ StatusCode PodioOutput::initialize() {
   // Both trees are written to the ROOT file and owned by it
   // PodioDataSvc has ownership of EventDataTree
   m_datatree = m_podioDataSvc->eventDataTree();
+  m_datatree->SetDirectory(m_file.get());
   m_metadatatree = new TTree("metadata", "Metadata tree");
   m_switch = KeepDropSwitch(m_outputCommands);
   return StatusCode::SUCCESS;
@@ -132,6 +133,7 @@ StatusCode PodioOutput::finalize() {
     config_data.push_back(config_stream.str());
   }
   //// finalize trees and file //////////////////////////////
+  m_file->cd();
   m_metadatatree->Branch("gaudiConfigOptions", &config_data);
   m_metadatatree->Branch("CollectionIDs", m_podioDataSvc->getCollectionIDs());
   m_metadatatree->Fill();
