@@ -14,7 +14,7 @@ out.outputCommands = ["keep *"]
 from Configurables import ApplicationMgr
 ApplicationMgr( TopAlg=[producer, out],
                 EvtSel="NONE",
-                EvtMax=1000000,
+                EvtMax=100,
                 ExtSvc=[podioevent],
                 OutputLevel=INFO,
                 StopOnSignal=True,

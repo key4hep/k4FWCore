@@ -3,7 +3,6 @@
 
 // GAUDI
 #include "GaudiAlg/GaudiAlgorithm.h"
-#include "GaudiKernel/Property.h"
 
 // edm4hep
 #include "k4FWCore/DataHandle.h"

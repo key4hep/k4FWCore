@@ -22,7 +22,7 @@ StatusCode TestAlgorithmWithTFile::initialize() {
 
   /// for testing
   m_value = 0.1;
-  m_file = TFile::Open("tmp.root", "RECREATE");
+  m_file = TFile::Open("output_TestAlgorithmWithTFile_myTFile.root", "RECREATE");
   m_tree = new TTree("mytree", "testing");
 
   m_tree->Branch("value", &m_value, "value/F");
@@ -33,6 +33,7 @@ StatusCode TestAlgorithmWithTFile::initialize() {
 StatusCode TestAlgorithmWithTFile::execute() {
 
   m_singleIntHandle.put(new int(12345));
+  m_singleFloatHandle.put(new float(12345.6789));
 
   std::vector<float>* floatVector = m_vectorFloatHandle.createAndPut();
   floatVector->emplace_back( 125.);
@@ -60,22 +61,11 @@ StatusCode TestAlgorithmWithTFile::execute() {
 }
 
 StatusCode TestAlgorithmWithTFile::finalize() {
-  /// for testing
-  if ( true ) {
-      /// m_tree will be wrote to the podio output file, but not m_file
+
+      // write and close the non-framework tfile
       m_file->cd();
       m_tree->Write();
       m_file->Close();
-  }
-  else {
-      /// this is OK when there is not too many entries, and no auto-flush has been invoked
-      /// otherwise there will be a crash
-      const char* preDir = gDirectory->GetPath();
-      m_file->cd();
-      m_tree->Write();
-      m_file->Close();
-      gDirectory->cd(preDir);
-  }
 
   return GaudiAlgorithm::finalize();
 }

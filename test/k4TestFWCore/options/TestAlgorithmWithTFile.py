@@ -8,13 +8,13 @@ producer = TestAlgorithmWithTFile()
 
 from Configurables import PodioOutput
 out = PodioOutput("out")
-out.filename = "output_k4test_algorithmWithTFile.root"
+out.filename = "output_TestAlgorithmWithTFile_framework.root"
 out.outputCommands = ["keep *"]
 
 from Configurables import ApplicationMgr
 ApplicationMgr( TopAlg=[producer, out],
                 EvtSel="NONE",
-                EvtMax=5000000,
+                EvtMax=100,
                 ExtSvc=[podioevent],
                 OutputLevel=INFO,
                 StopOnSignal=True,
