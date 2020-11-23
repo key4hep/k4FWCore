@@ -139,6 +139,8 @@ if __name__ == "__main__":
       ApplicationMgr().OutputLevel = VERBOSE
     if opts.num_events is not None:
       ApplicationMgr().EvtMax = opts.num_events
+    # Allow graceful exit with Ctrl + C
+    ApplicationMgr().StopOnSignal = True
 
 
 
