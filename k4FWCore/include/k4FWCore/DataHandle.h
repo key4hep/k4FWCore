@@ -143,12 +143,12 @@ const T* DataHandle<T>::get() {
       DataObjectHandle<DataWrapper<T>>::setRead();
       return reinterpret_cast<const T*>(tmp->collectionBase());
     } else {
-      std::string errorMsg("The type provided for " + DataObjectHandle<DataWrapper<T>>::toString() +
+      std::string errorMsg("The type provided for " + DataObjectHandle<DataWrapper<T>>::pythonRepr() +
                            " is different from the one of the object in the store.");
       throw GaudiException(errorMsg, "wrong product type", StatusCode::FAILURE);
     }
   }
-  std::string msg("Could not retrieve product " + DataObjectHandle<DataWrapper<T>>::toString());
+  std::string msg("Could not retrieve product " + DataObjectHandle<DataWrapper<T>>::pythonRepr());
   throw GaudiException(msg, "wrong product name", StatusCode::FAILURE);
 }
 
