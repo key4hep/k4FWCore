@@ -26,6 +26,7 @@ if(NOT CMAKE_CXX_STANDARD MATCHES "14|17")
 endif()
 
 add_subdirectory(k4FWCore)
+add_subdirectory(k4Interface)
 
 option(ENABLE_CPACK "Whether or not to use cpack config" OFF)
 if(ENABLE_CPACK)
