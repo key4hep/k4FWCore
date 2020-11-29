@@ -31,10 +31,10 @@ add_test(NAME AlgorithmWithTFile
 
 add_test(NAME AlgorithmWithTFileCheckFrameworkOutput
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND python scripts/check_TestAlgorithmWithTFile_framework_nonempty.py)
+         COMMAND ${CMAKE_BINARY_DIR}/run python scripts/check_TestAlgorithmWithTFile_framework_nonempty.py)
 set_property(TEST AlgorithmWithTFileCheckFrameworkOutput APPEND PROPERTY DEPENDS AlgorithmWithTFile)
 
 add_test(NAME AlgorithmWithTFileCheckMyTFileOutput
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND python scripts/check_TestAlgorithmWithTFile_myTFile_nonempty.py)
+         COMMAND ${CMAKE_BINARY_DIR}/run python scripts/check_TestAlgorithmWithTFile_myTFile_nonempty.py)
 set_property(TEST AlgorithmWithTFileCheckMyTFileOutput APPEND PROPERTY DEPENDS AlgorithmWithTFile)
