@@ -43,6 +43,20 @@ void PodioOutput::resetBranches(const std::vector<std::pair<std::string, podio::
           ++j;
         }
       }
+      // ---- vector members
+      auto vminfo = collNamePair.second->vectorMembers();
+      if (vminfo != nullptr){
+        int i = 0;
+        for(auto& c : (*vminfo)){
+          std::string typeName = "vector<"+c.first+">" ;
+          void* add = c.second ;
+          m_datatree->Branch((collName+"_"+std::to_string(i)).c_str(),
+                             typeName.c_str(),
+                             add);
+          ++i;
+        }
+      }
+
     }
     if (prepare) {
       collNamePair.second->prepareForWrite();
