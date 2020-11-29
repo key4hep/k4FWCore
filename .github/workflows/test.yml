@@ -21,7 +21,7 @@ jobs:
     - name: Setup container
       run: |
         docker exec CI_container /bin/bash -c 'cd ./Package;\
-        yum install -q -y ctest file git make automake glibc-devel unzip patch python3 bzip2 rsync which diffutils crontabs;\
+        yum install -q -y file git make automake glibc-devel unzip patch python3 bzip2 rsync which diffutils crontabs;\
         curl -L -o spack.tar.gz https://gitlab.cern.ch/key4hep/k4-deploy/-/jobs/artifacts/master/raw/key4hep-spack_centos7-cvmfs.tar.gz?job=setup_spack_push; \
         tar xfz spack.tar.gz;'
 
@@ -37,6 +37,7 @@ jobs:
         docker exec CI_container /bin/bash -c 'cd ./Package;\
         source spack/share/spack/setup-env.sh;\
         spack load  k4fwcore@master;\
+        spack load cmake;\
         rm spack-build-*.txt;\
         cd spack-build-*;\
         ctest --output-on-failure;'
