@@ -36,7 +36,8 @@ jobs:
       run: |
         docker exec CI_container /bin/bash -c 'cd ./Package;\
         source spack/share/spack/setup-env.sh;\
-        spack load  k4fwcore@master;\
+        spack load k4fwcore@master;\
+        spack load edm4hep;\
         spack load cmake;\
         rm spack-build-*.txt;\
         cd spack-build-*;\
