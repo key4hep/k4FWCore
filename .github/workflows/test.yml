@@ -42,12 +42,20 @@ jobs:
         curl -L -o spack.tar.gz https://gitlab.cern.ch/key4hep/k4-deploy/-/jobs/artifacts/master/raw/key4hep-spack_centos7-cvmfs.tar.gz?job=setup_spack_push; \
         tar xfz spack.tar.gz;'
 
-    - name: Compile And Test
+    - name: Compile
       run: |
         docker exec CI_container /bin/bash -c 'cd ./Package;\
         source spack/share/spack/setup-env.sh;\
-        spack dev-build --test=all k4fwcore@master;\
+        spack dev-build  k4fwcore@master;\
         '
+
+    - name: Test
+      run: |
+        docker exec CI_container /bin/bash -c 'cd ./Package;\
+        source spack/share/spack/setup-env.sh;\
+        spack load  k4fwcore@master;\
+        cd spack-build-*;\
+        ctest --output-on-failure;'
 
     - name: Downstream Package CMake Test
       run: |
