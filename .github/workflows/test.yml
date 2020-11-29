@@ -11,7 +11,7 @@ jobs:
         SETUP: ["init.sh"]
     steps:
     - uses: actions/checkout@v2
-    - uses: cvmfs-contrib/github-action-cvmfs@main
+    - uses: cvmfs-contrib/github-action-cvmfs@v1
       with:
         cvmfs_repositories: 'sw.hsf.org,sw-nightlies.hsf.org,sft-nightlies.cern.ch,sft.cern.ch,geant4.cern.ch'
 
