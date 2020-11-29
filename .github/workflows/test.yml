@@ -54,6 +54,7 @@ jobs:
         docker exec CI_container /bin/bash -c 'cd ./Package;\
         source spack/share/spack/setup-env.sh;\
         spack load  k4fwcore@master;\
+        rm spack-build-*.txt
         cd spack-build-*;\
         ctest --output-on-failure;'
 
