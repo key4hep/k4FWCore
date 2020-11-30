@@ -11,26 +11,9 @@ jobs:
         SETUP: ["init.sh"]
     steps:
     - uses: actions/checkout@v2
-    - name: Install CVMFS
-      run: |
-        wget --no-check-certificate https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest_all.deb
-        sudo dpkg -i cvmfs-release-latest_all.deb
-        sudo apt-get update
-        sudo apt-get install cvmfs cvmfs-config-default
-        sudo cvmfs_config setup
-        echo "CVMFS_QUOTA_LIMIT='32140'" > default.local
-        echo "CVMFS_HTTP_PROXY=DIRECT" >> default.local
-        echo "CVMFS_CACHE_BASE='/var/lib/cvmfs'" >> default.local
-        echo "CVMFS_FORCE_SIGNING='yes'" >> default.local
-        echo "CVMFS_FOLLOW_REDIRECTS='yes'" >> default.local
-        echo "CVMFS_REPOSITORIES='sw.hsf.org,sw-nightlies.hsf.org,fcc.cern.ch,sft-nightlies.cern.ch,sft.cern.ch,geant4.cern.ch'" >> default.local
-        echo "CVMFS_SEND_INFO_HEADER=no" >> default.local
-        sudo mkdir -p /etc/cvmfs
-        sudo mv default.local /etc/cvmfs/default.local
-        sudo cvmfs_config probe
-        ls /cvmfs/sft.cern.ch
-        ls /cvmfs/fcc.cern.ch
-        ls /cvmfs/geant4.cern.ch
+    - uses: cvmfs-contrib/github-action-cvmfs@v1
+      with:
+        cvmfs_repositories: 'sw.hsf.org,sw-nightlies.hsf.org,sft-nightlies.cern.ch,sft.cern.ch,geant4.cern.ch'
 
     - name: Start container
       run: |
@@ -42,12 +25,23 @@ jobs:
         curl -L -o spack.tar.gz https://gitlab.cern.ch/key4hep/k4-deploy/-/jobs/artifacts/master/raw/key4hep-spack_centos7-cvmfs.tar.gz?job=setup_spack_push; \
         tar xfz spack.tar.gz;'
 
-    - name: Compile And Test
+    - name: Compile
       run: |
         docker exec CI_container /bin/bash -c 'cd ./Package;\
         source spack/share/spack/setup-env.sh;\
-        spack dev-build --test=all k4fwcore@master;\
+        spack dev-build  k4fwcore@master;\
         '
+
+    - name: Test
+      run: |
+        docker exec CI_container /bin/bash -c 'cd ./Package;\
+        source spack/share/spack/setup-env.sh;\
+        spack load k4fwcore@master;\
+        spack load edm4hep;\
+        spack load cmake;\
+        rm spack-build-*.txt;\
+        cd spack-build-*;\
+        ctest --output-on-failure;'
 
     - name: Downstream Package CMake Test
       run: |
