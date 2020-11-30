@@ -15,7 +15,9 @@ gaudi_add_module(k4TestFWCorePlugins
 
 include(CTest)
 
-set(K4RUN ${CMAKE_BINARY_DIR}/run ${PROJECT_SOURCE_DIR}/k4FWCore/scripts/k4run)
+#set(K4RUN ${CMAKE_BINARY_DIR}/run ${PROJECT_SOURCE_DIR}/k4FWCore/scripts/k4run)
+set(K4RUN ${PROJECT_SOURCE_DIR}/k4FWCore/scripts/k4run)
+
 
 add_test(NAME CreateExampleEventData
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
@@ -31,10 +33,10 @@ add_test(NAME AlgorithmWithTFile
 
 add_test(NAME AlgorithmWithTFileCheckFrameworkOutput
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${CMAKE_BINARY_DIR}/run python scripts/check_TestAlgorithmWithTFile_framework_nonempty.py)
+         COMMAND  python scripts/check_TestAlgorithmWithTFile_framework_nonempty.py)
 set_property(TEST AlgorithmWithTFileCheckFrameworkOutput APPEND PROPERTY DEPENDS AlgorithmWithTFile)
 
 add_test(NAME AlgorithmWithTFileCheckMyTFileOutput
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${CMAKE_BINARY_DIR}/run python scripts/check_TestAlgorithmWithTFile_myTFile_nonempty.py)
+         COMMAND  python scripts/check_TestAlgorithmWithTFile_myTFile_nonempty.py)
 set_property(TEST AlgorithmWithTFileCheckMyTFileOutput APPEND PROPERTY DEPENDS AlgorithmWithTFile)
