@@ -43,20 +43,15 @@ void PodioOutput::resetBranches(const std::vector<std::pair<std::string, podio::
           ++j;
         }
       }
-      // ---- vector members
-      auto vminfo = collNamePair.second->vectorMembers();
-      if (vminfo != nullptr){
-        int i = 0;
-        for(auto& c : (*vminfo)){
-          std::string typeName = "vector<"+c.first+">" ;
+      auto colls_v = collNamePair.second->vectorMembers();
+      if (colls_v != nullptr) {
+        int j = 0;
+        for (auto& c : (*colls_v)) {
           void* add = c.second ;
-          m_datatree->Branch((collName+"_"+std::to_string(i)).c_str(),
-                             typeName.c_str(),
-                             add);
-          ++i;
+          m_datatree->SetBranchAddress((collName + "_" + std::to_string(j)).c_str(), add);
+          ++j;
         }
       }
-
     }
     if (prepare) {
       collNamePair.second->prepareForWrite();
@@ -81,6 +76,20 @@ void PodioOutput::createBranches(const std::vector<std::pair<std::string, podio:
         for (auto& c : (*colls)) {
           m_datatree->Branch((collName + "#" + std::to_string(j)).c_str(), c);
           ++j;
+        }
+      }
+      // ---- vector members
+      auto vminfo = collNamePair.second->vectorMembers();
+      if (vminfo != nullptr){
+        int i = 0;
+        for(auto& c : (*vminfo)){
+          std::string typeName = "vector<"+c.first+">" ;
+          std::cout << typeName << std::endl;
+          void* add = c.second ;
+          m_datatree->Branch((collName+"_"+std::to_string(i)).c_str(),
+                             typeName.c_str(),
+                             add);
+          ++i;
         }
       }
     }
