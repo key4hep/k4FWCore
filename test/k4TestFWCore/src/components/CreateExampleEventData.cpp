@@ -4,6 +4,8 @@
 // datamodel
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/SimTrackerHitCollection.h"
+#include "edm4hep/TrackerHitCollection.h"
+#include "edm4hep/TrackCollection.h"
 
 
 DECLARE_COMPONENT(CreateExampleEventData)
@@ -11,6 +13,7 @@ DECLARE_COMPONENT(CreateExampleEventData)
 CreateExampleEventData::CreateExampleEventData(const std::string& aName, ISvcLocator* aSvcLoc) : GaudiAlgorithm(aName, aSvcLoc) {
   declareProperty("mcparticles", m_mcParticleHandle, "Dummy Particle collection (output)");
   declareProperty("trackhits", m_simTrackerHitHandle, "Dummy Hit collection (output)");
+  declareProperty("tracks", m_trackHandle, "Dummy track collection (output)");
 }
 
 CreateExampleEventData::~CreateExampleEventData() {}
@@ -40,9 +43,32 @@ StatusCode CreateExampleEventData::execute() {
   p4.z = m_magicNumberOffset + 7;
   particle.setMass(m_magicNumberOffset + 8);
 
-  auto* hits = m_simTrackerHitHandle.createAndPut();
-  auto hit = hits->create();
+  edm4hep::SimTrackerHitCollection* simTrackerHits = m_simTrackerHitHandle.createAndPut();
+  auto hit = simTrackerHits->create();
   hit.setPosition({3, 4, 5});
+
+  edm4hep::TrackerHitCollection* trackerHits = m_TrackerHitHandle.createAndPut();
+  auto trackerHit = trackerHits->create();
+  trackerHit.setPosition({3, 4, 5});
+
+  edm4hep::TrackCollection* tracks = m_trackHandle.createAndPut();
+  edm4hep::Track track = tracks->create();
+  edm4hep::Track track2 = tracks->create();
+  // set members
+  track.setType(1);
+  track.setChi2(2.1);
+  track.setNdf(3);
+  track.setDEdx(4.1); 
+  track.setDEdxError(5.1); 
+  track.setRadiusOfInnermostHit(6.1); 
+  // set vectormembers
+  track.addToSubDetectorHitNumbers(1);
+  track.addToSubDetectorHitNumbers(4);
+  track.addToTrackStates(edm4hep::TrackState());
+  // set associatons
+  track.addToTrackerHits(trackerHit);
+  track.addToTracks(track2);
+
 
 
   return StatusCode::SUCCESS;
