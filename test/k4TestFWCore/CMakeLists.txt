@@ -10,7 +10,7 @@ find_package(EDM4HEP)
 file(GLOB k4testfwcore_plugin_sources src/components/*.cpp)
 gaudi_add_module(k4TestFWCorePlugins
                  SOURCES ${k4testfwcore_plugin_sources}
-                 LINK GaudiAlgLib GaudiKernel k4FWCore ROOT::Core ROOT::RIO ROOT::Tree EDM4HEP::edm4hepDict EDM4HEP::edm4hep)
+                 LINK Gaudi::GaudiAlgLib Gaudi::GaudiKernel k4FWCore ROOT::Core ROOT::RIO ROOT::Tree EDM4HEP::edm4hepDict EDM4HEP::edm4hep)
 
 
 include(CTest)

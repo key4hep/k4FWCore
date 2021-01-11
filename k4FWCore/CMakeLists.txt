@@ -10,7 +10,7 @@ gaudi_install(SCRIPTS)
 gaudi_add_library(k4FWCore
 		  SOURCES src/PodioDataSvc.cpp
               src/KeepDropSwitch.cpp
-                  LINK GaudiAlgLib GaudiKernel podio::podioRootIO ROOT::Core ROOT::RIO ROOT::Tree
+                  LINK Gaudi::GaudiAlgLib Gaudi::GaudiKernel podio::podioRootIO ROOT::Core ROOT::RIO ROOT::Tree
                   )
 target_include_directories(k4FWCore PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
@@ -22,7 +22,7 @@ target_include_directories(k4FWCore PUBLIC
 file(GLOB k4fwcore_plugin_sources components/*.cpp)
 gaudi_add_module(k4FWCorePlugins
                  SOURCES ${k4fwcore_plugin_sources}
-                 LINK GaudiAlgLib GaudiKernel k4FWCore ROOT::Core ROOT::RIO ROOT::Tree)
+                 LINK Gaudi::GaudiAlgLib Gaudi::GaudiKernel k4FWCore ROOT::Core ROOT::RIO ROOT::Tree)
 target_include_directories(k4FWCorePlugins PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
