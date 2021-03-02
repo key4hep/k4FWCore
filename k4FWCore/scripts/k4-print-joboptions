@@ -49,7 +49,7 @@ def _sanitize(s):
 
 
 def dump_joboptions(filename):
-  f = ROOT.TFile(filename)
+  f = ROOT.TFile.Open(filename)
   t = f.metadata
   for event in t:
       s =  event.gaudiConfigOptions
