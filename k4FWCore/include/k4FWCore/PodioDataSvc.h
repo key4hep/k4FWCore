@@ -79,5 +79,8 @@ protected:
   /// ROOT file name the input is read from. Set by option filename
   std::vector<std::string> m_filenames;
   std::string m_filename;
+  /// Jump to nth events at the beginning. Set by option FirstEventEntry
+  /// This option is helpful when we want to debug an event in the middle of a file
+  unsigned m_1stEvtEntry{0};
 };
 #endif  // CORE_PODIODATASVC_H

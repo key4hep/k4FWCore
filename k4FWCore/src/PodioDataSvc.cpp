@@ -30,6 +30,11 @@ StatusCode PodioDataSvc::initialize() {
 
       setCollectionIDs(idTable);
       m_provider.setReader(&m_reader);
+
+      if (m_1stEvtEntry != 0 ) {
+          m_reader.goToEvent(m_1stEvtEntry);
+          m_eventMax -= m_1stEvtEntry;
+      }
     }
   }
   return status;
