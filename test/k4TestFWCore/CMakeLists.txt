@@ -49,6 +49,10 @@ add_test(NAME ReadExampleEventData
 set_test_env(ReadExampleEventData)
 set_property(TEST ReadExampleEventData APPEND PROPERTY DEPENDS CreateExampleEventData)
 
+add_test(NAME ReadExampleDataFromNthEvent
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} options/readExampleDataFromNthEvent.py)
+
 add_test(NAME AlgorithmWithTFile
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
          COMMAND ${K4RUN} options/TestAlgorithmWithTFile.py)
