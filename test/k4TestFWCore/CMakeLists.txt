@@ -27,6 +27,10 @@ add_test(NAME ReadExampleEventData
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
          COMMAND ${K4RUN} options/readExampleEventData.py)
 
+add_test(NAME ReadExampleDataFromNthEvent
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} options/readExampleDataFromNthEvent.py)
+
 add_test(NAME AlgorithmWithTFile
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
          COMMAND ${K4RUN} options/TestAlgorithmWithTFile.py)
