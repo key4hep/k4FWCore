@@ -1,0 +1,41 @@
+name: linux_spacktest
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-18.04
+    strategy:
+      fail-fast: false
+      matrix:
+        SETUP: ["init.sh"]
+    steps:
+    - uses: actions/checkout@v2
+    - uses: cvmfs-contrib/github-action-cvmfs@v2
+      with:
+        cvmfs_repositories: 'sw.hsf.org,sw-nightlies.hsf.org'
+
+    - name: Start container
+      run: |
+        docker run -it --name CI_container -v ${GITHUB_WORKSPACE}:/Package -v /cvmfs:/cvmfs:shared -d clicdp/cc7-lcg /bin/bash
+    - name: Setup container
+      run: |
+        docker exec CI_container /bin/bash -c " ln -s /usr/lib64/liblzma.so.5.2.2 /usr/lib64/liblzma.so;"
+
+    - name: Compile And Test
+      run: |
+        docker exec CI_container /bin/bash -c 'cd ./Package;\
+        source /cvmfs/sw.hsf.org/contrib/spack/share/spack/setup-env.sh;\
+        spack dev-build --test=root k4fwcore@master;\
+        '
+
+    - name: Downstream Package CMake Test
+      run: |
+        docker exec CI_container /bin/bash -c 'cd ./Package;\
+        source /cvmfs/sw.hsf.org/key4hep/setup.sh;\
+        spack load k4fwcore@master;\
+        cd test/downstream-project-cmake-test;\
+        mkdir build install;\
+        cd build;\
+        cmake ..;\
+        make'
