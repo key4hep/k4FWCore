@@ -103,11 +103,12 @@ if __name__ == "__main__":
                           proptype = type(propvalue[0])
                         propnargs = "+"
                         
-                      parser.add_argument("--" + prop, type=proptype, help=props[prop][1],
+                      propName = conf.name() + '.' + prop
+                      parser.add_argument("--%s" % propName, type=proptype, help=props[prop][1],
                         nargs=propnargs,
                         default=propvalue)
                       # bookkeeping which option belongs to which configurable
-                      option_db[prop] = conf
+                      option_db[propName] = (conf, prop)
                     except argparse.ArgumentError:
                       pass
 
@@ -132,8 +133,8 @@ if __name__ == "__main__":
 
     # turn namespace into dict
     opts_dict = vars(opts)
-    for option in option_db:
-      option_db[option].setProp(option, opts_dict[option])
+    for optionName, propTuple in option_db.items():
+      propTuple[0].setProp(propTuple[1], opts_dict[optionName])
 
     if opts.verbose:
       ApplicationMgr().OutputLevel = VERBOSE
