@@ -80,8 +80,9 @@ if __name__ == "__main__":
               if not "Audit" in prop:
                 # do not want to deal with other components / datahandles for now
                   if not hasattr(props[prop][0], '__slots__'):
-                    #print(conf.name(), prop, props[prop])
-                    try: # TODO: remove once duplicate elements sorted out
+                    # argparse ArgumentError: used to catch when trying to add
+                    # same argument twice
+                    try:                       
                       propvalue = props[prop][0]
 
                       # if it is set to "no value" it hasn't been touched in the options file
@@ -91,7 +92,6 @@ if __name__ == "__main__":
                       proptype = type(props[prop][0])
                       # if the property is a list of something, we need to set argparse nargs to '+'
                       propnargs = "?"
-                      #print("proptype", proptype)
                       if proptype == list:
                         # tricky edgecase: if the default is an empty list there is no way to get the type
                         if len(propvalue) == 0:
@@ -104,12 +104,20 @@ if __name__ == "__main__":
                         propnargs = "+"
                         
                       propName = conf.name() + '.' + prop
-                      parser.add_argument("--%s" % propName, type=proptype, help=props[prop][1],
+                      # try to add argument once as a shortcut (prop, p.ex '--filename')
+                      # and once with the full property name (propName, p.ex '--PodioOutput.filename')
+                      # if the argument is already present, an ArgumentError is raised that is dealt with below
+                      parser.add_argument("--%s" % prop, "--%s" % propName, type=proptype, help=props[prop][1],
                         nargs=propnargs,
                         default=propvalue)
                       # bookkeeping which option belongs to which configurable
                       option_db[propName] = (conf, prop)
                     except argparse.ArgumentError:
+                      # argument already present, add it without shortcut
+                      parser.add_argument( "--%s" % propName, type=proptype, help=props[prop][1],
+                        nargs=propnargs,
+                        default=propvalue)
+                      option_db[propName] = (conf, prop)
                       pass
 
 
@@ -132,6 +140,7 @@ if __name__ == "__main__":
       sys.exit()
 
     # turn namespace into dict
+    # (python 2 compatibility)
     opts_dict = vars(opts)
     for optionName, propTuple in option_db.items():
       propTuple[0].setProp(propTuple[1], opts_dict[optionName])
