@@ -38,7 +38,7 @@ private:
   Gaudi::Property<std::vector<std::string>> m_outputCommands{
       this, "outputCommands", {"keep *"}, "A set of commands to declare which collections to keep or drop."};
   Gaudi::Property<std::string> m_filenameRemote{
-      this, "filenameRemote", "", "An optional file path to copy the outputfile to."};
+      this, "remoteFilename", "", "An optional file path to copy the outputfile to."};
   /// Switch for keeping or dropping outputs
   KeepDropSwitch m_switch;
   /// Needed for collection ID table
