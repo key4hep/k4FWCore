@@ -22,6 +22,7 @@ from Configurables import CreateExampleEventData
 producer2 = CreateExampleEventData("Producer2")
 producer2.mcparticles.Path = "mcparticles2"
 producer2.trackhits.Path = "trackhits2"
+producer2.simtrackhits.Path = "simtrackhits2"
 producer2.tracks.Path = "tracks2"
 producer2.singleint.Path = "singleint2"
 producer2.singlefloat.Path = "singlefloat2"
@@ -32,7 +33,7 @@ from Configurables import PodioOutput
 out = PodioOutput("out")
 out.filename = "output_k4test_exampledata_twoproducer.root"
 out.outputCommands = ["keep *"]
-ApplicationMgr().TopAlg += [producer2]
+ApplicationMgr().TopAlg += [out]
 
 
 
