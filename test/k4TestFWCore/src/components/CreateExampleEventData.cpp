@@ -12,7 +12,8 @@ DECLARE_COMPONENT(CreateExampleEventData)
 
 CreateExampleEventData::CreateExampleEventData(const std::string& aName, ISvcLocator* aSvcLoc) : GaudiAlgorithm(aName, aSvcLoc) {
   declareProperty("mcparticles", m_mcParticleHandle, "Dummy Particle collection (output)");
-  declareProperty("trackhits", m_simTrackerHitHandle, "Dummy Hit collection (output)");
+  declareProperty("simtrackhits", m_simTrackerHitHandle, "Dummy Hit collection (output)");
+  declareProperty("trackhits", m_TrackerHitHandle, "Dummy Hit collection (output)");
   declareProperty("tracks", m_trackHandle, "Dummy track collection (output)");
   declareProperty("singlefloat", m_singleFloatHandle, "Dummy collection (output)");
   declareProperty("vectorfloat", m_vectorFloatHandle, "Dummy collection (output)");
