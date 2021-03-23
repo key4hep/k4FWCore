@@ -40,7 +40,7 @@ set_test_env(CreateExampleEventData)
 
 add_test(NAME TwoProducers
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} options/TwoProducer.py --filename output_k4fwcore_test_twoproducer2.root --magicNumberOffset.Producer2 12345 )
+         COMMAND ${K4RUN} options/TwoProducers.py --filename output_k4fwcore_test_twoproducer2.root --magicNumberOffset.Producer2 12345 --Producer1.magicNumberOffset 54321 )
 set_test_env(TwoProducers)
 
 add_test(NAME ReadExampleEventData

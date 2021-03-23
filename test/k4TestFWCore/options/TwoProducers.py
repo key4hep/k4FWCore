@@ -14,7 +14,7 @@ podioevent = k4DataSvc("EventDataSvc")
 ApplicationMgr().ExtSvc += [podioevent]
 
 from Configurables import CreateExampleEventData
-producer1 = CreateExampleEventData()
+producer1 = CreateExampleEventData("Producer1")
 ApplicationMgr().TopAlg += [producer1]
 
 
