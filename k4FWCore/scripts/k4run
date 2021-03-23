@@ -82,43 +82,34 @@ if __name__ == "__main__":
                   if not hasattr(props[prop][0], '__slots__'):
                     # argparse ArgumentError: used to catch when trying to add
                     # same argument twice
-                    try:                       
-                      propvalue = props[prop][0]
+                    propvalue = props[prop][0]
 
-                      # if it is set to "no value" it hasn't been touched in the options file
+                    # if it is set to "no value" it hasn't been touched in the options file
 
-                      if propvalue == conf.propertyNoValue:
-                         propvalue = conf.getDefaultProperty(prop) # thus get the default value
-                      proptype = type(props[prop][0])
-                      # if the property is a list of something, we need to set argparse nargs to '+'
-                      propnargs = "?"
-                      if proptype == list:
-                        # tricky edgecase: if the default is an empty list there is no way to get the type
-                        if len(propvalue) == 0:
-                          # just skip for now
-                          #print("Warning: argparse cannot deduce type for property %s of %s. Needs to be set in options file." % (prop, conf.name()))
-                          continue
-                        else:
-                          # deduce type from first item of the list
-                          proptype = type(propvalue[0])
-                        propnargs = "+"
-                        
-                      propName = conf.name() + '.' + prop
-                      # try to add argument once as a shortcut (prop, p.ex '--filename')
-                      # and once with the full property name (propName, p.ex '--PodioOutput.filename')
-                      # if the argument is already present, an ArgumentError is raised that is dealt with below
-                      parser.add_argument("--%s" % prop, "--%s" % propName, type=proptype, help=props[prop][1],
-                        nargs=propnargs,
-                        default=propvalue)
-                      # bookkeeping which option belongs to which configurable
-                      option_db[propName] = (conf, prop)
-                    except argparse.ArgumentError:
-                      # argument already present, add it without shortcut
-                      parser.add_argument( "--%s" % propName, type=proptype, help=props[prop][1],
-                        nargs=propnargs,
-                        default=propvalue)
-                      option_db[propName] = (conf, prop)
-                      pass
+                    if propvalue == conf.propertyNoValue:
+                       propvalue = conf.getDefaultProperty(prop) # thus get the default value
+                    proptype = type(props[prop][0])
+                    # if the property is a list of something, we need to set argparse nargs to '+'
+                    propnargs = "?"
+                    if proptype == list:
+                      # tricky edgecase: if the default is an empty list there is no way to get the type
+                      if len(propvalue) == 0:
+                        # just skip for now
+                        #print("Warning: argparse cannot deduce type for property %s of %s. Needs to be set in options file." % (prop, conf.name()))
+                        continue
+                      else:
+                        # deduce type from first item of the list
+                        proptype = type(propvalue[0])
+                      propnargs = "+"
+                      
+                    propName = prop + '.' + conf.name()
+                    # try to add argument once as a shortcut (prop, p.ex '--filename')
+                    # and once with the full property name (propName, p.ex '--PodioOutput.filename')
+                    # if the argument is already present, an ArgumentError is raised that is dealt with below
+                    option_db[propName] = (conf, propName)
+                    parser.add_argument( "--%s" % propName, type=proptype, help=props[prop][1],
+                      nargs=propnargs,
+                      default=propvalue)
 
 
     opts=parser.parse_args()
@@ -138,12 +129,6 @@ if __name__ == "__main__":
     if not run_with_options_file:
       print("usage: " + os.path.basename(__file__) + " [gaudi_config.py ...] Specify a gaudi options file to run")
       sys.exit()
-
-    # turn namespace into dict
-    # (python 2 compatibility)
-    opts_dict = vars(opts)
-    for optionName, propTuple in option_db.items():
-      propTuple[0].setProp(propTuple[1], opts_dict[optionName])
 
     if opts.verbose:
       ApplicationMgr().OutputLevel = VERBOSE
