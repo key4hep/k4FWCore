@@ -80,8 +80,6 @@ if __name__ == "__main__":
               if not "Audit" in prop:
                 # do not want to deal with other components / datahandles for now
                   if not hasattr(props[prop][0], '__slots__'):
-                    # argparse ArgumentError: used to catch when trying to add
-                    # same argument twice
                     propvalue = props[prop][0]
 
                     # if it is set to "no value" it hasn't been touched in the options file
