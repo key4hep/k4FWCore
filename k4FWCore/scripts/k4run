@@ -12,9 +12,9 @@ __filterGaudiProps = [ "ContextService", "Cardinality", "Context", "CounterList"
   "FilterCircularDependencies", "StatEntityList", "IsIOBound", "MonitorService", "NeededResources",
   "PropertiesPrint", "RegisterForContextService", "RegularRowFormat", "RequireObjects", "RootInTES",
   "StatPrint", "StatTableHeader", "Timeline", "TypePrint", "UseEfficiencyRowFormat",
-  "VetoObjects","OutputLevel",
-  "EnableFaultHandler" ,"InhibitPathes" ,"EnableAccessHandler" ,"ForceLeaves" ,"RootName"
-  ,"DataAccessName", "DataFaultName", "RootCLID"
+  "EnableFaultHandler", "InhibitPathes", "EnableAccessHandler", "ForceLeaves", "RootName",
+  "DataAccessName", "DataFaultName", "RootCLID", "PrintEmptyCounters", "Blocking",
+  "VetoObjects", "CheckToolDeps", "AutoRetrieveTools",
   ]
 
 #---------------------------------------------------------------------
