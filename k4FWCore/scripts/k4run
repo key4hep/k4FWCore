@@ -70,7 +70,7 @@ if __name__ == "__main__":
       option_db = {}
 
       # loop over all components that were configured in the options file
-      for conf in list(ApplicationMgr.allConfigurables.values()):
+      for conf in set(list(ApplicationMgr.allConfigurables.values())):
         # skip public tools and the applicationmgr itself
         if "ToolSvc" not in conf.name() and "ApplicationMgr" not in conf.name():
           props = conf.getPropertiesWithDescription() #dict propertyname: (propertyvalue, propertydescription)
