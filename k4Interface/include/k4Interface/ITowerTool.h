@@ -6,6 +6,7 @@
 
 // datamodel
 #include "datamodel/CaloCluster.h"
+#include "datamodel/CaloHitCollection.h"
 
 struct tower {
   int eta;
@@ -60,10 +61,11 @@ public:
    *   @param[in] aPhi Position of the middle tower of a cluster in phi
    *   @param[in] aHalfEtaFinal Half size of cluster in eta (in units of tower size). Cluster size is 2*aHalfEtaFinal+1
    *   @param[in] aHalfPhiFinal Half size of cluster in phi (in units of tower size). Cluster size is 2*aHalfPhiFinal+1
-   *   @param[out] aEdmCluster Cluster where cells are attached to
+   *   @param[out] aEdmCluster Cluster of interest
+   *   @param[out] aEdmClusterCells Cluster cells which belong to the cluster of interest
    */
   virtual void attachCells(float aEta, float aPhi, uint aHalfEtaFinal, uint aHalfPhiFinal,
-                           fcc::CaloCluster& aEdmCluster, bool aEllipse) = 0;
+                           fcc::CaloCluster& aEdmCluster, fcc::CaloHitCollection* aEdmClusterCells, bool aEllipse) = 0;
 };
 
 #endif /* RECINTERFACE_ITOWERTOOL_H */
