@@ -117,7 +117,11 @@ if __name__ == "__main__":
         print("Available components:\n%s" % (21 * "="))
         for item in sorted(cfgDb):
             if True: # another option could filter Gaudi components here
-              print("  %s (from %s)" % (item, cfgDb[item]["lib"]))
+              try:
+                path_to_component = __import__(cfgDb[item]["module"]).__file__
+              except ImportError:
+                path_to_component = "NotFound"
+              print("  %s (from %s), \n\t\t path: %s\n" % (item, cfgDb[item]["lib"], path_to_component))
             else:
                 if not "Gaudi" in cfgDb[item]["lib"]:
                   print("  %s (from %s)" % (item, cfgDb[item]["lib"]))
