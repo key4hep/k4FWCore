@@ -127,6 +127,11 @@ if __name__ == "__main__":
       print("usage: " + os.path.basename(__file__) + " [gaudi_config.py ...] Specify a gaudi options file to run")
       sys.exit()
 
+    opts_dict = vars(opts)
+    for optionName, propTuple in option_db.items():
+      print("Option name:", propTuple[1], optionName, opts_dict[optionName])
+      propTuple[0].setProp(propTuple[1].rsplit(".",1)[1], opts_dict[optionName])
+
     if opts.verbose:
       ApplicationMgr().OutputLevel = VERBOSE
     if opts.num_events is not None:
