@@ -73,7 +73,7 @@ set_test_env(AlgorithmWithTFileCheckMyTFileOutput)
 
 add_test(NAME CheckCommandLineArguments
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} createHelloWorld.py --HelloWorldAlg1.PerEventPrintMessage TwasBrilligAndTheSlithyToves
+         COMMAND ${K4RUN} options/createHelloWorld.py --HelloWorldAlg1.PerEventPrintMessage TwasBrilligAndTheSlithyToves
          PASS_REGULAR_EXPRESSION "TwasBrilligAndTheSlithyToves"
 )
 set_test_env(CheckCommandLineArguments)
