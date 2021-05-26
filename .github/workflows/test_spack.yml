@@ -26,6 +26,7 @@ jobs:
       run: |
         docker exec CI_container /bin/bash -c 'cd ./Package;\
         source /cvmfs/sw.hsf.org/contrib/spack/share/spack/setup-env.sh;\
+        export PATH=/cvmfs/sft.cern.ch/lcg/releases/ccache/3.7.1-7651f/x86_64-centos7-gcc8-opt/bin:$PATH;\
         spack dev-build --test=root k4fwcore@master;\
         '
 
