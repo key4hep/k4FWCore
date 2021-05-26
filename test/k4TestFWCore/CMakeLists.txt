@@ -52,6 +52,7 @@ set_property(TEST ReadExampleEventData APPEND PROPERTY DEPENDS CreateExampleEven
 add_test(NAME ReadExampleDataFromNthEvent
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
          COMMAND ${K4RUN} options/readExampleDataFromNthEvent.py)
+set_test_env(ReadExampleDataFromNthEvent)
 
 add_test(NAME AlgorithmWithTFile
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
@@ -69,4 +70,11 @@ add_test(NAME AlgorithmWithTFileCheckMyTFileOutput
          COMMAND  python scripts/check_TestAlgorithmWithTFile_myTFile_nonempty.py)
 set_property(TEST AlgorithmWithTFileCheckMyTFileOutput APPEND PROPERTY DEPENDS AlgorithmWithTFile)
 set_test_env(AlgorithmWithTFileCheckMyTFileOutput)
+
+add_test(NAME CheckCommandLineArguments
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} createHelloWorld.py --HelloWorldAlg1.PerEventPrintMessage TwasBrilligAndTheSlithyToves
+         PASS_REGULAR_EXPRESSION "TwasBrilligAndTheSlithyToves"
+)
+set_test_env(CheckCommandLineArguments)
 
