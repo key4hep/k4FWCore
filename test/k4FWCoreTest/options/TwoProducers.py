@@ -13,13 +13,13 @@ from Configurables import k4DataSvc
 podioevent = k4DataSvc("EventDataSvc")
 ApplicationMgr().ExtSvc += [podioevent]
 
-from Configurables import CreateExampleEventData
-producer1 = CreateExampleEventData("Producer1")
+from Configurables import k4FWCoreTest_CreateExampleEventData
+producer1 = k4FWCoreTest_CreateExampleEventData("Producer1")
 ApplicationMgr().TopAlg += [producer1]
 
 
-from Configurables import CreateExampleEventData
-producer2 = CreateExampleEventData("Producer2")
+from Configurables import k4FWCoreTest_CreateExampleEventData
+producer2 = k4FWCoreTest_CreateExampleEventData("Producer2")
 producer2.mcparticles.Path = "mcparticles2"
 producer2.trackhits.Path = "trackhits2"
 producer2.simtrackhits.Path = "simtrackhits2"

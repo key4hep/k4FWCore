@@ -1,4 +1,4 @@
-#include "TestAlgorithmWithTFile.h"
+#include "k4FWCoreTest_AlgorithmWithTFile.h"
 
 
 // datamodel
@@ -6,16 +6,16 @@
 #include "edm4hep/SimTrackerHitCollection.h"
 
 
-DECLARE_COMPONENT(TestAlgorithmWithTFile)
+DECLARE_COMPONENT(k4FWCoreTest_AlgorithmWithTFile)
 
-TestAlgorithmWithTFile::TestAlgorithmWithTFile(const std::string& aName, ISvcLocator* aSvcLoc) : GaudiAlgorithm(aName, aSvcLoc) {
+k4FWCoreTest_AlgorithmWithTFile::k4FWCoreTest_AlgorithmWithTFile(const std::string& aName, ISvcLocator* aSvcLoc) : GaudiAlgorithm(aName, aSvcLoc) {
   declareProperty("mcparticles", m_mcParticleHandle, "Dummy Particle collection (output)");
   declareProperty("trackhits", m_simTrackerHitHandle, "Dummy Hit collection (output)");
 }
 
-TestAlgorithmWithTFile::~TestAlgorithmWithTFile() {}
+k4FWCoreTest_AlgorithmWithTFile::~k4FWCoreTest_AlgorithmWithTFile() {}
 
-StatusCode TestAlgorithmWithTFile::initialize() {
+StatusCode k4FWCoreTest_AlgorithmWithTFile::initialize() {
   if (GaudiAlgorithm::initialize().isFailure()) {
     return StatusCode::FAILURE;
   }
@@ -30,7 +30,7 @@ StatusCode TestAlgorithmWithTFile::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode TestAlgorithmWithTFile::execute() {
+StatusCode k4FWCoreTest_AlgorithmWithTFile::execute() {
 
   m_singleIntHandle.put(new int(12345));
   m_singleFloatHandle.put(new float(12345.6789));
@@ -60,7 +60,7 @@ StatusCode TestAlgorithmWithTFile::execute() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode TestAlgorithmWithTFile::finalize() {
+StatusCode k4FWCoreTest_AlgorithmWithTFile::finalize() {
 
       // write and close the non-framework tfile
       m_file->cd();

@@ -1,4 +1,4 @@
-#include "CreateExampleEventData.h"
+#include "k4FWCoreTest_CreateExampleEventData.h"
 
 
 // datamodel
@@ -8,9 +8,9 @@
 #include "edm4hep/TrackCollection.h"
 
 
-DECLARE_COMPONENT(CreateExampleEventData)
+DECLARE_COMPONENT(k4FWCoreTest_CreateExampleEventData)
 
-CreateExampleEventData::CreateExampleEventData(const std::string& aName, ISvcLocator* aSvcLoc) : GaudiAlgorithm(aName, aSvcLoc) {
+k4FWCoreTest_CreateExampleEventData::k4FWCoreTest_CreateExampleEventData(const std::string& aName, ISvcLocator* aSvcLoc) : GaudiAlgorithm(aName, aSvcLoc) {
   declareProperty("mcparticles", m_mcParticleHandle, "Dummy Particle collection (output)");
   declareProperty("simtrackhits", m_simTrackerHitHandle, "Dummy Hit collection (output)");
   declareProperty("trackhits", m_TrackerHitHandle, "Dummy Hit collection (output)");
@@ -20,16 +20,16 @@ CreateExampleEventData::CreateExampleEventData(const std::string& aName, ISvcLoc
   declareProperty("singleint", m_singleIntHandle, "Dummy collection (output)");
 }
 
-CreateExampleEventData::~CreateExampleEventData() {}
+k4FWCoreTest_CreateExampleEventData::~k4FWCoreTest_CreateExampleEventData() {}
 
-StatusCode CreateExampleEventData::initialize() {
+StatusCode k4FWCoreTest_CreateExampleEventData::initialize() {
   if (GaudiAlgorithm::initialize().isFailure()) {
     return StatusCode::FAILURE;
   }
   return StatusCode::SUCCESS;
 }
 
-StatusCode CreateExampleEventData::execute() {
+StatusCode k4FWCoreTest_CreateExampleEventData::execute() {
 
   m_singleIntHandle.put(new int(12345));
 
@@ -78,4 +78,4 @@ StatusCode CreateExampleEventData::execute() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode CreateExampleEventData::finalize() { return GaudiAlgorithm::finalize(); }
+StatusCode k4FWCoreTest_CreateExampleEventData::finalize() { return GaudiAlgorithm::finalize(); }

@@ -3,8 +3,8 @@ from Gaudi.Configuration import *
 from Configurables import k4DataSvc
 podioevent = k4DataSvc("EventDataSvc")
 
-from Configurables import TestAlgorithmWithTFile
-producer = TestAlgorithmWithTFile()
+from Configurables import k4FWCoreTest_AlgorithmWithTFile
+producer = k4FWCoreTest_AlgorithmWithTFile()
 
 from Configurables import PodioOutput
 out = PodioOutput("out")

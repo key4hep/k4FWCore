@@ -1,5 +1,5 @@
-#ifndef TESTFWCORE_CREATEEXAMPLEEVENTDATA
-#define TESTFWCORE_CREATEEXAMPLEEVENTDATA
+#ifndef K4FWCORE_K4FWCORETEST_CREATEEXAMPLEEVENTDATA
+#define K4FWCORE_K4FWCORETEST_CREATEEXAMPLEEVENTDATA
 
 // GAUDI
 #include "GaudiAlg/GaudiAlgorithm.h"
@@ -7,7 +7,6 @@
 // edm4hep
 #include "k4FWCore/DataHandle.h"
 #include "TTree.h"
-#include "TFile.h"
 
 
 
@@ -15,20 +14,22 @@
 namespace edm4hep {
 class MCParticleCollection;
 class SimTrackerHitCollection;
-class SimCaloHit;
+class TrackerHitCollection;
+class SimCaloHitCollection;
+class TrackCollection;
 }
 
-/** @class TestAlgorithmWithTFile
+/** @class k4FWCoreTest_CreateExampleEventData
  *  Lightweight producer for edm data for tests that do not depend on the actual
  *  data content and therefore do not need the simulation machinery.
  *  Fills data members with increasing integers, together with some offset so that different
  *  events can be easily distinguished. 
  *
  */
-class TestAlgorithmWithTFile : public GaudiAlgorithm {
+class k4FWCoreTest_CreateExampleEventData : public GaudiAlgorithm {
 public:
-  explicit TestAlgorithmWithTFile(const std::string&, ISvcLocator*);
-  virtual ~TestAlgorithmWithTFile();
+  explicit k4FWCoreTest_CreateExampleEventData(const std::string&, ISvcLocator*);
+  virtual ~k4FWCoreTest_CreateExampleEventData();
   /**  Initialize.
    *   @return status code
    */
@@ -45,18 +46,17 @@ public:
 private:
   /// integer to add to the dummy values written to the edm
   Gaudi::Property<int> m_magicNumberOffset{this, "magicNumberOffset", 0, "Integer to add to the dummy values written to the edm"};
-  /// Handle for the genparticles to be written
+  /// Handle for the MCParticles to be written
   DataHandle<edm4hep::MCParticleCollection> m_mcParticleHandle{"MCParticles", Gaudi::DataHandle::Writer, this};
-  /// Handle for the genvertices to be written
-  DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitHandle{"SimTrackerHit", Gaudi::DataHandle::Writer, this};
+  /// Handle for the SimTrackerHits to be written
+  DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitHandle{"SimTrackerHits", Gaudi::DataHandle::Writer, this};
+  DataHandle<edm4hep::TrackerHitCollection> m_TrackerHitHandle{"TrackerHits", Gaudi::DataHandle::Writer, this};
+
+  /// Handle for the Tracks to be written
+  DataHandle<edm4hep::TrackCollection> m_trackHandle{"Tracks", Gaudi::DataHandle::Writer, this};
 
   DataHandle<float> m_singleFloatHandle{"SingleFloat", Gaudi::DataHandle::Writer, this};
   DataHandle<std::vector<float>> m_vectorFloatHandle{"VectorFloat", Gaudi::DataHandle::Writer, this};
   DataHandle<int> m_singleIntHandle{"SingleInt", Gaudi::DataHandle::Writer, this};
-
-  /// for testing: write a second TFile by user in an algorithm
-  Float_t m_value;
-  TFile* m_file;
-  TTree* m_tree;
 };
-#endif /* TESTFWCORE_CREATEEXAMPLEEVENTDATA */
+#endif /* K4FWCORE_K4FWCORETEST_CREATEEXAMPLEEVENTDATA */
