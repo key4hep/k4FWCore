@@ -5,8 +5,8 @@
 #include "GaudiKernel/IAlgTool.h"
 
 // datamodel
-#include "datamodel/CaloCluster.h"
-#include "datamodel/CaloHitCollection.h"
+#include "edm4hep/CalorimeterHitCollection.h"
+#include "edm4hep/Cluster.h"
 
 struct tower {
   int eta;
@@ -65,7 +65,7 @@ public:
    *   @param[out] aEdmClusterCells Cluster cells which belong to the cluster of interest
    */
   virtual void attachCells(float aEta, float aPhi, uint aHalfEtaFinal, uint aHalfPhiFinal,
-                           fcc::CaloCluster& aEdmCluster, fcc::CaloHitCollection* aEdmClusterCells, bool aEllipse) = 0;
+                           edm4hep::Cluster& aEdmCluster, edm4hep::CalorimeterHitCollection* aEdmClusterCells, bool aEllipse) = 0;
 };
 
 #endif /* RECINTERFACE_ITOWERTOOL_H */
