@@ -11,6 +11,7 @@ inp.collections = ["MCParticles", "SimTrackerHits", "Tracks"]
 from Configurables import PodioOutput
 oup = PodioOutput()
 oup.filename = "output_k4test_exampledata_2.root"
+oup.outputCommands = ["drop MCParticles"]
 
 from Configurables import ApplicationMgr
 ApplicationMgr( TopAlg=[inp, oup],

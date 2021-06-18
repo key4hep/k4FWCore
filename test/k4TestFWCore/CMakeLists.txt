@@ -66,3 +66,8 @@ add_test(NAME AlgorithmWithTFileCheckMyTFileOutput
 set_property(TEST AlgorithmWithTFileCheckMyTFileOutput APPEND PROPERTY DEPENDS AlgorithmWithTFile)
 set_test_env(AlgorithmWithTFileCheckMyTFileOutput)
 
+add_test(NAME checkKeepDropSwitch
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} scripts/check_KeepDropSwitch.py)
+set_test_env(checkKeepDropSwitch)
+set_property(TEST checkKeepDropSwitch APPEND PROPERTY DEPENDS ReadExampleEventData)
