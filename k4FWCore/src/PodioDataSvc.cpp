@@ -106,6 +106,7 @@ StatusCode PodioDataSvc::readCollection(const std::string& collName, int collect
   auto wrapper = new DataWrapper<podio::CollectionBase>;
   int id = m_collectionIDs->add(collName);
   collection->setID(id);
+  collection->prepareAfterRead();
   wrapper->setData(collection);
   m_readCollections.emplace_back(std::make_pair(collName, collection));
   return DataSvc::registerObject("/Event", "/" + collName, wrapper);

@@ -88,3 +88,9 @@ set_tests_properties(CheckCommandLineArguments PROPERTIES
 )
 set_test_env(CheckCommandLineArguments)
 
+add_test(NAME checkKeepDropSwitch
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND python scripts/check_KeepDropSwitch.py)
+set_test_env(checkKeepDropSwitch)
+set_property(TEST checkKeepDropSwitch APPEND PROPERTY DEPENDS ReadExampleEventData)
+

@@ -28,8 +28,7 @@ StatusCode PodioOutput::initialize() {
   return StatusCode::SUCCESS;
 }
 
-void PodioOutput::resetBranches(const std::vector<std::pair<std::string, podio::CollectionBase*>>& collections,
-                                bool prepare) {
+void PodioOutput::resetBranches(const std::vector<std::pair<std::string, podio::CollectionBase*>>& collections) {
   for (auto& collNamePair : collections) {
     auto collName = collNamePair.first;
     if (m_switch.isOn(collName)) {
@@ -53,14 +52,11 @@ void PodioOutput::resetBranches(const std::vector<std::pair<std::string, podio::
         }
       }
     }
-    if (prepare) {
-      collNamePair.second->prepareForWrite();
-    }
+    collNamePair.second->prepareForWrite();
   }
 }
 
-void PodioOutput::createBranches(const std::vector<std::pair<std::string, podio::CollectionBase*>>& collections,
-                                 bool prepare) {
+void PodioOutput::createBranches(const std::vector<std::pair<std::string, podio::CollectionBase*>>& collections) {
   for (auto& collNamePair : collections) {
     auto collName = collNamePair.first;
     std::string className( collNamePair.second->getValueTypeName() ) ;
@@ -95,9 +91,7 @@ void PodioOutput::createBranches(const std::vector<std::pair<std::string, podio:
     }
     debug() << isOn << " Registering collection " << collClassName << " " << collName.c_str() << " containing type "
             << className << endmsg;
-    if (prepare) {
-      collNamePair.second->prepareForWrite();
-    }
+    collNamePair.second->prepareForWrite();
   }
 }
 
@@ -105,11 +99,11 @@ StatusCode PodioOutput::execute() {
   // for now assume identical content for every event
   // register for writing
   if (m_firstEvent) {
-    createBranches(m_podioDataSvc->getCollections(), true);
-    createBranches(m_podioDataSvc->getReadCollections(), false);
+    createBranches(m_podioDataSvc->getCollections());
+    createBranches(m_podioDataSvc->getReadCollections());
   } else {
-    resetBranches(m_podioDataSvc->getCollections(), true);
-    resetBranches(m_podioDataSvc->getReadCollections(), false);
+    resetBranches(m_podioDataSvc->getCollections());
+    resetBranches(m_podioDataSvc->getReadCollections());
   }
   m_firstEvent = false;
   debug() << "Filling DataTree .." << endmsg;
