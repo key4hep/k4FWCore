@@ -1,5 +1,7 @@
 import ROOT
 
+ROOT.gSystem.Load("libedm4hepDict")
+
 file = ROOT.TFile.Open("output_k4test_exampledata_2.root")
 tree = file.Get("events")
 tree.GetEntry(0)
