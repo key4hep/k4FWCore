@@ -94,3 +94,9 @@ add_test(NAME checkKeepDropSwitch
 set_test_env(checkKeepDropSwitch)
 set_property(TEST checkKeepDropSwitch APPEND PROPERTY DEPENDS ReadExampleEventData)
 
+add_test(NAME TestDataHandleUniquePtr
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} options/TestDataHandleUniquePtr.py)
+set_test_env(TestDataHandleUniquePtr)
+
+
