@@ -39,6 +39,8 @@ public:
    */
   void put(T* object);
 
+  T* put( std::unique_ptr<T> object );
+
   /**
   * Create and register object in transient store
   */
@@ -167,6 +169,14 @@ void DataHandle<T>::put(T* objectp) {
   DataObjectHandle<DataWrapper<T>>::put(std::move(dw));
 
 }
+
+//---------------------------------------------------------------------------
+template <typename T>
+T* DataHandle<T>::put( std::unique_ptr<T> objectp ){
+  put(objectp.get());
+  return objectp.release();
+}
+
 //---------------------------------------------------------------------------
 /**
  * Create the collection, put it in the DataObjectHandle and return the
