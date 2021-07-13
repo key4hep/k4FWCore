@@ -41,6 +41,9 @@ public:
 
   T* put( std::unique_ptr<T> object );
 
+  ///Retrieve CellID string from the Collection metadata
+  const std::string getCollMetadataCellID(const unsigned int id);
+
   /**
   * Create and register object in transient store
   */
@@ -170,12 +173,35 @@ void DataHandle<T>::put(T* objectp) {
 
 }
 
+
 //---------------------------------------------------------------------------
 template <typename T>
 T* DataHandle<T>::put( std::unique_ptr<T> objectp ){
   put(objectp.get());
   return objectp.release();
 }
+
+
+//---------------------------------------------------------------------------
+// Get the CellID encoded String from the Metadata of the collection
+// using Podio Data Service
+// Give collection ID
+template <typename T>
+const std::string DataHandle<T>::getCollMetadataCellID(
+  const unsigned int id)
+{
+  PodioDataSvc* pds;
+  pds = dynamic_cast<PodioDataSvc*>( m_eds.get());
+
+  if (pds != nullptr) {
+    auto colMD = pds->getProvider().getCollectionMetaData( id );
+    return colMD.getStringVal("CellIDEncodingString") ;
+  } else {
+    std::string msg("Could not get Podio Data Service.");
+    throw GaudiException(msg, "Failed to get Collection Metadata.", StatusCode::FAILURE);
+  }
+}
+
 
 //---------------------------------------------------------------------------
 /**

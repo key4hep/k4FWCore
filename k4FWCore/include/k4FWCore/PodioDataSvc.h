@@ -43,6 +43,7 @@ public:
 
   virtual const CollRegistry& getCollections() const { return m_collections; }
   virtual const CollRegistry& getReadCollections() const { return m_readCollections; }
+  const podio::EventStore& getProvider() const { return m_provider; }
   virtual podio::CollectionIDTable* getCollectionIDs() { return m_collectionIDs; }
 
   /// Set the collection IDs (if reading a file)
