@@ -109,7 +109,7 @@ StatusCode PodioDataSvc::readCollection(const std::string& collName, int collect
   collection->prepareAfterRead();
   wrapper->setData(collection);
   m_readCollections.emplace_back(std::make_pair(collName, collection));
-  return DataSvc::registerObject("/Event", "/" + collName, wrapper);
+  return registerObject("/Event", "/" + collName, wrapper);
 }
 
 StatusCode PodioDataSvc::registerObject(std::string_view parentPath, std::string_view fullPath, DataObject* pObject) {
