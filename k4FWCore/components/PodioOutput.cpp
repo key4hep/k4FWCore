@@ -1,5 +1,4 @@
 #include "PodioOutput.h"
-#include "GaudiKernel/IJobOptionsSvc.h"
 #include "k4FWCore/PodioDataSvc.h"
 #include "TFile.h"
 
@@ -123,19 +122,16 @@ StatusCode PodioOutput::finalize() {
   // retrieve the configuration of the job
   // and write it to file as vector of strings
   std::vector<std::string> config_data;
-  auto jobOptionsSvc = service<IJobOptionsSvc>("JobOptionsSvc");
-  auto configured_components = jobOptionsSvc->getClients();
-  for (const auto& name : configured_components) {
-    auto properties = jobOptionsSvc->getProperties(name);
+  const auto& jobOptionsSvc = Gaudi::svcLocator()->getOptsSvc();
+  const auto& configured_properties = jobOptionsSvc.items();
+  for (const auto& per_property : configured_properties) {
     std::stringstream config_stream;
-    for (const auto& property : *properties) {
-      // sample output:
-      // HepMCToEDMConverter.genparticles = "GenParticles";
-      // Note that quotes are added to all property values,
-      // which leads to problems with ints, lists, dicts and bools. 
-      // For theses types, the quotes must be removed in postprocessing.
-      config_stream << name << "." << property->name() << " = \"" << property->toString() << "\";" << std::endl;
-    }
+    // sample output:
+    // HepMCToEDMConverter.genparticles = "GenParticles";
+    // Note that quotes are added to all property values,
+    // which leads to problems with ints, lists, dicts and bools. 
+    // For theses types, the quotes must be removed in postprocessing.
+    config_stream << std::get<0>(per_property) << " = \"" << std::get<1>(per_property) << "\";" << std::endl;
     config_data.push_back(config_stream.str());
   }
   // Some default components are not captured by the job option service
