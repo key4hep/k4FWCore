@@ -6,7 +6,7 @@ podioevent.input = "output_k4test_exampledata.root"
 
 from Configurables import PodioInput
 inp = PodioInput()
-inp.collections = ["MCParticles", "SimTrackerHits", "Tracks"]
+inp.collections = ["MCParticles", "SimTrackerHits", "TrackerHits", "Tracks"]
 
 from Configurables import PodioOutput
 oup = PodioOutput()
@@ -16,7 +16,7 @@ oup.outputCommands = ["drop MCParticles"]
 from Configurables import ApplicationMgr
 ApplicationMgr( TopAlg=[inp, oup],
                 EvtSel="NONE",
-                EvtMax=100,
+                EvtMax=10,
                 ExtSvc=[podioevent],
                 OutputLevel=DEBUG,
                 )
