@@ -49,6 +49,10 @@ private:
   TTree* m_datatree;
   /// The tree to be filled with meta data
   TTree* m_metadatatree;
+  TTree* m_runMDtree;
+  TTree* m_evtMDtree;
+  TTree* m_colMDtree;
+
   /// The stored collections
   std::vector<podio::CollectionBase*> m_storedCollections;
 };
