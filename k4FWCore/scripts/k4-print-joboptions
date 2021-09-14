@@ -16,7 +16,7 @@ import re
 _regexp_int = re.compile(r'(")([-+]?[0-9]+)(")(;)')
 def _sanitize(s):
   """
-   helper function for postprocessing of fcc job options
+   helper function for postprocessing of key4hep job options
    quotes need to be removed around ints, lists, dicts and bools,
    and some properties that get stored by the job options svc need to be disabled
 
@@ -24,7 +24,7 @@ def _sanitize(s):
   ----------
 
   s: str
-     String containing fcc joboptions (.opts format) to be sanitized.
+     String containing key4hep joboptions (.opts format) to be sanitized.
 
   Returns
   -------
