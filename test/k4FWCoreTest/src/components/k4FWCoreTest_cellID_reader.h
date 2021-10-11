@@ -12,11 +12,7 @@
 #include "edm4hep/SimTrackerHitCollection.h"
 
 /** @class k4FWCoreTest_cellID
- *  Lightweight producer for edm data for tests that do not depend on the actual
- *  data content and therefore do not need the simulation machinery.
- *  Fills data members with increasing integers, together with some offset so that different
- *  events can be easily distinguished. 
- *
+ *  Lightweight producer for edm data to test cellID reading
  */
 class k4FWCoreTest_cellID_reader : public GaudiAlgorithm {
 public:
@@ -36,8 +32,6 @@ public:
   virtual StatusCode finalize() final;
 
 private:
-  /// Handle for the SimTrackerHits to be written
-  // DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitWriterHandle{"SimTrackerHits", Gaudi::DataHandle::Writer, this};
   /// Handle for the SimTrackerHits to be read
    DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitReaderHandle{"SimTrackerHits", Gaudi::DataHandle::Reader, this};
 };
