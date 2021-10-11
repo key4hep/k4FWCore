@@ -4,7 +4,6 @@
 DECLARE_COMPONENT(k4FWCoreTest_cellID_reader)
 
 k4FWCoreTest_cellID_reader::k4FWCoreTest_cellID_reader(const std::string& aName, ISvcLocator* aSvcLoc) : GaudiAlgorithm(aName, aSvcLoc) {;
-  // declareProperty("simtrackhits_w", m_simTrackerHitWriterHandle, "Dummy Hit collection Writer");
   declareProperty("simtrackhits_r", m_simTrackerHitReaderHandle, "Dummy Hit collection Reader");
 }
 
@@ -24,7 +23,10 @@ StatusCode k4FWCoreTest_cellID_reader::execute() {
   auto       collID    = simtrackerhits_coll->getID();
   const auto cellIDstr = m_simTrackerHitReaderHandle.getCollMetadataCellID(collID);
 
-  std::cout << "cellID is: " << cellIDstr << std::endl;
+  if (cellIDstr != "M:3,S-1:3,I:9,J:9,K-1:6") {
+    std::cout << "ERROR cellID is: " << cellIDstr << std::endl;
+    return StatusCode::FAILURE;
+  }
 
   return StatusCode::SUCCESS;
 }

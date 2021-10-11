@@ -32,6 +32,9 @@ public:
   virtual StatusCode finalize() final;
 
 private:
+  PodioDataSvc* m_podioDataSvc;
+  ServiceHandle<IDataProviderSvc> m_eventDataSvc;
+
   /// Handle for the SimTrackerHits to be written
   DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitWriterHandle{"SimTrackerHits", Gaudi::DataHandle::Writer, this};
 
