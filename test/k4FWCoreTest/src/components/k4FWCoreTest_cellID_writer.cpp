@@ -32,12 +32,8 @@ StatusCode k4FWCoreTest_cellID_writer::execute() {
   auto hit = simTrackerHits->create();
   hit.setPosition({3, 4, 5});
 
-  auto* collids = m_podioDataSvc->getCollectionIDs();
-
-  for (auto& id : collids->ids()) {
-    auto& collmd = m_podioDataSvc->getProvider().getCollectionMetaData(id);
-    collmd.setValue("CellIDEncodingString", cellIDtest);
-  }
+  auto& collmd = m_podioDataSvc->getProvider().getCollectionMetaData(simTrackerHits->getID());
+  collmd.setValue("CellIDEncodingString", cellIDtest);
 
   return StatusCode::SUCCESS;
 }
