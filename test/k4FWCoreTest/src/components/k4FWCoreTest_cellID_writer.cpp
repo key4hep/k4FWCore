@@ -36,7 +36,7 @@ StatusCode k4FWCoreTest_cellID_writer::execute() {
 
   for (auto& id : collids->ids()) {
     auto& collmd = m_podioDataSvc->getProvider().getCollectionMetaData(id);
-    collmd.setValue("CellIDEncodingString", "M:3,S-1:3,I:9,J:9,K-1:6");
+    collmd.setValue("CellIDEncodingString", cellIDtest);
   }
 
   return StatusCode::SUCCESS;
