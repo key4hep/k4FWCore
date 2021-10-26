@@ -32,9 +32,7 @@ StatusCode PodioDataSvc::initialize() {
       m_provider.setReader(&m_reader);
 
       auto idTable = m_provider.getCollectionIDTable();
-      idTable->print();
       setCollectionIDs(idTable);
-      idTable->print();
 
       if (m_1stEvtEntry != 0 ) {
           m_reader.goToEvent(m_1stEvtEntry);
@@ -108,8 +106,7 @@ PodioDataSvc::~PodioDataSvc() {}
 StatusCode PodioDataSvc::readCollection(const std::string& collName, int collectionID) {
   podio::CollectionBase* collection(nullptr);
 
-      auto idTable = m_provider.getCollectionIDTable();
-      idTable->print();
+  auto idTable = m_provider.getCollectionIDTable();
   m_provider.get(collectionID, collection);
 
   if (collection->isSubsetCollection()) {
