@@ -45,6 +45,13 @@ add_test(NAME CreateExampleEventData
          COMMAND ${K4RUN} options/createExampleEventData.py)
 set_test_env(CreateExampleEventData)
 
+
+add_test(NAME PodioOutputTest
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} options/PodioOutputTest.py)
+set_test_env(PodioOutputTest)
+
+
 add_test(NAME CreateExampleEventData_cellID
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
          COMMAND ${K4RUN} options/createExampleEventData_cellID.py)
