@@ -42,7 +42,6 @@ public:
   StatusCode readCollection(const std::string& collectionName, int collectionID);
 
   virtual const CollRegistry& getCollections() const { return m_collections; }
-  virtual const CollRegistry& getReadCollections() const { return m_readCollections; }
   podio::EventStore& getProvider() { return m_provider; }
   virtual podio::CollectionIDTable* getCollectionIDs() { return m_collectionIDs; }
 
@@ -73,7 +72,6 @@ private:
 
   // special members for podio handling
   std::vector<std::pair<std::string, podio::CollectionBase*>> m_collections;
-  std::vector<std::pair<std::string, podio::CollectionBase*>> m_readCollections;
   podio::CollectionIDTable* m_collectionIDs;
 
 protected:

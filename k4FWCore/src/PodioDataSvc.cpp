@@ -60,14 +60,8 @@ StatusCode PodioDataSvc::clearStore() {
       collNamePair.second->clear();
     }
   }
-  for (auto& collNamePair : m_readCollections) {
-    if (collNamePair.second != nullptr) {
-      collNamePair.second->clear();
-    }
-  }
   DataSvc::clearStore().ignore();
   m_collections.clear();
-  m_readCollections.clear();
   return StatusCode::SUCCESS;
 }
 
@@ -117,7 +111,6 @@ StatusCode PodioDataSvc::readCollection(const std::string& collName, int collect
   collection->setID(id);
   collection->prepareAfterRead();
   wrapper->setData(collection);
-  m_readCollections.emplace_back(std::make_pair(collName, collection));
   return registerObject("/Event", "/" + collName, wrapper);
 }
 
