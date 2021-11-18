@@ -128,10 +128,8 @@ StatusCode PodioOutput::execute() {
   // register for writing
   if (m_firstEvent) {
     createBranches(m_podioDataSvc->getCollections());
-    //createBranches(m_podioDataSvc->getReadCollections());
   } else {
     resetBranches(m_podioDataSvc->getCollections());
-    //resetBranches(m_podioDataSvc->getReadCollections());
   }
   m_firstEvent = false;
   debug() << "Filling DataTree .." << endmsg;
