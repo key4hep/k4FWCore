@@ -56,8 +56,8 @@ StatusCode k4FWCoreTest_CreateExampleEventData::execute() {
   trackerHit.setPosition({3, 4, 5});
 
   edm4hep::TrackCollection* tracks = m_trackHandle.createAndPut();
-  edm4hep::Track track = tracks->create();
-  edm4hep::Track track2 = tracks->create();
+  auto track = tracks->create();
+  auto track2 = tracks->create();
   // set members
   track.setType(1);
   track.setChi2(2.1);
