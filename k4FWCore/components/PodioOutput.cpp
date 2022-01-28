@@ -42,10 +42,11 @@ void PodioOutput::resetBranches(const std::vector<std::pair<std::string, podio::
       m_datatree->SetBranchAddress(collName.c_str(), collBuffers.data);
       auto colls = collBuffers.references;
       if (colls != nullptr) {
-        int j = 0;
-        for (auto& c : (*colls)) {
-          m_datatree->SetBranchAddress((collName + "#" + std::to_string(j)).c_str(), &c);
-          ++j;
+        for (size_t j = 0; j < colls->size(); ++j) {
+          // We need to make sure that we pass the actual pointer to
+          // SetBranchAddress instead of the pointer to the unique_ptr
+          auto collPtr = (*colls)[j].get();
+          m_datatree->SetBranchAddress((collName + "#" + std::to_string(j)).c_str(), &collPtr);
         }
       }
       auto colls_v = collBuffers.vectorMembers;
@@ -82,7 +83,7 @@ void PodioOutput::createBranches(const std::vector<std::pair<std::string, podio:
         int i = 0;
         for (auto& c : (*refColls)) {
           const auto brName = podio::root_utils::refBranch(collName, i);
-          m_datatree->Branch(brName.c_str(), c);
+          m_datatree->Branch(brName.c_str(), c.get());
           ++i;
         }
       // ---- vector members
