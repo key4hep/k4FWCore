@@ -1,3 +1,5 @@
+#include <cstdlib>
+
 #include "PodioOutput.h"
 #include "k4FWCore/PodioDataSvc.h"
 #include "TFile.h"
@@ -174,6 +176,12 @@ StatusCode PodioOutput::finalize() {
   }
   //// finalize trees and file //////////////////////////////
   m_file->cd();
+
+  if(const char* env_key4hep_stack = std::getenv("KEY4HEP_STACK")) {
+    std::string s_env_key4hep_stack = env_key4hep_stack;
+    m_metadatatree->Branch("key4hepStack", &s_env_key4hep_stack);
+  }
+
   m_metadatatree->Branch("gaudiConfigOptions", &config_data);
   m_metadatatree->Branch("CollectionIDs", m_podioDataSvc->getCollectionIDs());
 
