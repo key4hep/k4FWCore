@@ -7,7 +7,6 @@
 
 #include "TTree.h"
 
-#include "edm4hep/MCParticleCollection.h"
 
 /// Service initialisation
 StatusCode PodioDataSvc::initialize() {
