@@ -11,9 +11,9 @@ class UniqueIDGenSvc : public extends<Service, IUniqueIDGenSvc> {
 public:
   UniqueIDGenSvc(const std::string& name, ISvcLocator* svcLoc);
   StatusCode initialize() override;
-  uint64_t getUniqueID(uint32_t evt_num) const override;
-  uint64_t getUniqueID(uint32_t evt_num, uint32_t run_num) const override;
-  uint64_t getUniqueID(uint32_t evt_num, uint32_t run_num, std::string name) const override;
+  size_t getUniqueID(uint32_t evt_num) const override;
+  size_t getUniqueID(uint32_t evt_num, uint32_t run_num) const override;
+  size_t getUniqueID(uint32_t evt_num, uint32_t run_num, std::string name) const override;
 };
 
 #endif
