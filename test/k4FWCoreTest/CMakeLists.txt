@@ -10,8 +10,7 @@ find_package(EDM4HEP)
 file(GLOB k4fwcoretest_plugin_sources src/components/*.cpp)
 gaudi_add_module(k4FWCoreTestPlugins
                  SOURCES ${k4fwcoretest_plugin_sources}
-                 LINK Gaudi::GaudiAlgLib Gaudi::GaudiKernel k4FWCore ROOT::Core ROOT::RIO ROOT::Tree EDM4HEP::edm4hepDict EDM4HEP::edm4hep)
-
+                 LINK Gaudi::GaudiAlgLib Gaudi::GaudiKernel k4FWCore k4FWCore::k4Interface ROOT::Core ROOT::RIO ROOT::Tree EDM4HEP::edm4hepDict EDM4HEP::edm4hep)
 
 include(CTest)
 
@@ -104,4 +103,7 @@ add_test(NAME TestDataHandleUniquePtr
          COMMAND ${K4RUN} options/TestDataHandleUniquePtr.py)
 set_test_env(TestDataHandleUniquePtr)
 
-
+add_test(NAME TestUniqueIDGenSvc
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} options/TestUniqueIDGenSvc.py)
+set_test_env(TestUniqueIDGenSvc)
