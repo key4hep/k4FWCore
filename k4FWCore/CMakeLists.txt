@@ -16,30 +16,15 @@ target_include_directories(k4FWCore PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
-
-
-
 file(GLOB k4fwcore_plugin_sources components/*.cpp)
 gaudi_add_module(k4FWCorePlugins
                  SOURCES ${k4fwcore_plugin_sources}
-                 LINK Gaudi::GaudiAlgLib Gaudi::GaudiKernel k4FWCore ROOT::Core ROOT::RIO ROOT::Tree)
+                 LINK Gaudi::GaudiAlgLib Gaudi::GaudiKernel k4FWCore k4FWCore::k4Interface ROOT::Core ROOT::RIO ROOT::Tree)
 target_include_directories(k4FWCorePlugins PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
-
-gaudi_add_module(UniqueIDGenSvc
-    SOURCES
-      src/UniqueIDGenSvc.cpp
-    LINK
-      Gaudi::GaudiAlgLib
-)
-
-target_include_directories(UniqueIDGenSvc PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
-  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-
-install(TARGETS k4FWCore k4FWCorePlugins UniqueIDGenSvc
+install(TARGETS k4FWCore k4FWCorePlugins
   EXPORT k4FWCoreTargets
   RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT bin
   LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT shlib

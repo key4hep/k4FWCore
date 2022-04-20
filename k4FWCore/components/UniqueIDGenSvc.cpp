@@ -1,4 +1,4 @@
-#include "k4FWCore/UniqueIDGenSvc.h"
+#include "UniqueIDGenSvc.h"
 
 DECLARE_COMPONENT( UniqueIDGenSvc )
 

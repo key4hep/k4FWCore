@@ -5,7 +5,7 @@
 #include "GaudiAlg/GaudiAlgorithm.h"
 
 
-#include <k4FWCore/IUniqueIDGenSvc.h>
+#include "k4Interface/IUniqueIDGenSvc.h"
 
 class TestUniqueIDGenSvc : public GaudiAlgorithm {
 public:

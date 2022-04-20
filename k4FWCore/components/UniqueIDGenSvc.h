@@ -5,7 +5,7 @@
 #include <cstdint>
 
 #include <GaudiKernel/Service.h>
-#include "k4FWCore/IUniqueIDGenSvc.h"
+#include "k4Interface/IUniqueIDGenSvc.h"
 
 class UniqueIDGenSvc : public extends<Service, IUniqueIDGenSvc> {
 public:
