@@ -10,7 +10,7 @@
 
 /** @class UniqueIDGenSvc
  *  Generate a random, unique*, reproducible number using
- *  event number, event run, and algorithm name.
+ *  event number, event run, algorithm name, and global seed.
  *  To be used as ID across events and algorithms.
  *
  */
@@ -18,7 +18,7 @@ class UniqueIDGenSvc : public extends<Service, IUniqueIDGenSvc> {
 public:
   UniqueIDGenSvc(const std::string& name, ISvcLocator* svcLoc);
   StatusCode initialize() override;
-  size_t getUniqueID(uint32_t evt_num, uint32_t run_num, std::string name) const override;
+  size_t getUniqueID(int64_t seed, uint32_t evt_num, uint32_t run_num, std::string name) const override;
 };
 
 #endif

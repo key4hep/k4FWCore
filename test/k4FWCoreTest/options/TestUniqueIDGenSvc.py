@@ -1,5 +1,10 @@
 from Gaudi.Configuration import *
 
+from Configurables import HepRndm__Engine_CLHEP__RanluxEngine_ as RndmEngine
+rndmengine = RndmEngine('RndmGenSvc.Engine')
+rndmengine.SetSingleton = True
+rndmengine.Seeds = [ 4072012 ]
+
 from Configurables import ApplicationMgr
 ApplicationMgr().EvtSel = "NONE"
 ApplicationMgr().EvtMax = 5
