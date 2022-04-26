@@ -19,5 +19,3 @@ ApplicationMgr( TopAlg=[producer, out],
                 OutputLevel=INFO,
                 StopOnSignal=True,
                 )
-
-
