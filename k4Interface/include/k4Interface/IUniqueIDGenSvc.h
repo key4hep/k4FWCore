@@ -19,7 +19,7 @@
 struct GAUDI_API IUniqueIDGenSvc : extend_interfaces<IInterface> {
   DeclareInterfaceID(IUniqueIDGenSvc, 2, 0);
   virtual size_t getUniqueID(
-    int64_t seed, uint32_t evt_num, uint32_t run_num, std::string name) const = 0;
+    uint32_t evt_num, uint32_t run_num, std::string name) const = 0;
 };
 
 #endif
