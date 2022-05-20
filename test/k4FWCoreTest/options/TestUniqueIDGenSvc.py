@@ -1,5 +1,8 @@
 from Gaudi.Configuration import *
 
+from Configurables import UniqueIDGenSvc
+UniqueIDGenSvc().Seed = 987
+
 from Configurables import ApplicationMgr
 ApplicationMgr().EvtSel = "NONE"
 ApplicationMgr().EvtMax = 5
