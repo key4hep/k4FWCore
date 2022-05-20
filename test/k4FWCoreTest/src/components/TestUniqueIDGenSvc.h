@@ -3,7 +3,6 @@
 
 // GAUDI
 #include <GaudiAlg/GaudiAlgorithm.h>
-#include <GaudiKernel/IRndmEngine.h>
 
 #include "k4Interface/IUniqueIDGenSvc.h"
 

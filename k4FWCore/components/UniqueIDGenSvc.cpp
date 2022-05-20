@@ -15,7 +15,7 @@ const size_t bits64 = std::numeric_limits<uint64_t>::digits;
 const size_t bitsSizeT = std::numeric_limits<size_t>::digits;
 
 size_t UniqueIDGenSvc::getUniqueID(
-  uint32_t evt_num, uint32_t run_num, std::string name) const
+  uint32_t evt_num, uint32_t run_num, const std::string& name) const
 {
   std::bitset<bits64> seed_bits(this->m_seed);
   std::bitset<bits32> event_num_bits(evt_num), run_num_bits(run_num);
