@@ -9,9 +9,9 @@
 
 
 /** @class UniqueIDGenSvc
- *  Generate a random, unique*, reproducible number using
- *  event number, event run, algorithm name, and global seed.
- *  To be used as ID across events and algorithms.
+ *  Generate unique, reproducible numbers using
+ *  event number, run number, algorithm name, and global seed.
+ *  To be used as reproducible per event seeds for random number generators used inside algorithms.
  *
  */
 class UniqueIDGenSvc : public extends<Service, IUniqueIDGenSvc> {
