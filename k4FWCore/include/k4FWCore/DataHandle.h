@@ -139,13 +139,11 @@ const T* DataHandle<T>::get() {
       }
     }
     if (LIKELY(m_isGoodType)) {
-      DataObjectHandle<DataWrapper<T>>::setRead();
       return static_cast<DataWrapper<T>*>(dataObjectp)->getData();
     } else if (m_isCollection) {
       // The reader does not know the specific type of the collection. So we need a reinterpret_cast if the handle was
       // created by the reader.
       DataWrapper<podio::CollectionBase>* tmp = static_cast<DataWrapper<podio::CollectionBase>*>(dataObjectp);
-      DataObjectHandle<DataWrapper<T>>::setRead();
       return reinterpret_cast<const T*>(tmp->collectionBase());
     } else {
       std::string errorMsg("The type provided for " + DataObjectHandle<DataWrapper<T>>::pythonRepr() +
