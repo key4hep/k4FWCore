@@ -9,9 +9,9 @@ jobs:
       fail-fast: false
       matrix:
         cvmfs_base: ['sft.cern.ch/lcg/views']
-        ENVIRONMENT: ['LCG_99/x86_64-centos7-gcc8-opt',
+        ENVIRONMENT: ['LCG_102rc1/x86_64-centos7-gcc11-opt',
                       'dev3/latest/x86_64-centos7-gcc10-opt',
-                      'dev4/latest/x86_64-centos7-clang11-opt']
+                      ]
         include:
         - cvmfs_base: 'sw.hsf.org'
           ENVIRONMENT: 'key4hep'
