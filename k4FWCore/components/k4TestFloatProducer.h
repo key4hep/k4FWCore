@@ -5,7 +5,7 @@
 #include "GaudiAlg/GaudiAlgorithm.h"
 
 /***
- * Simple test algorithm which outputs a single float each event 
+ * Simple test algorithm which outputs a single float each event
  * The value of the float can be set in the options,
  * using the FloatValue property.
  *

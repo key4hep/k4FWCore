@@ -42,7 +42,7 @@ StatusCode k4FWCoreTest_CreateExampleEventData::execute() {
   auto particle = particles->create();
 
   auto& p4 = particle.momentum();
-  p4.x = m_magicNumberOffset + 5; 
+  p4.x = m_magicNumberOffset + 5;
   p4.y = m_magicNumberOffset + 6;
   p4.z = m_magicNumberOffset + 7;
   particle.setMass(m_magicNumberOffset + 8);
@@ -62,9 +62,9 @@ StatusCode k4FWCoreTest_CreateExampleEventData::execute() {
   track.setType(1);
   track.setChi2(2.1);
   track.setNdf(3);
-  track.setDEdx(4.1); 
-  track.setDEdxError(5.1); 
-  track.setRadiusOfInnermostHit(6.1); 
+  track.setDEdx(4.1);
+  track.setDEdxError(5.1);
+  track.setRadiusOfInnermostHit(6.1);
   // set vectormembers
   track.addToSubDetectorHitNumbers(1);
   track.addToSubDetectorHitNumbers(4);

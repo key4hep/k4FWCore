@@ -102,7 +102,7 @@ void PodioOutput::createBranches(const std::vector<std::pair<std::string, podio:
       }
 
     }
-        
+
     const auto collID = m_podioDataSvc->getCollectionIDs()->collectionID(collName);
     // No check necessary, only registered collections possible
     auto coll = collNamePair.second;
@@ -158,7 +158,7 @@ StatusCode PodioOutput::finalize() {
     // sample output:
     // HepMCToEDMConverter.genparticles = "GenParticles";
     // Note that quotes are added to all property values,
-    // which leads to problems with ints, lists, dicts and bools. 
+    // which leads to problems with ints, lists, dicts and bools.
     // For theses types, the quotes must be removed in postprocessing.
     config_stream << std::get<0>(per_property) << " = \"" << std::get<1>(per_property) << "\";" << std::endl;
     config_data.push_back(config_stream.str());
@@ -201,7 +201,7 @@ StatusCode PodioOutput::finalize() {
   info() << "Data written to: " << m_filename.value();
   if (!m_filenameRemote.value().empty()) {
     TFile::Cp(m_filename.value().c_str(), m_filenameRemote.value().c_str(), false);
-    info() << " and copied to: " << m_filenameRemote.value() << endmsg; 
+    info() << " and copied to: " << m_filenameRemote.value() << endmsg;
   }
   return StatusCode::SUCCESS;
 }

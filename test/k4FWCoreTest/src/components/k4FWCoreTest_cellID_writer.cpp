@@ -3,7 +3,7 @@
 
 DECLARE_COMPONENT(k4FWCoreTest_cellID_writer)
 
-k4FWCoreTest_cellID_writer::k4FWCoreTest_cellID_writer(const std::string& aName, ISvcLocator* aSvcLoc) 
+k4FWCoreTest_cellID_writer::k4FWCoreTest_cellID_writer(const std::string& aName, ISvcLocator* aSvcLoc)
   : GaudiAlgorithm(aName, aSvcLoc), m_eventDataSvc("EventDataSvc", "k4FWCoreTest_cellID_writer") {;
   declareProperty("simtrackhits_w", m_simTrackerHitWriterHandle, "Dummy Hit collection Writer");
 }

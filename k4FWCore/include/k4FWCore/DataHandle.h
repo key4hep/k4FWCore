@@ -14,7 +14,7 @@
 /**
  * Specialisation of the Gaudi DataHandle
  * for use with podio collections.
- */ 
+ */
 template <typename T>
 class DataHandle : public DataObjectHandle<DataWrapper<T>> {
 
@@ -30,7 +30,7 @@ public:
   DataHandle(DataObjID& descriptor, Gaudi::DataHandle::Mode a, IDataHandleHolder* fatherAlg);
 
   DataHandle(const std::string& k, Gaudi::DataHandle::Mode a, IDataHandleHolder* fatherAlg);
-   
+
    ///Retrieve object from transient data store
   const T* get();
 
@@ -68,7 +68,7 @@ DataHandle<T>::~DataHandle() {
 template <typename T>
 DataHandle<T>::DataHandle(DataObjID& descriptor, Gaudi::DataHandle::Mode a, IDataHandleHolder* fatherAlg)
     : DataObjectHandle<DataWrapper<T>>(descriptor, a, fatherAlg), m_eds("EventDataSvc", "DataHandle") {
-      
+
 }
 /// The DataHandle::Writer constructor is used to create the corresponding branch in the output file
 template <typename T>
@@ -84,13 +84,13 @@ DataHandle<T>::DataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode
     if (std::is_convertible<T*,podio::CollectionBase*>::value) {
        // case 1: T is a podio collection
        // for this case creation of branches is still handled in PodioOutput
-       // (but could be moved here in the future) 
+       // (but could be moved here in the future)
     } else if constexpr (std::is_integral_v<T>) {
        // case 2: T is some integer type
        // the call signature for TTree Branch is different for primitive types
        // in particular, we pass the pointer, not the adress of the pointer
        // and have to append a char indicating type (see TTree documentation)
-       // therefore  space needs to be allocated for the integer 
+       // therefore  space needs to be allocated for the integer
        m_dataPtr = new T();
        TTree* tree = pds->eventDataTree();
        tree->Branch(descriptor.c_str(),  m_dataPtr, (descriptor + "/I").c_str());

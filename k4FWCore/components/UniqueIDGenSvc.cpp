@@ -2,7 +2,7 @@
 
 DECLARE_COMPONENT( UniqueIDGenSvc )
 
-UniqueIDGenSvc::UniqueIDGenSvc(const std::string& name, ISvcLocator* svcLoc) : 
+UniqueIDGenSvc::UniqueIDGenSvc(const std::string& name, ISvcLocator* svcLoc) :
   base_class(name, svcLoc) {}
 
 StatusCode UniqueIDGenSvc::initialize() {

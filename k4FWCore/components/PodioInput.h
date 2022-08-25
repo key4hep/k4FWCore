@@ -11,7 +11,7 @@
 // from k4FWCore:
 class PodioDataSvc;
 
-/** @class PodioInput 
+/** @class PodioInput
  *
  *  Class that allows to read ROOT files written with PodioOutput
  *

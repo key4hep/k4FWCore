@@ -27,7 +27,7 @@ StatusCode TestDataHandleUniquePtr::execute() {
   auto particle = coll->create();
 
   auto& p4 = particle.momentum();
-  p4.x = 5; 
+  p4.x = 5;
   p4.y = 6;
   p4.z = 7;
   particle.setMass(8);

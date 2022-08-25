@@ -11,7 +11,7 @@
 
 
 
-// datamodel 
+// datamodel
 namespace edm4hep {
 class MCParticleCollection;
 class SimTrackerHitCollection;

@@ -44,7 +44,7 @@ StatusCode k4FWCoreTest_AlgorithmWithTFile::execute() {
   auto particle = particles->create();
 
   auto& p4 = particle.momentum();
-  p4.x = m_magicNumberOffset + 5; 
+  p4.x = m_magicNumberOffset + 5;
   p4.y = m_magicNumberOffset + 6;
   p4.z = m_magicNumberOffset + 7;
   particle.setMass(m_magicNumberOffset + 8);

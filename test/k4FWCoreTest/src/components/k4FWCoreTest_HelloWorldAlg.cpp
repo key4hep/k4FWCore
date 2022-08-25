@@ -17,12 +17,12 @@ StatusCode k4FWCoreTest_HelloWorldAlg::initialize() {
 StatusCode k4FWCoreTest_HelloWorldAlg::execute() {
   info() << endmsg;
   info() << endmsg;
-  info() << theMessage << endmsg;  
+  info() << theMessage << endmsg;
   info() << endmsg;
   info() << endmsg;
   return StatusCode::SUCCESS;
 }
 
 StatusCode k4FWCoreTest_HelloWorldAlg::finalize() {
-  return GaudiAlgorithm::finalize(); 
+  return GaudiAlgorithm::finalize();
 }

@@ -10,7 +10,7 @@
 
 
 
-// datamodel 
+// datamodel
 namespace edm4hep {
 class MCParticleCollection;
 class SimTrackerHitCollection;
@@ -23,7 +23,7 @@ class TrackCollection;
  *  Lightweight producer for edm data for tests that do not depend on the actual
  *  data content and therefore do not need the simulation machinery.
  *  Fills data members with increasing integers, together with some offset so that different
- *  events can be easily distinguished. 
+ *  events can be easily distinguished.
  *
  */
 class k4FWCoreTest_CreateExampleEventData : public GaudiAlgorithm {

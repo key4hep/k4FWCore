@@ -10,7 +10,7 @@
 
 
 
-// datamodel 
+// datamodel
 namespace edm4hep {
 class MCParticleCollection;
 }

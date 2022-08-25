@@ -24,7 +24,7 @@ public:
   virtual StatusCode finalize() final;
 
 private:
-  // member variable 
+  // member variable
   Gaudi::Property<std::string> theMessage{this, "PerEventPrintMessage", "Hello ", "The message to printed for each Event"};
 };
 
