@@ -19,7 +19,6 @@ class PodioDataSvc;
  */
 
 class PodioInput : public GaudiAlgorithm {
-
 public:
   /// Constructor.
   PodioInput(const std::string& name, ISvcLocator* svcLoc);

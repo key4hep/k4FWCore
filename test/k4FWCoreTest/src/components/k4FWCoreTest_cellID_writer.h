@@ -5,8 +5,8 @@
 #include "GaudiAlg/GaudiAlgorithm.h"
 
 // edm4hep
-#include "k4FWCore/DataHandle.h"
 #include "TTree.h"
+#include "k4FWCore/DataHandle.h"
 
 // datamodel
 #include "edm4hep/SimTrackerHitCollection.h"
@@ -34,11 +34,11 @@ public:
   virtual StatusCode finalize() final;
 
 private:
-  PodioDataSvc* m_podioDataSvc;
+  PodioDataSvc*                   m_podioDataSvc;
   ServiceHandle<IDataProviderSvc> m_eventDataSvc;
 
   /// Handle for the SimTrackerHits to be written
-  DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitWriterHandle{"SimTrackerHits", Gaudi::DataHandle::Writer, this};
-
+  DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitWriterHandle{"SimTrackerHits", Gaudi::DataHandle::Writer,
+                                                                           this};
 };
 #endif /* K4FWCORE_K4FWCORETEST_CELLID_WRITER */

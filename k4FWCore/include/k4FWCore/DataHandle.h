@@ -15,9 +15,7 @@
  * Specialisation of the Gaudi DataHandle
  * for use with podio collections.
  */
-template <typename T>
-class DataHandle : public DataObjectHandle<DataWrapper<T>> {
-
+template <typename T> class DataHandle : public DataObjectHandle<DataWrapper<T>> {
 public:
   friend class Algorithm;
   friend class AlgTool;
@@ -31,7 +29,7 @@ public:
 
   DataHandle(const std::string& k, Gaudi::DataHandle::Mode a, IDataHandleHolder* fatherAlg);
 
-   ///Retrieve object from transient data store
+  ///Retrieve object from transient data store
   const T* get();
 
   /**
@@ -39,7 +37,7 @@ public:
    */
   void put(T* object);
 
-  T* put( std::unique_ptr<T> object );
+  T* put(std::unique_ptr<T> object);
 
   ///Retrieve CellID string from the Collection metadata
   const std::string getCollMetadataCellID(const unsigned int id);
@@ -51,13 +49,12 @@ public:
 
 private:
   ServiceHandle<IDataProviderSvc> m_eds;
-  bool m_isGoodType{false};
-  bool m_isCollection{false};
-  T* m_dataPtr;
+  bool                            m_isGoodType{false};
+  bool                            m_isCollection{false};
+  T*                              m_dataPtr;
 };
 
-template <typename T>
-DataHandle<T>::~DataHandle() {
+template <typename T> DataHandle<T>::~DataHandle() {
   // release memory allocated for primitive types (see comments in ctor)
   if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
     delete m_dataPtr;
@@ -67,49 +64,46 @@ DataHandle<T>::~DataHandle() {
 //---------------------------------------------------------------------------
 template <typename T>
 DataHandle<T>::DataHandle(DataObjID& descriptor, Gaudi::DataHandle::Mode a, IDataHandleHolder* fatherAlg)
-    : DataObjectHandle<DataWrapper<T>>(descriptor, a, fatherAlg), m_eds("EventDataSvc", "DataHandle") {
-
-}
+    : DataObjectHandle<DataWrapper<T>>(descriptor, a, fatherAlg), m_eds("EventDataSvc", "DataHandle") {}
 /// The DataHandle::Writer constructor is used to create the corresponding branch in the output file
 template <typename T>
 DataHandle<T>::DataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode a, IDataHandleHolder* fatherAlg)
     : DataObjectHandle<DataWrapper<T>>(descriptor, a, fatherAlg), m_eds("EventDataSvc", "DataHandle") {
-
   if (a == Gaudi::DataHandle::Writer) {
-    StatusCode sc = m_eds.retrieve();
+    StatusCode    sc = m_eds.retrieve();
     PodioDataSvc* pds;
-    pds = dynamic_cast<PodioDataSvc*>( m_eds.get());
+    pds       = dynamic_cast<PodioDataSvc*>(m_eds.get());
     m_dataPtr = nullptr;
-  if (nullptr != pds) {
-    if (std::is_convertible<T*,podio::CollectionBase*>::value) {
-       // case 1: T is a podio collection
-       // for this case creation of branches is still handled in PodioOutput
-       // (but could be moved here in the future)
-    } else if constexpr (std::is_integral_v<T>) {
-       // case 2: T is some integer type
-       // the call signature for TTree Branch is different for primitive types
-       // in particular, we pass the pointer, not the adress of the pointer
-       // and have to append a char indicating type (see TTree documentation)
-       // therefore  space needs to be allocated for the integer
-       m_dataPtr = new T();
-       TTree* tree = pds->eventDataTree();
-       tree->Branch(descriptor.c_str(),  m_dataPtr, (descriptor + "/I").c_str());
-    } else if constexpr (std::is_floating_point_v<T>) {
-       // case 3: T is some floating point type
-       // similar case 2, distinguish floats and doubles by size
-       m_dataPtr = new T();
-       TTree* tree = pds->eventDataTree();
-       if (sizeof(T) > 4) {
-         tree->Branch(descriptor.c_str(),  m_dataPtr, (descriptor + "/D").c_str());
-       } else {
-         tree->Branch(descriptor.c_str(),  m_dataPtr, (descriptor + "/F").c_str());
-       }
-    } else {
-       // case 4: T is any other type (for which exists a root dictionary,
-       // otherwise i/o will fail)
-       // this includes std::vectors of ints, floats
-       TTree* tree = pds->eventDataTree();
-       tree->Branch(descriptor.c_str(),  &m_dataPtr);
+    if (nullptr != pds) {
+      if (std::is_convertible<T*, podio::CollectionBase*>::value) {
+        // case 1: T is a podio collection
+        // for this case creation of branches is still handled in PodioOutput
+        // (but could be moved here in the future)
+      } else if constexpr (std::is_integral_v<T>) {
+        // case 2: T is some integer type
+        // the call signature for TTree Branch is different for primitive types
+        // in particular, we pass the pointer, not the adress of the pointer
+        // and have to append a char indicating type (see TTree documentation)
+        // therefore  space needs to be allocated for the integer
+        m_dataPtr   = new T();
+        TTree* tree = pds->eventDataTree();
+        tree->Branch(descriptor.c_str(), m_dataPtr, (descriptor + "/I").c_str());
+      } else if constexpr (std::is_floating_point_v<T>) {
+        // case 3: T is some floating point type
+        // similar case 2, distinguish floats and doubles by size
+        m_dataPtr   = new T();
+        TTree* tree = pds->eventDataTree();
+        if (sizeof(T) > 4) {
+          tree->Branch(descriptor.c_str(), m_dataPtr, (descriptor + "/D").c_str());
+        } else {
+          tree->Branch(descriptor.c_str(), m_dataPtr, (descriptor + "/F").c_str());
+        }
+      } else {
+        // case 4: T is any other type (for which exists a root dictionary,
+        // otherwise i/o will fail)
+        // this includes std::vectors of ints, floats
+        TTree* tree = pds->eventDataTree();
+        tree->Branch(descriptor.c_str(), &m_dataPtr);
       }
     }
   }
@@ -122,10 +116,9 @@ DataHandle<T>::DataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode
  * If this is not the first time we cast and the cast worked, just use the
  * static cast: we do not need the checks of the dynamic cast for every access!
  */
-template <typename T>
-const T* DataHandle<T>::get() {
+template <typename T> const T* DataHandle<T>::get() {
   DataObject* dataObjectp = nullptr;
-  auto sc = m_eds->retrieveObject(DataObjectHandle<DataWrapper<T>>::fullKey().key(), dataObjectp);
+  auto        sc          = m_eds->retrieveObject(DataObjectHandle<DataWrapper<T>>::fullKey().key(), dataObjectp);
 
   if (LIKELY(sc.isSuccess())) {
     if (UNLIKELY(!m_isGoodType && !m_isCollection)) {
@@ -156,8 +149,7 @@ const T* DataHandle<T>::get() {
 }
 
 //---------------------------------------------------------------------------
-template <typename T>
-void DataHandle<T>::put(T* objectp) {
+template <typename T> void DataHandle<T>::put(T* objectp) {
   std::unique_ptr<DataWrapper<T>> dw = std::make_unique<DataWrapper<T>>();
   // in case T is of primitive type, we must not change the pointer address
   // (see comments in ctor) instead copy the value of T into allocated memory
@@ -168,38 +160,30 @@ void DataHandle<T>::put(T* objectp) {
   }
   dw->setData(objectp);
   DataObjectHandle<DataWrapper<T>>::put(std::move(dw));
-
 }
 
-
 //---------------------------------------------------------------------------
-template <typename T>
-T* DataHandle<T>::put( std::unique_ptr<T> objectp ){
+template <typename T> T* DataHandle<T>::put(std::unique_ptr<T> objectp) {
   put(objectp.get());
   return objectp.release();
 }
-
 
 //---------------------------------------------------------------------------
 // Get the CellID encoded String from the Metadata of the collection
 // using Podio Data Service
 // Give collection ID
-template <typename T>
-const std::string DataHandle<T>::getCollMetadataCellID(
-  const unsigned int id)
-{
+template <typename T> const std::string DataHandle<T>::getCollMetadataCellID(const unsigned int id) {
   PodioDataSvc* pds;
-  pds = dynamic_cast<PodioDataSvc*>( m_eds.get());
+  pds = dynamic_cast<PodioDataSvc*>(m_eds.get());
 
   if (pds != nullptr) {
-    auto colMD = pds->getProvider().getCollectionMetaData( id );
-    return colMD.getStringVal("CellIDEncodingString") ;
+    auto colMD = pds->getProvider().getCollectionMetaData(id);
+    return colMD.getStringVal("CellIDEncodingString");
   } else {
     std::string msg("Could not get Podio Data Service.");
     throw GaudiException(msg, "Failed to get Collection Metadata.", StatusCode::FAILURE);
   }
 }
-
 
 //---------------------------------------------------------------------------
 /**
@@ -207,8 +191,7 @@ const std::string DataHandle<T>::getCollMetadataCellID(
  * pointer to the data. Call this function if you create a collection and
  * want to save it.
  */
-template <typename T>
-T* DataHandle<T>::createAndPut() {
+template <typename T> T* DataHandle<T>::createAndPut() {
   T* objectp = new T();
   this->put(objectp);
   return objectp;
@@ -216,14 +199,13 @@ T* DataHandle<T>::createAndPut() {
 
 // temporary to allow property declaration
 namespace Gaudi {
-template <class T>
-class Property<::DataHandle<T>&> : public ::DataHandleProperty {
-public:
-  Property(const std::string& name, ::DataHandle<T>& value) : ::DataHandleProperty(name, value) {}
+  template <class T> class Property<::DataHandle<T>&> : public ::DataHandleProperty {
+  public:
+    Property(const std::string& name, ::DataHandle<T>& value) : ::DataHandleProperty(name, value) {}
 
-  /// virtual Destructor
-  virtual ~Property() {}
-};
-}
+    /// virtual Destructor
+    virtual ~Property() {}
+  };
+}  // namespace Gaudi
 
 #endif

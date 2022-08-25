@@ -5,8 +5,8 @@
 #include "GaudiAlg/GaudiAlgorithm.h"
 
 // edm4hep
-#include "k4FWCore/DataHandle.h"
 #include "TTree.h"
+#include "k4FWCore/DataHandle.h"
 
 // datamodel
 #include "edm4hep/SimTrackerHitCollection.h"
@@ -33,6 +33,7 @@ public:
 
 private:
   /// Handle for the SimTrackerHits to be read
-   DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitReaderHandle{"SimTrackerHits", Gaudi::DataHandle::Reader, this};
+  DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitReaderHandle{"SimTrackerHits", Gaudi::DataHandle::Reader,
+                                                                           this};
 };
 #endif /* K4FWCORE_K4FWCORETEST_CELLID */

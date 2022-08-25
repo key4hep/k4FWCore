@@ -1,10 +1,11 @@
 #include "k4FWCoreTest_cellID_reader.h"
 #include "k4FWCoreTest_cellID_writer.h"
 
-
 DECLARE_COMPONENT(k4FWCoreTest_cellID_reader)
 
-k4FWCoreTest_cellID_reader::k4FWCoreTest_cellID_reader(const std::string& aName, ISvcLocator* aSvcLoc) : GaudiAlgorithm(aName, aSvcLoc) {;
+k4FWCoreTest_cellID_reader::k4FWCoreTest_cellID_reader(const std::string& aName, ISvcLocator* aSvcLoc)
+    : GaudiAlgorithm(aName, aSvcLoc) {
+  ;
   declareProperty("simtrackhits_r", m_simTrackerHitReaderHandle, "Dummy Hit collection Reader");
 }
 
@@ -18,7 +19,6 @@ StatusCode k4FWCoreTest_cellID_reader::initialize() {
 }
 
 StatusCode k4FWCoreTest_cellID_reader::execute() {
-
   const auto simtrackerhits_coll = m_simTrackerHitReaderHandle.get();
 
   auto       collID    = simtrackerhits_coll->getID();

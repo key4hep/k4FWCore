@@ -1,8 +1,8 @@
 #ifndef K4FWCORE_TESTFLOATPRODUCER_H
 #define K4FWCORE_TESTFLOATPRODUCER_H
 
-#include "k4FWCore/DataHandle.h"
 #include "GaudiAlg/GaudiAlgorithm.h"
+#include "k4FWCore/DataHandle.h"
 
 /***
  * Simple test algorithm which outputs a single float each event
@@ -11,7 +11,6 @@
  *
  */
 class k4TestFloatProducer : public GaudiAlgorithm {
-
 public:
   k4TestFloatProducer(const std::string& name, ISvcLocator* svcLoc);
 

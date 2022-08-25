@@ -5,7 +5,7 @@
 #include "GaudiKernel/IAlgTool.h"
 
 namespace edm4hep {
-class CalorimeterHit;
+  class CalorimeterHit;
 }
 /** @class ITopoClusterInputTool RecInterface/RecInterface/ITopoClusterInput.h ITopoClusterInputTool.h
  *
@@ -19,6 +19,6 @@ public:
   DeclareInterfaceID(ITopoClusterInputTool, 1, 0);
 
   virtual StatusCode cellIDMap(std::map<uint64_t, double>& aCells) = 0;
- };
+};
 
 #endif /* RECINTERFACE_ITOPOCLUSTERINPUTTOOL_H */
