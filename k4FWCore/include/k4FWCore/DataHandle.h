@@ -193,7 +193,7 @@ const std::string DataHandle<T>::getCollMetadataCellID(
 
   if (pds != nullptr) {
     auto colMD = pds->getProvider().getCollectionMetaData( id );
-    return colMD.getStringVal("CellIDEncodingString") ;
+    return colMD.getValue<std::string>("CellIDEncodingString") ;
   } else {
     std::string msg("Could not get Podio Data Service.");
     throw GaudiException(msg, "Failed to get Collection Metadata.", StatusCode::FAILURE);
