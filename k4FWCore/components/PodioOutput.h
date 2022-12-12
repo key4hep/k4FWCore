@@ -1,8 +1,8 @@
 #ifndef FWCORE_PODIOOUTPUT_H
 #define FWCORE_PODIOOUTPUT_H
 
-#include "k4FWCore/KeepDropSwitch.h"
 #include "GaudiAlg/GaudiAlgorithm.h"
+#include "k4FWCore/KeepDropSwitch.h"
 #include "podio/CollectionBase.h"
 
 #include "TTree.h"
@@ -14,7 +14,6 @@ class TFile;
 class PodioDataSvc;
 
 class PodioOutput : public GaudiAlgorithm {
-
 public:
   /// Constructor.
   PodioOutput(const std::string& name, ISvcLocator* svcLoc);
@@ -37,8 +36,8 @@ private:
   /// Commands which output is to be kept
   Gaudi::Property<std::vector<std::string>> m_outputCommands{
       this, "outputCommands", {"keep *"}, "A set of commands to declare which collections to keep or drop."};
-  Gaudi::Property<std::string> m_filenameRemote{
-      this, "remoteFilename", "", "An optional file path to copy the outputfile to."};
+  Gaudi::Property<std::string> m_filenameRemote{this, "remoteFilename", "",
+                                                "An optional file path to copy the outputfile to."};
   /// Switch for keeping or dropping outputs
   KeepDropSwitch m_switch;
   /// Needed for collection ID table

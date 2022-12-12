@@ -2,7 +2,7 @@ from Gaudi.Configuration import *
 
 from Configurables import ApplicationMgr
 ApplicationMgr().EvtSel = "NONE"
-ApplicationMgr().EvtMax = 1           
+ApplicationMgr().EvtMax = 1
 ApplicationMgr().OutputLevel = INFO
 
 from Configurables import k4FWCoreTest_HelloWorldAlg

@@ -7,7 +7,7 @@
 #include <unordered_map>
 
 namespace edm4hep {
-class CalorimeterHit;
+  class CalorimeterHit;
 }
 /** @class ITopoClusterInputTool RecInterface/RecInterface/ITopoClusterInput.h ITopoClusterInputTool.h
  *
@@ -19,6 +19,7 @@ class CalorimeterHit;
 class ITopoClusterInputTool : virtual public IAlgTool {
 public:
   DeclareInterfaceID(ITopoClusterInputTool, 1, 0);
+
 
   virtual StatusCode cellIDMap(std::unordered_map<uint64_t, double>& aCells) = 0;
  };

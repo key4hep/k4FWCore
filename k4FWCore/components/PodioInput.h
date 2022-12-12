@@ -11,7 +11,7 @@
 // from k4FWCore:
 class PodioDataSvc;
 
-/** @class PodioInput 
+/** @class PodioInput
  *
  *  Class that allows to read ROOT files written with PodioOutput
  *
@@ -19,7 +19,6 @@ class PodioDataSvc;
  */
 
 class PodioInput : public GaudiAlgorithm {
-
 public:
   /// Constructor.
   PodioInput(const std::string& name, ISvcLocator* svcLoc);

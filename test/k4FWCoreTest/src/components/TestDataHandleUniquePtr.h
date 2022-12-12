@@ -5,14 +5,12 @@
 #include "GaudiAlg/GaudiAlgorithm.h"
 
 // edm4hep
-#include "k4FWCore/DataHandle.h"
 #include "TTree.h"
+#include "k4FWCore/DataHandle.h"
 
-
-
-// datamodel 
+// datamodel
 namespace edm4hep {
-class MCParticleCollection;
+  class MCParticleCollection;
 }
 
 class TestDataHandleUniquePtr : public GaudiAlgorithm {

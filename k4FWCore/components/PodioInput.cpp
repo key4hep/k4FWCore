@@ -11,11 +11,13 @@ DECLARE_COMPONENT(PodioInput)
 PodioInput::PodioInput(const std::string& name, ISvcLocator* svcLoc) : GaudiAlgorithm(name, svcLoc) {}
 
 StatusCode PodioInput::initialize() {
-  if (GaudiAlgorithm::initialize().isFailure()) return StatusCode::FAILURE;
+  if (GaudiAlgorithm::initialize().isFailure())
+    return StatusCode::FAILURE;
 
   // check whether we have the PodioEvtSvc active
   m_podioDataSvc = dynamic_cast<PodioDataSvc*>(evtSvc().get());
-  if (nullptr == m_podioDataSvc) return StatusCode::FAILURE;
+  if (nullptr == m_podioDataSvc)
+    return StatusCode::FAILURE;
 
   auto idTable = m_podioDataSvc->getCollectionIDs();
   for (auto& name : m_collectionNames) {
@@ -45,6 +47,7 @@ StatusCode PodioInput::execute() {
 }
 
 StatusCode PodioInput::finalize() {
-  if (GaudiAlgorithm::finalize().isFailure()) return StatusCode::FAILURE;
+  if (GaudiAlgorithm::finalize().isFailure())
+    return StatusCode::FAILURE;
   return StatusCode::SUCCESS;
 }

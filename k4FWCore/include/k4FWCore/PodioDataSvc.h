@@ -37,12 +37,13 @@ public:
   using DataSvc::registerObject;
   /// Overriding standard behaviour of evt service
   /// Register object with the data store.
-  virtual StatusCode registerObject(std::string_view parentPath, std::string_view fullPath, DataObject* pObject) override final;
+  virtual StatusCode registerObject(std::string_view parentPath, std::string_view fullPath,
+                                    DataObject* pObject) override final;
 
   StatusCode readCollection(const std::string& collectionName, int collectionID);
 
-  virtual const CollRegistry& getCollections() const { return m_collections; }
-  podio::EventStore& getProvider() { return m_provider; }
+  virtual const CollRegistry&       getCollections() const { return m_collections; }
+  podio::EventStore&                getProvider() { return m_provider; }
   virtual podio::CollectionIDTable* getCollectionIDs() { return m_collectionIDs; }
 
   /// Set the collection IDs (if reading a file)
@@ -50,12 +51,9 @@ public:
   /// Resets caches of reader and event store, increases event counter
   void endOfRead();
 
-
-  TTree* eventDataTree() {return m_eventDataTree;}
-
+  TTree* eventDataTree() { return m_eventDataTree; }
 
 private:
-
   // eventDataTree
   TTree* m_eventDataTree;
   /// PODIO reader for ROOT files
@@ -67,17 +65,16 @@ private:
   /// Number of events in the file / to process
   int m_eventMax{-1};
 
-
   SmartIF<IConversionSvc> m_cnvSvc;
 
   // special members for podio handling
   std::vector<std::pair<std::string, podio::CollectionBase*>> m_collections;
-  podio::CollectionIDTable* m_collectionIDs;
+  podio::CollectionIDTable*                                   m_collectionIDs;
 
 protected:
   /// ROOT file name the input is read from. Set by option filename
   std::vector<std::string> m_filenames;
-  std::string m_filename;
+  std::string              m_filename;
   /// Jump to nth events at the beginning. Set by option FirstEventEntry
   /// This option is helpful when we want to debug an event in the middle of a file
   unsigned m_1stEvtEntry{0};

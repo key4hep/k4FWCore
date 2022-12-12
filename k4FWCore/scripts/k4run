@@ -24,7 +24,7 @@ if __name__ == "__main__":
         os.environ['LC_ALL'] = 'C'
 
     # run all the configuration files
-    # we generate arguments from them, so we need to load them 
+    # we generate arguments from them, so we need to load them
     # before parsing the arguments
     # to avoid parsing them twice, just assume the positional arguments
     # come first and as soon as we encounter "-" we stop
@@ -99,7 +99,7 @@ if __name__ == "__main__":
                         # deduce type from first item of the list
                         proptype = type(propvalue[0])
                       propnargs = "+"
-                      
+
                     # add the argument twice, once as "--PodioOutput.filename"
                     # and once as "--filename.PodioOutput"
                     propName = conf.name() + '.' + prop
