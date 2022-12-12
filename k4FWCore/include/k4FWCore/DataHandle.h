@@ -177,6 +177,7 @@ template <typename T> const std::string DataHandle<T>::getCollMetadataCellID(con
   pds = dynamic_cast<PodioDataSvc*>(m_eds.get());
 
   if (pds != nullptr) {
+    auto colMD = pds->getProvider().getCollectionMetaData(id);
     return colMD.getValue<std::string>("CellIDEncodingString");
   } else {
     std::string msg("Could not get Podio Data Service.");
