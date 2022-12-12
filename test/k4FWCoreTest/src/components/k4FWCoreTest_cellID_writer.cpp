@@ -1,10 +1,10 @@
 #include "k4FWCoreTest_cellID_writer.h"
 
-
 DECLARE_COMPONENT(k4FWCoreTest_cellID_writer)
 
-k4FWCoreTest_cellID_writer::k4FWCoreTest_cellID_writer(const std::string& aName, ISvcLocator* aSvcLoc) 
-  : GaudiAlgorithm(aName, aSvcLoc), m_eventDataSvc("EventDataSvc", "k4FWCoreTest_cellID_writer") {;
+k4FWCoreTest_cellID_writer::k4FWCoreTest_cellID_writer(const std::string& aName, ISvcLocator* aSvcLoc)
+    : GaudiAlgorithm(aName, aSvcLoc), m_eventDataSvc("EventDataSvc", "k4FWCoreTest_cellID_writer") {
+  ;
   declareProperty("simtrackhits_w", m_simTrackerHitWriterHandle, "Dummy Hit collection Writer");
 }
 
@@ -15,8 +15,8 @@ StatusCode k4FWCoreTest_cellID_writer::initialize() {
     return StatusCode::FAILURE;
   }
 
-  StatusCode sc = m_eventDataSvc.retrieve();
-  m_podioDataSvc = dynamic_cast<PodioDataSvc*>( m_eventDataSvc.get());
+  StatusCode sc  = m_eventDataSvc.retrieve();
+  m_podioDataSvc = dynamic_cast<PodioDataSvc*>(m_eventDataSvc.get());
 
   if (sc == StatusCode::FAILURE) {
     error() << "Error retrieving Event Data Service" << endmsg;
@@ -27,9 +27,8 @@ StatusCode k4FWCoreTest_cellID_writer::initialize() {
 }
 
 StatusCode k4FWCoreTest_cellID_writer::execute() {
-
   edm4hep::SimTrackerHitCollection* simTrackerHits = m_simTrackerHitWriterHandle.createAndPut();
-  auto hit = simTrackerHits->create();
+  auto                              hit            = simTrackerHits->create();
   hit.setPosition({3, 4, 5});
 
   auto& collmd = m_podioDataSvc->getProvider().getCollectionMetaData(simTrackerHits->getID());

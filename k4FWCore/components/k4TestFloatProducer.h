@@ -1,17 +1,16 @@
 #ifndef K4FWCORE_TESTFLOATPRODUCER_H
 #define K4FWCORE_TESTFLOATPRODUCER_H
 
-#include "k4FWCore/DataHandle.h"
 #include "GaudiAlg/GaudiAlgorithm.h"
+#include "k4FWCore/DataHandle.h"
 
 /***
- * Simple test algorithm which outputs a single float each event 
+ * Simple test algorithm which outputs a single float each event
  * The value of the float can be set in the options,
  * using the FloatValue property.
  *
  */
 class k4TestFloatProducer : public GaudiAlgorithm {
-
 public:
   k4TestFloatProducer(const std::string& name, ISvcLocator* svcLoc);
 

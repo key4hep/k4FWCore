@@ -27,4 +27,4 @@ private:
   SmartIF<IUniqueIDGenSvc> m_service;
 };
 
-#endif // TEST_UNIQUEIDGENSVC_H 
+#endif  // TEST_UNIQUEIDGENSVC_H

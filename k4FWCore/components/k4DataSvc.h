@@ -5,7 +5,6 @@
 #include "k4FWCore/PodioDataSvc.h"
 
 class k4DataSvc : public PodioDataSvc {
-
 public:
   /// Standard Constructor
   k4DataSvc(const std::string& name, ISvcLocator* svc);

@@ -13,9 +13,9 @@ k4FWCore is a Gaudi package that  provides the PodioDataService, that allows to 
 Component wrapping the PodioDataService to handle PODIO types and collections.
 
 
-#### PodioInput 
+#### PodioInput
 
-Algorithm to read data from input file(s) on disk. 
+Algorithm to read data from input file(s) on disk.
 
 #### PodioOutput
 
@@ -23,7 +23,7 @@ Algorithm to write data to output file on disk.
 
 #### FWFloatProducer
 
-Algorithm with a simple float as output, for testing and adding parameters to jobs. 
+Algorithm with a simple float as output, for testing and adding parameters to jobs.
 
 
 ## Dependencies
@@ -36,7 +36,7 @@ Algorithm with a simple float as output, for testing and adding parameters to jo
 
 ## Installation and downstream usage.
 
-k4FWCore is a cmake project. After setting up the dependencies (use for example `source /cvmfs/sw.hsf.org/key4hep/setup.sh`) 
+k4FWCore is a cmake project. After setting up the dependencies (use for example `source /cvmfs/sw.hsf.org/key4hep/setup.sh`)
 
 
 ```

@@ -7,17 +7,15 @@
 
 #include "TTree.h"
 
-
 /// Service initialisation
 StatusCode PodioDataSvc::initialize() {
   // Nothing to do: just call base class initialisation
-  StatusCode status = DataSvc::initialize();
+  StatusCode   status  = DataSvc::initialize();
   ISvcLocator* svc_loc = serviceLocator();
-
 
   // Attach data loader facility
   m_cnvSvc = svc_loc->service("EventPersistencySvc");
-  status = setDataLoader(m_cnvSvc);
+  status   = setDataLoader(m_cnvSvc);
 
   if (m_filename != "") {
     m_filenames.push_back(m_filename);
@@ -33,9 +31,9 @@ StatusCode PodioDataSvc::initialize() {
       auto idTable = m_provider.getCollectionIDTable();
       setCollectionIDs(idTable);
 
-      if (m_1stEvtEntry != 0 ) {
-          m_reader.goToEvent(m_1stEvtEntry);
-          m_eventMax -= m_1stEvtEntry;
+      if (m_1stEvtEntry != 0) {
+        m_reader.goToEvent(m_1stEvtEntry);
+        m_eventMax -= m_1stEvtEntry;
       }
     }
   }
@@ -48,7 +46,7 @@ StatusCode PodioDataSvc::reinitialize() {
 }
 /// Service finalization
 StatusCode PodioDataSvc::finalize() {
-  m_cnvSvc = 0; // release
+  m_cnvSvc = 0;  // release
   DataSvc::finalize().ignore();
   return StatusCode::SUCCESS;
 }
@@ -89,9 +87,8 @@ void PodioDataSvc::setCollectionIDs(podio::CollectionIDTable* collectionIds) {
 /// Standard Constructor
 PodioDataSvc::PodioDataSvc(const std::string& name, ISvcLocator* svc)
     : DataSvc(name, svc), m_collectionIDs(new podio::CollectionIDTable()) {
-
   m_eventDataTree = new TTree("events", "Events tree");
-    }
+}
 
 /// Standard Destructor
 PodioDataSvc::~PodioDataSvc() {}
@@ -106,7 +103,7 @@ StatusCode PodioDataSvc::readCollection(const std::string& collName, int collect
     return StatusCode::SUCCESS;
   }
   auto wrapper = new DataWrapper<podio::CollectionBase>;
-  int id = m_collectionIDs->add(collName);
+  int  id      = m_collectionIDs->add(collName);
   collection->setID(id);
   collection->prepareAfterRead();
   wrapper->setData(collection);
@@ -118,9 +115,9 @@ StatusCode PodioDataSvc::registerObject(std::string_view parentPath, std::string
   if (wrapper != nullptr) {
     podio::CollectionBase* coll = wrapper->collectionBase();
     if (coll != nullptr) {
-      size_t pos = fullPath.find_last_of("/");
+      size_t      pos = fullPath.find_last_of("/");
       std::string shortPath(fullPath.substr(pos + 1, fullPath.length()));
-      int id = m_collectionIDs->add(shortPath);
+      int         id = m_collectionIDs->add(shortPath);
       coll->setID(id);
       m_collections.emplace_back(std::make_pair(shortPath, coll));
     }

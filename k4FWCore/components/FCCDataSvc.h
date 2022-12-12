@@ -6,7 +6,6 @@
 
 /// an alias to k4DataSvc for backwards compatibility
 class FCCDataSvc : public PodioDataSvc {
-
 public:
   /// Standard Constructor
   FCCDataSvc(const std::string& name, ISvcLocator* svc);
