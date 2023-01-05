@@ -4,6 +4,8 @@ from __future__ import print_function
 import os
 import sys
 import argparse
+from multiprocessing import cpu_count
+import logging
 
 
 # these default properties are filtered as otherwise they will clutter the argument list
@@ -55,10 +57,9 @@ if __name__ == "__main__":
     #   -1   : All available cpus
     #    0   : Serial Mode (traditional gaudirun)
     #    n>0 : parallel with n cpus (n <= sys_cpus)
-    parser.add_argument("--ncpus",  type=int, default=0,
+    parser.add_argument("--ncpus", type=int, default=0,
                       help="Start Gaudi in parallel mode using NCPUS processes. "
                            "0 => serial mode (default), -1 => use all CPUs")
-
 
 
     # print a doc line showing the configured algorithms
@@ -68,48 +69,46 @@ if __name__ == "__main__":
       print("",'\n')
 
       option_db = {}
-
       # loop over all components that were configured in the options file
-      for conf in set(list(ApplicationMgr.allConfigurables.values())):
+      for conf in dict.fromkeys(ApplicationMgr.allConfigurables.values()):
         # skip public tools and the applicationmgr itself
-        if "ToolSvc" not in conf.name() and "ApplicationMgr" not in conf.name():
-          props = conf.getPropertiesWithDescription() #dict propertyname: (propertyvalue, propertydescription)
-          for prop in props:
-            # only add arguments for relevant properties
-            if not prop in __filterGaudiProps:
-              if not "Audit" in prop:
-                # do not want to deal with other components / datahandles for now
-                  if not hasattr(props[prop][0], '__slots__'):
-                    propvalue = props[prop][0]
+        if "ToolSvc" in conf.name() or "ApplicationMgr" in conf.name():
+          continue
+        props = conf.getPropertiesWithDescription() #dict propertyname: (propertyvalue, propertydescription)
+        for prop in props:
+          # only add arguments for relevant properties
+          if prop in __filterGaudiProps or "Audit" in prop or hasattr(props[prop][0], '__slots__'):
+            continue
+          propvalue = props[prop][0]
 
-                    # if it is set to "no value" it hasn't been touched in the options file
+          # if it is set to "no value" it hasn't been touched in the options file
 
-                    if propvalue == conf.propertyNoValue:
-                       propvalue = conf.getDefaultProperty(prop) # thus get the default value
-                    proptype = type(props[prop][0])
-                    # if the property is a list of something, we need to set argparse nargs to '+'
-                    propnargs = "?"
-                    if proptype == list:
-                      # tricky edgecase: if the default is an empty list there is no way to get the type
-                      if len(propvalue) == 0:
-                        # just skip for now
-                        #print("Warning: argparse cannot deduce type for property %s of %s. Needs to be set in options file." % (prop, conf.name()))
-                        continue
-                      else:
-                        # deduce type from first item of the list
-                        proptype = type(propvalue[0])
-                      propnargs = "+"
+          if propvalue == conf.propertyNoValue:
+              propvalue = conf.getDefaultProperty(prop) # thus get the default value
+          proptype = type(props[prop][0])
+          # if the property is a list of something, we need to set argparse nargs to '+'
+          propnargs = "?"
+          if proptype == list:
+              # tricky edgecase: if the default is an empty list there is no way to get the type
+              if len(propvalue) == 0:
+              # just skip for now
+              #print("Warning: argparse cannot deduce type for property %s of %s. Needs to be set in options file." % (prop, conf.name()))
+                continue
+              else:
+                # deduce type from first item of the list
+                proptype = type(propvalue[0])
+              propnargs = "+"
 
-                    # add the argument twice, once as "--PodioOutput.filename"
-                    # and once as "--filename.PodioOutput"
-                    propName = conf.name() + '.' + prop
-                    propNameReversed = prop + '.' + conf.name()
-                    option_db[propName] = (conf, propName)
-                    parser.add_argument( "--%s" % propName, "--%s" % propNameReversed, type=proptype, help=props[prop][1],
-                      nargs=propnargs,
-                      default=propvalue)
+          # add the argument twice, once as "--PodioOutput.filename"
+          # and once as "--filename.PodioOutput"
+          propName = conf.name() + '.' + prop
+          propNameReversed = prop + '.' + conf.name()
+          option_db[propName] = (conf, propName)
+          parser.add_argument( "--%s" % propName, "--%s" % propNameReversed, type=proptype, help=props[prop][1],
+              nargs=propnargs,
+              default=propvalue)
 
-    opts=parser.parse_args()
+    opts = parser.parse_args()
 
     if opts.list:
         from Gaudi import Configuration
@@ -145,7 +144,6 @@ if __name__ == "__main__":
 
     # Parallel Option ---------------------------------------------------------
     if opts.ncpus:
-        from multiprocessing import cpu_count
         sys_cpus = cpu_count()
         if opts.ncpus > sys_cpus:
             s = "Invalid value : --ncpus : only %i cpus available" % sys_cpus
@@ -155,9 +153,7 @@ if __name__ == "__main__":
             parser.error(s)
 
     # configure the logging
-    import logging
-    from GaudiKernel.ProcessJobOptions import (InstallRootLoggingHandler,
-                                               PrintOff)
+    from GaudiKernel.ProcessJobOptions import InstallRootLoggingHandler, PrintOff
 
     prefix = "# "
     level = logging.INFO
