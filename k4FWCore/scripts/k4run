@@ -9,7 +9,7 @@ import logging
 
 
 # these default properties are filtered as otherwise they will clutter the argument list
-__filterGaudiProps = [ "ContextService", "Cardinality", "Context", "CounterList", "EfficiencyRowFormat",
+FILTER_GAUDI_PROPS = [ "ContextService", "Cardinality", "Context", "CounterList", "EfficiencyRowFormat",
   "Enable", "ErrorCount", "ErrorMax", "ErrorsPrint", "ExtraInputs", "ExtraOutputs",
   "FilterCircularDependencies", "StatEntityList", "IsIOBound", "MonitorService", "NeededResources",
   "PropertiesPrint", "RegisterForContextService", "RegularRowFormat", "RequireObjects", "RootInTES",
@@ -20,62 +20,16 @@ __filterGaudiProps = [ "ContextService", "Cardinality", "Context", "CounterList"
   ]
 
 #---------------------------------------------------------------------
-if __name__ == "__main__":
-    # ensure that we (and the subprocesses) use the C standard localization
-    os.environ['LC_ALL'] = 'C'
 
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.INFO)
-    # Don't propagate to the root logger, otherwise the output will be doubled
-    logger.propagate = 0
-    # formatter = logging.Formatter('[%(asctime)s %(levelname)s] %(message)s', datefmt='%Y-%b-%d %H:%M:%S')
-    formatter = logging.Formatter('[k4run] %(message)s')
-    handler = logging.StreamHandler()
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-
-    # run all the configuration files
-    # we generate arguments from them, so we need to load them
-    # before parsing the arguments
-    # to avoid parsing them twice, just assume the positional arguments
-    # come first and as soon as we encounter "-" we stop
-    run_with_options_file = False
-    for f in sys.argv[1:]:
-      if f[0] != '-':
-        exec(open(f).read())
-        run_with_options_file = True
-      else:
-        break
-
-    parser = argparse.ArgumentParser(description="Run job in the Key4HEP framework")
-    parser.add_argument("config_files", nargs="*",
-                        help="Gaudi config (python) files describing the job")
-    parser.add_argument("--dry-run", action="store_true",
-                        help="Do not actually run the job, just parse the config files")
-    parser.add_argument("-v", "--verbose", action="store_true",
-                        help="Run job with verbose output")
-    parser.add_argument("-n", "--num-events", type=int,
-                        help="Number of events to run")
-    parser.add_argument("-l", "--list", action="store_true",
-                        help="Print all the configurable components available in the framework and exit")
-    parser.add_argument("--gdb", action="store_true", help="Attach gdb debugger")
-
-    # TODO: Don't want to advertise this until tested.
-    # GaudiPython Parallel Mode Option
-    #   Argument must be an integer in range [ -1, sys_cpus ]
-    #   -1   : All available cpus
-    #    0   : Serial Mode (traditional gaudirun)
-    #    n>0 : parallel with n cpus (n <= sys_cpus)
-    parser.add_argument("--ncpus", type=int, default=0,
-                      help="Start Gaudi in parallel mode using NCPUS processes. "
-                           "0 => serial mode (default), -1 => use all CPUs")
-
-
-    # print a doc line showing the configured algorithms
-    if run_with_options_file:
-      logger.info(' --> '.join([alg.name() for alg in ApplicationMgr().TopAlg]))
-
-      option_db = {}
+seen_files = set()
+option_db = {}
+class LoadFromFile(argparse.Action):
+    def __call__ (self, parser, namespace, values, option_string=None):
+      for wrapper in values:
+        if wrapper.name in seen_files:
+            return
+        seen_files.add(wrapper.name)
+        exec(open(wrapper.name).read(), globals())
       # loop over all components that were configured in the options file
       # use dict.fromkeys so that the confs are sorted (Python >= 3.7)
       for conf in dict.fromkeys(ApplicationMgr.allConfigurables.values()):
@@ -85,7 +39,7 @@ if __name__ == "__main__":
         props = conf.getPropertiesWithDescription() #dict propertyname: (propertyvalue, propertydescription)
         for prop in props:
           # only add arguments for relevant properties
-          if prop in __filterGaudiProps or "Audit" in prop or hasattr(props[prop][0], '__slots__'):
+          if prop in FILTER_GAUDI_PROPS or "Audit" in prop or hasattr(props[prop][0], '__slots__'):
             continue
           propvalue = props[prop][0]
 
@@ -115,7 +69,51 @@ if __name__ == "__main__":
               nargs=propnargs,
               default=propvalue)
 
+if __name__ == "__main__":
+    # ensure that we (and the subprocesses) use the C standard localization
+    os.environ['LC_ALL'] = 'C'
+
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+    # Don't propagate to the root logger, otherwise the output will be doubled
+    logger.propagate = 0
+    # formatter = logging.Formatter('[%(asctime)s %(levelname)s] %(message)s', datefmt='%Y-%b-%d %H:%M:%S')
+    formatter = logging.Formatter('[k4run] %(message)s')
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+    parser = argparse.ArgumentParser(description="Run job in the Key4HEP framework")
+    parser.add_argument("config_files", type=open, action=LoadFromFile, nargs="*",
+                        help="Gaudi config (python) files describing the job")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Do not actually run the job, just parse the config files")
+    parser.add_argument("-v", "--verbose", action="store_true",
+                        help="Run job with verbose output")
+    parser.add_argument("-n", "--num-events", type=int,
+                        help="Number of events to run")
+    parser.add_argument("-l", "--list", action="store_true",
+                        help="Print all the configurable components available in the framework and exit")
+    parser.add_argument("--gdb", action="store_true", help="Attach gdb debugger")
+
+    # TODO: Don't want to advertise this until tested.
+    # GaudiPython Parallel Mode Option
+    #   Argument must be an integer in range [ -1, sys_cpus ]
+    #   -1   : All available cpus
+    #    0   : Serial Mode (traditional gaudirun)
+    #    n>0 : parallel with n cpus (n <= sys_cpus)
+    parser.add_argument("--ncpus", type=int, default=0,
+                      help="Start Gaudi in parallel mode using NCPUS processes. "
+                           "0 => serial mode (default), -1 => use all CPUs")
+
+    # Once to parse the files and another time to have the new parameters
+    # in the namespace since parsing of the file happens when the namespace
+    # has already been filled
     opts = parser.parse_args()
+    opts = parser.parse_args()
+
+    # print a doc line showing the configured algorithms
+    logger.info(' --> '.join([alg.name() for alg in ApplicationMgr().TopAlg]))
 
     if opts.list:
         from Gaudi import Configuration
@@ -132,10 +130,6 @@ if __name__ == "__main__":
                 if not "Gaudi" in cfgDb[item]["lib"]:
                   print("  %s (from %s)" % (item, cfgDb[item]["lib"]))
         sys.exit()
-
-    if not run_with_options_file:
-      logging.error("usage: " + os.path.basename(__file__) + " [gaudi_config.py ...] Specify a gaudi options file to run")
-      sys.exit()
 
     opts_dict = vars(opts)
     for optionName, propTuple in option_db.items():
