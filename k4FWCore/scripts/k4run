@@ -23,8 +23,10 @@ FILTER_GAUDI_PROPS = [ "ContextService", "Cardinality", "Context", "CounterList"
 
 seen_files = set()
 option_db = {}
+
+
 class LoadFromFile(argparse.Action):
-    def __call__ (self, parser, namespace, values, option_string=None):
+    def __call__(self, parser, namespace, values, option_string=None):
       for wrapper in values:
         if wrapper.name in seen_files:
             return
@@ -69,6 +71,7 @@ class LoadFromFile(argparse.Action):
               nargs=propnargs,
               default=propvalue)
 
+
 if __name__ == "__main__":
     # ensure that we (and the subprocesses) use the C standard localization
     os.environ['LC_ALL'] = 'C'
@@ -103,13 +106,13 @@ if __name__ == "__main__":
     #    0   : Serial Mode (traditional gaudirun)
     #    n>0 : parallel with n cpus (n <= sys_cpus)
     parser.add_argument("--ncpus", type=int, default=0,
-                      help="Start Gaudi in parallel mode using NCPUS processes. "
-                           "0 => serial mode (default), -1 => use all CPUs")
+                        help="Start Gaudi in parallel mode using NCPUS processes. "
+                        "0 => serial mode (default), -1 => use all CPUs")
 
     # Once to parse the files and another time to have the new parameters
     # in the namespace since parsing of the file happens when the namespace
     # has already been filled
-    opts = parser.parse_args()
+    opts = parser.parse_known_args()
     opts = parser.parse_args()
 
     # print a doc line showing the configured algorithms
@@ -120,7 +123,7 @@ if __name__ == "__main__":
         cfgDb = Configuration.cfgDb
         logger.info("Available components:\n%s" % (21 * "="))
         for item in sorted(cfgDb):
-            if True: # another option could filter Gaudi components here
+            if True:  # another option could filter Gaudi components here
               try:
                 path_to_component = __import__(cfgDb[item]["module"]).__file__
               except ImportError:
