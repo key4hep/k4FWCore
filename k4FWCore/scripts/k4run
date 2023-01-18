@@ -116,12 +116,12 @@ if __name__ == "__main__":
     opts = parser.parse_args()
 
     # print a doc line showing the configured algorithms
-    logger.info(' --> '.join([alg.name() for alg in ApplicationMgr().TopAlg]))
+    logger.info('-->' + ' --> '.join([alg.name() for alg in ApplicationMgr().TopAlg]))
 
     if opts.list:
         from Gaudi import Configuration
         cfgDb = Configuration.cfgDb
-        logger.info("Available components:\n%s" % (21 * "="))
+        logger.info("Available components:\n%s", (21 * "="))
         for item in sorted(cfgDb):
             if True:  # another option could filter Gaudi components here
               try:
@@ -136,7 +136,7 @@ if __name__ == "__main__":
 
     opts_dict = vars(opts)
     for optionName, propTuple in option_db.items():
-      logger.info("Option name: " + str(propTuple[1]) + " " + optionName + " " + str(opts_dict[optionName]))
+      logger.info("Option name: %s %s %s", propTuple[1], optionName, opts_dict[optionName])
       propTuple[0].setProp(propTuple[1].rsplit(".",1)[1], opts_dict[optionName])
 
     if opts.verbose:
