@@ -76,13 +76,11 @@ if __name__ == "__main__":
     # ensure that we (and the subprocesses) use the C standard localization
     os.environ['LC_ALL'] = 'C'
 
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger()
     logger.setLevel(logging.INFO)
-    # Don't propagate to the root logger, otherwise the output will be doubled
-    logger.propagate = 0
     # formatter = logging.Formatter('[%(asctime)s %(levelname)s] %(message)s', datefmt='%Y-%b-%d %H:%M:%S')
     formatter = logging.Formatter('[k4run] %(message)s')
-    handler = logging.StreamHandler()
+    handler = logging.StreamHandler(stream=sys.stdout)
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 
@@ -116,7 +114,7 @@ if __name__ == "__main__":
     opts = parser.parse_args()
 
     # print a doc line showing the configured algorithms
-    logger.info('-->' + ' --> '.join([alg.name() for alg in ApplicationMgr().TopAlg]))
+    logger.info('--> ' + ' --> '.join([alg.name() for alg in ApplicationMgr().TopAlg]))
 
     if opts.list:
         from Gaudi import Configuration
@@ -155,14 +153,6 @@ if __name__ == "__main__":
         elif opts.ncpus < -1:
             s = "Invalid value : --ncpus must be integer >= -1"
             parser.error(s)
-
-    # configure the logging
-    from GaudiKernel.ProcessJobOptions import InstallRootLoggingHandler
-
-    prefix = "# "
-    level = logging.INFO
-    InstallRootLoggingHandler(prefix, level=level, with_time=opts.verbose)
-    root_logger = logging.getLogger()
 
     from Gaudi.Main import gaudimain
     c = gaudimain()
