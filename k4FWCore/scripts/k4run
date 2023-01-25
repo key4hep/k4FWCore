@@ -114,7 +114,7 @@ if __name__ == "__main__":
     opts = parser.parse_args()
 
     # print a doc line showing the configured algorithms
-    logger.info('--> ' + ' --> '.join([alg.name() for alg in ApplicationMgr().TopAlg]))
+    logger.info(' '.join(f'--> {alg.name()}' for alg in ApplicationMgr().TopAlg))
 
     if opts.list:
         from Gaudi import Configuration
