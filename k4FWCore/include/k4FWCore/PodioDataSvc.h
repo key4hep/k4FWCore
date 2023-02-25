@@ -22,10 +22,10 @@ class PodioDataSvc : public DataSvc {
 public:
   typedef std::vector<std::pair<std::string, podio::CollectionBase*>> CollRegistry;
 
-  virtual StatusCode initialize();
-  virtual StatusCode reinitialize();
-  virtual StatusCode finalize();
-  virtual StatusCode clearStore();
+  virtual StatusCode initialize() override;
+  virtual StatusCode reinitialize() override;
+  virtual StatusCode finalize() override;
+  virtual StatusCode clearStore() override;
 
   /// Standard Constructor
   PodioDataSvc(const std::string& name, ISvcLocator* svc);
