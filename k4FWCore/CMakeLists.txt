@@ -4,6 +4,12 @@
 
 find_package(podio)
 
+if(APPLE)
+  file(READ scripts/k4run filedata)
+  string(REGEX REPLACE "#!/usr/bin/env python" "#!${Python_EXECUTABLE}" filedata "${filedata}")
+  file(WRITE scripts/k4run "${filedata}")
+endif(APPLE)
+
 gaudi_install(SCRIPTS)
 
 
