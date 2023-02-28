@@ -25,6 +25,9 @@ if(NOT CMAKE_CXX_STANDARD MATCHES "14|17")
   message(FATAL_ERROR "Unsupported C++ standard: ${CMAKE_CXX_STANDARD}")
 endif()
 
+# Setting RPATH ------------------------------------------------
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 add_subdirectory(k4FWCore)
 add_subdirectory(k4Interface)
 if(BUILD_TESTING)
