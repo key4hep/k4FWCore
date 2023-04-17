@@ -4,8 +4,7 @@
 
 find_package(EDM4HEP)
 
-
-
+file(COPY ${GAUDI_LIB_DIR}/libGaudiCoreSvc.so DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 
 file(GLOB k4fwcoretest_plugin_sources src/components/*.cpp)
 gaudi_add_module(k4FWCoreTestPlugins

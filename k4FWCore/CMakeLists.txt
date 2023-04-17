@@ -6,6 +6,7 @@ find_package(podio)
 
 gaudi_install(SCRIPTS)
 
+file(COPY ${GAUDI_LIB_DIR}/libGaudiCoreSvc.so DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 
 gaudi_add_library(k4FWCore
 		  SOURCES src/PodioDataSvc.cpp

@@ -7,6 +7,8 @@ find_package(ROOT COMPONENTS RIO Tree)
 #---------------------------------------------------------------
 # Load macros and functions for Gaudi-based projects
 find_package(Gaudi)
+get_filename_component(Gaudi_CMakeDir ${GAUDI_TOOLBOX_DIR} DIRECTORY)
+get_filename_component(GAUDI_LIB_DIR ${Gaudi_CMakeDir} DIRECTORY)
 #---------------------------------------------------------------
 
 include(GNUInstallDirs)
