@@ -9,6 +9,8 @@
 #include "TTree.h"
 #include "k4FWCore/DataHandle.h"
 
+#include "podio/UserDataCollection.h"
+
 // datamodel
 namespace edm4hep {
   class MCParticleCollection;
@@ -47,9 +49,7 @@ private:
   /// Handle for the genvertices to be written
   DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitHandle{"SimTrackerHit", Gaudi::DataHandle::Writer, this};
 
-  DataHandle<float>              m_singleFloatHandle{"SingleFloat", Gaudi::DataHandle::Writer, this};
-  DataHandle<std::vector<float>> m_vectorFloatHandle{"VectorFloat", Gaudi::DataHandle::Writer, this};
-  DataHandle<int>                m_singleIntHandle{"SingleInt", Gaudi::DataHandle::Writer, this};
+  DataHandle<podio::UserDataCollection<float>> m_vectorFloatHandle{"VectorFloat", Gaudi::DataHandle::Writer, this};
 
   /// for testing: write a second TFile by user in an algorithm
   Float_t m_value;

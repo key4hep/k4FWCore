@@ -107,3 +107,8 @@ add_test(NAME TestUniqueIDGenSvc
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
          COMMAND ${K4RUN} options/TestUniqueIDGenSvc.py)
 set_test_env(TestUniqueIDGenSvc)
+
+add_test(NAME CreateLegacyExampleEventData
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} options/createLegacyExampleEventData.py)
+set_test_env(CreateLegacyExampleEventData)

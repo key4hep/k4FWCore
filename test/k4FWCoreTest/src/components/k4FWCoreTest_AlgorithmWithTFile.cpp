@@ -30,12 +30,10 @@ StatusCode k4FWCoreTest_AlgorithmWithTFile::initialize() {
 }
 
 StatusCode k4FWCoreTest_AlgorithmWithTFile::execute() {
-  m_singleIntHandle.put(new int(12345));
-  m_singleFloatHandle.put(new float(12345.6789));
 
-  std::vector<float>* floatVector = m_vectorFloatHandle.createAndPut();
-  floatVector->emplace_back(125.);
-  floatVector->emplace_back(25.);
+  auto* floatVector = m_vectorFloatHandle.createAndPut();
+  floatVector->push_back(125.);
+  floatVector->push_back(25.);
 
   edm4hep::MCParticleCollection* particles = m_mcParticleHandle.createAndPut();
 

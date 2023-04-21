@@ -31,8 +31,9 @@ StatusCode k4FWCoreTest_cellID_writer::execute() {
   auto                              hit            = simTrackerHits->create();
   hit.setPosition({3, 4, 5});
 
-  auto& collmd = m_podioDataSvc->getProvider().getCollectionMetaData(simTrackerHits->getID());
-  collmd.setValue("CellIDEncodingString", cellIDtest);
+  // TODO: decide on collection metadata interface in the data service 
+  // something along the lines of 
+  // m_podioDataSvc->addCollectionMetaData(collID, "name", value);
 
   return StatusCode::SUCCESS;
 }

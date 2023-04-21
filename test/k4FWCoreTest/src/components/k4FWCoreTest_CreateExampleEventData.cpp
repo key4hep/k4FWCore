@@ -1,5 +1,7 @@
 #include "k4FWCoreTest_CreateExampleEventData.h"
 
+#include "podio/UserDataCollection.h"
+
 // datamodel
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/SimTrackerHitCollection.h"
@@ -14,9 +16,7 @@ k4FWCoreTest_CreateExampleEventData::k4FWCoreTest_CreateExampleEventData(const s
   declareProperty("simtrackhits", m_simTrackerHitHandle, "Dummy Hit collection (output)");
   declareProperty("trackhits", m_TrackerHitHandle, "Dummy Hit collection (output)");
   declareProperty("tracks", m_trackHandle, "Dummy track collection (output)");
-  declareProperty("singlefloat", m_singleFloatHandle, "Dummy collection (output)");
   declareProperty("vectorfloat", m_vectorFloatHandle, "Dummy collection (output)");
-  declareProperty("singleint", m_singleIntHandle, "Dummy collection (output)");
 }
 
 k4FWCoreTest_CreateExampleEventData::~k4FWCoreTest_CreateExampleEventData() {}
@@ -29,11 +29,10 @@ StatusCode k4FWCoreTest_CreateExampleEventData::initialize() {
 }
 
 StatusCode k4FWCoreTest_CreateExampleEventData::execute() {
-  m_singleIntHandle.put(new int(12345));
 
-  std::vector<float>* floatVector = m_vectorFloatHandle.createAndPut();
-  floatVector->emplace_back(125.);
-  floatVector->emplace_back(25.);
+  auto* floatVector = m_vectorFloatHandle.createAndPut();
+  floatVector->push_back(125.);
+  floatVector->push_back(25.);
 
   edm4hep::MCParticleCollection* particles = m_mcParticleHandle.createAndPut();
 

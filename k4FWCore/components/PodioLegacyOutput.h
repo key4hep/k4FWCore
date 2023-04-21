@@ -1,21 +1,22 @@
-#ifndef FWCORE_PODIOOUTPUT_H
-#define FWCORE_PODIOOUTPUT_H
+#ifndef FWCORE_PODIOLEGACYOUTPUT_H
+#define FWCORE_PODIOLEGACYOUTPUT_H
 
 #include "GaudiAlg/GaudiAlgorithm.h"
 #include "k4FWCore/KeepDropSwitch.h"
 #include "podio/CollectionBase.h"
-#include "podio/ROOTFrameWriter.h"
+
+#include "TTree.h"
 
 #include <vector>
 
 // forward declarations
 class TFile;
-class PodioDataSvc;
+class PodioLegacyDataSvc;
 
-class PodioOutput : public GaudiAlgorithm {
+class PodioLegacyOutput : public GaudiAlgorithm {
 public:
   /// Constructor.
-  PodioOutput(const std::string& name, ISvcLocator* svcLoc);
+  PodioLegacyOutput(const std::string& name, ISvcLocator* svcLoc);
 
   /// Initialization of PodioOutput. Acquires the data service, creates trees and root file.
   virtual StatusCode initialize();
@@ -26,6 +27,8 @@ public:
   virtual StatusCode finalize();
 
 private:
+  void resetBranches(const std::vector<std::pair<std::string, podio::CollectionBase*>>& collections);
+  void createBranches(const std::vector<std::pair<std::string, podio::CollectionBase*>>& collections);
   /// First event or not
   bool m_firstEvent;
   /// Root file name the output is written to
@@ -38,9 +41,17 @@ private:
   /// Switch for keeping or dropping outputs
   KeepDropSwitch m_switch;
   /// Needed for collection ID table
-  PodioDataSvc* m_podioDataSvc;
-  /// The actual ROOT frame writer
-  std::unique_ptr<podio::ROOTFrameWriter> m_framewriter;
+  PodioLegacyDataSvc* m_podioLegacyDataSvc;
+  /// The actual ROOT file
+  std::unique_ptr<TFile> m_file;
+  /// The tree to be filled with collections
+  TTree* m_datatree;
+  /// The tree to be filled with meta data
+  TTree* m_metadatatree;
+  TTree* m_runMDtree;
+  TTree* m_evtMDtree;
+  TTree* m_colMDtree;
+
   /// The stored collections
   std::vector<podio::CollectionBase*> m_storedCollections;
 };

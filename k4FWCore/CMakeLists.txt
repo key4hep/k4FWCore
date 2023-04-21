@@ -9,6 +9,7 @@ gaudi_install(SCRIPTS)
 
 gaudi_add_library(k4FWCore
 		  SOURCES src/PodioDataSvc.cpp
+		  	  src/PodioLegacyDataSvc.cpp
               src/KeepDropSwitch.cpp
                   LINK Gaudi::GaudiAlgLib Gaudi::GaudiKernel podio::podioRootIO ROOT::Core ROOT::RIO ROOT::Tree
                   )
@@ -29,9 +30,4 @@ install(TARGETS k4FWCore k4FWCorePlugins
   RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT bin
   LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT shlib
   COMPONENT dev)
-
-
-add_test(NAME WriteTest
-         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-         COMMAND ${CMAKE_BINARY_DIR}/run ${PROJECT_SOURCE_DIR}/k4FWCore/scripts/k4run k4FWCore/test/options/simple_write.py)
 
