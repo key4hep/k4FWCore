@@ -94,14 +94,11 @@ PodioDataSvc::~PodioDataSvc() {}
 
 StatusCode PodioDataSvc::readCollection(const std::string& collName) {
   const podio::CollectionBase* collection(nullptr);
-
   collection = m_frame.get(collName);
-  if (collection->isSubsetCollection()) {
-    return StatusCode::SUCCESS;
-  }
   auto wrapper = new DataWrapper<podio::CollectionBase>;
-    wrapper->setData(collection);
-  return registerObject("/Event", "/" + collName, wrapper);
+  wrapper->setData(collection);
+  m_podio_datawrappers.push_back(wrapper);
+  return DataSvc::registerObject("/Event", "/" + collName, wrapper);
 }
 
 StatusCode PodioDataSvc::registerObject(std::string_view parentPath, std::string_view fullPath, DataObject* pObject) {

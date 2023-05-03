@@ -27,13 +27,14 @@ StatusCode PodioInput::initialize() {
 StatusCode PodioInput::execute() {
   size_t cntr = 0;
   // Re-create the collections from ROOT file
-  for (auto& id : m_collectionIDs) {
-    const std::string& collName = m_collectionNames.value().at(cntr++);
-    debug() << "Registering collection to read " << collName << " with id " << id << endmsg;
+
+  for (auto& collName : m_collectionNames) {
+    debug() << "Registering collection to read " << collName << endmsg;
     if (m_podioDataSvc->readCollection(collName).isFailure()) {
       return StatusCode::FAILURE;
     }
   }
+
   // Tell data service that we are done with requested collections
   m_podioDataSvc->endOfRead();
   return StatusCode::SUCCESS;
