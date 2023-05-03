@@ -38,10 +38,6 @@ StatusCode PodioDataSvc::initialize() {
 
   }
 
-  // read 
-
-  // if empty, create a new frame from scratch
-
   return status;
 }
 /// Service reinitialisation
