@@ -30,11 +30,10 @@ StatusCode PodioOutput::initialize() {
 StatusCode PodioOutput::execute() {
   auto& frame = m_podioDataSvc->getFrame();
 
-  // for now assume identical content for every event
   // register for writing
+  std::vector<std::string> collection_names_to_write;
   if (m_firstEvent) {
     auto collections = frame.getAvailableCollections();
-    std::vector<std::string> collection_names_to_write;
     for (auto collection_name : collections) {
       if (m_switch.isOn(collection_name)) {
 	  collection_names_to_write.push_back(collection_name);
@@ -42,7 +41,7 @@ StatusCode PodioOutput::execute() {
     }
     m_framewriter->writeFrame(frame, "events", collection_names_to_write);
   } else {
-    m_framewriter->writeFrame(frame, "events");
+    m_framewriter->writeFrame(frame, "events", collection_names_to_write);
   }
   m_firstEvent = false;
 
