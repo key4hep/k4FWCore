@@ -93,7 +93,7 @@ StatusCode PodioOutput::finalize() {
     std::string s_env_key4hep_stack = env_key4hep_stack;
     metadata_frame.putParameter("key4hepstack", s_env_key4hep_stack);
   }
-  m_framewriter->writeFrame(metadata_frame, "metadata");
+  m_framewriter->writeFrame(metadata_frame, "configuration_metadata");
 
   // TODO: Create frames for run metadata and collection metadata
 
