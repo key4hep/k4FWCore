@@ -2,7 +2,7 @@
 # Package: k4FWCore
 ################################################################################
 
-find_package(podio)
+find_package(podio 0.16.3 REQUIRED)
 
 gaudi_install(SCRIPTS)
 
