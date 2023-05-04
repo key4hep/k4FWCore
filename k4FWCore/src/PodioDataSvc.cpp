@@ -95,6 +95,9 @@ PodioDataSvc::~PodioDataSvc() {}
 StatusCode PodioDataSvc::readCollection(const std::string& collName) {
   const podio::CollectionBase* collection(nullptr);
   collection = m_frame.get(collName);
+  if (collection == nullptr){
+    error() << "Collection " << collName << " does not exist." << endmsg;
+  }
   auto wrapper = new DataWrapper<podio::CollectionBase>;
   wrapper->setData(collection);
   m_podio_datawrappers.push_back(wrapper);

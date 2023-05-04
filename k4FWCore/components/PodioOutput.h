@@ -37,12 +37,13 @@ private:
                                                 "An optional file path to copy the outputfile to."};
   /// Switch for keeping or dropping outputs
   KeepDropSwitch m_switch;
-  /// Needed for collection ID table
   PodioDataSvc* m_podioDataSvc;
   /// The actual ROOT frame writer
   std::unique_ptr<podio::ROOTFrameWriter> m_framewriter;
   /// The stored collections
   std::vector<podio::CollectionBase*> m_storedCollections;
+  /// The collections to write out
+  std::vector<std::string> m_collection_names_to_write;
 };
 
 #endif

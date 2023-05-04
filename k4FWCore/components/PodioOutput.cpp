@@ -31,17 +31,16 @@ StatusCode PodioOutput::execute() {
   auto& frame = m_podioDataSvc->getFrame();
 
   // register for writing
-  std::vector<std::string> collection_names_to_write;
   if (m_firstEvent) {
     auto collections = frame.getAvailableCollections();
-    for (auto collection_name : collections) {
+    for (auto& collection_name : collections) {
       if (m_switch.isOn(collection_name)) {
-	  collection_names_to_write.push_back(collection_name);
+	m_collection_names_to_write.push_back(collection_name);
       }
     }
-    m_framewriter->writeFrame(frame, "events", collection_names_to_write);
+    m_framewriter->writeFrame(frame, "events", m_collection_names_to_write);
   } else {
-    m_framewriter->writeFrame(frame, "events", collection_names_to_write);
+    m_framewriter->writeFrame(frame, "events", m_collection_names_to_write);
   }
   m_firstEvent = false;
 
