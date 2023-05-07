@@ -29,20 +29,20 @@ StatusCode k4FWCoreTest_CreateExampleEventData::initialize() {
 }
 
 StatusCode k4FWCoreTest_CreateExampleEventData::execute() {
-
   auto* floatVector = m_vectorFloatHandle.createAndPut();
   floatVector->push_back(125.);
   floatVector->push_back(25.);
+  floatVector->push_back(m_event);
 
   edm4hep::MCParticleCollection* particles = m_mcParticleHandle.createAndPut();
 
   auto particle = particles->create();
 
   auto& p4 = particle.momentum();
-  p4.x     = m_magicNumberOffset + 5;
+  p4.x     = m_magicNumberOffset + m_event + 5;
   p4.y     = m_magicNumberOffset + 6;
   p4.z     = m_magicNumberOffset + 7;
-  particle.setMass(m_magicNumberOffset + 8);
+  particle.setMass(m_magicNumberOffset + m_event + 8);
 
   edm4hep::SimTrackerHitCollection* simTrackerHits = m_simTrackerHitHandle.createAndPut();
   auto                              hit            = simTrackerHits->create();
@@ -69,6 +69,8 @@ StatusCode k4FWCoreTest_CreateExampleEventData::execute() {
   // set associatons
   track.addToTrackerHits(trackerHit);
   track.addToTracks(track2);
+
+  m_event++;
 
   return StatusCode::SUCCESS;
 }

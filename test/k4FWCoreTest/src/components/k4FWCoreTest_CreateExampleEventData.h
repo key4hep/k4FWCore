@@ -58,5 +58,7 @@ private:
   DataHandle<edm4hep::TrackCollection> m_trackHandle{"Tracks", Gaudi::DataHandle::Writer, this};
 
   DataHandle<podio::UserDataCollection<float>> m_vectorFloatHandle{"VectorFloat", Gaudi::DataHandle::Writer, this};
+
+  int m_event{0};
 };
 #endif /* K4FWCORE_K4FWCORETEST_CREATEEXAMPLEEVENTDATA */

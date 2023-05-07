@@ -4,10 +4,17 @@
 
 find_package(EDM4HEP)
 
+set(k4fwcoretest_plugin_sources
+  src/components/TestDataHandleUniquePtr.cpp
+  src/components/TestUniqueIDGenSvc.cpp
+  src/components/k4FWCoreTest_AlgorithmWithTFile.cpp
+  src/components/k4FWCoreTest_CreateExampleEventData.cpp
+  src/components/k4FWCoreTest_HelloWorldAlg.cpp
+  src/components/k4FWCoreTest_cellID_reader.cpp
+  src/components/k4FWCoreTest_cellID_writer.cpp
+  src/components/k4FWCoreTest_CheckExampleEventData.cpp
+)
 
-
-
-file(GLOB k4fwcoretest_plugin_sources src/components/*.cpp)
 gaudi_add_module(k4FWCoreTestPlugins
                  SOURCES ${k4fwcoretest_plugin_sources}
                  LINK Gaudi::GaudiAlgLib Gaudi::GaudiKernel k4FWCore k4FWCore::k4Interface ROOT::Core ROOT::RIO ROOT::Tree EDM4HEP::edm4hepDict EDM4HEP::edm4hep)
@@ -44,6 +51,12 @@ add_test(NAME CreateExampleEventData
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
          COMMAND ${K4RUN} options/createExampleEventData.py)
 set_test_env(CreateExampleEventData)
+
+add_test(NAME CheckExampleEventData
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} options/checkExampleEventData.py
+)
+set_test_env(CheckExampleEventData)
 
 add_test(NAME CreateExampleEventData_cellID
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
