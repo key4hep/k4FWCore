@@ -30,12 +30,7 @@ StatusCode PodioDataSvc::initialize() {
       if (m_1stEvtEntry != 0) {
         m_eventMax -= m_1stEvtEntry;
       }
-
-      m_frame = podio::Frame(m_reader.readEntry("events",m_1stEvtEntry));
     }
-  } else {
-    m_frame = podio::Frame();
-
   }
 
   return status;
@@ -60,21 +55,35 @@ StatusCode PodioDataSvc::clearStore() {
   }
   m_podio_datawrappers.clear();
 
-  // create a new frame
-  if (m_reading_from_file) {
-    m_frame = podio::Frame(m_reader.readNextEntry("events"));
-  } else {
-    m_frame = podio::Frame();
-  }
-
   DataSvc::clearStore().ignore();
   return StatusCode::SUCCESS;
 }
 
+StatusCode PodioDataSvc::i_setRoot(std::string root_path, IOpaqueAddress* pRootAddr) {
+  // create a new frame
+  if (m_reading_from_file) {
+    m_frame = podio::Frame(m_reader.readEntry("events", m_eventNum + m_1stEvtEntry));
+  } else {
+    m_frame = podio::Frame();
+  }
+  return DataSvc::i_setRoot(root_path, pRootAddr);
+}
+
+StatusCode PodioDataSvc::i_setRoot(std::string root_path, DataObject* pRootObj) {
+  // create a new frame
+  if (m_reading_from_file) {
+    m_frame = podio::Frame(m_reader.readEntry("events", m_eventNum + m_1stEvtEntry));
+  } else {
+    m_frame = podio::Frame();
+  }
+  return DataSvc::i_setRoot(root_path, pRootObj);
+}
+
+
 void PodioDataSvc::endOfRead() {
   StatusCode sc;
   if (m_eventMax != -1) {
-    if (m_eventNum++ > m_eventMax) {
+    if (m_eventNum++ >= m_eventMax-1) {  // we start counting at 0 thus the -1.
       info() << "Reached end of file with event " << m_eventMax << endmsg;
       IEventProcessor* eventProcessor;
       sc = service("ApplicationMgr", eventProcessor);

@@ -26,6 +26,8 @@ public:
   virtual StatusCode reinitialize();
   virtual StatusCode finalize();
   virtual StatusCode clearStore();
+  virtual StatusCode i_setRoot( std::string root_path, IOpaqueAddress* pRootAddr );
+  virtual StatusCode i_setRoot( std::string root_path, DataObject* pRootObj );
 
   /// Standard Constructor
   PodioDataSvc(const std::string& name, ISvcLocator* svc);
