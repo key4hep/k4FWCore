@@ -26,6 +26,7 @@
 
 #include "podio/CollectionBase.h"
 
+#include "TFile.h"
 #include "TTree.h"
 
 /// Service initialisation
@@ -44,10 +45,19 @@ StatusCode PodioDataSvc::initialize() {
 
   if (m_filenames.size() > 0) {
     if (m_filenames[0] != "") {
-      m_reading_from_file = true;
-      m_reader.openFiles(m_filenames);
-      m_numAvailableEvents = m_reader.getEntries("events");
-      m_numAvailableEvents -= m_1stEvtEntry;
+      m_reading_legacy_file = is_legacy_file(m_filenames[0]);
+      m_reading_from_file   = true;
+      if (m_reading_legacy_file) {
+        warning() << "Reading PODIO file(s) in legacy format." << endmsg;
+        m_legacy_reader.openFiles(m_filenames);
+        m_eventMax = m_reader.getEntries("events");
+      } else {
+        m_reader.openFiles(m_filenames);
+        m_eventMax = m_reader.getEntries("events");
+      }
+      if (m_1stEvtEntry != 0) {
+        m_eventMax -= m_1stEvtEntry;
+      }
     }
   }
 
@@ -80,6 +90,20 @@ StatusCode PodioDataSvc::initialize() {
 
   return status;
 }
+
+/// Check whether the file read is legacy format or w/ frames
+bool PodioDataSvc::is_legacy_file(const std::string& filename) {
+  bool                   is_legacy(true);
+  std::unique_ptr<TFile> file(TFile::Open(filename.c_str()));
+  TTree*                 tree(nullptr);
+  file->GetObject("podio_metadata", tree);
+  if (tree) {
+    is_legacy = false;
+  }
+  file->Close();
+  return is_legacy;
+}
+
 /// Service reinitialisation
 StatusCode PodioDataSvc::reinitialize() {
   // Do nothing for this service
@@ -107,7 +131,11 @@ StatusCode PodioDataSvc::clearStore() {
 StatusCode PodioDataSvc::i_setRoot(std::string root_path, IOpaqueAddress* pRootAddr) {
   // create a new frame
   if (m_reading_from_file) {
-    m_eventframe = podio::Frame(m_reader.readEntry("events", m_eventNum + m_1stEvtEntry));
+    if (m_reading_legacy_file) {
+      m_eventframe = podio::Frame(m_legacy_reader.readEntry("events", m_eventNum + m_1stEvtEntry));
+    } else {
+      m_eventframe = podio::Frame(m_reader.readEntry("events", m_eventNum + m_1stEvtEntry));
+    }
   } else {
     m_eventframe = podio::Frame();
   }
@@ -117,7 +145,11 @@ StatusCode PodioDataSvc::i_setRoot(std::string root_path, IOpaqueAddress* pRootA
 StatusCode PodioDataSvc::i_setRoot(std::string root_path, DataObject* pRootObj) {
   // create a new frame
   if (m_reading_from_file) {
-    m_eventframe = podio::Frame(m_reader.readEntry("events", m_eventNum + m_1stEvtEntry));
+    if (m_reading_legacy_file) {
+      m_eventframe = podio::Frame(m_legacy_reader.readEntry("events", m_eventNum + m_1stEvtEntry));
+    } else {
+      m_eventframe = podio::Frame(m_reader.readEntry("events", m_eventNum + m_1stEvtEntry));
+    }
   } else {
     m_eventframe = podio::Frame();
   }

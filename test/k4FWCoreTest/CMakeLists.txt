@@ -247,3 +247,11 @@ add_test(NAME FunctionalMix
 set_test_env(FunctionalMix)
 set_tests_properties(FunctionalMix PROPERTIES
                      DEPENDS "ExampleFunctionalProducerMultiple")
+
+add_test(NAME CheckLegacyExampleEventData
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} options/checkLegacyExampleEventData.py
+)
+set_test_env(CheckLegacyExampleEventData)
+set_tests_properties( CheckLegacyExampleEventData
+         PROPERTIES PASS_REGULAR_EXPRESSION "Application Manager Terminated successfully with a user requested ScheduledStop")

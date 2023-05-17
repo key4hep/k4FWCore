@@ -22,13 +22,17 @@
 #include "GaudiKernel/DataSvc.h"
 #include "GaudiKernel/IConversionSvc.h"
 // PODIO
-#include <utility>
 #include "podio/CollectionBase.h"
 #include "podio/CollectionIDTable.h"
 #include "podio/Frame.h"
 #include "podio/ROOTFrameReader.h"
-// Forward declarations
+#include "podio/ROOTLegacyReader.h"
+
 #include "k4FWCore/DataWrapper.h"
+
+#include <utility>
+
+// Forward declarations
 class DataWrapperBase;
 class PodioOutput;
 template <typename T> class MetaDataHandle;
@@ -91,6 +95,8 @@ public:
 private:
   /// PODIO reader for ROOT files
   podio::ROOTFrameReader m_reader;
+  //// PODIO reader for legacy ROOT files
+  podio::ROOTLegacyReader m_legacy_reader;
   /// PODIO Frame, used to initialise collections
   podio::Frame m_eventframe;
   /// PODIO Frame, used to store metadata
@@ -104,6 +110,9 @@ private:
   bool m_reading_from_file{false};
 
   SmartIF<IConversionSvc> m_cnvSvc;
+
+  bool is_legacy_file(const std::string& filename);
+  bool m_reading_legacy_file{true};
 
   // Registry of data wrappers; needed for memory management
   std::vector<DataWrapperBase*> m_podio_datawrappers;
