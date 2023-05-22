@@ -81,7 +81,7 @@ DataHandle<T>::DataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode
     PodioLegacyDataSvc* plds;
     plds       = dynamic_cast<PodioLegacyDataSvc*>(m_eds.get());
     if (nullptr != plds) {
-      if (std::is_convertible<T*, podio::CollectionBase*>::value) {
+      if constexpr (std::is_convertible<T*, podio::CollectionBase*>::value) {
         // case 1: T is a podio collection
         // for this case creation of branches is still handled in PodioOutput
         // (but could be moved here in the future)
