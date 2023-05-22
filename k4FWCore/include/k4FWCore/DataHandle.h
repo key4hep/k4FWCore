@@ -74,10 +74,7 @@ DataHandle<T>::DataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode
 
     podio_data_service = dynamic_cast<PodioDataSvc*>(m_eds.get());
     if (nullptr != podio_data_service) {
-      if (!std::is_convertible<T*, podio::CollectionBase*>::value) {
-	throw GaudiException("DataHandle", "Trying to add non-PODIO type to data service", StatusCode::FAILURE);         
-
-	} else { m_dataPtr = new T();}
+      m_dataPtr = new T();
     } else {
 
     // This is the legacy implementation kept for a transition period

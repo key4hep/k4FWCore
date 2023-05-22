@@ -47,7 +47,7 @@ template <class T> DataWrapper<T>::~DataWrapper<T>() {
 }
 
 template <class T> podio::CollectionBase* DataWrapper<T>::collectionBase() {
-  if (std::is_base_of<podio::CollectionBase, T>::value) {
+  if constexpr (std::is_base_of<podio::CollectionBase, T>::value) {
     return const_cast<T*>(m_data);
   }
   return nullptr;
