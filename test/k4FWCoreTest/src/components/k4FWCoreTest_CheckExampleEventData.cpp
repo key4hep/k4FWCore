@@ -18,7 +18,6 @@ k4FWCoreTest_CheckExampleEventData::k4FWCoreTest_CheckExampleEventData(const std
 StatusCode k4FWCoreTest_CheckExampleEventData::initialize() { return GaudiAlgorithm::initialize(); }
 
 StatusCode k4FWCoreTest_CheckExampleEventData::execute() {
-  auto metadata =  m_metadatafloat.get();
   auto floatVector = m_vectorFloatHandle.get();
   if (floatVector->size() != 3 || (*floatVector)[2] != m_event) {
     fatal() << "Contents of vectorfloat collection is not as expected: size = " << floatVector->size()

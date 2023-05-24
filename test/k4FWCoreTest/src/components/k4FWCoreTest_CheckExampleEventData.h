@@ -2,7 +2,7 @@
 #define K4FWCORE_K4FWCORETEST_CHECKEEXAMPLEEVENTDATA
 
 #include "k4FWCore/DataHandle.h"
-#include "k4FWCore/MetaDataHandle.h"
+
 // GAUDI
 #include "GaudiAlg/GaudiAlgorithm.h"
 
@@ -41,9 +41,6 @@ private:
   /// Handle for the MCParticles to be written
   DataHandle<edm4hep::MCParticleCollection>    m_mcParticleHandle{"MCParticles", Gaudi::DataHandle::Reader, this};
   DataHandle<podio::UserDataCollection<float>> m_vectorFloatHandle{"VectorFloat", Gaudi::DataHandle::Reader, this};
-
-  // Some test MetaData
-  MetaDataHandle<float> m_metadatafloat{&m_vectorFloatHandle, "someCollectionMetaData",  Gaudi::DataHandle::Writer, this};
 
   int m_event{0};
 };

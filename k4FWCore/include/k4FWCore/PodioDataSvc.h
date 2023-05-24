@@ -11,6 +11,8 @@
 #include <utility>
 // Forward declarations
 class DataWrapperBase;
+class PodioOutput;
+template<typename T> class MetaDataHandle;
 
 /** @class PodioEvtSvc EvtDataSvc.h
  *
@@ -19,6 +21,9 @@ class DataWrapperBase;
  *  @author B. Hegner
  */
 class PodioDataSvc : public DataSvc {
+  template<typename T>
+    friend class MetaDataHandle;
+  friend class PodioOutput;
 public:
   typedef std::vector<std::pair<std::string, podio::CollectionBase*>> CollRegistry;
 
@@ -45,10 +50,12 @@ public:
   StatusCode readCollection(const std::string& collectionName);
 
   const podio::Frame& getEventFrame() const { return m_eventframe; }
-  podio::Frame& getMetaDataFrame() { return m_metadataframe; }
 
   /// Resets caches of reader and event store, increases event counter
   void endOfRead();
+
+private:
+  podio::Frame& getMetaDataFrame() { return m_metadataframe; }
 
 private:
   /// PODIO reader for ROOT files

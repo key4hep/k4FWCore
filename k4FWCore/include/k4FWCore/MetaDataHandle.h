@@ -15,7 +15,7 @@ template <typename T> class MetaDataHandle {
 public:
   MetaDataHandle();
   MetaDataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode a, Algorithm* fatherAlg);
-  MetaDataHandle(const Gaudi::DataHandle* handle, const std::string& descriptor, Gaudi::DataHandle::Mode a, Algorithm* fatherAlg);
+  MetaDataHandle(const Gaudi::DataHandle& handle, const std::string& descriptor, Gaudi::DataHandle::Mode a, Algorithm* fatherAlg);
   ~MetaDataHandle();
 
   const T get();
@@ -29,7 +29,9 @@ private:
   std::string                     m_descriptor;
   PodioDataSvc*                   m_podio_data_service{nullptr};
   Algorithm*                      m_fatherAlg{nullptr};
-  const Gaudi::DataHandle*                m_dataHandle{nullptr}; // holds the identifier in case we do collection metadata
+  const Gaudi::DataHandle*        m_dataHandle{nullptr}; // holds the identifier in case we do collection metadata
+  Gaudi::DataHandle::Mode         m_mode;
+
 };
 
 template <typename T> MetaDataHandle<T>::~MetaDataHandle() {
@@ -38,7 +40,7 @@ template <typename T> MetaDataHandle<T>::~MetaDataHandle() {
 //---------------------------------------------------------------------------
 template <typename T>
 MetaDataHandle<T>::MetaDataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode a, Algorithm* fatherAlg)
-: m_eds("EventDataSvc", "DataHandle"), m_descriptor(descriptor), m_fatherAlg(fatherAlg) {
+: m_eds("EventDataSvc", "DataHandle"), m_descriptor(descriptor), m_fatherAlg(fatherAlg), m_mode(a) {
 
   StatusCode    sc = m_eds.retrieve();
   m_podio_data_service = dynamic_cast<PodioDataSvc*>(m_eds.get()); 
@@ -49,8 +51,8 @@ MetaDataHandle<T>::MetaDataHandle(const std::string& descriptor, Gaudi::DataHand
 
 //---------------------------------------------------------------------------
 template <typename T>
-MetaDataHandle<T>::MetaDataHandle(const Gaudi::DataHandle* handle, const std::string& descriptor, Gaudi::DataHandle::Mode a, Algorithm* fatherAlg)
-: m_eds("EventDataSvc", "DataHandle"), m_descriptor(descriptor), m_fatherAlg(fatherAlg), m_dataHandle{handle} {
+MetaDataHandle<T>::MetaDataHandle(const Gaudi::DataHandle& handle, const std::string& descriptor, Gaudi::DataHandle::Mode a, Algorithm* fatherAlg)
+: m_eds("EventDataSvc", "DataHandle"), m_descriptor(descriptor), m_fatherAlg(fatherAlg), m_dataHandle(&handle), m_mode(a) {
 
   StatusCode    sc = m_eds.retrieve();
   m_podio_data_service = dynamic_cast<PodioDataSvc*>(m_eds.get());
@@ -69,10 +71,12 @@ template <typename T> const T MetaDataHandle<T>::get() {
 //---------------------------------------------------------------------------
 template <typename T> void MetaDataHandle<T>::put(T value) {
 
+  if (m_mode != Gaudi::DataHandle::Writer)
+    throw GaudiException("MetaDataHandle policy violation", "Put for non-writing MetaDataHandle not allowed", StatusCode::FAILURE);
   // check whether we are in the proper State
   // put is only allowed in the initalization
-  if (m_podio_data_service->targetFSMState() != Gaudi::StateMachine::INITIALIZED) {
-    m_fatherAlg->fatal() << "A MetaDataHandle::put can only be used during initialize" << endmsg; 
+  if (m_podio_data_service->targetFSMState() == Gaudi::StateMachine::RUNNING) {
+    m_fatherAlg->fatal() << "A MetaDataHandle::put cannot be used during the event loop" << endmsg; 
   }
   std::string full_descriptor = fullDescriptor();
   podio::Frame& frame = m_podio_data_service->getMetaDataFrame();
@@ -85,7 +89,10 @@ template <typename T> std::string MetaDataHandle<T>::fullDescriptor() {
   std::string full_descriptor;
   if (nullptr != m_dataHandle) {
     full_descriptor = m_dataHandle->objKey() + "__" + m_descriptor;
-    full_descriptor.erase(0,7); // remove the "/Event/" part of the collections' object key
+    // remove the "/Event/" part of the collections' object key if in read mode
+    if (m_mode == Gaudi::DataHandle::Reader) {
+      full_descriptor.erase(0,7);
+    }
   } else {
     full_descriptor = m_descriptor;
   }
