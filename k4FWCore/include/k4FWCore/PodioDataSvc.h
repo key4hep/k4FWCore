@@ -44,7 +44,8 @@ public:
 
   StatusCode readCollection(const std::string& collectionName);
 
-  const podio::Frame& getFrame() const { return m_frame; }
+  const podio::Frame& getEventFrame() const { return m_eventframe; }
+  podio::Frame& getMetaDataFrame() { return m_metadataframe; }
 
   /// Resets caches of reader and event store, increases event counter
   void endOfRead();
@@ -53,7 +54,9 @@ private:
   /// PODIO reader for ROOT files
   podio::ROOTFrameReader m_reader;
   /// PODIO Frame, used to initialise collections
-  podio::Frame m_frame;
+  podio::Frame m_eventframe;
+  /// PODIO Frame, used to store metadata
+  podio::Frame m_metadataframe;
   /// Counter of the event number
   int m_eventNum{0};
   /// Number of events in the file / to process

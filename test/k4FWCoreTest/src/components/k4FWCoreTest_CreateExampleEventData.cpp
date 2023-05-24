@@ -25,6 +25,7 @@ StatusCode k4FWCoreTest_CreateExampleEventData::initialize() {
   if (GaudiAlgorithm::initialize().isFailure()) {
     return StatusCode::FAILURE;
   }
+  m_metadatafloat.put(4.);
   return StatusCode::SUCCESS;
 }
 

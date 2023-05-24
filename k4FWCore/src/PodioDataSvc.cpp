@@ -33,6 +33,12 @@ StatusCode PodioDataSvc::initialize() {
     }
   }
 
+  if (m_reading_from_file == true) {
+    m_metadataframe = m_reader.readEntry("metadata",0);
+  } else {
+    m_metadataframe = podio::Frame();
+  }
+
   return status;
 }
 /// Service reinitialisation
@@ -62,9 +68,9 @@ StatusCode PodioDataSvc::clearStore() {
 StatusCode PodioDataSvc::i_setRoot(std::string root_path, IOpaqueAddress* pRootAddr) {
   // create a new frame
   if (m_reading_from_file) {
-    m_frame = podio::Frame(m_reader.readEntry("events", m_eventNum + m_1stEvtEntry));
+    m_eventframe = podio::Frame(m_reader.readEntry("events", m_eventNum + m_1stEvtEntry));
   } else {
-    m_frame = podio::Frame();
+    m_eventframe = podio::Frame();
   }
   return DataSvc::i_setRoot(root_path, pRootAddr);
 }
@@ -72,9 +78,9 @@ StatusCode PodioDataSvc::i_setRoot(std::string root_path, IOpaqueAddress* pRootA
 StatusCode PodioDataSvc::i_setRoot(std::string root_path, DataObject* pRootObj) {
   // create a new frame
   if (m_reading_from_file) {
-    m_frame = podio::Frame(m_reader.readEntry("events", m_eventNum + m_1stEvtEntry));
+    m_eventframe = podio::Frame(m_reader.readEntry("events", m_eventNum + m_1stEvtEntry));
   } else {
-    m_frame = podio::Frame();
+    m_eventframe = podio::Frame();
   }
   return DataSvc::i_setRoot(root_path, pRootObj);
 }
@@ -103,7 +109,7 @@ PodioDataSvc::~PodioDataSvc() {}
 
 StatusCode PodioDataSvc::readCollection(const std::string& collName) {
   const podio::CollectionBase* collection(nullptr);
-  collection = m_frame.get(collName);
+  collection = m_eventframe.get(collName);
   if (collection == nullptr){
     error() << "Collection " << collName << " does not exist." << endmsg;
   }
@@ -121,7 +127,7 @@ StatusCode PodioDataSvc::registerObject(std::string_view parentPath, std::string
       size_t      pos = fullPath.find_last_of("/");
       std::string shortPath(fullPath.substr(pos + 1, fullPath.length()));
       // Attention: this passes the ownership of the data to the frame
-      m_frame.put(std::unique_ptr<podio::CollectionBase>(coll), shortPath);
+      m_eventframe.put(std::unique_ptr<podio::CollectionBase>(coll), shortPath);
       m_podio_datawrappers.push_back(wrapper);
     }
   }

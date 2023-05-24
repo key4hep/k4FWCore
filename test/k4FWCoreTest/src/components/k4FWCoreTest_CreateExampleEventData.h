@@ -4,9 +4,10 @@
 // GAUDI
 #include "GaudiAlg/GaudiAlgorithm.h"
 
-// edm4hep
+// key4hep
 #include "TTree.h"
 #include "k4FWCore/DataHandle.h"
+#include "k4FWCore/MetaDataHandle.h"
 
 // podio
 #include "podio/UserDataCollection.h"
@@ -58,6 +59,9 @@ private:
   DataHandle<edm4hep::TrackCollection> m_trackHandle{"Tracks", Gaudi::DataHandle::Writer, this};
 
   DataHandle<podio::UserDataCollection<float>> m_vectorFloatHandle{"VectorFloat", Gaudi::DataHandle::Writer, this};
+
+  // Some test MetaData
+  MetaDataHandle<float> m_metadatafloat{&m_vectorFloatHandle, "someCollectionMetaData",  Gaudi::DataHandle::Writer, this};
 
   int m_event{0};
 };

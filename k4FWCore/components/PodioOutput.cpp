@@ -28,7 +28,7 @@ StatusCode PodioOutput::initialize() {
 }
 
 StatusCode PodioOutput::execute() {
-  auto& frame = m_podioDataSvc->getFrame();
+  auto& frame = m_podioDataSvc->getEventFrame();
 
   // register for writing
   if (m_firstEvent) {
@@ -86,15 +86,16 @@ StatusCode PodioOutput::finalize() {
   }
 
   // Collect all the metadata
-  podio::Frame metadata_frame{};
-  metadata_frame.putParameter("gaudiConfigOptions", config_data);
+  podio::Frame config_metadata_frame{};
+  config_metadata_frame.putParameter("gaudiConfigOptions", config_data);
   if (const char* env_key4hep_stack = std::getenv("KEY4HEP_STACK")) {
     std::string s_env_key4hep_stack = env_key4hep_stack;
-    metadata_frame.putParameter("key4hepstack", s_env_key4hep_stack);
+    config_metadata_frame.putParameter("key4hepstack", s_env_key4hep_stack);
   }
-  m_framewriter->writeFrame(metadata_frame, "configuration_metadata");
+  m_framewriter->writeFrame(config_metadata_frame, "configuration_metadata");
 
-  // TODO: Create frames for run metadata and collection metadata
+  auto& metadata_frame = m_podioDataSvc->getMetaDataFrame();
+  m_framewriter->writeFrame(metadata_frame, "metadata");
 
   // write information into file
   m_framewriter->finish();
