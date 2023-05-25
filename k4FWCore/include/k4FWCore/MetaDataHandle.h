@@ -14,8 +14,8 @@
 template <typename T> class MetaDataHandle {
 public:
   MetaDataHandle();
-  MetaDataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode a, Algorithm* fatherAlg);
-  MetaDataHandle(const Gaudi::DataHandle& handle, const std::string& descriptor, Gaudi::DataHandle::Mode a, Algorithm* fatherAlg);
+  MetaDataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode a);
+  MetaDataHandle(const Gaudi::DataHandle& handle, const std::string& descriptor, Gaudi::DataHandle::Mode a);
   ~MetaDataHandle();
 
   const T get();
@@ -28,7 +28,6 @@ private:
   ServiceHandle<IDataProviderSvc> m_eds;
   std::string                     m_descriptor;
   PodioDataSvc*                   m_podio_data_service{nullptr};
-  Algorithm*                      m_fatherAlg{nullptr};
   const Gaudi::DataHandle*        m_dataHandle{nullptr}; // holds the identifier in case we do collection metadata
   Gaudi::DataHandle::Mode         m_mode;
 
@@ -39,25 +38,25 @@ template <typename T> MetaDataHandle<T>::~MetaDataHandle() {
 
 //---------------------------------------------------------------------------
 template <typename T>
-MetaDataHandle<T>::MetaDataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode a, Algorithm* fatherAlg)
-: m_eds("EventDataSvc", "DataHandle"), m_descriptor(descriptor), m_fatherAlg(fatherAlg), m_mode(a) {
+MetaDataHandle<T>::MetaDataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode a)
+: m_eds("EventDataSvc", "DataHandle"), m_descriptor(descriptor), m_mode(a) {
 
   StatusCode    sc = m_eds.retrieve();
   m_podio_data_service = dynamic_cast<PodioDataSvc*>(m_eds.get()); 
   if (nullptr == m_podio_data_service) {
-    m_fatherAlg->fatal() << "MetaDataHandles require the PodioDataSvc" << endmsg;
+    std::cout << "ERROR: MetaDataHandles require the PodioDataSvc" << std::endl;
   }
 }
 
 //---------------------------------------------------------------------------
 template <typename T>
-MetaDataHandle<T>::MetaDataHandle(const Gaudi::DataHandle& handle, const std::string& descriptor, Gaudi::DataHandle::Mode a, Algorithm* fatherAlg)
-: m_eds("EventDataSvc", "DataHandle"), m_descriptor(descriptor), m_fatherAlg(fatherAlg), m_dataHandle(&handle), m_mode(a) {
+MetaDataHandle<T>::MetaDataHandle(const Gaudi::DataHandle& handle, const std::string& descriptor, Gaudi::DataHandle::Mode a)
+: m_eds("EventDataSvc", "DataHandle"), m_descriptor(descriptor), m_dataHandle(&handle), m_mode(a) {
 
   StatusCode    sc = m_eds.retrieve();
   m_podio_data_service = dynamic_cast<PodioDataSvc*>(m_eds.get());
   if (nullptr == m_podio_data_service) {
-    m_fatherAlg->fatal() << "MetaDataHandles require the PodioDataSvc" << endmsg;
+    std::cout << "ERROR: MetaDataHandles require the PodioDataSvc" << std::endl;
   }
 }
 
@@ -76,7 +75,7 @@ template <typename T> void MetaDataHandle<T>::put(T value) {
   // check whether we are in the proper State
   // put is only allowed in the initalization
   if (m_podio_data_service->targetFSMState() == Gaudi::StateMachine::RUNNING) {
-    m_fatherAlg->fatal() << "A MetaDataHandle::put cannot be used during the event loop" << endmsg; 
+    throw GaudiException("MetaDataHandle policy violation", "Put cannot be used during the event loop", StatusCode::FAILURE);
   }
   std::string full_descriptor = fullDescriptor();
   podio::Frame& frame = m_podio_data_service->getMetaDataFrame();

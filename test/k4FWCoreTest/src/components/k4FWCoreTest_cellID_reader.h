@@ -35,6 +35,6 @@ private:
   /// Handle for the SimTrackerHits to be read
   DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitReaderHandle{"SimTrackerHits", Gaudi::DataHandle::Reader,
                                                                            this};
-  MetaDataHandle<std::string> m_cellIDHandle{m_simTrackerHitReaderHandle, "CellIDEncodingString",  Gaudi::DataHandle::Reader, this};
+  MetaDataHandle<std::string> m_cellIDHandle{m_simTrackerHitReaderHandle, "CellIDEncodingString",  Gaudi::DataHandle::Reader};
 };
 #endif /* K4FWCORE_K4FWCORETEST_CELLID */
