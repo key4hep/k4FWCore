@@ -11,6 +11,10 @@
 
 #include <type_traits>
 
+static std::string metaDataHandleDescriptor(const std::string& collectionName, const std::string& key) {
+  return collectionName + "__" + key;
+}
+
 template <typename T> class MetaDataHandle {
 public:
   MetaDataHandle();
@@ -87,7 +91,7 @@ template <typename T> std::string MetaDataHandle<T>::fullDescriptor() {
 
   std::string full_descriptor;
   if (nullptr != m_dataHandle) {
-    full_descriptor = m_dataHandle->objKey() + "__" + m_descriptor;
+    full_descriptor = metaDataHandleDescriptor(m_dataHandle->objKey(), m_descriptor);
     // remove the "/Event/" part of the collections' object key if in read mode
     if (m_mode == Gaudi::DataHandle::Reader) {
       full_descriptor.erase(0,7);
