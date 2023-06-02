@@ -104,7 +104,7 @@ void PodioLegacyOutput::createBranches(const std::vector<std::pair<std::string, 
     const auto collID = m_podioLegacyDataSvc->getCollectionIDs()->collectionID(collName);
     // No check necessary, only registered collections possible
     auto       coll     = collNamePair.second;
-    const auto collType = coll->getValueTypeName() + "Collection";
+    const auto collType = std::string(coll->getValueTypeName()) + "Collection";
     collectionInfo->emplace_back(collID, std::move(collType), coll->isSubsetCollection());
     //}
 
