@@ -64,8 +64,8 @@ StatusCode k4FWCoreTest_CreateExampleEventData::execute() {
   track.setDEdxError(5.1);
   track.setRadiusOfInnermostHit(6.1);
   // set vectormembers
-  track.addToSubDetectorHitNumbers(1);
-  track.addToSubDetectorHitNumbers(4);
+  track.addToSubdetectorHitNumbers(1);
+  track.addToSubdetectorHitNumbers(4);
   track.addToTrackStates(edm4hep::TrackState());
   // set associatons
   track.addToTrackerHits(trackerHit);
