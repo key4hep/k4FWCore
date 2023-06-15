@@ -108,3 +108,10 @@ add_test(NAME TestUniqueIDGenSvc
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
          COMMAND ${K4RUN} options/TestUniqueIDGenSvc.py)
 set_test_env(TestUniqueIDGenSvc)
+
+add_test(NAME Testk4runNoArguments
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN})
+set_test_env(Testk4runNoArguments)
+set_tests_properties(Testk4runNoArguments
+  PROPERTIES PASS_REGULAR_EXPRESSION "Usage: k4run <options_file.py>, use --help to get a complete list of arguments")

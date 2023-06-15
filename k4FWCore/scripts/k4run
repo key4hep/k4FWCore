@@ -27,6 +27,10 @@ option_db = {}
 
 class LoadFromFile(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
+      if not values:
+        print('Error: missing gaudi options file.\n'
+        'Usage: k4run <options_file.py>, use --help to get a complete list of arguments')
+        sys.exit(1)
       for wrapper in values:
         if wrapper.name in seen_files:
             return
