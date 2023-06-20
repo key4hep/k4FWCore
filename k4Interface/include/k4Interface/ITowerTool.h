@@ -9,7 +9,7 @@
 #include "edm4hep/Cluster.h"
 
 struct tower {
-  int eta;
+  int theta;
   int phi;
 };
 
@@ -24,7 +24,7 @@ class ITowerTool : virtual public IAlgTool {
 public:
   DeclareInterfaceID(ITowerTool, 1, 0);
   /**  Find number of calorimeter towers.
-   *   @return Struct containing number of towers in eta and phi.
+   *   @return Struct containing number of towers in theta and phi.
    */
   virtual tower towersNumber() = 0;
   /**  Build calorimeter towers.
@@ -37,35 +37,35 @@ public:
    *   @return Radius
    */
   virtual float radiusForPosition() const = 0;
-  /**  Get the tower IDs in eta.
-   *   @param[in] aEta Position of the calorimeter cell in eta
-   *   @return ID (eta) of a tower
+  /**  Get the tower IDs in theta.
+   *   @param[in] aTheta Position of the calorimeter cell in theta
+   *   @return ID (theta) of a tower
    */
-  virtual uint idEta(float aEta) const = 0;
+  virtual uint idTheta(float aTheta) const = 0;
   /**  Get the tower IDs in phi.
    *   @param[in] aPhi Position of the calorimeter cell in phi
    *   @return ID (phi) of a tower
    */
   virtual uint idPhi(float aPhi) const = 0;
-  /**  Get the eta position of the centre of the tower.
-   *   @param[in] aIdEta ID (eta) of a tower
+  /**  Get the theta position of the centre of the tower.
+   *   @param[in] aIdTheta ID (theta) of a tower
    *   @return Position of the centre of the tower
    */
-  virtual float eta(int aIdEta) const = 0;
+  virtual float theta(int aIdTheta) const = 0;
   /**  Get the phi position of the centre of the tower.
    *   @param[in] aIdPhi ID (phi) of a tower
    *   @return Position of the centre of the tower
    */
   virtual float phi(int aIdPhi) const = 0;
   /**  Find cells belonging to a cluster.
-   *   @param[in] aEta Position of the middle tower of a cluster in eta
+   *   @param[in] aTheta Position of the middle tower of a cluster in theta
    *   @param[in] aPhi Position of the middle tower of a cluster in phi
-   *   @param[in] aHalfEtaFinal Half size of cluster in eta (in units of tower size). Cluster size is 2*aHalfEtaFinal+1
+   *   @param[in] aHalfThetaFinal Half size of cluster in theta (in units of tower size). Cluster size is 2*aHalfThetaFinal+1
    *   @param[in] aHalfPhiFinal Half size of cluster in phi (in units of tower size). Cluster size is 2*aHalfPhiFinal+1
    *   @param[out] aEdmCluster Cluster of interest
    *   @param[out] aEdmClusterCells Cluster cells which belong to the cluster of interest
    */
-  virtual void attachCells(float aEta, float aPhi, uint aHalfEtaFinal, uint aHalfPhiFinal,
+  virtual void attachCells(float aTheta, float aPhi, uint aHalfThetaFinal, uint aHalfPhiFinal,
                            edm4hep::MutableCluster& aEdmCluster, edm4hep::CalorimeterHitCollection* aEdmClusterCells,
                            bool aEllipse) = 0;
 };
