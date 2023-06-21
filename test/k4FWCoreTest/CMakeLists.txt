@@ -80,6 +80,7 @@ add_test(NAME ReadExampleDataFromNthEvent
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
          COMMAND ${K4RUN} options/readExampleDataFromNthEvent.py)
 set_test_env(ReadExampleDataFromNthEvent)
+set_property(TEST ReadExampleDataFromNthEvent APPEND PROPERTY DEPENDS CreateExampleEventData)
 
 add_test(NAME AlgorithmWithTFile
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
@@ -123,7 +124,15 @@ add_test(NAME TestUniqueIDGenSvc
          COMMAND ${K4RUN} options/TestUniqueIDGenSvc.py)
 set_test_env(TestUniqueIDGenSvc)
 
+
 add_test(NAME CreateLegacyExampleEventData
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
          COMMAND ${K4RUN} options/createLegacyExampleEventData.py)
 set_test_env(CreateLegacyExampleEventData)
+
+add_test(NAME Testk4runNoArguments
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN})
+set_test_env(Testk4runNoArguments)
+set_tests_properties(Testk4runNoArguments
+  PROPERTIES PASS_REGULAR_EXPRESSION "Usage: k4run <options_file.py>, use --help to get a complete list of arguments")

@@ -7,6 +7,14 @@
 #include "edm4hep/SimTrackerHitCollection.h"
 #include "edm4hep/TrackCollection.h"
 #include "edm4hep/TrackerHitCollection.h"
+#if __has_include("edm4hep/EDM4hepVersion.h")
+#include "edm4hep/EDM4hepVersion.h"
+#else
+// Copy the necessary parts from the header above to make whatever we need to work here
+#define EDM4HEP_VERSION(major, minor, patch) ((UINT64_C(major) << 32) | (UINT64_C(minor) << 16) | (UINT64_C(patch)))
+// v00-09 is the last version without the capitalization change of the track vector members
+#define EDM4HEP_BUILD_VERSION EDM4HEP_VERSION(0, 9, 0)
+#endif
 
 DECLARE_COMPONENT(k4FWCoreTest_CreateExampleEventData)
 
@@ -63,8 +71,13 @@ StatusCode k4FWCoreTest_CreateExampleEventData::execute() {
   track.setDEdxError(5.1);
   track.setRadiusOfInnermostHit(6.1);
   // set vectormembers
+#if EDM4HEP_BUILD_VERSION > EDM4HEP_VERSION(0, 9, 0)
+  track.addToSubdetectorHitNumbers(1);
+  track.addToSubdetectorHitNumbers(4);
+#else
   track.addToSubDetectorHitNumbers(1);
   track.addToSubDetectorHitNumbers(4);
+#endif
   track.addToTrackStates(edm4hep::TrackState());
   // set associatons
   track.addToTrackerHits(trackerHit);

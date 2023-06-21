@@ -41,7 +41,7 @@ private:
 
 };
 
-template <class T> DataWrapper<T>::~DataWrapper<T>() {
+template <class T> DataWrapper<T>::~DataWrapper() {
   if (m_data != nullptr)
     delete m_data;
 }
