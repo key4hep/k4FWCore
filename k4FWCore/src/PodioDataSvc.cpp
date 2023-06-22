@@ -33,7 +33,7 @@ StatusCode PodioDataSvc::initialize() {
     }
   }
 
-  if (m_reading_from_file == true) {
+  if (m_reading_from_file) {
     m_metadataframe = m_reader.readEntry("metadata",0);
   } else {
     m_metadataframe = podio::Frame();
