@@ -58,7 +58,8 @@ add_test(NAME CheckExampleEventData
 )
 set_test_env(CheckExampleEventData)
 set_tests_properties( CheckExampleEventData
-         PROPERTIES PASS_REGULAR_EXPRESSION "Application Manager Terminated successfully with a user requested ScheduledStop")
+         PROPERTIES PASS_REGULAR_EXPRESSION "Application Manager Terminated successfully with a user requested ScheduledStop"
+         DEPENDS CreateExampleEventData)
 
 add_test(NAME CreateExampleEventData_cellID
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
