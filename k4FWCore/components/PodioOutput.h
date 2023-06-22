@@ -9,7 +9,6 @@
 #include <vector>
 
 // forward declarations
-class TFile;
 class PodioDataSvc;
 
 class PodioOutput : public GaudiAlgorithm {

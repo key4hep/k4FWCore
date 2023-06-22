@@ -1,7 +1,6 @@
 #include <cstdlib>
 
 #include "PodioOutput.h"
-#include "TFile.h"
 #include "k4FWCore/PodioDataSvc.h"
 #include "rootUtils.h"
 
