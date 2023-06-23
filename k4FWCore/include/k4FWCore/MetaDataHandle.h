@@ -31,6 +31,7 @@ public:
   
 private:
   std::string fullDescriptor();
+  void        checkPodioDataSvc();
 
 private:
   ServiceHandle<IDataProviderSvc> m_eds;
@@ -51,9 +52,7 @@ MetaDataHandle<T>::MetaDataHandle(const std::string& descriptor, Gaudi::DataHand
 
   StatusCode    sc = m_eds.retrieve();
   m_podio_data_service = dynamic_cast<PodioDataSvc*>(m_eds.get()); 
-  if (nullptr == m_podio_data_service) {
-    std::cout << "ERROR: MetaDataHandles require the PodioDataSvc" << std::endl;
-  }
+  checkPodioDataSvc();
 }
 
 //---------------------------------------------------------------------------
@@ -63,9 +62,7 @@ MetaDataHandle<T>::MetaDataHandle(const Gaudi::DataHandle& handle, const std::st
 
   StatusCode    sc = m_eds.retrieve();
   m_podio_data_service = dynamic_cast<PodioDataSvc*>(m_eds.get());
-  if (nullptr == m_podio_data_service) {
-    std::cout << "ERROR: MetaDataHandles require the PodioDataSvc" << std::endl;
-  }
+  checkPodioDataSvc();
 }
 
 
@@ -105,4 +102,16 @@ template <typename T> std::string MetaDataHandle<T>::fullDescriptor() {
   }
   return full_descriptor;
 }
+
+//---------------------------------------------------------------------------
+template <typename T> void MetaDataHandle<T>::checkPodioDataSvc(){
+  // do not do this check during the genconf step
+  const std::string cmd = System::cmdLineArgs()[0];
+  if ( cmd.find( "genconf" ) != std::string::npos ) return;
+
+  if (nullptr == m_podio_data_service) {
+    std::cout << "ERROR: MetaDataHandles require the PodioDataSvc" << std::endl;
+  }
+}
+
 #endif
