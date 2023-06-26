@@ -4,15 +4,15 @@
 // GAUDI
 #include "GaudiAlg/GaudiAlgorithm.h"
 
-// edm4hep
-#include "TTree.h"
+// key4hep
 #include "k4FWCore/DataHandle.h"
+#include "k4FWCore/MetaDataHandle.h"
 
 // datamodel
 #include "edm4hep/SimTrackerHitCollection.h"
 
 /** @class k4FWCoreTest_cellID
- *  Lightweight producer for edm data to test cellID reading
+ *  Lightweight reader for edm data to test cellID reading
  */
 class k4FWCoreTest_cellID_reader : public GaudiAlgorithm {
 public:
@@ -35,5 +35,6 @@ private:
   /// Handle for the SimTrackerHits to be read
   DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitReaderHandle{"SimTrackerHits", Gaudi::DataHandle::Reader,
                                                                            this};
+  MetaDataHandle<std::string> m_cellIDHandle{m_simTrackerHitReaderHandle, "CellIDEncodingString",  Gaudi::DataHandle::Reader};
 };
 #endif /* K4FWCORE_K4FWCORETEST_CELLID */

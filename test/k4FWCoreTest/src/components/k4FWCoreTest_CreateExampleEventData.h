@@ -4,9 +4,11 @@
 // GAUDI
 #include "GaudiAlg/GaudiAlgorithm.h"
 
-// edm4hep
-#include "TTree.h"
+// key4hep
 #include "k4FWCore/DataHandle.h"
+
+// podio
+#include "podio/UserDataCollection.h"
 
 // datamodel
 namespace edm4hep {
@@ -54,8 +56,8 @@ private:
   /// Handle for the Tracks to be written
   DataHandle<edm4hep::TrackCollection> m_trackHandle{"Tracks", Gaudi::DataHandle::Writer, this};
 
-  DataHandle<float>              m_singleFloatHandle{"SingleFloat", Gaudi::DataHandle::Writer, this};
-  DataHandle<std::vector<float>> m_vectorFloatHandle{"VectorFloat", Gaudi::DataHandle::Writer, this};
-  DataHandle<int>                m_singleIntHandle{"SingleInt", Gaudi::DataHandle::Writer, this};
+  DataHandle<podio::UserDataCollection<float>> m_vectorFloatHandle{"VectorFloat", Gaudi::DataHandle::Writer, this};
+
+  int m_event{0};
 };
 #endif /* K4FWCORE_K4FWCORETEST_CREATEEXAMPLEEVENTDATA */

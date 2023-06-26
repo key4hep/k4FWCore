@@ -24,8 +24,6 @@ producer2.mcparticles.Path = "mcparticles2"
 producer2.trackhits.Path = "trackhits2"
 producer2.simtrackhits.Path = "simtrackhits2"
 producer2.tracks.Path = "tracks2"
-producer2.singleint.Path = "singleint2"
-producer2.singlefloat.Path = "singlefloat2"
 producer2.vectorfloat.Path = "vectorfloat2"
 ApplicationMgr().TopAlg += [producer2]
 

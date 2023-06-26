@@ -3,6 +3,7 @@
 
 #include "k4FWCore/DataWrapper.h"
 #include "k4FWCore/PodioDataSvc.h"
+#include "k4FWCore/PodioLegacyDataSvc.h"
 
 #include "Gaudi/Algorithm.h"
 #include "GaudiKernel/DataObjectHandle.h"
@@ -39,9 +40,6 @@ public:
 
   T* put(std::unique_ptr<T> object);
 
-  ///Retrieve CellID string from the Collection metadata
-  const std::string getCollMetadataCellID(const unsigned int id);
-
   /**
   * Create and register object in transient store
   */
@@ -71,11 +69,19 @@ DataHandle<T>::DataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode
     : DataObjectHandle<DataWrapper<T>>(descriptor, a, fatherAlg), m_eds("EventDataSvc", "DataHandle") {
   if (a == Gaudi::DataHandle::Writer) {
     StatusCode    sc = m_eds.retrieve();
-    PodioDataSvc* pds;
-    pds       = dynamic_cast<PodioDataSvc*>(m_eds.get());
     m_dataPtr = nullptr;
-    if (nullptr != pds) {
-      if (std::is_convertible<T*, podio::CollectionBase*>::value) {
+    PodioDataSvc* podio_data_service;
+
+    podio_data_service = dynamic_cast<PodioDataSvc*>(m_eds.get());
+    if (nullptr != podio_data_service) {
+      m_dataPtr = new T();
+    } else {
+
+    // This is the legacy implementation kept for a transition period
+    PodioLegacyDataSvc* plds;
+    plds       = dynamic_cast<PodioLegacyDataSvc*>(m_eds.get());
+    if (nullptr != plds) {
+      if constexpr (std::is_convertible<T*, podio::CollectionBase*>::value) {
         // case 1: T is a podio collection
         // for this case creation of branches is still handled in PodioOutput
         // (but could be moved here in the future)
@@ -86,13 +92,13 @@ DataHandle<T>::DataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode
         // and have to append a char indicating type (see TTree documentation)
         // therefore  space needs to be allocated for the integer
         m_dataPtr   = new T();
-        TTree* tree = pds->eventDataTree();
+        TTree* tree = plds->eventDataTree();
         tree->Branch(descriptor.c_str(), m_dataPtr, (descriptor + "/I").c_str());
       } else if constexpr (std::is_floating_point_v<T>) {
         // case 3: T is some floating point type
         // similar case 2, distinguish floats and doubles by size
         m_dataPtr   = new T();
-        TTree* tree = pds->eventDataTree();
+        TTree* tree = plds->eventDataTree();
         if (sizeof(T) > 4) {
           tree->Branch(descriptor.c_str(), m_dataPtr, (descriptor + "/D").c_str());
         } else {
@@ -102,10 +108,11 @@ DataHandle<T>::DataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode
         // case 4: T is any other type (for which exists a root dictionary,
         // otherwise i/o will fail)
         // this includes std::vectors of ints, floats
-        TTree* tree = pds->eventDataTree();
+        TTree* tree = plds->eventDataTree();
         tree->Branch(descriptor.c_str(), &m_dataPtr);
       }
     }
+  }
   }
 }
 
@@ -166,23 +173,6 @@ template <typename T> void DataHandle<T>::put(T* objectp) {
 template <typename T> T* DataHandle<T>::put(std::unique_ptr<T> objectp) {
   put(objectp.get());
   return objectp.release();
-}
-
-//---------------------------------------------------------------------------
-// Get the CellID encoded String from the Metadata of the collection
-// using Podio Data Service
-// Give collection ID
-template <typename T> const std::string DataHandle<T>::getCollMetadataCellID(const unsigned int id) {
-  PodioDataSvc* pds;
-  pds = dynamic_cast<PodioDataSvc*>(m_eds.get());
-
-  if (pds != nullptr) {
-    auto colMD = pds->getProvider().getCollectionMetaData(id);
-    return colMD.getValue<std::string>("CellIDEncodingString");
-  } else {
-    std::string msg("Could not get Podio Data Service.");
-    throw GaudiException(msg, "Failed to get Collection Metadata.", StatusCode::FAILURE);
-  }
 }
 
 //---------------------------------------------------------------------------

@@ -1,29 +1,24 @@
-#ifndef FWCORE_PODIODATASVC_H
-#define FWCORE_PODIODATASVC_H
+#ifndef FWCORE_PODIOLEGACYDATASVC_H
+#define FWCORE_PODIOLEGACYDATASVC_H
 
 #include "GaudiKernel/DataSvc.h"
 #include "GaudiKernel/IConversionSvc.h"
 // PODIO
 #include "podio/CollectionBase.h"
 #include "podio/CollectionIDTable.h"
-#include "podio/ROOTFrameReader.h"
-#include "podio/Frame.h"
+#include "podio/EventStore.h"
+#include "podio/ROOTReader.h"
+
 #include <utility>
 // Forward declarations
-class DataWrapperBase;
-class PodioOutput;
-template<typename T> class MetaDataHandle;
 
-/** @class PodioEvtSvc EvtDataSvc.h
+/** @class PodioLegacyEvtSvc EvtDataSvc.h
  *
  *   An EvtDataSvc for PODIO classes
  *
  *  @author B. Hegner
  */
-class PodioDataSvc : public DataSvc {
-  template<typename T>
-    friend class MetaDataHandle;
-  friend class PodioOutput;
+class PodioLegacyDataSvc : public DataSvc {
 public:
   typedef std::vector<std::pair<std::string, podio::CollectionBase*>> CollRegistry;
 
@@ -31,14 +26,12 @@ public:
   virtual StatusCode reinitialize();
   virtual StatusCode finalize();
   virtual StatusCode clearStore();
-  virtual StatusCode i_setRoot( std::string root_path, IOpaqueAddress* pRootAddr );
-  virtual StatusCode i_setRoot( std::string root_path, DataObject* pRootObj );
 
   /// Standard Constructor
-  PodioDataSvc(const std::string& name, ISvcLocator* svc);
+  PodioLegacyDataSvc(const std::string& name, ISvcLocator* svc);
 
   /// Standard Destructor
-  virtual ~PodioDataSvc();
+  virtual ~PodioLegacyDataSvc();
 
   // Use DataSvc functionality except where we override
   using DataSvc::registerObject;
@@ -47,34 +40,36 @@ public:
   virtual StatusCode registerObject(std::string_view parentPath, std::string_view fullPath,
                                     DataObject* pObject) override final;
 
-  StatusCode readCollection(const std::string& collectionName);
+  StatusCode readCollection(const std::string& collectionName, int collectionID);
 
-  const podio::Frame& getEventFrame() const { return m_eventframe; }
+  virtual const CollRegistry&       getCollections() const { return m_collections; }
+  podio::EventStore&                getProvider() { return m_provider; }
+  virtual podio::CollectionIDTable* getCollectionIDs() { return m_collectionIDs; }
 
+  /// Set the collection IDs (if reading a file)
+  void setCollectionIDs(podio::CollectionIDTable* collectionIds);
   /// Resets caches of reader and event store, increases event counter
   void endOfRead();
 
-private:
-  podio::Frame& getMetaDataFrame() { return m_metadataframe; }
+  TTree* eventDataTree() { return m_eventDataTree; }
 
 private:
+  // eventDataTree
+  TTree* m_eventDataTree;
   /// PODIO reader for ROOT files
-  podio::ROOTFrameReader m_reader;
-  /// PODIO Frame, used to initialise collections
-  podio::Frame m_eventframe;
-  /// PODIO Frame, used to store metadata
-  podio::Frame m_metadataframe;
+  podio::ROOTReader m_reader;
+  /// PODIO EventStore, used to initialise collections
+  podio::EventStore m_provider;
   /// Counter of the event number
   int m_eventNum{0};
   /// Number of events in the file / to process
   int m_eventMax{-1};
-  /// Whether reading from file at all
-  bool m_reading_from_file{false};
 
   SmartIF<IConversionSvc> m_cnvSvc;
 
-  // Registry of data wrappers; needed for memory management
-  std::vector<DataWrapperBase*> m_podio_datawrappers;
+  // special members for podio handling
+  std::vector<std::pair<std::string, podio::CollectionBase*>> m_collections;
+  podio::CollectionIDTable*                                   m_collectionIDs;
 
 protected:
   /// ROOT file name the input is read from. Set by option filename
@@ -84,4 +79,4 @@ protected:
   /// This option is helpful when we want to debug an event in the middle of a file
   unsigned m_1stEvtEntry{0};
 };
-#endif  // CORE_PODIODATASVC_H
+#endif  // CORE_PODIOLEGACYDATASVC_H
