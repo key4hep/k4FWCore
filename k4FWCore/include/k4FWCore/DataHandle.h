@@ -38,6 +38,9 @@ public:
    */
   void put(T* object);
 
+  // Temporary workaround for k4MarlinWrapper
+  const std::string getCollMetadataCellID(const unsigned int id);
+
   T* put(std::unique_ptr<T> object);
 
   /**
@@ -185,6 +188,12 @@ template <typename T> T* DataHandle<T>::createAndPut() {
   T* objectp = new T();
   this->put(objectp);
   return objectp;
+}
+
+// Temporary workaround for k4MarlinWrapper
+template <typename T> const std::string DataHandle<T>::getCollMetadataCellID(const unsigned int id) {
+  std::cerr << "k4FWCore: getCollMetadataCellID is not implemented!" << std::endl;
+  return "";
 }
 
 // temporary to allow property declaration
