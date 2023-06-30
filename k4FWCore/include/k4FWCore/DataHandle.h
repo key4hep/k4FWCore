@@ -77,7 +77,9 @@ DataHandle<T>::DataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode
 
     podio_data_service = dynamic_cast<PodioDataSvc*>(m_eds.get());
     if (nullptr != podio_data_service) {
-      m_dataPtr = new T();
+      if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
+        m_dataPtr = new T();
+      }
     } else {
       // This is the legacy implementation kept for a transition period
       PodioLegacyDataSvc* plds;
