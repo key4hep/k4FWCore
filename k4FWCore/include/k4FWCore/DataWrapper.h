@@ -8,8 +8,7 @@
 #include "podio/CollectionBase.h"
 
 // forward declaration
-template<typename T>
-class DataHandle;
+template <typename T> class DataHandle;
 
 class GAUDI_API DataWrapperBase : public DataObject {
 public:
@@ -22,15 +21,15 @@ public:
 
 template <class T> class GAUDI_API DataWrapper : public DataWrapperBase {
 public:
-  template<class T2>
-  friend class DataHandle;
+  template <class T2> friend class DataHandle;
+
 public:
   DataWrapper() : DataWrapperBase(), m_data(nullptr){};
   virtual ~DataWrapper();
 
-  const T* getData() { return m_data; }
-  void     setData(const T* data) { m_data = data; }
-  virtual void     resetData() { m_data = nullptr; }
+  const T*     getData() { return m_data; }
+  void         setData(const T* data) { m_data = data; }
+  virtual void resetData() { m_data = nullptr; }
 
 private:
   /// try to cast to collectionBase; may return nullptr;
@@ -38,7 +37,6 @@ private:
 
 private:
   const T* m_data;
-
 };
 
 template <class T> DataWrapper<T>::~DataWrapper() {

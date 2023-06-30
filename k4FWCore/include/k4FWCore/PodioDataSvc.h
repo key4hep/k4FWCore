@@ -4,15 +4,15 @@
 #include "GaudiKernel/DataSvc.h"
 #include "GaudiKernel/IConversionSvc.h"
 // PODIO
+#include <utility>
 #include "podio/CollectionBase.h"
 #include "podio/CollectionIDTable.h"
-#include "podio/ROOTFrameReader.h"
 #include "podio/Frame.h"
-#include <utility>
+#include "podio/ROOTFrameReader.h"
 // Forward declarations
 class DataWrapperBase;
 class PodioOutput;
-template<typename T> class MetaDataHandle;
+template <typename T> class MetaDataHandle;
 
 /** @class PodioEvtSvc EvtDataSvc.h
  *
@@ -21,9 +21,9 @@ template<typename T> class MetaDataHandle;
  *  @author B. Hegner
  */
 class PodioDataSvc : public DataSvc {
-  template<typename T>
-    friend class MetaDataHandle;
+  template <typename T> friend class MetaDataHandle;
   friend class PodioOutput;
+
 public:
   typedef std::vector<std::pair<std::string, podio::CollectionBase*>> CollRegistry;
 
@@ -31,8 +31,8 @@ public:
   virtual StatusCode reinitialize();
   virtual StatusCode finalize();
   virtual StatusCode clearStore();
-  virtual StatusCode i_setRoot( std::string root_path, IOpaqueAddress* pRootAddr );
-  virtual StatusCode i_setRoot( std::string root_path, DataObject* pRootObj );
+  virtual StatusCode i_setRoot(std::string root_path, IOpaqueAddress* pRootAddr);
+  virtual StatusCode i_setRoot(std::string root_path, DataObject* pRootObj);
 
   /// Standard Constructor
   PodioDataSvc(const std::string& name, ISvcLocator* svc);

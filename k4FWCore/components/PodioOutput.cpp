@@ -20,8 +20,8 @@ StatusCode PodioOutput::initialize() {
     return StatusCode::FAILURE;
   }
 
-  m_framewriter = std::make_unique<podio::ROOTFrameWriter>(m_filename); 
-  m_switch = KeepDropSwitch(m_outputCommands);
+  m_framewriter = std::make_unique<podio::ROOTFrameWriter>(m_filename);
+  m_switch      = KeepDropSwitch(m_outputCommands);
 
   return StatusCode::SUCCESS;
 }
@@ -34,7 +34,7 @@ StatusCode PodioOutput::execute() {
     auto collections = frame.getAvailableCollections();
     for (auto& collection_name : collections) {
       if (m_switch.isOn(collection_name)) {
-	m_collection_names_to_write.push_back(collection_name);
+        m_collection_names_to_write.push_back(collection_name);
       }
     }
     m_framewriter->writeFrame(frame, "events", m_collection_names_to_write);

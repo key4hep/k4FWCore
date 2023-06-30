@@ -34,11 +34,10 @@ public:
   virtual StatusCode finalize() final;
 
 private:
-
   /// Handle for the SimTrackerHits to be written
   DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitWriterHandle{"SimTrackerHits", Gaudi::DataHandle::Writer,
                                                                            this};
-  MetaDataHandle<std::string> m_cellIDHandle{m_simTrackerHitWriterHandle, "CellIDEncodingString",  Gaudi::DataHandle::Writer};
-
+  MetaDataHandle<std::string>                  m_cellIDHandle{m_simTrackerHitWriterHandle, "CellIDEncodingString",
+                                             Gaudi::DataHandle::Writer};
 };
 #endif /* K4FWCORE_K4FWCORETEST_CELLID_WRITER */

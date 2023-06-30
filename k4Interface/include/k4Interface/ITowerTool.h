@@ -32,7 +32,7 @@ public:
    *   @param[in] fillTowersCells Whether to fill maps of cells into towers, for later use in attachCells
    *   @return Size of the cell collection.
    */
-  virtual uint buildTowers(std::vector<std::vector<float>>& aTowers, bool fillTowersCells=true) = 0;
+  virtual uint buildTowers(std::vector<std::vector<float>>& aTowers, bool fillTowersCells = true) = 0;
   /**  Get the radius for the position calculation.
    *   @return Radius
    */
