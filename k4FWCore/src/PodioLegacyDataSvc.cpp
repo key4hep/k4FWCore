@@ -110,7 +110,8 @@ StatusCode PodioLegacyDataSvc::readCollection(const std::string& collName, int c
   return registerObject("/Event", "/" + collName, wrapper);
 }
 
-StatusCode PodioLegacyDataSvc::registerObject(std::string_view parentPath, std::string_view fullPath, DataObject* pObject) {
+StatusCode PodioLegacyDataSvc::registerObject(std::string_view parentPath, std::string_view fullPath,
+                                              DataObject* pObject) {
   DataWrapperBase* wrapper = dynamic_cast<DataWrapperBase*>(pObject);
   if (wrapper != nullptr) {
     podio::CollectionBase* coll = wrapper->collectionBase();

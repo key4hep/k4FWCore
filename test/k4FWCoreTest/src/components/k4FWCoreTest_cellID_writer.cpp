@@ -15,7 +15,7 @@ StatusCode k4FWCoreTest_cellID_writer::initialize() {
     return StatusCode::FAILURE;
   }
   m_cellIDHandle.put(cellIDtest);
-  
+
   return StatusCode::SUCCESS;
 }
 

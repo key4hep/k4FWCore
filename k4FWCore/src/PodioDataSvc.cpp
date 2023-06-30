@@ -34,7 +34,7 @@ StatusCode PodioDataSvc::initialize() {
   }
 
   if (m_reading_from_file) {
-    m_metadataframe = m_reader.readEntry("metadata",0);
+    m_metadataframe = m_reader.readEntry("metadata", 0);
   } else {
     m_metadataframe = podio::Frame();
   }
@@ -55,9 +55,9 @@ StatusCode PodioDataSvc::finalize() {
 
 StatusCode PodioDataSvc::clearStore() {
   // as the frame takes care of the ownership of the podio::Collections,
-  // make sure the DataWrappers don't cause a double delete 
-  for(auto wrapper :  m_podio_datawrappers){
-    wrapper->resetData();    
+  // make sure the DataWrappers don't cause a double delete
+  for (auto wrapper : m_podio_datawrappers) {
+    wrapper->resetData();
   }
   m_podio_datawrappers.clear();
 
@@ -85,11 +85,10 @@ StatusCode PodioDataSvc::i_setRoot(std::string root_path, DataObject* pRootObj) 
   return DataSvc::i_setRoot(root_path, pRootObj);
 }
 
-
 void PodioDataSvc::endOfRead() {
   StatusCode sc;
   if (m_eventMax != -1) {
-    if (m_eventNum++ >= m_eventMax-1) {  // we start counting at 0 thus the -1.
+    if (m_eventNum++ >= m_eventMax - 1) {  // we start counting at 0 thus the -1.
       info() << "Reached end of file with event " << m_eventMax << endmsg;
       IEventProcessor* eventProcessor;
       sc = service("ApplicationMgr", eventProcessor);
@@ -100,9 +99,7 @@ void PodioDataSvc::endOfRead() {
 }
 
 /// Standard Constructor
-PodioDataSvc::PodioDataSvc(const std::string& name, ISvcLocator* svc)
-    : DataSvc(name, svc) {
-}
+PodioDataSvc::PodioDataSvc(const std::string& name, ISvcLocator* svc) : DataSvc(name, svc) {}
 
 /// Standard Destructor
 PodioDataSvc::~PodioDataSvc() {}
@@ -110,7 +107,7 @@ PodioDataSvc::~PodioDataSvc() {}
 StatusCode PodioDataSvc::readCollection(const std::string& collName) {
   const podio::CollectionBase* collection(nullptr);
   collection = m_eventframe.get(collName);
-  if (collection == nullptr){
+  if (collection == nullptr) {
     error() << "Collection " << collName << " does not exist." << endmsg;
   }
   auto wrapper = new DataWrapper<podio::CollectionBase>;

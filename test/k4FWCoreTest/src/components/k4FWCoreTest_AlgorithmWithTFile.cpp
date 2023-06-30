@@ -30,7 +30,6 @@ StatusCode k4FWCoreTest_AlgorithmWithTFile::initialize() {
 }
 
 StatusCode k4FWCoreTest_AlgorithmWithTFile::execute() {
-
   auto* floatVector = m_vectorFloatHandle.createAndPut();
   floatVector->push_back(125.);
   floatVector->push_back(25.);
