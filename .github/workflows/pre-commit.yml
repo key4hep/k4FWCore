@@ -15,8 +15,9 @@ jobs:
           export PYTHONPATH=$(python -m site --user-site):$PYTHONPATH
           export PATH=/root/.local/bin:$PATH
           pip install --upgrade --user pip
-          pip install argparse --user
           pip install pre-commit --user
+          # Use virtualenv from the LCG release
+          pip uninstall --yes virtualenv
           pre-commit run --show-diff-on-failure \
             --color=always \
             --all-files
