@@ -77,7 +77,9 @@ DataHandle<T>::DataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode
 
     podio_data_service = dynamic_cast<PodioDataSvc*>(m_eds.get());
     if (nullptr != podio_data_service) {
-      m_dataPtr = new T();
+      if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
+        m_dataPtr = new T();
+      }
     } else {
       // This is the legacy implementation kept for a transition period
       PodioLegacyDataSvc* plds;
@@ -191,8 +193,13 @@ template <typename T> T* DataHandle<T>::createAndPut() {
 
 // Temporary workaround for k4MarlinWrapper
 template <typename T> const std::string DataHandle<T>::getCollMetadataCellID(const unsigned int id) {
-  std::cerr << "k4FWCore: getCollMetadataCellID is not implemented!" << std::endl;
-  return "";
+  if (auto lpds = dynamic_cast<PodioLegacyDataSvc*>(m_eds.get())) {
+    auto colMD = lpds->getProvider().getCollectionMetaData(id);
+    return colMD.getValue<std::string>("CellIDEncodingString");
+  }
+
+  throw GaudiException("getCollMetadataCellID is only implemented for the legacy data svc",
+                       "Cannot get collection metadata", StatusCode::FAILURE);
 }
 
 // temporary to allow property declaration
