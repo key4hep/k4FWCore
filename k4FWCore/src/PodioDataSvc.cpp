@@ -34,7 +34,12 @@ StatusCode PodioDataSvc::initialize() {
   }
 
   if (m_reading_from_file) {
-    m_metadataframe = m_reader.readEntry("metadata", 0);
+    if (auto metadata = m_reader.readEntry("metadata", 0)) {
+      m_metadataframe = std::move(metadata);
+    } else {
+      warning() << "Reading file without a 'metadata' category." << endmsg;
+      m_metadataframe = podio::Frame();
+    }
   } else {
     m_metadataframe = podio::Frame();
   }
