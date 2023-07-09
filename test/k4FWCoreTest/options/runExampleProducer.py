@@ -1,5 +1,5 @@
 from Gaudi.Configuration import *
-from Configurables import ExampleProducer
+from Configurables import FunctionalProducer
 from Configurables import EvtStoreSvc
 from Configurables import ApplicationMgr
 
@@ -12,7 +12,7 @@ out = PodioOutput("out")
 out.filename = "output_k4test_exampledata_twoproducer.root"
 out.outputCommands = ["keep *"]
 
-producer = ExampleProducer("ExampleProducer", OutputLocation="/ExampleInt", ExampleInt=5)
+producer = FunctionalProducer("FunctionalProducer", OutputLocation="/ExampleInt", ExampleInt=5)
 
 ApplicationMgr( TopAlg=[producer, out],
                 EvtSel="NONE",
