@@ -201,5 +201,5 @@ add_test(NAME TestExec
 set_test_env(TestExec)
 add_test(NAME ExampleProducer
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN})
+         COMMAND ${K4RUN} options/runExampleProducer.py)
 set_test_env(ExampleProducer)
