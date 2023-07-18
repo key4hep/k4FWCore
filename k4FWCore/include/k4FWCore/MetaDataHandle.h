@@ -18,11 +18,11 @@ public:
   MetaDataHandle(const Gaudi::DataHandle& handle, const std::string& descriptor, Gaudi::DataHandle::Mode a);
   ~MetaDataHandle();
 
-  const T get();
+  const T get() const;
   void    put(T);
 
 private:
-  std::string fullDescriptor();
+  std::string fullDescriptor() const;
   void        checkPodioDataSvc();
 
 private:
@@ -55,8 +55,8 @@ MetaDataHandle<T>::MetaDataHandle(const Gaudi::DataHandle& handle, const std::st
 }
 
 //---------------------------------------------------------------------------
-template <typename T> const T MetaDataHandle<T>::get() {
-  podio::Frame& frame = m_podio_data_service->getMetaDataFrame();
+template <typename T> const T MetaDataHandle<T>::get() const {
+  const auto& frame = m_podio_data_service->getMetaDataFrame();
   return frame.getParameter<T>(fullDescriptor());
 }
 
@@ -77,18 +77,17 @@ template <typename T> void MetaDataHandle<T>::put(T value) {
 }
 
 //---------------------------------------------------------------------------
-template <typename T> std::string MetaDataHandle<T>::fullDescriptor() {
-  std::string full_descriptor;
+template <typename T> std::string MetaDataHandle<T>::fullDescriptor() const {
   if (nullptr != m_dataHandle) {
-    full_descriptor = podio::collMetadataParamName(m_dataHandle->objKey(), m_descriptor);
+    auto full_descriptor = podio::collMetadataParamName(m_dataHandle->objKey(), m_descriptor);
     // remove the "/Event/" part of the collections' object key if in read mode
-    if (m_mode == Gaudi::DataHandle::Reader) {
+    if (m_mode == Gaudi::DataHandle::Reader && full_descriptor.find("/Event/") == 0u) {
       full_descriptor.erase(0, 7);
     }
-  } else {
-    full_descriptor = m_descriptor;
+    return full_descriptor;
   }
-  return full_descriptor;
+
+  return m_descriptor;
 }
 
 //---------------------------------------------------------------------------
