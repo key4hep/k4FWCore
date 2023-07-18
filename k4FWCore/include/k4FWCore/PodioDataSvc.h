@@ -54,7 +54,7 @@ public:
   /// Resets caches of reader and event store, increases event counter
   void endOfRead();
 
-private:
+  /// TODO: Make this private again after conversions have been properly solved
   podio::Frame& getMetaDataFrame() { return m_metadataframe; }
 
 private:
