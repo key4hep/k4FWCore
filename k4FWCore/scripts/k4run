@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
 import os
 import sys
 import argparse
 from multiprocessing import cpu_count
 import logging
-
 
 # these default properties are filtered as otherwise they will clutter the argument list
 FILTER_GAUDI_PROPS = [ "ContextService", "Cardinality", "Context", "CounterList", "EfficiencyRowFormat",
@@ -25,12 +23,21 @@ seen_files = set()
 option_db = {}
 
 
+# There is no way of knowing if parse_known_args() or parse_args() was called
+# so we'll track wether this is the first parsing or not
+first_run = True
 class LoadFromFile(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
+      global first_run
       if not values:
-        print('Error: missing gaudi options file.\n'
-        'Usage: k4run <options_file.py>, use --help to get a complete list of arguments')
-        sys.exit(1)
+        if not first_run:
+          print('Error: missing gaudi options file.\n'
+          'Usage: k4run <options_file.py>, use --help to get a complete list of arguments')
+          sys.exit(1)
+        first_run = False
+        return
+      first_run = False
+
       for wrapper in values:
         if wrapper.name in seen_files:
             return
@@ -111,16 +118,12 @@ if __name__ == "__main__":
                         help="Start Gaudi in parallel mode using NCPUS processes. "
                         "0 => serial mode (default), -1 => use all CPUs")
 
-    # Once to parse the files and another time to have the new parameters
+    # Once to parse the files and another time below to have the new parameters
     # in the namespace since parsing of the file happens when the namespace
     # has already been filled
     opts = parser.parse_known_args()
-    opts = parser.parse_args()
 
-    # print a doc line showing the configured algorithms
-    logger.info(' '.join(f'--> {alg.name()}' for alg in ApplicationMgr().TopAlg))
-
-    if opts.list:
+    if opts[0].list:
         from Gaudi import Configuration
         cfgDb = Configuration.cfgDb
         logger.info("Available components:\n%s", (21 * "="))
@@ -135,6 +138,11 @@ if __name__ == "__main__":
                 if not "Gaudi" in cfgDb[item]["lib"]:
                   print("  %s (from %s)" % (item, cfgDb[item]["lib"]))
         sys.exit()
+
+    opts = parser.parse_args()
+
+    # print a doc line showing the configured algorithms
+    logger.info(' '.join(f'--> {alg.name()}' for alg in ApplicationMgr().TopAlg))
 
     opts_dict = vars(opts)
     for optionName, propTuple in option_db.items():
