@@ -131,8 +131,8 @@ template <typename T> const T* DataHandle<T>::get() {
   DataObject* dataObjectp = nullptr;
   auto        sc          = m_eds->retrieveObject(DataObjectHandle<DataWrapper<T>>::fullKey().key(), dataObjectp);
 
-  if (LIKELY(sc.isSuccess())) {
-    if (UNLIKELY(!m_isGoodType && !m_isCollection)) {
+  if (sc.isSuccess()) {
+    if (!m_isGoodType && !m_isCollection) {
       // only do this once (if both are false after this, we throw exception)
       m_isGoodType = nullptr != dynamic_cast<DataWrapper<T>*>(dataObjectp);
       if (!m_isGoodType) {
@@ -142,7 +142,7 @@ template <typename T> const T* DataHandle<T>::get() {
         }
       }
     }
-    if (LIKELY(m_isGoodType)) {
+    if (m_isGoodType) {
       return static_cast<DataWrapper<T>*>(dataObjectp)->getData();
     } else if (m_isCollection) {
       // The reader does not know the specific type of the collection. So we need a reinterpret_cast if the handle was
