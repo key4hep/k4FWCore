@@ -1,33 +1,35 @@
 #include "Gaudi/Property.h"
-#include "GaudiAlg/GaudiAlgorithm.h"
+#include "Gaudi/Algorithm.h"
 #include "GaudiAlg/Producer.h"
+#include "k4FWCore/DataWrapper.h"
+
 #include "edm4hep/MCParticleCollection.h"
-#include "podio/UserDataCollection.h"
-#include "k4FWCore/DataHandle.h"
 
 #include <string>
 
+// This will always be Gaudi::Algorithm
 using BaseClass_t = Gaudi::Functional::Traits::BaseClass_t<Gaudi::Algorithm>;
 
-using colltype = DataWrapper<podio::UserDataCollection<float>>;
+// Which type of collection we are producing
+// Has to be wrapped in DataWrapper
+using colltype = DataWrapper<edm4hep::MCParticleCollection>;
 
-struct FunctionalProducer final : Gaudi::Functional::Producer<colltype(), BaseClass_t> {
+struct ExampleFunctionalProducer final : Gaudi::Functional::Producer<colltype(), BaseClass_t> {
 
-  FunctionalProducer( const std::string& name, ISvcLocator* svcLoc )
+  ExampleFunctionalProducer( const std::string& name, ISvcLocator* svcLoc )
     : Producer( name, svcLoc, KeyValue( "OutputLocation", "/ExampleInt" ) ) {}
 
+  // This is the function that will be called to produce the data
   colltype operator()() const override {
-    auto coll = new podio::UserDataCollection<float>();
-    coll->push_back(1.5);
-    coll->push_back(2.5);
-    colltype* dw = new DataWrapper<podio::UserDataCollection<float>>();
-    dw->setData(coll);
-    return *dw;
+    auto coll = std::make_unique<edm4hep::MCParticleCollection>();
+    coll->push_back({1, 2, 3, 4, 5, 6, {}, {}, {}, {}, {}, {}});
+    coll->push_back({2, 3, 4, 5, 6, 7, {}, {}, {}, {}, {}, {}});
+    colltype dw = DataWrapper<edm4hep::MCParticleCollection>(std::move(coll));
+    return dw;
   }
 
   Gaudi::Property<int> m_exampleInt{this, "ExampleInt", 3,
                                     "Example int to be produced"};
-
 };
  
-DECLARE_COMPONENT(FunctionalProducer)
+DECLARE_COMPONENT(ExampleFunctionalProducer)
