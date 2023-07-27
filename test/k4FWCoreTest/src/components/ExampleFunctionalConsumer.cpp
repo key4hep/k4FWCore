@@ -22,11 +22,10 @@ struct ExampleFunctionalConsumer final : Gaudi::Functional::Consumer<void(const 
     : Consumer( name, svcLoc, KeyValue("InputLocation", "MCParticles")) {}
 
   // This is the function that will be called to transform the data
-  // Note that the function has to be const, as well as all pointers to collections
+  // Note that the function has to be const, as well as the collections
   // we get from the input
   void operator()(const colltype& input) const override {
-    const auto* coll = input.getData();
-    const auto* ptr = dynamic_cast<const edm4hep::MCParticleCollection*>(coll);
+    auto* ptr = dynamic_cast<const edm4hep::MCParticleCollection*>(input.getData());
     int i = 0;
     for (const auto& p : *ptr) {
       assert(p.getPDG() == 1 + i);
