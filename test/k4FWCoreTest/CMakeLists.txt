@@ -36,6 +36,7 @@ set(k4fwcoretest_plugin_sources
   src/components/ExampleFunctionalConsumer.cpp
   src/components/ExampleFunctionalTransformer.cpp
   src/components/ExampleFunctionalProducerMultiple.cpp
+  src/components/ExampleFunctionalConsumerMultiple.cpp
 )
 
 gaudi_add_module(k4FWCoreTestPlugins
@@ -223,3 +224,9 @@ add_test(NAME ExampleFunctionalProducerMultiple
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
          COMMAND ${K4RUN} options/runExampleFunctionalProducerMultiple.py)
 set_test_env(ExampleFunctionalProducerMultiple)
+
+add_test(NAME ExampleFunctionalConsumerMultiple
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} options/runExampleFunctionalProducerMultiple.py)
+set_test_env(ExampleFunctionalConsumerMultiple)
+set_tests_properties(ExampleFunctionalConsumerMultiple PROPERTIES DEPENDS ExampleFunctionalProducerMultiple)
