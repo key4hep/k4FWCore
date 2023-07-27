@@ -26,7 +26,7 @@ struct ExampleFunctionalConsumer final : Gaudi::Functional::Consumer<void(const 
   // we get from the input
   void operator()(const colltype& input) const override {
     const auto* coll = input.getData();
-    const auto* ptr = reinterpret_cast<const edm4hep::MCParticleCollection*>(coll);
+    const auto* ptr = dynamic_cast<const edm4hep::MCParticleCollection*>(coll);
     int i = 0;
     for (const auto& p : *ptr) {
       assert(p.getPDG() == 1 + i);
