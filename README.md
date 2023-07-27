@@ -81,6 +81,9 @@ depending on how may input and output types they take:
 
 In all cases the implementation process is the same, we'll create a new class
 that will implement `operator()`, that is where our algorithm will be. Simple
-examples can be found in the test folder for each one of these three.
+examples can be found in the test folder for each one of these three. In
+addition, there are tests that have either multiple inputs and / or multiple
+outputs (like `ExampleFunctionalProducerMultiple`) that can be used as a
+template for the more typical case when working with multiple inputs or outputs.
 
 `GaudiAlg` is deprecated and will be removed in future versions of Gaudi.
