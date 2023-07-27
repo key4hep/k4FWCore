@@ -29,8 +29,7 @@ struct ExampleFunctionalTransformer final :
   // Note that the function has to be const, as well as all pointers to collections
   // we get from the input
   colltype_out operator()(const colltype_in& input) const override {
-    const auto* coll = input.getData();
-    const auto* ptr = dynamic_cast<const edm4hep::MCParticleCollection*>(coll);
+    auto* ptr = dynamic_cast<const edm4hep::MCParticleCollection*>(input.getData());
     auto coll_out = std::make_unique<edm4hep::MCParticleCollection>();
     for (const auto& p : *ptr) {
       auto new_particle = edm4hep::MutableMCParticle();
