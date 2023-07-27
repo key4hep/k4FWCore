@@ -43,9 +43,12 @@ public:
 
 public:
   DataWrapper() : m_data(nullptr){};
+  DataWrapper(std::unique_ptr<T> uptr) : m_data(uptr.get()){
+    uptr.release();
+  };
   virtual ~DataWrapper();
 
-  const T*     getData() { return m_data; }
+  const T*     getData() const { return m_data; }
   void         setData(const T* data) { m_data = data; }
   virtual void resetData() { m_data = nullptr; }
 
