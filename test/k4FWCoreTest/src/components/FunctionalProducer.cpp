@@ -13,8 +13,6 @@ using colltype = DataWrapper<podio::UserDataCollection<float>>;
 
 struct FunctionalProducer final : Gaudi::Functional::Producer<colltype(), BaseClass_t> {
 
-  mutable DataHandle<colltype> m_vectorFloatHandle{"VectorFloat", Gaudi::DataHandle::Writer, this};
-
   FunctionalProducer( const std::string& name, ISvcLocator* svcLoc )
     : Producer( name, svcLoc, KeyValue( "OutputLocation", "/ExampleInt" ) ) {}
 
