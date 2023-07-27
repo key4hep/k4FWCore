@@ -45,6 +45,7 @@ public:
   DataWrapper() : m_data(nullptr){};
   DataWrapper(std::unique_ptr<T> uptr) : m_data(uptr.get()){
     uptr.release();
+    is_owner = false;
   };
   virtual ~DataWrapper();
 
@@ -58,10 +59,11 @@ private:
 
 private:
   const T* m_data;
+  bool is_owner{true};
 };
 
 template <class T> DataWrapper<T>::~DataWrapper() {
-  if (m_data != nullptr)
+  if (is_owner && !m_data)
     delete m_data;
 }
 
