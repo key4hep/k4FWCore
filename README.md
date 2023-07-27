@@ -61,12 +61,26 @@ print(my_opts[0].foo)
 
 k4FWCore is a CMake project. After setting up the dependencies (use for example `source /cvmfs/sw.hsf.org/key4hep/setup.sh`)
 
-
-```
-mkdir build install
-cd build;
+``` bash
+mkdir build
+cd build
 cmake ..
 make install
 ```
 
+## Implementing algorithms
+k4FWCore uses (or will use) `Gaudi::Functional` for executing algorithms. In
+`Gaudi::Functional` we have three different base classes that we will use
+depending on how may input and output types they take:
+- The `Consumer` takes inputs but no outputs; can be used for reading
+- The `Producer` takes outputs but no inputs; can be used for generating
+  collections or events
+- The `Transformer` is the more general one (both the `Consumer` and the
+  `Producer` are a particular case of this one) and takes both inputs and
+  outputs
 
+In all cases the implementation process is the same, we'll create a new class
+that will implement `operator()`, that is where our algorithm will be. Simple
+examples can be found in the test folder for each one of these three.
+
+`GaudiAlg` is deprecated and will be removed in future versions of Gaudi.
