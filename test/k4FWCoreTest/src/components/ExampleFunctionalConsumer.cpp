@@ -25,7 +25,6 @@ struct ExampleFunctionalConsumer final : Gaudi::Functional::Consumer<void(const 
   // Note that the function has to be const, as well as all pointers to collections
   // we get from the input
   void operator()(const colltype& input) const override {
-    std::cout << "ExampleFunctionalConsumer: " << input << std::endl;
     const auto* coll = input.getData();
     const auto* ptr = reinterpret_cast<const edm4hep::MCParticleCollection*>(coll);
     int i = 0;
