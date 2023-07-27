@@ -12,11 +12,11 @@ from Configurables import PodioInput
 
 inp = PodioInput()
 inp.collections = [
-    "ExampleInt",
+    "MCParticles",
 ]
 
 consumer = ExampleFunctionalConsumer("ExampleFunctionalConsumer",
-                                     InputLocation="/Event/ExampleInt",
+                                     InputLocation="MCParticles",
                                      )
 
 ApplicationMgr(TopAlg=[inp, consumer],

@@ -17,7 +17,7 @@ using colltype = DataWrapper<edm4hep::MCParticleCollection>;
 struct ExampleFunctionalProducer final : Gaudi::Functional::Producer<colltype(), BaseClass_t> {
 
   ExampleFunctionalProducer( const std::string& name, ISvcLocator* svcLoc )
-    : Producer( name, svcLoc, KeyValue( "OutputLocation", "/ExampleInt" ) ) {}
+    : Producer( name, svcLoc, KeyValue( "OutputLocation", "MCParticles" ) ) {}
 
   // This is the function that will be called to produce the data
   colltype operator()() const override {

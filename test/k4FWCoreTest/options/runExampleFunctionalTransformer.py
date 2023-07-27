@@ -11,17 +11,17 @@ podioevent.input = "output_k4test_exampledata_producer.root"
 
 inp = PodioInput()
 inp.collections = [
-    "ExampleInt",
+    "MCParticles",
 ]
 
 out = PodioOutput("out")
 out.filename = "output_k4test_exampledata_transformer.root"
 # Use this to keep all the existing collections in the input file
-out.outputCommands = ["drop ExampleInt"]
+out.outputCommands = ["drop MCParticles"]
 
 transformer = ExampleFunctionalTransformer("ExampleFunctionalTransformer",
-                                           InputLocation="ExampleInt",
-                                           OutputLocation="ExampleDoubles")
+                                           InputLocation="MCParticles",
+                                           OutputLocation="NewMCParticles")
 
 ApplicationMgr(TopAlg=[inp, transformer, out],
                EvtSel="NONE",

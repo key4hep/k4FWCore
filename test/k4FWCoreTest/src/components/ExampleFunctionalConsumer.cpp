@@ -19,7 +19,7 @@ using colltype = DataWrapper<podio::CollectionBase>;
 struct ExampleFunctionalConsumer final : Gaudi::Functional::Consumer<void(const colltype& input), BaseClass_t> {
 
   ExampleFunctionalConsumer( const std::string& name, ISvcLocator* svcLoc )
-    : Consumer( name, svcLoc, KeyValue("InputLocation", "/ExampleInt")) {}
+    : Consumer( name, svcLoc, KeyValue("InputLocation", "MCParticles")) {}
 
   // This is the function that will be called to transform the data
   // Note that the function has to be const, as well as all pointers to collections
