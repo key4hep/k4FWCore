@@ -13,7 +13,7 @@ out.filename = "output_k4test_exampledata_producer.root"
 out.outputCommands = ["keep *"]
 
 producer = ExampleFunctionalProducer("ExampleFunctionalProducer",
-                                     OutputLocation="ExampleInt",
+                                     OutputLocation="MCParticles",
                                      ExampleInt=5)
 
 ApplicationMgr(TopAlg=[producer, out],

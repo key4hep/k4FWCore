@@ -22,8 +22,8 @@ struct ExampleFunctionalTransformer final :
   Gaudi::Functional::Transformer<colltype_out(const colltype_in&), BaseClass_t> {
 
   ExampleFunctionalTransformer( const std::string& name, ISvcLocator* svcLoc )
-    : Transformer( name, svcLoc, KeyValue("InputLocation", "/ExampleInt"),
-                   KeyValue( "OutputLocation", "/ExampleDouble" ) ) {}
+    : Transformer( name, svcLoc, KeyValue("InputLocation", "MCParticles"),
+                   KeyValue( "OutputLocation", "NewMCParticles" ) ) {}
 
   // This is the function that will be called to transform the data
   // Note that the function has to be const, as well as all pointers to collections
