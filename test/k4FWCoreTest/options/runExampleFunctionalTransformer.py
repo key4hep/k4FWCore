@@ -1,6 +1,6 @@
 from Gaudi.Configuration import INFO
 from Gaudi import Configurables
-from Configurables import FunctionalTransformer
+from Configurables import ExampleFunctionalTransformer
 from Configurables import ApplicationMgr
 from Configurables import k4DataSvc
 from Configurables import PodioOutput
@@ -19,9 +19,9 @@ out.filename = "output_k4test_exampledata_transformer.root"
 # Use this to keep all the existing collections in the input file
 out.outputCommands = ["drop ExampleInt"]
 
-transformer = FunctionalTransformer("FunctionalTransformer",
-                                    InputLocation="ExampleInt",
-                                    OutputLocation="ExampleDoubles")
+transformer = ExampleFunctionalTransformer("ExampleFunctionalTransformer",
+                                           InputLocation="ExampleInt",
+                                           OutputLocation="ExampleDoubles")
 
 ApplicationMgr(TopAlg=[inp, transformer, out],
                EvtSel="NONE",
