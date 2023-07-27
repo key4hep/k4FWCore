@@ -29,16 +29,16 @@ struct ExampleFunctionalTransformer final :
   // Note that the function has to be const, as well as all pointers to collections
   // we get from the input
   colltype_out operator()(const colltype_in& input) const override {
-    auto* ptr = dynamic_cast<const edm4hep::MCParticleCollection*>(input.getData());
+    auto* coll = dynamic_cast<const edm4hep::MCParticleCollection*>(input.getData());
     auto coll_out = std::make_unique<edm4hep::MCParticleCollection>();
-    for (const auto& p : *ptr) {
+    for (const auto& particle : *coll) {
       auto new_particle = edm4hep::MutableMCParticle();
-      new_particle.setPDG(p.getPDG() + 10);
-      new_particle.setGeneratorStatus(p.getGeneratorStatus() + 10);
-      new_particle.setSimulatorStatus(p.getSimulatorStatus() + 10);
-      new_particle.setCharge(p.getCharge() + 10);
-      new_particle.setTime(p.getTime() + 10);
-      new_particle.setMass(p.getMass() + 10);
+      new_particle.setPDG(particle.getPDG() + 10);
+      new_particle.setGeneratorStatus(particle.getGeneratorStatus() + 10);
+      new_particle.setSimulatorStatus(particle.getSimulatorStatus() + 10);
+      new_particle.setCharge(particle.getCharge() + 10);
+      new_particle.setTime(particle.getTime() + 10);
+      new_particle.setMass(particle.getMass() + 10);
       // new_particle.
       coll_out->push_back(new_particle);
     }

@@ -25,15 +25,15 @@ struct ExampleFunctionalConsumer final : Gaudi::Functional::Consumer<void(const 
   // Note that the function has to be const, as well as the collections
   // we get from the input
   void operator()(const colltype& input) const override {
-    auto* ptr = dynamic_cast<const edm4hep::MCParticleCollection*>(input.getData());
+    auto* coll = dynamic_cast<const edm4hep::MCParticleCollection*>(input.getData());
     int i = 0;
-    for (const auto& p : *ptr) {
-      assert(p.getPDG() == 1 + i);
-      assert(p.getGeneratorStatus() == 2 + i);
-      assert(p.getSimulatorStatus() == 3 + i);
-      assert(p.getCharge() == 4 + i);
-      assert(p.getTime() == 5 + i);
-      assert(p.getMass() == 6 + i);
+    for (const auto& particle : *coll) {
+      assert(particle.getPDG() == 1 + i);
+      assert(particle.getGeneratorStatus() == 2 + i);
+      assert(particle.getSimulatorStatus() == 3 + i);
+      assert(particle.getCharge() == 4 + i);
+      assert(particle.getTime() == 5 + i);
+      assert(particle.getMass() == 6 + i);
       i++;
     }
   }
