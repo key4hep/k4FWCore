@@ -4,8 +4,8 @@
 #include "k4FWCore/DataWrapper.h"
 
 #include "podio/CollectionBase.h"
-#include "podio/UserDataCollection.h"
 #include "edm4hep/MCParticleCollection.h"
+#include "edm4hep/MutableMCParticle.h"
 
 #include <string>
 
@@ -16,7 +16,7 @@ using BaseClass_t = Gaudi::Functional::Traits::BaseClass_t<Gaudi::Algorithm>;
 // Both have to be wrapped in DataWrapper
 // For reading, the collection type is always podio::CollectionBase
 using colltype_in = DataWrapper<podio::CollectionBase>;
-using colltype_out = DataWrapper<podio::UserDataCollection<double>>;
+using colltype_out = DataWrapper<edm4hep::MCParticleCollection>;
 
 struct ExampleFunctionalTransformer final :
   Gaudi::Functional::Transformer<colltype_out(const colltype_in&), BaseClass_t> {
@@ -30,12 +30,20 @@ struct ExampleFunctionalTransformer final :
   // we get from the input
   colltype_out operator()(const colltype_in& input) const override {
     const auto* coll = input.getData();
-    const auto* ptr = reinterpret_cast<const podio::UserDataCollection<float>*>(coll);
-    auto coll_out = std::make_unique<podio::UserDataCollection<double>>();
-    for (auto& val : *ptr) {
-      coll_out->push_back(val);
+    const auto* ptr = reinterpret_cast<const edm4hep::MCParticleCollection*>(coll);
+    auto coll_out = std::make_unique<edm4hep::MCParticleCollection>();
+    for (const auto& p : *ptr) {
+      auto new_particle = edm4hep::MutableMCParticle();
+      new_particle.setPDG(p.getPDG() + 10);
+      new_particle.setGeneratorStatus(p.getGeneratorStatus() + 10);
+      new_particle.setSimulatorStatus(p.getSimulatorStatus() + 10);
+      new_particle.setCharge(p.getCharge() + 10);
+      new_particle.setTime(p.getTime() + 10);
+      new_particle.setMass(p.getMass() + 10);
+      // new_particle.
+      coll_out->push_back(new_particle);
     }
-    colltype_out dw = DataWrapper<podio::UserDataCollection<double>>(std::move(coll_out));
+    colltype_out dw = DataWrapper<edm4hep::MCParticleCollection>(std::move(coll_out));
     return dw;
   }
 
