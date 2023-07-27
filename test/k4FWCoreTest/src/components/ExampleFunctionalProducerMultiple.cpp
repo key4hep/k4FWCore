@@ -29,9 +29,9 @@ struct ExampleFunctionalProducerMultiple final : Gaudi::Functional::Producer<std
                 {
                 KeyValue( "OutputLocationFloat", "VectorFloat" ),
                 KeyValue( "OutputLocationParticles", "MCParticles" ),
-                KeyValue( "OutputLocation1", "SimTrackerHits" ),
-                KeyValue( "OutputLocation1", "TrackerHits" ),
-                KeyValue( "OutputLocation1", "Tracks" )
+                KeyValue( "OutputLocationSimTrackerHits", "SimTrackerHits" ),
+                KeyValue( "OutputLocationTrackerHits", "TrackerHits" ),
+                KeyValue( "OutputLocationTracks", "Tracks" )
                 }
                 ) {}
 
