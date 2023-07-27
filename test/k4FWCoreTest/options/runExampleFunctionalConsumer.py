@@ -1,9 +1,10 @@
-from Gaudi.Configuration import *
-from Configurables import FunctionalConsumer
-from Configurables import EvtStoreSvc
+from Gaudi.Configuration import INFO
+from Gaudi import Configurables
+from Configurables import ExampleFunctionalConsumer
 from Configurables import ApplicationMgr
-
 from Configurables import k4DataSvc
+from Configurables import PodioInput
+
 podioevent = k4DataSvc("EventDataSvc")
 podioevent.input = "output_k4test_exampledata_producer.root"
 
@@ -14,9 +15,9 @@ inp.collections = [
     "ExampleInt",
 ]
 
-consumer = FunctionalConsumer("FunctionalConsumer",
-                              InputLocation="/Event/ExampleInt",
-                              )
+consumer = ExampleFunctionalConsumer("ExampleFunctionalConsumer",
+                                     InputLocation="/Event/ExampleInt",
+                                     )
 
 ApplicationMgr(TopAlg=[inp, consumer],
                EvtSel="NONE",

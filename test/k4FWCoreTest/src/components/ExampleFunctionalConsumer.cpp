@@ -4,7 +4,6 @@
 #include "k4FWCore/DataWrapper.h"
 
 #include "podio/CollectionBase.h"
-#include "podio/UserDataCollection.h"
 #include "edm4hep/MCParticleCollection.h"
 
 #include <string>
@@ -28,9 +27,16 @@ struct ExampleFunctionalConsumer final : Gaudi::Functional::Consumer<void(const 
   void operator()(const colltype& input) const override {
     std::cout << "ExampleFunctionalConsumer: " << input << std::endl;
     const auto* coll = input.getData();
-    const auto* ptr = reinterpret_cast<const podio::UserDataCollection<float>*>(coll);
-    for (const auto& val : *ptr) {
-      std::cout << val << std::endl;
+    const auto* ptr = reinterpret_cast<const edm4hep::MCParticleCollection*>(coll);
+    int i = 0;
+    for (const auto& p : *ptr) {
+      assert(p.getPDG() == 1 + i);
+      assert(p.getGeneratorStatus() == 2 + i);
+      assert(p.getSimulatorStatus() == 3 + i);
+      assert(p.getCharge() == 4 + i);
+      assert(p.getTime() == 5 + i);
+      assert(p.getMass() == 6 + i);
+      i++;
     }
   }
 
