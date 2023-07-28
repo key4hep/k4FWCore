@@ -95,6 +95,7 @@ if __name__ == "__main__":
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 
+    global parser
     parser = argparse.ArgumentParser(description="Run job in the Key4HEP framework")
     parser.add_argument("config_files", type=open, action=LoadFromFile, nargs="*",
                         help="Gaudi config (python) files describing the job")
