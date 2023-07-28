@@ -24,7 +24,7 @@ public:
   template <class T2> friend class DataHandle;
 
 public:
-  DataWrapper() : DataWrapperBase(), m_data(nullptr){};
+  DataWrapper() : m_data(nullptr){};
   virtual ~DataWrapper();
 
   const T*     getData() { return m_data; }
