@@ -39,8 +39,8 @@ struct ExampleFunctionalTransformerMultiple final : Gaudi::Functional::MultiTran
                   KeyValue("InputLocationTracks", "Tracks")
                 },
                 {
-                  KeyValue("OutputLocationFloat", "VectorFloat"),
-                  KeyValue("InputLocationParticles", "MCParticles")
+                  KeyValue("OutputLocationCounter", "Counter"),
+                  KeyValue("OutputLocationParticles", "MCParticles_out")
                 }
                 ) {}
 
@@ -61,11 +61,20 @@ struct ExampleFunctionalTransformerMultiple final : Gaudi::Functional::MultiTran
     auto particlesColl = dynamic_cast<const edm4hep::MCParticleCollection*>(particles.getData());
     auto newParticlesColl = std::make_unique<edm4hep::MCParticleCollection>();
     for (const auto& p : *particlesColl) {
-      newParticlesColl->push_back(p);
+      // We need to create a new particle since the current one is already in a collection
+
+      // We could create a new one
+      auto newParticle = newParticlesColl->create();
+      newParticle.setPDG(p.getPDG());
+      newParticle.setGeneratorStatus(p.getGeneratorStatus() + 1);
+      newParticle.setSimulatorStatus(p.getSimulatorStatus() + 1);
+      newParticle.setCharge(p.getCharge() + 2);
+      newParticle.setTime(p.getTime() + 3);
+      newParticle.setMass(p.getMass() + 4);
+
     }
     auto particleDW = DataWrapper<edm4hep::MCParticleCollection>(std::move(newParticlesColl));
     counter->push_back(particlesColl->size());
-
 
     auto simTrackerHitsColl = dynamic_cast<const edm4hep::SimTrackerHitCollection*>(simTrackerHits.getData());
     counter->push_back(simTrackerHitsColl->size());
@@ -79,7 +88,6 @@ struct ExampleFunctionalTransformerMultiple final : Gaudi::Functional::MultiTran
     auto counterDW = DataWrapper<podio::UserDataCollection<int>>(std::move(counter));
 
     return std::make_tuple(counterDW, particleDW);
-
   }
 
 };
