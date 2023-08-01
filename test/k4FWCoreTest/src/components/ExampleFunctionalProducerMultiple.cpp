@@ -24,14 +24,16 @@ using Track_t = DataWrapper<edm4hep::TrackCollection>;
 
 struct ExampleFunctionalProducerMultiple final : Gaudi::Functional::Producer<std::tuple<Float_t, Particle_t, SimTrackerHit_t, TrackerHit_t, Track_t>(), BaseClass_t> {
 
+  // The pairs in KeyValue can be changed from python and they correspond
+  // to the names of the output collections
   ExampleFunctionalProducerMultiple( const std::string& name, ISvcLocator* svcLoc )
     : Producer( name, svcLoc,
                 {
-                KeyValue( "OutputLocationFloat", "VectorFloat" ),
-                KeyValue( "OutputLocationParticles", "MCParticles" ),
-                KeyValue( "OutputLocationSimTrackerHits", "SimTrackerHits" ),
-                KeyValue( "OutputLocationTrackerHits", "TrackerHits" ),
-                KeyValue( "OutputLocationTracks", "Tracks" )
+                KeyValue( "OutputCollectionFloat", "VectorFloat" ),
+                KeyValue( "OutputCollectionParticles", "MCParticles" ),
+                KeyValue( "OutputCollectionSimTrackerHits", "SimTrackerHits" ),
+                KeyValue( "OutputCollectionTrackerHits", "TrackerHits" ),
+                KeyValue( "OutputCollectionTracks", "Tracks" )
                 }
                 ) {}
 
@@ -87,10 +89,15 @@ struct ExampleFunctionalProducerMultiple final : Gaudi::Functional::Producer<std
   }
 
 private:
+  // We can define any property we want that can be set from python
+  // and use it inside operator()
+  Gaudi::Property<int> m_exampleInt{this, "ExampleInt", 3,
+                                    "Example int that can be used in the algorithm"};
   // integer to add to the dummy values written to the edm
   Gaudi::Property<int> m_magicNumberOffset{this, "magicNumberOffset", 0,
                                            "Integer to add to the dummy values written to the edm"};
   int m_event{0};
+
 };
  
 DECLARE_COMPONENT(ExampleFunctionalProducerMultiple)

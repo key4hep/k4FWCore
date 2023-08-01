@@ -10,11 +10,11 @@ podioevent = k4DataSvc("EventDataSvc")
 from Configurables import PodioOutput
 out = PodioOutput("out")
 out.filename = "output_k4test_exampledata_producer.root"
-out.outputCommands = ["keep *"]
+# Collections can be dropped
+# out.outputCommands = ["drop *"]
 
-producer = ExampleFunctionalProducer("ExampleFunctionalProducer",
-                                     OutputLocation="MCParticles",
-                                     ExampleInt=5)
+
+producer = ExampleFunctionalProducer("ExampleFunctionalProducer")
 
 ApplicationMgr(TopAlg=[producer, out],
                EvtSel="NONE",

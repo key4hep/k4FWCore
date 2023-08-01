@@ -16,12 +16,12 @@ inp.collections = [
 
 out = PodioOutput("out")
 out.filename = "output_k4test_exampledata_transformer.root"
-# Use this to keep all the existing collections in the input file
+# The collections that we don't drop will also be present in the output file
 out.outputCommands = ["drop MCParticles"]
 
 transformer = ExampleFunctionalTransformer("ExampleFunctionalTransformer",
-                                           InputLocation="MCParticles",
-                                           OutputLocation="NewMCParticles")
+                                           InputCollection="MCParticles",
+                                           OutputCollection="NewMCParticles")
 
 ApplicationMgr(TopAlg=[inp, transformer, out],
                EvtSel="NONE",

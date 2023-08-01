@@ -32,15 +32,15 @@ struct ExampleFunctionalTransformerMultiple final : Gaudi::Functional::MultiTran
   ExampleFunctionalTransformerMultiple( const std::string& name, ISvcLocator* svcLoc )
     : MultiTransformer( name, svcLoc,
                 {
-                  KeyValue("InputLocationFloat", "VectorFloat"),
-                  KeyValue("InputLocationParticles", "MCParticles"),
-                  KeyValue("InputLocationSimTrackerHits", "SimTrackerHits"),
-                  KeyValue("InputLocationTrackerHits", "TrackerHits"),
-                  KeyValue("InputLocationTracks", "Tracks")
+                  KeyValue("InputCollectionFloat", "VectorFloat"),
+                  KeyValue("InputCollectionParticles", "MCParticles"),
+                  KeyValue("InputCollectionSimTrackerHits", "SimTrackerHits"),
+                  KeyValue("InputCollectionTrackerHits", "TrackerHits"),
+                  KeyValue("InputCollectionTracks", "Tracks")
                 },
                 {
-                  KeyValue("OutputLocationCounter", "Counter"),
-                  KeyValue("OutputLocationParticles", "MCParticles_out")
+                  KeyValue("OutputCollectionCounter", "Counter"),
+                  KeyValue("OutputCollectionParticles", "NewMCParticles")
                 }
                 ) {}
 
