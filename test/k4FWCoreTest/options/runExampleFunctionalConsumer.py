@@ -16,7 +16,7 @@ inp.collections = [
 ]
 
 consumer = ExampleFunctionalConsumer("ExampleFunctionalConsumer",
-                                     InputLocation="MCParticles",
+                                     InputCollection="MCParticles",
                                      )
 
 ApplicationMgr(TopAlg=[inp, consumer],

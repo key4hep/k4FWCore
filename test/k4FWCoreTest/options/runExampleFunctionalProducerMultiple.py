@@ -10,9 +10,16 @@ podioevent = k4DataSvc("EventDataSvc")
 from Configurables import PodioOutput
 out = PodioOutput("out")
 out.filename = "output_k4test_exampledata_producer_multiple.root"
-out.outputCommands = ["keep *"]
+# Collections can be dropped
+# out.outputCommands = ["drop *"]
 
-producer = ExampleFunctionalProducerMultiple("ExampleFunctionalProducerMultiple")
+producer = ExampleFunctionalProducerMultiple("ExampleFunctionalProducerMultiple",
+                                             OutputCollectionFloat="VectorFloat",
+                                             OutputCollectionParticles="MCParticles",
+                                             OutputCollectionSimTrackerHits="SimTrackerHits",
+                                             OutputCollectionTrackerHits="TrackerHits",
+                                             OutputCollectionTracks="Tracks",
+                                             ExampleInt=5)
 
 ApplicationMgr(TopAlg=[producer, out],
                EvtSel="NONE",

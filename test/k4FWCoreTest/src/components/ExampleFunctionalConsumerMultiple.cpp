@@ -25,14 +25,16 @@ struct ExampleFunctionalConsumerMultiple final : Gaudi::Functional::Consumer<voi
                                                                                   const colltype&,
                                                                                   const colltype&), BaseClass_t> {
 
+  // The pairs in KeyValue can be changed from python and they correspond
+  // to the names of the input collection
   ExampleFunctionalConsumerMultiple( const std::string& name, ISvcLocator* svcLoc )
     : Consumer( name, svcLoc,
                 {
-                  KeyValue("InputLocationFloat", "VectorFloat"),
-                  KeyValue("InputLocationParticles", "MCParticles"),
-                  KeyValue("InputLocationSimTrackerHits", "SimTrackerHits"),
-                  KeyValue("InputLocationTrackerHits", "TrackerHits"),
-                  KeyValue("InputLocationTracks", "Tracks"),
+                  KeyValue("InputCollectionFloat", "VectorFloat"),
+                  KeyValue("InputCollectionParticles", "MCParticles"),
+                  KeyValue("InputCollectionSimTrackerHits", "SimTrackerHits"),
+                  KeyValue("InputCollectionTrackerHits", "TrackerHits"),
+                  KeyValue("InputCollectionTracks", "Tracks"),
                 }
                 ) {}
 
