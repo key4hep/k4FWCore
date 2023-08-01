@@ -44,31 +44,54 @@ struct ExampleFunctionalConsumerMultiple final : Gaudi::Functional::Consumer<voi
                   const colltype& simTrackerHits,
                   const colltype& trackerHits,
                   const colltype& tracks) const override {
-    // auto* floatVectorColl = dynamic_cast<const podio::UserDataCollection<float>*>(floatVector.getData());
-    // assert(*floatVectorColl[0] == 125);
-    // assert(*floatVectorColl[1] == 25);
-    // assert(*floatVectorColl[2] == m_event);
+    auto* floatVectorColl = dynamic_cast<const podio::UserDataCollection<float>*>(floatVector.getData());
+    if (((*floatVectorColl)[0] != 125) ||
+        ((*floatVectorColl)[1] != 25) ||
+        ((*floatVectorColl)[2] != m_event)) {
+      fatal() << "Wrong data in floatVector collection";
+    }
 
-    // auto particlesColl = dynamic_cast<const edm4hep::MCParticleCollection*>(particles.getData());
-    // auto p4 = particlesColl[0].momentum();
-    // assert(p4.x == m_magicNumberOffset + m_event + 5);
-    // assert(p4.y == m_magicNumberOffset + 6);
-    // assert(p4.z == m_magicNumberOffset + 7);
-    // assert(particlesColl[0].getMass() == m_magicNumberOffset + m_event + 8);
+    auto* particlesColl = dynamic_cast<const edm4hep::MCParticleCollection*>(particles.getData());
+    auto p4 = (*particlesColl).momentum()[0];
+    if ((p4.x != m_magicNumberOffset + m_event + 5) ||
+        (p4.y != m_magicNumberOffset + 6) ||
+        (p4.z != m_magicNumberOffset + 7) ||
+        ((*particlesColl)[0].getMass() != m_magicNumberOffset + m_event + 8)) {
+      fatal() << "Wrong data in particles collection";
+    }
 
-    // auto simTrackerHitsColl = dynamic_cast<const edm4hep::SimTrackerHitCollection*>(simTrackerHits.getData());
-    // assert(simTrackerHitsColl[0].getPosition()[0] == 3);
-    // assert(simTrackerHitsColl[0].getPosition()[1] == 4);
-    // assert(simTrackerHitsColl[0].getPosition()[2] == 5);
+    auto* simTrackerHitsColl = dynamic_cast<const edm4hep::SimTrackerHitCollection*>(simTrackerHits.getData());
+    if (((*simTrackerHitsColl)[0].getPosition()[0] != 3) || 
+        ((*simTrackerHitsColl)[0].getPosition()[1] != 4) ||
+        ((*simTrackerHitsColl)[0].getPosition()[2] != 5)) {
+      fatal() << "Wrong data in simTrackerHits collection";
+    }
 
-    // auto trackerHitsColl = dynamic_cast<const edm4hep::TrackerHitCollection*>(trackerHits.getData());
-    // assert(trackerHitsColl[0].getPosition()[0] == 3);
-    // assert(trackerHitsColl[0].getPosition()[1] == 4);
-    // assert(trackerHitsColl[0].getPosition()[2] == 5);
+    auto trackerHitsColl = dynamic_cast<const edm4hep::TrackerHitCollection*>(trackerHits.getData());
+    if (((*trackerHitsColl)[0].getPosition()[0] != 3) ||
+        ((*trackerHitsColl)[0].getPosition()[1] != 4) ||
+        ((*trackerHitsColl)[0].getPosition()[2] != 5)) {
+      fatal() << "Wrong data in trackerHits collection";
+    }
 
-    // auto tracksColl = dynamic_cast<const edm4hep::TrackCollection*>(tracks.getData());
+    auto tracksColl = dynamic_cast<const edm4hep::TrackCollection*>(tracks.getData());
+    if (((*tracksColl)[0].getType() != 1) ||
+        ((*tracksColl)[0].getChi2() != 2.1) ||
+        ((*tracksColl)[0].getNdf() != 3) ||
+        ((*tracksColl)[0].getDEdx() != 4.1) ||
+        ((*tracksColl)[0].getDEdxError() != 5.1) ||
+        ((*tracksColl)[0].getRadiusOfInnermostHit() != 6.1) 
+        // ((*tracksColl)[0].getSubdetectorHitNumbers() != {1, 4})
+        ) {
+      fatal() << "Wrong data in tracks collection";
+    }
 
   }
+private:
+  // integer to add to the dummy values written to the edm
+  Gaudi::Property<int> m_magicNumberOffset{this, "magicNumberOffset", 0,
+                                           "Integer to add to the dummy values written to the edm"};
+  int m_event{0};
 
 };
  
