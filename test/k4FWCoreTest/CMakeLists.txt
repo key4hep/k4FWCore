@@ -218,7 +218,9 @@ add_test(NAME ExampleFunctionalTransformer
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
          COMMAND ${K4RUN} options/runExampleFunctionalTransformer.py)
 set_test_env(ExampleFunctionalTransformer)
-set_tests_properties(ExampleFunctionalTransformer PROPERTIES DEPENDS ExampleFunctionalProducer)
+set_tests_properties(ExampleFunctionalTransformer PROPERTIES
+                     PASS_REGULAR_EXPRESSION "Application Manager Terminated successfully with a user requested ScheduledStop"
+                     DEPENDS ExampleFunctionalProducer)
 
 add_test(NAME ExampleFunctionalProducerMultiple
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
