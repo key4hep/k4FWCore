@@ -28,12 +28,14 @@ struct ExampleFunctionalConsumer final : Gaudi::Functional::Consumer<void(const 
     auto* coll = dynamic_cast<const edm4hep::MCParticleCollection*>(input.getData());
     int i = 0;
     for (const auto& particle : *coll) {
-      assert(particle.getPDG() == 1 + i);
-      assert(particle.getGeneratorStatus() == 2 + i);
-      assert(particle.getSimulatorStatus() == 3 + i);
-      assert(particle.getCharge() == 4 + i);
-      assert(particle.getTime() == 5 + i);
-      assert(particle.getMass() == 6 + i);
+      if ((particle.getPDG() != 1 + i) ||
+          (particle.getGeneratorStatus() != 2 + i) ||
+          (particle.getSimulatorStatus() != 3 + i) ||
+          (particle.getCharge() != 4 + i) ||
+          (particle.getTime() != 5 + i) ||
+          (particle.getMass() != 6 + i)) {
+        fatal() << "Wrong data in MCParticle collection";
+      }
       i++;
     }
   }
