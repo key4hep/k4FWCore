@@ -44,7 +44,7 @@ struct ExampleFunctionalProducerMultiple final : Gaudi::Functional::Producer<std
     floatVector->push_back(125.);
     floatVector->push_back(25.);
     floatVector->push_back(m_event);
-    Float_t floatVector_dw = DataWrapper<podio::UserDataCollection<float>>(std::move(floatVector));
+    Float_t floatVectorDW = DataWrapper<podio::UserDataCollection<float>>(std::move(floatVector));
 
     auto particles = std::make_unique<edm4hep::MCParticleCollection>();
     auto particle = particles->create();
@@ -53,17 +53,17 @@ struct ExampleFunctionalProducerMultiple final : Gaudi::Functional::Producer<std
     p4.y     = m_magicNumberOffset + 6;
     p4.z     = m_magicNumberOffset + 7;
     particle.setMass(m_magicNumberOffset + m_event + 8);
-    Particle_t particle_dw = DataWrapper<edm4hep::MCParticleCollection>(std::move(particles));
+    Particle_t particleDW = DataWrapper<edm4hep::MCParticleCollection>(std::move(particles));
 
     auto simTrackerHits = std::make_unique<edm4hep::SimTrackerHitCollection>();
     auto hit = simTrackerHits->create();
     hit.setPosition({3, 4, 5});
-    SimTrackerHit_t simTrackerHit_dw = DataWrapper<edm4hep::SimTrackerHitCollection>(std::move(simTrackerHits)); 
+    SimTrackerHit_t simTrackerHitDW = DataWrapper<edm4hep::SimTrackerHitCollection>(std::move(simTrackerHits)); 
 
     auto trackerHits = std::make_unique<edm4hep::TrackerHitCollection>();
     auto trackerHit = trackerHits->create();
     trackerHit.setPosition({3, 4, 5});
-    TrackerHit_t trackerHit_dw = DataWrapper<edm4hep::TrackerHitCollection>(std::move(trackerHits));
+    TrackerHit_t trackerHitDW = DataWrapper<edm4hep::TrackerHitCollection>(std::move(trackerHits));
 
     auto tracks = std::make_unique<edm4hep::TrackCollection>();
     auto track  = tracks->create();
@@ -81,9 +81,9 @@ struct ExampleFunctionalProducerMultiple final : Gaudi::Functional::Producer<std
     // set associatons
     track.addToTrackerHits(trackerHit);
     track.addToTracks(track2);
-    Track_t track_dw = DataWrapper<edm4hep::TrackCollection>(std::move(tracks));
+    Track_t trackDW = DataWrapper<edm4hep::TrackCollection>(std::move(tracks));
 
-    return std::make_tuple(floatVector_dw, particle_dw, simTrackerHit_dw, trackerHit_dw, track_dw);
+    return std::make_tuple(floatVectorDW, particleDW, simTrackerHitDW, trackerHitDW, trackDW);
   }
 
 private:

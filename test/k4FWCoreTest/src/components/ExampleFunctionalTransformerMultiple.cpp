@@ -19,10 +19,10 @@ using BaseClass_t = Gaudi::Functional::Traits::BaseClass_t<Gaudi::Algorithm>;
 // Has to be wrapped in DataWrapper
 using colltype = DataWrapper<podio::CollectionBase>;
 
+// As a simple example, we'll write an integer and a collection of MCParticles
 using Counter_t = DataWrapper<podio::UserDataCollection<int>>;
 using Particle_t = DataWrapper<edm4hep::MCParticleCollection>;
 
-// As a simple example, we'll write an integer and a collection of MCParticles
 struct ExampleFunctionalTransformerMultiple final : Gaudi::Functional::MultiTransformer<std::tuple<Counter_t, Particle_t>(const colltype&,
                                                                                   const colltype&,
                                                                                   const colltype&,
@@ -63,7 +63,7 @@ struct ExampleFunctionalTransformerMultiple final : Gaudi::Functional::MultiTran
     for (const auto& p : *particlesColl) {
       newParticlesColl->push_back(p);
     }
-    auto particle_dw = DataWrapper<edm4hep::MCParticleCollection>(std::move(newParticlesColl));
+    auto particleDW = DataWrapper<edm4hep::MCParticleCollection>(std::move(newParticlesColl));
     counter->push_back(particlesColl->size());
 
 
@@ -76,9 +76,9 @@ struct ExampleFunctionalTransformerMultiple final : Gaudi::Functional::MultiTran
     auto tracksColl = dynamic_cast<const edm4hep::TrackCollection*>(tracks.getData());
     counter->push_back(tracksColl->size());
 
-    auto counter_dw = DataWrapper<podio::UserDataCollection<int>>(std::move(counter));
+    auto counterDW = DataWrapper<podio::UserDataCollection<int>>(std::move(counter));
 
-    return std::make_tuple(counter_dw, particle_dw);
+    return std::make_tuple(counterDW, particleDW);
 
   }
 
