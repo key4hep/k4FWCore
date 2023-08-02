@@ -17,11 +17,11 @@
  * limitations under the License.
  */
 #include "k4FWCore/PodioDataSvc.h"
-#include "k4FWCore/DataWrapper.h"
 #include "GaudiKernel/IConversionSvc.h"
 #include "GaudiKernel/IEventProcessor.h"
 #include "GaudiKernel/IProperty.h"
 #include "GaudiKernel/ISvcLocator.h"
+#include "k4FWCore/DataWrapper.h"
 
 #include "podio/CollectionBase.h"
 
