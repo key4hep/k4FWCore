@@ -96,7 +96,7 @@ if __name__ == "__main__":
     logger.addHandler(handler)
 
     global parser
-    parser = argparse.ArgumentParser(description="Run job in the Key4HEP framework")
+    parser = argparse.ArgumentParser(description="Run job in the Key4HEP framework", add_help=False)
     parser.add_argument("config_files", type=open, action=LoadFromFile, nargs="*",
                         help="Gaudi config (python) files describing the job")
     parser.add_argument("--dry-run", action="store_true",
@@ -139,6 +139,9 @@ if __name__ == "__main__":
                 if not "Gaudi" in cfgDb[item]["lib"]:
                   print("  %s (from %s)" % (item, cfgDb[item]["lib"]))
         sys.exit()
+
+    # add help manually here, if it is added earlier the parser exits after the first parse_arguments call
+    parser.add_argument("-h", "--help", action="help", default=argparse.SUPPRESS, help="show this help message and exit")
 
     opts = parser.parse_args()
 
