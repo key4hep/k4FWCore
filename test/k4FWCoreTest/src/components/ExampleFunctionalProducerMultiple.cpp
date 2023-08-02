@@ -1,13 +1,13 @@
-#include "Gaudi/Property.h"
 #include "Gaudi/Algorithm.h"
+#include "Gaudi/Property.h"
 #include "GaudiAlg/Producer.h"
 #include "k4FWCore/DataWrapper.h"
 
-#include "podio/UserDataCollection.h"
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/SimTrackerHitCollection.h"
 #include "edm4hep/TrackCollection.h"
 #include "edm4hep/TrackerHitCollection.h"
+#include "podio/UserDataCollection.h"
 
 #include <string>
 
@@ -16,26 +16,23 @@ using BaseClass_t = Gaudi::Functional::Traits::BaseClass_t<Gaudi::Algorithm>;
 
 // Which type of collections we are producing
 // They have to be wrapped in DataWrapper
-using Float_t = DataWrapper<podio::UserDataCollection<float>>;
-using Particle_t = DataWrapper<edm4hep::MCParticleCollection>;
+using Float_t         = DataWrapper<podio::UserDataCollection<float>>;
+using Particle_t      = DataWrapper<edm4hep::MCParticleCollection>;
 using SimTrackerHit_t = DataWrapper<edm4hep::SimTrackerHitCollection>;
-using TrackerHit_t = DataWrapper<edm4hep::TrackerHitCollection>;
-using Track_t = DataWrapper<edm4hep::TrackCollection>;
+using TrackerHit_t    = DataWrapper<edm4hep::TrackerHitCollection>;
+using Track_t         = DataWrapper<edm4hep::TrackCollection>;
 
-struct ExampleFunctionalProducerMultiple final : Gaudi::Functional::Producer<std::tuple<Float_t, Particle_t, SimTrackerHit_t, TrackerHit_t, Track_t>(), BaseClass_t> {
-
+struct ExampleFunctionalProducerMultiple final
+    : Gaudi::Functional::Producer<std::tuple<Float_t, Particle_t, SimTrackerHit_t, TrackerHit_t, Track_t>(),
+                                  BaseClass_t> {
   // The pairs in KeyValue can be changed from python and they correspond
   // to the names of the output collections
-  ExampleFunctionalProducerMultiple( const std::string& name, ISvcLocator* svcLoc )
-    : Producer( name, svcLoc,
-                {
-                KeyValue( "OutputCollectionFloat", "VectorFloat" ),
-                KeyValue( "OutputCollectionParticles", "MCParticles" ),
-                KeyValue( "OutputCollectionSimTrackerHits", "SimTrackerHits" ),
-                KeyValue( "OutputCollectionTrackerHits", "TrackerHits" ),
-                KeyValue( "OutputCollectionTracks", "Tracks" )
-                }
-                ) {}
+  ExampleFunctionalProducerMultiple(const std::string& name, ISvcLocator* svcLoc)
+      : Producer(
+            name, svcLoc,
+            {KeyValue("OutputCollectionFloat", "VectorFloat"), KeyValue("OutputCollectionParticles", "MCParticles"),
+             KeyValue("OutputCollectionSimTrackerHits", "SimTrackerHits"),
+             KeyValue("OutputCollectionTrackerHits", "TrackerHits"), KeyValue("OutputCollectionTracks", "Tracks")}) {}
 
   // This is the function that will be called to produce the data
   std::tuple<Float_t, Particle_t, SimTrackerHit_t, TrackerHit_t, Track_t> operator()() const override {
@@ -48,22 +45,22 @@ struct ExampleFunctionalProducerMultiple final : Gaudi::Functional::Producer<std
     floatVector->push_back(m_event);
     Float_t floatVectorDW = DataWrapper<podio::UserDataCollection<float>>(std::move(floatVector));
 
-    auto particles = std::make_unique<edm4hep::MCParticleCollection>();
-    auto particle = particles->create();
-    auto& p4 = particle.momentum();
-    p4.x     = m_magicNumberOffset + m_event + 5;
-    p4.y     = m_magicNumberOffset + 6;
-    p4.z     = m_magicNumberOffset + 7;
+    auto  particles = std::make_unique<edm4hep::MCParticleCollection>();
+    auto  particle  = particles->create();
+    auto& p4        = particle.momentum();
+    p4.x            = m_magicNumberOffset + m_event + 5;
+    p4.y            = m_magicNumberOffset + 6;
+    p4.z            = m_magicNumberOffset + 7;
     particle.setMass(m_magicNumberOffset + m_event + 8);
     Particle_t particleDW = DataWrapper<edm4hep::MCParticleCollection>(std::move(particles));
 
     auto simTrackerHits = std::make_unique<edm4hep::SimTrackerHitCollection>();
-    auto hit = simTrackerHits->create();
+    auto hit            = simTrackerHits->create();
     hit.setPosition({3, 4, 5});
-    SimTrackerHit_t simTrackerHitDW = DataWrapper<edm4hep::SimTrackerHitCollection>(std::move(simTrackerHits)); 
+    SimTrackerHit_t simTrackerHitDW = DataWrapper<edm4hep::SimTrackerHitCollection>(std::move(simTrackerHits));
 
     auto trackerHits = std::make_unique<edm4hep::TrackerHitCollection>();
-    auto trackerHit = trackerHits->create();
+    auto trackerHit  = trackerHits->create();
     trackerHit.setPosition({3, 4, 5});
     TrackerHit_t trackerHitDW = DataWrapper<edm4hep::TrackerHitCollection>(std::move(trackerHits));
 
@@ -91,13 +88,11 @@ struct ExampleFunctionalProducerMultiple final : Gaudi::Functional::Producer<std
 private:
   // We can define any property we want that can be set from python
   // and use it inside operator()
-  Gaudi::Property<int> m_exampleInt{this, "ExampleInt", 3,
-                                    "Example int that can be used in the algorithm"};
+  Gaudi::Property<int> m_exampleInt{this, "ExampleInt", 3, "Example int that can be used in the algorithm"};
   // integer to add to the dummy values written to the edm
   Gaudi::Property<int> m_magicNumberOffset{this, "magicNumberOffset", 0,
                                            "Integer to add to the dummy values written to the edm"};
-  int m_event{0};
-
+  int                  m_event{0};
 };
- 
+
 DECLARE_COMPONENT(ExampleFunctionalProducerMultiple)

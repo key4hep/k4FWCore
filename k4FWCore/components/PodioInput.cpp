@@ -32,7 +32,6 @@ PodioInput::PodioInput(const std::string& name, ISvcLocator* svcLoc) : Consumer(
 }
 
 void PodioInput::operator()() const {
-
   for (auto& collName : m_collectionNames) {
     debug() << "Registering collection to read " << collName << endmsg;
     if (m_podioDataSvc->readCollection(collName).isFailure()) {
