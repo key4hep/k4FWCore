@@ -42,7 +42,7 @@ class LoadFromFile(argparse.Action):
         if wrapper.name in seen_files:
             return
         seen_files.add(wrapper.name)
-        exec(open(wrapper.name).read(), globals())
+        exec(wrapper.read(), globals())
       # loop over all components that were configured in the options file
       # use dict.fromkeys so that the confs are sorted (Python >= 3.7)
       for conf in dict.fromkeys(ApplicationMgr.allConfigurables.values()):
