@@ -19,8 +19,8 @@
 #ifndef FWCORE_PODIOINPUT_H
 #define FWCORE_PODIOINPUT_H
 // Gaudi
-#include "GaudiAlg/Consumer.h"
 #include "Gaudi/Property.h"
+#include "GaudiAlg/Consumer.h"
 
 // STL
 #include <string>
@@ -39,8 +39,7 @@ using BaseClass_t = Gaudi::Functional::Traits::BaseClass_t<Gaudi::Algorithm>;
 
 class PodioInput final : public Gaudi::Functional::Consumer<void(), BaseClass_t> {
 public:
-
-  PodioInput( const std::string& name, ISvcLocator* svcLoc );
+  PodioInput(const std::string& name, ISvcLocator* svcLoc);
   void operator()() const override;
 
 private:

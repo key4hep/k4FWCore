@@ -43,7 +43,7 @@ public:
 
 public:
   DataWrapper() : m_data(nullptr){};
-  DataWrapper(std::unique_ptr<T> uptr) : m_data(uptr.get()){
+  DataWrapper(std::unique_ptr<T> uptr) : m_data(uptr.get()) {
     uptr.release();
     is_owner = false;
   };
@@ -59,7 +59,7 @@ private:
 
 private:
   const T* m_data;
-  bool is_owner{true};
+  bool     is_owner{true};
 };
 
 template <class T> DataWrapper<T>::~DataWrapper() {
