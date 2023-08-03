@@ -77,7 +77,17 @@ add_test(NAME CheckExampleEventData
 )
 set_test_env(CheckExampleEventData)
 set_tests_properties( CheckExampleEventData
-         PROPERTIES DEPENDS CreateExampleEventData)
+         PROPERTIES
+         DEPENDS CreateExampleEventData)
+
+add_test(NAME CheckExampleEventData_unbounded
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} options/checkExampleEventData_unbounded.py
+)
+set_test_env(CheckExampleEventData_unbounded)
+set_tests_properties( CheckExampleEventData_unbounded
+         PROPERTIES
+         DEPENDS CreateExampleEventData)
 
 add_test(NAME CreateExampleEventData_cellID
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
