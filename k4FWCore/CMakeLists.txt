@@ -3,6 +3,7 @@
 ################################################################################
 
 find_package(podio 0.16.3 REQUIRED)
+find_package(EDM4HEP)
 
 gaudi_install(SCRIPTS)
 
@@ -20,7 +21,7 @@ target_include_directories(k4FWCore PUBLIC
 file(GLOB k4fwcore_plugin_sources components/*.cpp)
 gaudi_add_module(k4FWCorePlugins
                  SOURCES ${k4fwcore_plugin_sources}
-                 LINK Gaudi::GaudiAlgLib Gaudi::GaudiKernel k4FWCore k4FWCore::k4Interface ROOT::Core ROOT::RIO ROOT::Tree)
+                 LINK Gaudi::GaudiAlgLib Gaudi::GaudiKernel k4FWCore k4FWCore::k4Interface ROOT::Core ROOT::RIO ROOT::Tree EDM4HEP::edm4hep)
 target_include_directories(k4FWCorePlugins PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
