@@ -5,6 +5,7 @@
 find_package(podio 0.16.3 REQUIRED)
 
 gaudi_install(SCRIPTS)
+gaudi_install(PYTHON)
 
 
 gaudi_add_library(k4FWCore
@@ -30,4 +31,11 @@ install(TARGETS k4FWCore k4FWCorePlugins
   RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT bin
   LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT shlib
   COMPONENT dev)
+
+# Copy python parsing file to genConfDir in Gaudi
+add_custom_command(
+        TARGET k4FWCore POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+                ${PROJECT_SOURCE_DIR}/k4FWCore/python/k4FWCore/parseArgs.py
+                ${CMAKE_CURRENT_BINARY_DIR}/genConfDir/k4FWCore/parseArgs.py)
 

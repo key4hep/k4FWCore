@@ -78,9 +78,8 @@ if __name__ == "__main__":
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 
-    global parser
-    parser = argparse.ArgumentParser(description="Run job in the Key4HEP framework", add_help=False)
-    parser.add_argument("config_files", type=open, action=LoadFromFile, nargs="*",
+    from k4FWCore.parseArgs import parser
+    parser.add_argument("config_files", type=open, action="store", nargs="*",
                         help="Gaudi config (python) files describing the job")
     parser.add_argument("--dry-run", action="store_true",
                         help="Do not actually run the job, just parse the config files")
