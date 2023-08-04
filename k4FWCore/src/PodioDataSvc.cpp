@@ -20,6 +20,7 @@
 #include "GaudiKernel/IConversionSvc.h"
 #include "GaudiKernel/IEventProcessor.h"
 #include "GaudiKernel/ISvcLocator.h"
+#include "GaudiKernel/IProperty.h"
 
 #include "k4FWCore/DataWrapper.h"
 
@@ -60,6 +61,18 @@ StatusCode PodioDataSvc::initialize() {
     }
   } else {
     m_metadataframe = podio::Frame();
+  }
+
+  IProperty* property;
+  auto sc = service("ApplicationMgr", property);
+  if (sc == StatusCode::FAILURE) {
+    error() << "Could not get ApplicationMgr properties" << std::endl;
+  }
+  Gaudi::Property<int> evtMax;
+  evtMax.assign(property->getProperty("EvtMax"));
+
+  if (evtMax == -1) {
+    m_unbounded = true;
   }
 
   return status;
@@ -109,9 +122,16 @@ StatusCode PodioDataSvc::i_setRoot(std::string root_path, DataObject* pRootObj) 
 }
 
 void PodioDataSvc::endOfRead() {
+  m_eventNum++;
+
+  // Only check if we read the last available event when running with n = -1
+  if (!m_unbounded) {
+    return;
+  }
+
   StatusCode sc;
   if (m_eventMax != -1) {
-    if (m_eventNum++ >= m_eventMax - 1) {  // we start counting at 0 thus the -1.
+    if (m_eventNum >= m_eventMax - 1) {  // we start counting at 0 thus the -1.
       info() << "Reached end of file with event " << m_eventMax << endmsg;
       IEventProcessor* eventProcessor;
       sc = service("ApplicationMgr", eventProcessor);
