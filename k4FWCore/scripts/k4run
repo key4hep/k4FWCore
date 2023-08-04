@@ -22,65 +22,48 @@ FILTER_GAUDI_PROPS = [ "ContextService", "Cardinality", "Context", "CounterList"
 seen_files = set()
 option_db = {}
 
+def load_file(file):
+  exec(file.read())
 
-# There is no way of knowing if parse_known_args() or parse_args() was called
-# so we'll track wether this is the first parsing or not
-first_run = True
-class LoadFromFile(argparse.Action):
-    def __call__(self, parser, namespace, values, option_string=None):
-      global first_run
-      if not values:
-        if not first_run:
-          print('Error: missing gaudi options file.\n'
-          'Usage: k4run <options_file.py>, use --help to get a complete list of arguments')
-          sys.exit(1)
-        first_run = False
-        return
-      first_run = False
 
-      for wrapper in values:
-        if wrapper.name in seen_files:
-            return
-        seen_files.add(wrapper.name)
-        exec(wrapper.read(), globals())
-      # loop over all components that were configured in the options file
-      # use dict.fromkeys so that the confs are sorted (Python >= 3.7)
-      for conf in dict.fromkeys(ApplicationMgr.allConfigurables.values()):
-        # skip public tools and the applicationmgr itself
-        if "ToolSvc" in conf.name() or "ApplicationMgr" in conf.name():
-          continue
-        props = conf.getPropertiesWithDescription() #dict propertyname: (propertyvalue, propertydescription)
-        for prop in props:
-          # only add arguments for relevant properties
-          if prop in FILTER_GAUDI_PROPS or "Audit" in prop or hasattr(props[prop][0], '__slots__'):
+def add_arguments(parser, app_mgr):
+  configurables = app_mgr.allConfigurables.values()
+  for conf in configurables:
+    # skip public tools and the applicationmgr itself
+    if "ToolSvc" in conf.name() or "ApplicationMgr" in conf.name():
+      continue
+    props = conf.getPropertiesWithDescription() #dict propertyname: (propertyvalue, propertydescription)
+    for prop in props:
+      # only add arguments for relevant properties
+      if prop in FILTER_GAUDI_PROPS or "Audit" in prop or hasattr(props[prop][0], '__slots__'):
+        continue
+      propvalue = props[prop][0]
+
+      # if it is set to "no value" it hasn't been touched in the options file
+      if propvalue == conf.propertyNoValue:
+          propvalue = conf.getDefaultProperty(prop) # thus get the default value
+      proptype = type(props[prop][0])
+      # if the property is a list of something, we need to set argparse nargs to '+'
+      propnargs = "?"
+      if proptype == list:
+          # tricky edgecase: if the default is an empty list there is no way to get the type
+          if len(propvalue) == 0:
+          # just skip for now
+          #print("Warning: argparse cannot deduce type for property %s of %s. Needs to be set in options file." % (prop, conf.name()))
             continue
-          propvalue = props[prop][0]
+          else:
+            # deduce type from first item of the list
+            proptype = type(propvalue[0])
+          propnargs = "+"
 
-          # if it is set to "no value" it hasn't been touched in the options file
-          if propvalue == conf.propertyNoValue:
-              propvalue = conf.getDefaultProperty(prop) # thus get the default value
-          proptype = type(props[prop][0])
-          # if the property is a list of something, we need to set argparse nargs to '+'
-          propnargs = "?"
-          if proptype == list:
-              # tricky edgecase: if the default is an empty list there is no way to get the type
-              if len(propvalue) == 0:
-              # just skip for now
-              #print("Warning: argparse cannot deduce type for property %s of %s. Needs to be set in options file." % (prop, conf.name()))
-                continue
-              else:
-                # deduce type from first item of the list
-                proptype = type(propvalue[0])
-              propnargs = "+"
-
-          # add the argument twice, once as "--PodioOutput.filename"
-          # and once as "--filename.PodioOutput"
-          propName = conf.name() + '.' + prop
-          propNameReversed = prop + '.' + conf.name()
-          option_db[propName] = (conf, propName)
-          parser.add_argument( "--%s" % propName, "--%s" % propNameReversed, type=proptype, help=props[prop][1],
-              nargs=propnargs,
-              default=propvalue)
+      # add the argument twice, once as "--PodioOutput.filename"
+      # and once as "--filename.PodioOutput"
+      propName = conf.name() + '.' + prop
+      propNameReversed = prop + '.' + conf.name()
+      option_db[propName] = (conf, propName)
+      parser.add_argument( f"--{propName}", f"--{propNameReversed}", type=proptype, help=props[prop][1],
+          nargs=propnargs,
+          default=propvalue)
 
 
 if __name__ == "__main__":
@@ -139,6 +122,18 @@ if __name__ == "__main__":
                 if not "Gaudi" in cfgDb[item]["lib"]:
                   print("  %s (from %s)" % (item, cfgDb[item]["lib"]))
         sys.exit()
+
+    if len(opts[0].config_files) == 0:
+      print('Error: missing gaudi options file.\n'
+      'Usage: k4run <options_file.py>, use --help to get a complete list of arguments')
+      sys.exit(1)
+
+    for file in opts[0].config_files:
+      load_file(file)
+
+    # ApplicationMgr is a singleton
+    from Configurables import ApplicationMgr
+    add_arguments(parser, ApplicationMgr())
 
     # add help manually here, if it is added earlier the parser exits after the first parse_arguments call
     parser.add_argument("-h", "--help", action="help", default=argparse.SUPPRESS, help="show this help message and exit")
