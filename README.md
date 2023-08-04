@@ -41,8 +41,9 @@ options:
   --gdb                 Attach gdb debugger
   --ncpus NCPUS         Start Gaudi in parallel mode using NCPUS processes. 0 => serial mode (default), -1 => use all CPUs
 ```
-When supplied with a Gaudi steering file `k4run --help file.py` also shows the settable properties of the Gaudi algorithms used in the file. Additionally, it is possible to add further arguments and use them in the steering file by using the python `argparse.ArgumentParser` shared by `k4run`.
+When supplied with a Gaudi steering file `k4run --help file.py` also shows the settable properties of the Gaudi algorithms used in the file. Additionally, it is possible to add further arguments and use them in the steering file by using the Python `argparse.ArgumentParser` shared by `k4run`.
 ```python
+from k4FWCore.parseArgs import parser
 parser.add_argument("-f", "--foo", type=int, help="hello world")
 my_opts = parser.parse_known_args()
 print(my_opts[0].foo)
