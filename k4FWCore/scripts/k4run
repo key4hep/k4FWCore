@@ -27,8 +27,7 @@ def load_file(file):
 
 
 def add_arguments(parser, app_mgr):
-  configurables = app_mgr.allConfigurables.values()
-  for conf in configurables:
+  for conf in dict.fromkeys(app_mgr.allConfigurables.values()):
     # skip public tools and the applicationmgr itself
     if "ToolSvc" in conf.name() or "ApplicationMgr" in conf.name():
       continue
