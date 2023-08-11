@@ -122,7 +122,8 @@ if __name__ == "__main__":
                   print("  %s (from %s)" % (item, cfgDb[item]["lib"]))
         sys.exit()
 
-    if len(opts[0].config_files) == 0:
+    if len(opts[0].config_files) == 0 \
+            and ('-h' not in opts[1] and '--help' not in opts[1]):
       print('Error: missing gaudi options file.\n'
       'Usage: k4run <options_file.py>, use --help to get a complete list of arguments')
       sys.exit(1)
