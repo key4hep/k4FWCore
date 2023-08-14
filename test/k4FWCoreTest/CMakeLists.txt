@@ -144,3 +144,10 @@ add_test(NAME Testk4runCustomArguments
 set_test_env(Testk4runCustomArguments)
 set_tests_properties(Testk4runCustomArguments
   PROPERTIES PASS_REGULAR_EXPRESSION "The answer is 42")
+
+add_test(NAME Testk4runVerboseOutput
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} --verbose options/TestArgs.py)
+set_test_env(Testk4runVerboseOutput)
+set_tests_properties(Testk4runVerboseOutput
+  PROPERTIES PASS_REGULAR_EXPRESSION " VERBOSE ")

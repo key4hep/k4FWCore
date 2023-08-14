@@ -148,6 +148,7 @@ if __name__ == "__main__":
       propTuple[0].setProp(propTuple[1].rsplit(".",1)[1], opts_dict[optionName])
 
     if opts.verbose:
+      from Gaudi.Configuration import VERBOSE
       ApplicationMgr().OutputLevel = VERBOSE
     if opts.num_events is not None:
       ApplicationMgr().EvtMax = opts.num_events
