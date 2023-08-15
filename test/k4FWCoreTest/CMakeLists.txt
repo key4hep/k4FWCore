@@ -151,3 +151,10 @@ add_test(NAME Testk4runVerboseOutput
 set_test_env(Testk4runVerboseOutput)
 set_tests_properties(Testk4runVerboseOutput
   PROPERTIES PASS_REGULAR_EXPRESSION " VERBOSE ")
+
+add_test(NAME Testk4runHelpOnly
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} --help)
+set_test_env(Testk4runHelpOnly)
+set_tests_properties(Testk4runHelpOnly
+  PROPERTIES PASS_REGULAR_EXPRESSION "show this help message and exit")
