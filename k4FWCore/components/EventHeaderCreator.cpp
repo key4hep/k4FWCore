@@ -5,7 +5,7 @@ DECLARE_COMPONENT(EventHeaderCreator)
 
 EventHeaderCreator::EventHeaderCreator(const std::string& name, ISvcLocator* svcLoc)
     : GaudiAlgorithm(name, svcLoc) {
-      declareProperty("EventHeaderColllection", m_headerCol);
+      declareProperty("EventHeaderCollection", m_headerCol, "Name of the EventHeaderCollection that will be stored in the output root file.");
     }
 
 StatusCode EventHeaderCreator::initialize() {
