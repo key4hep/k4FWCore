@@ -1,7 +1,7 @@
 from Gaudi.Configuration import *
 
-from Configurables import EventHeaderFiller
-eventHeaderFiller = EventHeaderFiller("eventHeaderFiller",
+from Configurables import EventHeaderCreator
+eventHeaderCreator = EventHeaderCreator("eventHeaderCreator",
     runNumber = 42,
     eventNumberOffset = 42,
     OutputLevel=DEBUG)
@@ -9,7 +9,7 @@ eventHeaderFiller = EventHeaderFiller("eventHeaderFiller",
 from Configurables import ApplicationMgr
 ApplicationMgr(
     TopAlg = [
-              eventHeaderFiller,
+              eventHeaderCreator,
               ],
     EvtSel = 'NONE',
     EvtMax   = 2,

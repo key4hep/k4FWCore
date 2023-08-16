@@ -1,19 +1,19 @@
-#include "EventHeaderFiller.h"
+#include "EventHeaderCreator.h"
 #include "edm4hep/EventHeaderCollection.h"
 
-DECLARE_COMPONENT(EventHeaderFiller)
+DECLARE_COMPONENT(EventHeaderCreator)
 
-EventHeaderFiller::EventHeaderFiller(const std::string& name, ISvcLocator* svcLoc)
+EventHeaderCreator::EventHeaderCreator(const std::string& name, ISvcLocator* svcLoc)
     : GaudiAlgorithm(name, svcLoc) {
       declareProperty("EventHeaderColllection", m_headerCol);
     }
 
-StatusCode EventHeaderFiller::initialize() {
+StatusCode EventHeaderCreator::initialize() {
   if (GaudiAlgorithm::initialize().isFailure()) return StatusCode::FAILURE;
   return StatusCode::SUCCESS;
 }
 
-StatusCode EventHeaderFiller::execute() {
+StatusCode EventHeaderCreator::execute() {
   static int eventNumber = 0;
   debug() << "Filling EventHeader with runNumber " << int(m_runNumber) << " and eventNumber " << eventNumber + m_eventNumberOffset << endmsg;
   auto headers = m_headerCol.createAndPut();
@@ -23,7 +23,7 @@ StatusCode EventHeaderFiller::execute() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode EventHeaderFiller::finalize() {
+StatusCode EventHeaderCreator::finalize() {
   if (GaudiAlgorithm::finalize().isFailure()) return StatusCode::FAILURE;
   return StatusCode::SUCCESS;
 }

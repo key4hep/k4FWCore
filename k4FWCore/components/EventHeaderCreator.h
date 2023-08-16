@@ -1,21 +1,21 @@
-#ifndef K4FWCORE_EVENTHEADERFILLER
-#define K4FWCORE_EVENTHEADERFILLER
+#ifndef K4FWCORE_EVENTHEADERCREATOR
+#define K4FWCORE_EVENTHEADERCREATOR
 
 #include "k4FWCore/DataHandle.h"
 #include "GaudiAlg/GaudiAlgorithm.h"
 
 /***
- * Algortihm that fills the EventHeader with eventNumber and runNumber
+ * Algortihm that creates an EventHeader collection and fills it with eventNumber and runNumber
  */
 
 namespace edm4hep {
   class EventHeaderCollection;
 }
 
-class EventHeaderFiller : public GaudiAlgorithm {
+class EventHeaderCreator : public GaudiAlgorithm {
 
 public:
-  EventHeaderFiller(const std::string& name, ISvcLocator* svcLoc);
+  EventHeaderCreator(const std::string& name, ISvcLocator* svcLoc);
 
   virtual StatusCode initialize();
   virtual StatusCode execute();
