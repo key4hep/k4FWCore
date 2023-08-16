@@ -142,3 +142,25 @@ add_test(NAME TestEventHeaderFiller
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
          COMMAND ${K4RUN} options/cfillEventHeader.py)
 set_test_env(TestEventHeaderFiller)
+
+add_test(NAME Testk4runCustomArguments
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} --foo=42 options/TestArgs.py)
+set_test_env(Testk4runCustomArguments)
+set_tests_properties(Testk4runCustomArguments
+  PROPERTIES PASS_REGULAR_EXPRESSION "The answer is 42")
+
+add_test(NAME Testk4runVerboseOutput
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} --verbose options/TestArgs.py)
+set_test_env(Testk4runVerboseOutput)
+set_tests_properties(Testk4runVerboseOutput
+  PROPERTIES PASS_REGULAR_EXPRESSION " VERBOSE ")
+
+add_test(NAME Testk4runHelpOnly
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} --help)
+set_test_env(Testk4runHelpOnly)
+set_tests_properties(Testk4runHelpOnly
+  PROPERTIES PASS_REGULAR_EXPRESSION "show this help message and exit")
+
