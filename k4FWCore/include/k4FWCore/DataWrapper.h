@@ -43,6 +43,10 @@ public:
 
 public:
   DataWrapper() : m_data(nullptr){};
+  DataWrapper(T&& coll) {
+    m_data    = new T(std::move(coll));
+    is_owner = true;
+  }
   DataWrapper(std::unique_ptr<T> uptr) : m_data(uptr.get()) {
     uptr.release();
     is_owner = false;
