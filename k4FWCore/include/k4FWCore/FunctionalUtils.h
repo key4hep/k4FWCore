@@ -9,9 +9,9 @@
 // Gaudi::Functional algorithms
 struct BaseClass_t {
   template<typename T>
-  using OutputHandle_t = DataObjectWriteHandle<DataWrapper<T>>;
   // template<typename T>
   // using InputHandle_t = DataObjectReadHandle<DataWrapper<T>>;
+  using OutputHandle = DataObjectWriteHandle<DataWrapper<T>>;
   
   using BaseClass = Gaudi::Algorithm;
 };

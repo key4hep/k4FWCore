@@ -1,8 +1,6 @@
-#include <GaudiKernel/DataObjectHandle.h>
 #include "Gaudi/Algorithm.h"
 #include "Gaudi/Property.h"
 #include "GaudiAlg/Producer.h"
-#include "GaudiKernel/DataObjectHandle.h"
 #include "k4FWCore/FunctionalUtils.h"
 
 #include "edm4hep/MCParticleCollection.h"
