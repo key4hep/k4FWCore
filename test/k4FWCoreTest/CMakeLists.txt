@@ -211,7 +211,7 @@ set_test_env(ExampleFunctionalProducer)
 
 add_test(NAME ExampleFunctionalConsumer
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} options/runExampleFunctionalProducer.py)
+         COMMAND ${K4RUN} options/runExampleFunctionalConsumer.py)
 set_test_env(ExampleFunctionalConsumer)
 set_tests_properties(ExampleFunctionalConsumer PROPERTIES DEPENDS ExampleFunctionalProducer)
 
@@ -230,7 +230,7 @@ set_test_env(ExampleFunctionalProducerMultiple)
 
 add_test(NAME ExampleFunctionalConsumerMultiple
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} options/runExampleFunctionalProducerMultiple.py)
+         COMMAND ${K4RUN} options/runExampleFunctionalConsumerMultiple.py)
 set_test_env(ExampleFunctionalConsumerMultiple)
 set_tests_properties(ExampleFunctionalConsumerMultiple PROPERTIES DEPENDS ExampleFunctionalProducerMultiple)
 
