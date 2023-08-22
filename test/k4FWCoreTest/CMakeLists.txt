@@ -80,9 +80,18 @@ set_tests_properties( CheckExampleEventData
          PROPERTIES
          DEPENDS CreateExampleEventData)
 
+add_test(NAME CheckExampleEventData_toolong
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} -n 999 options/checkExampleEventData.py
+)
+set_test_env(CheckExampleEventData_toolong)
+set_tests_properties( CheckExampleEventData_toolong
+         PROPERTIES PASS_REGULAR_EXPRESSION "Application Manager Terminated successfully with a user requested ScheduledStop"
+         DEPENDS CreateExampleEventData)
+
 add_test(NAME CheckExampleEventData_unbounded
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} options/checkExampleEventData_unbounded.py
+         COMMAND ${K4RUN} -n -1 options/checkExampleEventData.py
 )
 set_test_env(CheckExampleEventData_unbounded)
 set_tests_properties( CheckExampleEventData_unbounded

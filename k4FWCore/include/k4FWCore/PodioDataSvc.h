@@ -85,7 +85,8 @@ private:
   /// Counter of the event number
   int m_eventNum{0};
   /// Number of events in the file / to process
-  int m_eventMax{-1};
+  int m_availableEventMax{-1};
+  int m_requestedEventMax{-1};
   /// Whether reading from file at all
   bool m_reading_from_file{false};
 
@@ -101,7 +102,6 @@ protected:
   /// Jump to nth events at the beginning. Set by option FirstEventEntry
   /// This option is helpful when we want to debug an event in the middle of a file
   unsigned m_1stEvtEntry{0};
-  /// If running with --num-event=-1
-  bool m_unbounded{false};
+  bool m_bounds_check_needed{true};
 };
 #endif  // CORE_PODIODATASVC_H
