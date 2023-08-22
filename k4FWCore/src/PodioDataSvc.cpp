@@ -79,7 +79,6 @@ StatusCode PodioDataSvc::initialize() {
     m_bounds_check_needed = false;
   }
 
-
   return status;
 }
 /// Service reinitialisation
