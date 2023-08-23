@@ -133,13 +133,12 @@ void PodioDataSvc::endOfRead() {
   }
 
   StatusCode sc;
-  if (m_availableEventMax != -1) {
-    if (m_eventNum >= m_availableEventMax - 1) {  // we start counting at 0 thus the -1.
-      info() << "Reached end of file with event " << m_availableEventMax << endmsg;
-      IEventProcessor* eventProcessor;
-      sc = service("ApplicationMgr", eventProcessor);
-      sc = eventProcessor->stopRun();
-    }
+  // check if the next event is available
+  if (m_availableEventMax != -1 && m_eventNum >= m_availableEventMax - 1) {
+    info() << "Reached end of file with event " << m_availableEventMax << endmsg;
+    IEventProcessor* eventProcessor;
+    sc = service("ApplicationMgr", eventProcessor);
+    sc = eventProcessor->stopRun();
   }
   // todo: figure out sthg to do with sc (added to silence -Wunused-result)
 }
