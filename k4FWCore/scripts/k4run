@@ -23,7 +23,7 @@ seen_files = set()
 option_db = {}
 
 def load_file(file):
-  exec(file.read())
+  exec(file.read(), {})
 
 
 def add_arguments(parser, app_mgr):
