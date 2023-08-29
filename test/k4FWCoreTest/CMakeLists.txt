@@ -159,7 +159,7 @@ set_tests_properties(Testk4runNoArguments
 
 add_test(NAME TestEventHeaderFiller
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} options/cfillEventHeader.py)
+         COMMAND ${K4RUN} options/createEventHeader.py)
 set_test_env(TestEventHeaderFiller)
 
 add_test(NAME Testk4runCustomArguments
