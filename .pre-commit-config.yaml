@@ -12,3 +12,14 @@ repos:
         entry: .github/scripts/clang-format-hook
         types: [c++]
         language: system
+  - repo: https://github.com/johann-petrak/licenseheaders.git
+    rev: 'v0.8.8'
+    hooks:
+      - id: licenseheaders
+        args: ["-t", ".github/templates/apache-2.tmpl", "-y2014-2023",
+        "-o", "Key4hep-Project",
+        "-n", "Key4hep",
+        "-u", "https://key4hep.github.io/key4hep-doc/",
+        "-x", ".github/*", ".pre-commit-config.yaml", "README.md",
+              "doc/ReleaseNotes.md", ".k4fwcore-ci.d/*", "init.sh",
+        "-f"]
