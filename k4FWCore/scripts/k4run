@@ -29,7 +29,9 @@ def load_file(file):
 def add_arguments(parser, app_mgr):
   # length increases when properties of an algorithm with tools are inspected
   # see https://github.com/key4hep/k4FWCore/pull/138
-  for conf in tuple(app_mgr.allConfigurables.values()):
+  # can contain the same value multiple times
+  # see https://github.com/key4hep/k4FWCore/issues/141
+  for conf in frozenset(app_mgr.allConfigurables.values()):
     # skip public tools and the applicationmgr itself
     if "ToolSvc" in conf.name() or "ApplicationMgr" in conf.name():
       continue
