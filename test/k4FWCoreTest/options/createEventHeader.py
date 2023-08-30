@@ -24,11 +24,20 @@ eventHeaderCreator = EventHeaderCreator("eventHeaderCreator",
     eventNumberOffset = 42,
     OutputLevel=DEBUG)
 
+from Configurables import k4DataSvc
+podioevent  = k4DataSvc("EventDataSvc")
+
+from Configurables import PodioOutput
+out = PodioOutput("out")
+out.filename = "eventHeader.root"
+
 from Configurables import ApplicationMgr
 ApplicationMgr(
     TopAlg = [
               eventHeaderCreator,
+              out,
               ],
     EvtSel = 'NONE',
     EvtMax   = 2,
+    ExtSvc = [podioevent],
     StopOnSignal = True)
