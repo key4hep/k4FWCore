@@ -44,10 +44,10 @@ StatusCode PodioDataSvc::initialize() {
     if (m_filenames[0] != "") {
       m_reading_from_file = true;
       m_reader.openFiles(m_filenames);
-      m_availableEventMax = m_reader.getEntries("events");
+      m_numAvailableEvents = m_reader.getEntries("events");
 
       if (m_1stEvtEntry != 0) {
-        m_availableEventMax -= m_1stEvtEntry;
+        m_numAvailableEvents -= m_1stEvtEntry;
       }
     }
   }
@@ -75,7 +75,7 @@ StatusCode PodioDataSvc::initialize() {
 
   // if run with a fixed number of requested events and we have enough
   // in the file we don't need to check if we run out of events
-  if (m_requestedEventMax > 0 && m_requestedEventMax <= m_availableEventMax) {
+  if (m_requestedEventMax > 0 && m_requestedEventMax <= m_numAvailableEvents) {
     m_bounds_check_needed = false;
   }
 
@@ -133,9 +133,9 @@ void PodioDataSvc::endOfRead() {
   }
 
   StatusCode sc;
-  // check if the next event is available
-  if (m_availableEventMax != -1 && m_eventNum >= m_availableEventMax - 1) {
-    info() << "Reached end of file with event " << m_availableEventMax << endmsg;
+  // m_eventNum already points to the next event here so check if it is available
+  if (m_numAvailableEvents != -1 && m_eventNum >= m_numAvailableEvents) {
+    info() << "Reached end of file with event " << m_eventNum << "/" << m_numAvailableEvents << endmsg;
     IEventProcessor* eventProcessor;
     sc = service("ApplicationMgr", eventProcessor);
     sc = eventProcessor->stopRun();

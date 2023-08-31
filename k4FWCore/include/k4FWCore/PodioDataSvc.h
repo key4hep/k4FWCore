@@ -85,7 +85,7 @@ private:
   /// Counter of the event number
   int m_eventNum{0};
   /// Number of events in the file / to process
-  int m_availableEventMax{-1};
+  int m_numAvailableEvents{-1};
   int m_requestedEventMax{-1};
   /// Whether reading from file at all
   bool m_reading_from_file{false};
