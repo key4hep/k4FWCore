@@ -45,10 +45,7 @@ StatusCode PodioDataSvc::initialize() {
       m_reading_from_file = true;
       m_reader.openFiles(m_filenames);
       m_numAvailableEvents = m_reader.getEntries("events");
-
-      if (m_1stEvtEntry != 0) {
-        m_numAvailableEvents -= m_1stEvtEntry;
-      }
+      m_numAvailableEvents -= m_1stEvtEntry;
     }
   }
 
@@ -134,7 +131,7 @@ void PodioDataSvc::endOfRead() {
 
   StatusCode sc;
   // m_eventNum already points to the next event here so check if it is available
-  if (m_numAvailableEvents != -1 && m_eventNum >= m_numAvailableEvents) {
+  if (m_eventNum >= m_numAvailableEvents) {
     info() << "Reached end of file with event " << m_eventNum << "/" << m_numAvailableEvents << endmsg;
     IEventProcessor* eventProcessor;
     sc = service("ApplicationMgr", eventProcessor);
