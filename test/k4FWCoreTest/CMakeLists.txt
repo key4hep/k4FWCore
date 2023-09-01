@@ -177,3 +177,8 @@ add_test(NAME Testk4runHelpOnly
 set_test_env(Testk4runHelpOnly)
 set_tests_properties(Testk4runHelpOnly
   PROPERTIES PASS_REGULAR_EXPRESSION "show this help message and exit")
+
+add_test(NAME TestExec
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} --dry-run options/TestExec.py)
+set_test_env(TestExec)
