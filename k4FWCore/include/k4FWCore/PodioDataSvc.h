@@ -45,12 +45,12 @@ class PodioDataSvc : public DataSvc {
 public:
   typedef std::vector<std::pair<std::string, podio::CollectionBase*>> CollRegistry;
 
-  virtual StatusCode initialize();
-  virtual StatusCode reinitialize();
-  virtual StatusCode finalize();
-  virtual StatusCode clearStore();
-  virtual StatusCode i_setRoot(std::string root_path, IOpaqueAddress* pRootAddr);
-  virtual StatusCode i_setRoot(std::string root_path, DataObject* pRootObj);
+  StatusCode initialize() final;
+  StatusCode reinitialize() final;
+  StatusCode finalize() final;
+  StatusCode clearStore() final;
+  StatusCode i_setRoot(std::string root_path, IOpaqueAddress* pRootAddr) final;
+  StatusCode i_setRoot(std::string root_path, DataObject* pRootObj) final;
 
   /// Standard Constructor
   PodioDataSvc(const std::string& name, ISvcLocator* svc);
