@@ -132,7 +132,7 @@ void PodioDataSvc::endOfRead() {
   StatusCode sc;
   // m_eventNum already points to the next event here so check if it is available
   if (m_eventNum >= m_numAvailableEvents) {
-    info() << "Reached end of file with event " << m_eventNum << "(" << m_requestedEventMax << " events requested)"
+    info() << "Reached end of file with event " << m_eventNum << " (" << m_requestedEventMax << " events requested)"
            << endmsg;
     IEventProcessor* eventProcessor;
     sc = service("ApplicationMgr", eventProcessor);
