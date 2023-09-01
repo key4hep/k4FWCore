@@ -44,7 +44,7 @@ from Configurables import ApplicationMgr
 ApplicationMgr(
     TopAlg=[inp, checker],
     EvtSel="NONE",
-    EvtMax=-1,
+    EvtMax=100,
     ExtSvc=[podioevent],
     OutputLevel=INFO,
     StopOnSignal=True,
