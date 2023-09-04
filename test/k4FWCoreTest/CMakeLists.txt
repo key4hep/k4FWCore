@@ -207,7 +207,6 @@ add_test(NAME ExampleFunctionalConsumer
          COMMAND ${K4RUN} options/runExampleFunctionalConsumer.py)
 set_test_env(ExampleFunctionalConsumer)
 set_tests_properties(ExampleFunctionalConsumer PROPERTIES
-                     PASS_REGULAR_EXPRESSION "Application Manager Terminated successfully with a user requested ScheduledStop"
                      DEPENDS ExampleFunctionalProducer)
 
 add_test(NAME ExampleFunctionalTransformer
@@ -215,7 +214,6 @@ add_test(NAME ExampleFunctionalTransformer
          COMMAND ${K4RUN} options/runExampleFunctionalTransformer.py)
 set_test_env(ExampleFunctionalTransformer)
 set_tests_properties(ExampleFunctionalTransformer PROPERTIES
-                     PASS_REGULAR_EXPRESSION "Application Manager Terminated successfully with a user requested ScheduledStop"
                      DEPENDS "ExampleFunctionalProducer;ExampleFunctionalConsumer")
 
 add_test(NAME ExampleFunctionalProducerMultiple
@@ -228,7 +226,6 @@ add_test(NAME ExampleFunctionalConsumerMultiple
          COMMAND ${K4RUN} options/runExampleFunctionalConsumerMultiple.py)
 set_test_env(ExampleFunctionalConsumerMultiple)
 set_tests_properties(ExampleFunctionalConsumerMultiple PROPERTIES
-                     PASS_REGULAR_EXPRESSION "Application Manager Terminated successfully with a user requested ScheduledStop"
                      DEPENDS ExampleFunctionalProducerMultiple)
 
 add_test(NAME ExampleFunctionalTransformerMultiple
@@ -236,5 +233,4 @@ add_test(NAME ExampleFunctionalTransformerMultiple
          COMMAND ${K4RUN} options/runExampleFunctionalTransformerMultiple.py)
 set_test_env(ExampleFunctionalTransformerMultiple)
 set_tests_properties(ExampleFunctionalTransformerMultiple PROPERTIES
-                     PASS_REGULAR_EXPRESSION "Application Manager Terminated successfully with a user requested ScheduledStop"
                      DEPENDS "ExampleFunctionalProducerMultiple;ExampleFunctionalConsumerMultiple")
