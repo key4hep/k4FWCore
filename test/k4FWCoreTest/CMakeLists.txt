@@ -32,7 +32,9 @@ set(k4fwcoretest_plugin_sources
   src/components/k4FWCoreTest_cellID_reader.cpp
   src/components/k4FWCoreTest_cellID_writer.cpp
   src/components/k4FWCoreTest_CheckExampleEventData.cpp
-  src/components/ExampleProducer.cpp
+  src/components/FunctionalProducer.cpp
+  src/components/FunctionalConsumer.cpp
+  src/components/FunctionalTransformer.cpp
 )
 
 gaudi_add_module(k4FWCoreTestPlugins
@@ -199,7 +201,19 @@ add_test(NAME TestExec
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
          COMMAND ${K4RUN} --dry-run options/TestExec.py)
 set_test_env(TestExec)
-add_test(NAME ExampleProducer
+add_test(NAME FunctionalProducer
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} options/runExampleProducer.py)
-set_test_env(ExampleProducer)
+         COMMAND ${K4RUN} options/runFunctionalProducer.py)
+set_test_env(FunctionalProducer)
+
+add_test(NAME FunctionalConsumer
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} options/runFunctionalProducer.py)
+set_test_env(FunctionalConsumer)
+set_tests_properties(FunctionalConsumer PROPERTIES DEPENDS FunctionalProducer)
+
+add_test(NAME FunctionalTransformer
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} options/runFunctionalTransformer.py)
+set_test_env(FunctionalTransformer)
+set_tests_properties(FunctionalTransformer PROPERTIES DEPENDS FunctionalProducer)
