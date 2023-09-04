@@ -1,4 +1,24 @@
+/*
+ * Copyright (c) 2014-2023 Key4hep-Project.
+ *
+ * This file is part of Key4hep.
+ * See https://key4hep.github.io/key4hep-doc/ for further info.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "k4FWCoreTest_CreateExampleEventData.h"
+
+#include "podio/UserDataCollection.h"
 
 // datamodel
 #include "edm4hep/MCParticleCollection.h"
@@ -22,9 +42,7 @@ k4FWCoreTest_CreateExampleEventData::k4FWCoreTest_CreateExampleEventData(const s
   declareProperty("simtrackhits", m_simTrackerHitHandle, "Dummy Hit collection (output)");
   declareProperty("trackhits", m_TrackerHitHandle, "Dummy Hit collection (output)");
   declareProperty("tracks", m_trackHandle, "Dummy track collection (output)");
-  declareProperty("singlefloat", m_singleFloatHandle, "Dummy collection (output)");
   declareProperty("vectorfloat", m_vectorFloatHandle, "Dummy collection (output)");
-  declareProperty("singleint", m_singleIntHandle, "Dummy collection (output)");
 }
 
 k4FWCoreTest_CreateExampleEventData::~k4FWCoreTest_CreateExampleEventData() {}
@@ -37,21 +55,20 @@ StatusCode k4FWCoreTest_CreateExampleEventData::initialize() {
 }
 
 StatusCode k4FWCoreTest_CreateExampleEventData::execute() {
-  m_singleIntHandle.put(new int(12345));
-
-  std::vector<float>* floatVector = m_vectorFloatHandle.createAndPut();
-  floatVector->emplace_back(125.);
-  floatVector->emplace_back(25.);
+  auto* floatVector = m_vectorFloatHandle.createAndPut();
+  floatVector->push_back(125.);
+  floatVector->push_back(25.);
+  floatVector->push_back(m_event);
 
   edm4hep::MCParticleCollection* particles = m_mcParticleHandle.createAndPut();
 
   auto particle = particles->create();
 
   auto& p4 = particle.momentum();
-  p4.x     = m_magicNumberOffset + 5;
+  p4.x     = m_magicNumberOffset + m_event + 5;
   p4.y     = m_magicNumberOffset + 6;
   p4.z     = m_magicNumberOffset + 7;
-  particle.setMass(m_magicNumberOffset + 8);
+  particle.setMass(m_magicNumberOffset + m_event + 8);
 
   edm4hep::SimTrackerHitCollection* simTrackerHits = m_simTrackerHitHandle.createAndPut();
   auto                              hit            = simTrackerHits->create();
@@ -83,6 +100,8 @@ StatusCode k4FWCoreTest_CreateExampleEventData::execute() {
   // set associatons
   track.addToTrackerHits(trackerHit);
   track.addToTracks(track2);
+
+  m_event++;
 
   return StatusCode::SUCCESS;
 }

@@ -1,16 +1,32 @@
+/*
+ * Copyright (c) 2014-2023 Key4hep-Project.
+ *
+ * This file is part of Key4hep.
+ * See https://key4hep.github.io/key4hep-doc/ for further info.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #ifndef FWCORE_PODIOOUTPUT_H
 #define FWCORE_PODIOOUTPUT_H
 
 #include "GaudiAlg/GaudiAlgorithm.h"
 #include "k4FWCore/KeepDropSwitch.h"
 #include "podio/CollectionBase.h"
-
-#include "TTree.h"
+#include "podio/ROOTFrameWriter.h"
 
 #include <vector>
 
 // forward declarations
-class TFile;
 class PodioDataSvc;
 
 class PodioOutput : public GaudiAlgorithm {
@@ -27,8 +43,6 @@ public:
   virtual StatusCode finalize();
 
 private:
-  void resetBranches(const std::vector<std::pair<std::string, podio::CollectionBase*>>& collections);
-  void createBranches(const std::vector<std::pair<std::string, podio::CollectionBase*>>& collections);
   /// First event or not
   bool m_firstEvent;
   /// Root file name the output is written to
@@ -40,20 +54,13 @@ private:
                                                 "An optional file path to copy the outputfile to."};
   /// Switch for keeping or dropping outputs
   KeepDropSwitch m_switch;
-  /// Needed for collection ID table
-  PodioDataSvc* m_podioDataSvc;
-  /// The actual ROOT file
-  std::unique_ptr<TFile> m_file;
-  /// The tree to be filled with collections
-  TTree* m_datatree;
-  /// The tree to be filled with meta data
-  TTree* m_metadatatree;
-  TTree* m_runMDtree;
-  TTree* m_evtMDtree;
-  TTree* m_colMDtree;
-
+  PodioDataSvc*  m_podioDataSvc;
+  /// The actual ROOT frame writer
+  std::unique_ptr<podio::ROOTFrameWriter> m_framewriter;
   /// The stored collections
   std::vector<podio::CollectionBase*> m_storedCollections;
+  /// The collections to write out
+  std::vector<std::string> m_collection_names_to_write;
 };
 
 #endif

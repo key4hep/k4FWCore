@@ -1,13 +1,39 @@
+#[[
+Copyright (c) 2014-2023 Key4hep-Project.
+
+This file is part of Key4hep.
+See https://key4hep.github.io/key4hep-doc/ for further info.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+]]
+
 ################################################################################
 # Package: k4FWCoreTest
 ################################################################################
 
 find_package(EDM4HEP)
 
+set(k4fwcoretest_plugin_sources
+  src/components/TestDataHandleUniquePtr.cpp
+  src/components/TestUniqueIDGenSvc.cpp
+  src/components/k4FWCoreTest_AlgorithmWithTFile.cpp
+  src/components/k4FWCoreTest_CreateExampleEventData.cpp
+  src/components/k4FWCoreTest_HelloWorldAlg.cpp
+  src/components/k4FWCoreTest_cellID_reader.cpp
+  src/components/k4FWCoreTest_cellID_writer.cpp
+  src/components/k4FWCoreTest_CheckExampleEventData.cpp
+)
 
-
-
-file(GLOB k4fwcoretest_plugin_sources src/components/*.cpp)
 gaudi_add_module(k4FWCoreTestPlugins
                  SOURCES ${k4fwcoretest_plugin_sources}
                  LINK Gaudi::GaudiAlgLib Gaudi::GaudiKernel k4FWCore k4FWCore::k4Interface ROOT::Core ROOT::RIO ROOT::Tree EDM4HEP::edm4hepDict EDM4HEP::edm4hep)
@@ -15,15 +41,6 @@ gaudi_add_module(k4FWCoreTestPlugins
 include(CTest)
 
 set(K4RUN ${PROJECT_SOURCE_DIR}/k4FWCore/scripts/k4run)
-
-get_target_property(edm4hep_lib EDM4HEP::edm4hepDict LOCATION)
-get_filename_component(edm4hep_loc ${edm4hep_lib} DIRECTORY)
-
-get_target_property(root_lib ROOT::Core LOCATION)
-get_filename_component(root_loc ${root_lib} DIRECTORY)
-
-get_target_property(podio_lib podio::podio LOCATION)
-get_filename_component(podio_loc ${podio_lib} DIRECTORY)
 
 #--- The genConf directory has been renamed to genConfDir in Gaudi 35r1
 #--- See https://gitlab.cern.ch/gaudi/Gaudi/-/merge_requests/1158
@@ -34,9 +51,9 @@ endif()
 
 
 function(set_test_env _testname)
-  set_property(TEST ${_testname} APPEND PROPERTY ENVIRONMENT "ROOT_INCLUDE_PATH=${podio_loc}/../include/podio:${edm4hep_loc}/../include:$ENV{ROOT_INCLUDE_PATH}")
-  set_property(TEST ${_testname} APPEND PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${CMAKE_BINARY_DIR}:${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}:${CMAKE_BINARY_DIR}/test/k4FWCoreTest:${root_loc}:${edm4hep_loc}:${podio_loc}:$ENV{LD_LIBRARY_PATH}")
-  set_property(TEST ${_testname} APPEND PROPERTY ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}/${GAUDI_GENCONF_DIR}:${CMAKE_BINARY_DIR}/test/k4FWCoreTest/${GAUDI_GENCONF_DIR}:$ENV{PYTHONPATH}")
+  set_property(TEST ${_testname} APPEND PROPERTY ENVIRONMENT "ROOT_INCLUDE_PATH=$<$<TARGET_EXISTS:podio::podio>:$<TARGET_FILE_DIR:podio::podio>/../include>:$<$<TARGET_EXISTS:EDM4HEP::edm4hep>:$<TARGET_FILE_DIR:EDM4HEP::edm4hep>/../include>:$ENV{ROOT_INCLUDE_PATH}")
+  set_property(TEST ${_testname} APPEND PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}:${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME}:${PROJECT_BINARY_DIR}/test/k4FWCoreTest:$<$<TARGET_EXISTS:ROOT::Core>:$<TARGET_FILE_DIR:ROOT::Core>>:$<$<TARGET_EXISTS:EDM4HEP::edm4hep>:$<TARGET_FILE_DIR:EDM4HEP::edm4hep>>:$<$<TARGET_EXISTS:podio::podio>:$<TARGET_FILE_DIR:podio::podio>>:$ENV{LD_LIBRARY_PATH}")
+  set_property(TEST ${_testname} APPEND PROPERTY ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME}/${GAUDI_GENCONF_DIR}:${PROJECT_BINARY_DIR}/test/k4FWCoreTest/${GAUDI_GENCONF_DIR}:$ENV{PYTHONPATH}")
 endfunction()
 
 
@@ -44,6 +61,33 @@ add_test(NAME CreateExampleEventData
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
          COMMAND ${K4RUN} options/createExampleEventData.py)
 set_test_env(CreateExampleEventData)
+
+add_test(NAME CheckExampleEventData
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} options/checkExampleEventData.py
+)
+set_test_env(CheckExampleEventData)
+set_tests_properties( CheckExampleEventData
+         PROPERTIES
+         DEPENDS CreateExampleEventData)
+
+add_test(NAME CheckExampleEventData_toolong
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} -n 999 options/checkExampleEventData.py
+)
+set_test_env(CheckExampleEventData_toolong)
+set_tests_properties( CheckExampleEventData_toolong
+         PROPERTIES PASS_REGULAR_EXPRESSION "Application Manager Terminated successfully with a user requested ScheduledStop"
+         DEPENDS CreateExampleEventData)
+
+add_test(NAME CheckExampleEventData_unbounded
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} -n -1 options/checkExampleEventData.py
+)
+set_test_env(CheckExampleEventData_unbounded)
+set_tests_properties( CheckExampleEventData_unbounded
+         PROPERTIES
+         DEPENDS CreateExampleEventData)
 
 add_test(NAME CreateExampleEventData_cellID
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
@@ -109,9 +153,41 @@ add_test(NAME TestUniqueIDGenSvc
          COMMAND ${K4RUN} options/TestUniqueIDGenSvc.py)
 set_test_env(TestUniqueIDGenSvc)
 
+
+add_test(NAME CreateLegacyExampleEventData
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} options/createLegacyExampleEventData.py)
+set_test_env(CreateLegacyExampleEventData)
+
 add_test(NAME Testk4runNoArguments
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
          COMMAND ${K4RUN})
 set_test_env(Testk4runNoArguments)
 set_tests_properties(Testk4runNoArguments
   PROPERTIES PASS_REGULAR_EXPRESSION "Usage: k4run <options_file.py>, use --help to get a complete list of arguments")
+
+add_test(NAME Testk4runCustomArguments
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} --foo=42 options/TestArgs.py)
+set_test_env(Testk4runCustomArguments)
+set_tests_properties(Testk4runCustomArguments
+  PROPERTIES PASS_REGULAR_EXPRESSION "The answer is 42")
+
+add_test(NAME Testk4runVerboseOutput
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} --verbose options/TestArgs.py)
+set_test_env(Testk4runVerboseOutput)
+set_tests_properties(Testk4runVerboseOutput
+  PROPERTIES PASS_REGULAR_EXPRESSION " VERBOSE ")
+
+add_test(NAME Testk4runHelpOnly
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} --help)
+set_test_env(Testk4runHelpOnly)
+set_tests_properties(Testk4runHelpOnly
+  PROPERTIES PASS_REGULAR_EXPRESSION "show this help message and exit")
+
+add_test(NAME TestExec
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} --dry-run options/TestExec.py)
+set_test_env(TestExec)

@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2014-2023 Key4hep-Project.
+ *
+ * This file is part of Key4hep.
+ * See https://key4hep.github.io/key4hep-doc/ for further info.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #ifndef K4FWCORE_DATAWRAPPER_H
 #define K4FWCORE_DATAWRAPPER_H
 
@@ -7,26 +25,36 @@
 #include "GaudiKernel/DataObject.h"
 #include "podio/CollectionBase.h"
 
+// forward declaration
+template <typename T> class DataHandle;
+
 class GAUDI_API DataWrapperBase : public DataObject {
 public:
   // ugly hack to circumvent the usage of boost::any yet
   // DataSvc would need a templated register method
   virtual podio::CollectionBase* collectionBase() = 0;
   virtual ~DataWrapperBase(){};
+  virtual void resetData() = 0;
 };
 
 template <class T> class GAUDI_API DataWrapper : public DataWrapperBase {
 public:
-  DataWrapper() : DataWrapperBase(), m_data(nullptr){};
+  template <class T2> friend class DataHandle;
+
+public:
+  DataWrapper() : m_data(nullptr){};
   virtual ~DataWrapper();
 
-  const T* getData() { return m_data; }
-  void     setData(T* data) { m_data = data; }
+  const T*     getData() { return m_data; }
+  void         setData(const T* data) { m_data = data; }
+  virtual void resetData() { m_data = nullptr; }
+
+private:
   /// try to cast to collectionBase; may return nullptr;
   virtual podio::CollectionBase* collectionBase();
 
 private:
-  T* m_data;
+  const T* m_data;
 };
 
 template <class T> DataWrapper<T>::~DataWrapper() {
@@ -35,8 +63,8 @@ template <class T> DataWrapper<T>::~DataWrapper() {
 }
 
 template <class T> podio::CollectionBase* DataWrapper<T>::collectionBase() {
-  if (std::is_base_of<podio::CollectionBase, T>::value) {
-    return reinterpret_cast<podio::CollectionBase*>(m_data);
+  if constexpr (std::is_base_of<podio::CollectionBase, T>::value) {
+    return const_cast<T*>(m_data);
   }
   return nullptr;
 }
