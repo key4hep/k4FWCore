@@ -32,6 +32,7 @@ set(k4fwcoretest_plugin_sources
   src/components/k4FWCoreTest_cellID_reader.cpp
   src/components/k4FWCoreTest_cellID_writer.cpp
   src/components/k4FWCoreTest_CheckExampleEventData.cpp
+  src/components/ExampleProducer.cpp
 )
 
 gaudi_add_module(k4FWCoreTestPlugins
@@ -198,3 +199,7 @@ add_test(NAME TestExec
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
          COMMAND ${K4RUN} --dry-run options/TestExec.py)
 set_test_env(TestExec)
+add_test(NAME ExampleProducer
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN})
+set_test_env(ExampleProducer)
