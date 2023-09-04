@@ -21,5 +21,5 @@ repos:
         "-n", "Key4hep",
         "-u", "https://key4hep.github.io/key4hep-doc/",
         "-x", ".github/*", ".pre-commit-config.yaml", "README.md",
-              "doc/ReleaseNotes.md", ".k4fwcore-ci.d/*", "init.sh",
+              "doc/ReleaseNotes.md", ".k4fwcore-ci.d/*",
         "-f"]
