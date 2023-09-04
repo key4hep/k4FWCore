@@ -32,9 +32,10 @@ set(k4fwcoretest_plugin_sources
   src/components/k4FWCoreTest_cellID_reader.cpp
   src/components/k4FWCoreTest_cellID_writer.cpp
   src/components/k4FWCoreTest_CheckExampleEventData.cpp
-  src/components/FunctionalProducer.cpp
-  src/components/FunctionalConsumer.cpp
-  src/components/FunctionalTransformer.cpp
+  src/components/ExampleFunctionalProducer.cpp
+  src/components/ExampleFunctionalConsumer.cpp
+  src/components/ExampleFunctionalTransformer.cpp
+  src/components/ExampleFunctionalProducerMultiple.cpp
 )
 
 gaudi_add_module(k4FWCoreTestPlugins
@@ -201,19 +202,24 @@ add_test(NAME TestExec
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
          COMMAND ${K4RUN} --dry-run options/TestExec.py)
 set_test_env(TestExec)
-add_test(NAME FunctionalProducer
+add_test(NAME ExampleFunctionalProducer
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} options/runFunctionalProducer.py)
-set_test_env(FunctionalProducer)
+         COMMAND ${K4RUN} options/runExampleFunctionalProducer.py)
+set_test_env(ExampleFunctionalProducer)
 
-add_test(NAME FunctionalConsumer
+add_test(NAME ExampleFunctionalConsumer
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} options/runFunctionalProducer.py)
-set_test_env(FunctionalConsumer)
-set_tests_properties(FunctionalConsumer PROPERTIES DEPENDS FunctionalProducer)
+         COMMAND ${K4RUN} options/runExampleFunctionalProducer.py)
+set_test_env(ExampleFunctionalConsumer)
+set_tests_properties(ExampleFunctionalConsumer PROPERTIES DEPENDS ExampleFunctionalProducer)
 
-add_test(NAME FunctionalTransformer
+add_test(NAME ExampleFunctionalTransformer
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} options/runFunctionalTransformer.py)
-set_test_env(FunctionalTransformer)
-set_tests_properties(FunctionalTransformer PROPERTIES DEPENDS FunctionalProducer)
+         COMMAND ${K4RUN} options/runExampleFunctionalTransformer.py)
+set_test_env(ExampleFunctionalTransformer)
+set_tests_properties(ExampleFunctionalTransformer PROPERTIES DEPENDS ExampleFunctionalProducer)
+
+add_test(NAME ExampleFunctionalProducerMultiple
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} options/runExampleFunctionalProducerMultiple.py)
+set_test_env(ExampleFunctionalProducerMultiple)
