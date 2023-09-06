@@ -159,6 +159,13 @@ add_test(NAME CreateLegacyExampleEventData
          COMMAND ${K4RUN} options/createLegacyExampleEventData.py)
 set_test_env(CreateLegacyExampleEventData)
 
+
+add_test(NAME TestEventHeaderFiller
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} options/createEventHeader.py)
+set_test_env(TestEventHeaderFiller)
+
+
 add_test(NAME Testk4runNoArguments
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
          COMMAND ${K4RUN})
