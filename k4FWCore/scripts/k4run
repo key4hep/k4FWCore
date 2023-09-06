@@ -23,13 +23,15 @@ seen_files = set()
 option_db = {}
 
 def load_file(file):
-  exec(file.read())
+  exec(file.read(), {})
 
 
 def add_arguments(parser, app_mgr):
   # length increases when properties of an algorithm with tools are inspected
   # see https://github.com/key4hep/k4FWCore/pull/138
-  for conf in tuple(app_mgr.allConfigurables.values()):
+  # can contain the same value multiple times
+  # see https://github.com/key4hep/k4FWCore/issues/141
+  for conf in frozenset(app_mgr.allConfigurables.values()):
     # skip public tools and the applicationmgr itself
     if "ToolSvc" in conf.name() or "ApplicationMgr" in conf.name():
       continue
@@ -171,4 +173,7 @@ if __name__ == "__main__":
     if not opts.dry_run:
         # Do the real processing
         retcode = c.run(opts.gdb, opts.ncpus)
+        # User requested stop returns non-zero exit code see: https://github.com/key4hep/k4FWCore/issues/125
+        if ApplicationMgr().EvtMax == -1 and retcode == 4:
+           retcode = 0
         sys.exit(retcode)

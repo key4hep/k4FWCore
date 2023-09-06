@@ -42,15 +42,6 @@ include(CTest)
 
 set(K4RUN ${PROJECT_SOURCE_DIR}/k4FWCore/scripts/k4run)
 
-get_target_property(edm4hep_lib EDM4HEP::edm4hepDict LOCATION)
-get_filename_component(edm4hep_loc ${edm4hep_lib} DIRECTORY)
-
-get_target_property(root_lib ROOT::Core LOCATION)
-get_filename_component(root_loc ${root_lib} DIRECTORY)
-
-get_target_property(podio_lib podio::podio LOCATION)
-get_filename_component(podio_loc ${podio_lib} DIRECTORY)
-
 #--- The genConf directory has been renamed to genConfDir in Gaudi 35r1
 #--- See https://gitlab.cern.ch/gaudi/Gaudi/-/merge_requests/1158
 set(GAUDI_GENCONF_DIR "genConfDir")
@@ -60,8 +51,8 @@ endif()
 
 
 function(set_test_env _testname)
-  set_property(TEST ${_testname} APPEND PROPERTY ENVIRONMENT "ROOT_INCLUDE_PATH=${podio_loc}/../include/podio:${edm4hep_loc}/../include:$ENV{ROOT_INCLUDE_PATH}")
-  set_property(TEST ${_testname} APPEND PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}:${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME}:${PROJECT_BINARY_DIR}/test/k4FWCoreTest:${root_loc}:${edm4hep_loc}:${podio_loc}:$ENV{LD_LIBRARY_PATH}")
+  set_property(TEST ${_testname} APPEND PROPERTY ENVIRONMENT "ROOT_INCLUDE_PATH=$<$<TARGET_EXISTS:podio::podio>:$<TARGET_FILE_DIR:podio::podio>/../include>:$<$<TARGET_EXISTS:EDM4HEP::edm4hep>:$<TARGET_FILE_DIR:EDM4HEP::edm4hep>/../include>:$ENV{ROOT_INCLUDE_PATH}")
+  set_property(TEST ${_testname} APPEND PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}:${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME}:${PROJECT_BINARY_DIR}/test/k4FWCoreTest:$<$<TARGET_EXISTS:ROOT::Core>:$<TARGET_FILE_DIR:ROOT::Core>>:$<$<TARGET_EXISTS:EDM4HEP::edm4hep>:$<TARGET_FILE_DIR:EDM4HEP::edm4hep>>:$<$<TARGET_EXISTS:podio::podio>:$<TARGET_FILE_DIR:podio::podio>>:$ENV{LD_LIBRARY_PATH}")
   set_property(TEST ${_testname} APPEND PROPERTY ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME}/${GAUDI_GENCONF_DIR}:${PROJECT_BINARY_DIR}/test/k4FWCoreTest/${GAUDI_GENCONF_DIR}:$ENV{PYTHONPATH}")
 endfunction()
 
@@ -77,7 +68,25 @@ add_test(NAME CheckExampleEventData
 )
 set_test_env(CheckExampleEventData)
 set_tests_properties( CheckExampleEventData
+         PROPERTIES
+         DEPENDS CreateExampleEventData)
+
+add_test(NAME CheckExampleEventData_toolong
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} -n 999 options/checkExampleEventData.py
+)
+set_test_env(CheckExampleEventData_toolong)
+set_tests_properties( CheckExampleEventData_toolong
          PROPERTIES PASS_REGULAR_EXPRESSION "Application Manager Terminated successfully with a user requested ScheduledStop"
+         DEPENDS CreateExampleEventData)
+
+add_test(NAME CheckExampleEventData_unbounded
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} -n -1 options/checkExampleEventData.py
+)
+set_test_env(CheckExampleEventData_unbounded)
+set_tests_properties( CheckExampleEventData_unbounded
+         PROPERTIES
          DEPENDS CreateExampleEventData)
 
 add_test(NAME CreateExampleEventData_cellID
@@ -150,17 +159,19 @@ add_test(NAME CreateLegacyExampleEventData
          COMMAND ${K4RUN} options/createLegacyExampleEventData.py)
 set_test_env(CreateLegacyExampleEventData)
 
+
+add_test(NAME TestEventHeaderFiller
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} options/createEventHeader.py)
+set_test_env(TestEventHeaderFiller)
+
+
 add_test(NAME Testk4runNoArguments
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
          COMMAND ${K4RUN})
 set_test_env(Testk4runNoArguments)
 set_tests_properties(Testk4runNoArguments
   PROPERTIES PASS_REGULAR_EXPRESSION "Usage: k4run <options_file.py>, use --help to get a complete list of arguments")
-
-add_test(NAME TestEventHeaderFiller
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} options/createEventHeader.py)
-set_test_env(TestEventHeaderFiller)
 
 add_test(NAME Testk4runCustomArguments
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
@@ -183,3 +194,7 @@ set_test_env(Testk4runHelpOnly)
 set_tests_properties(Testk4runHelpOnly
   PROPERTIES PASS_REGULAR_EXPRESSION "show this help message and exit")
 
+add_test(NAME TestExec
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} --dry-run options/TestExec.py)
+set_test_env(TestExec)

@@ -19,6 +19,7 @@
 #include "k4FWCore/PodioDataSvc.h"
 #include "GaudiKernel/IConversionSvc.h"
 #include "GaudiKernel/IEventProcessor.h"
+#include "GaudiKernel/IProperty.h"
 #include "GaudiKernel/ISvcLocator.h"
 
 #include "k4FWCore/DataWrapper.h"
@@ -43,11 +44,8 @@ StatusCode PodioDataSvc::initialize() {
     if (m_filenames[0] != "") {
       m_reading_from_file = true;
       m_reader.openFiles(m_filenames);
-      m_eventMax = m_reader.getEntries("events");
-
-      if (m_1stEvtEntry != 0) {
-        m_eventMax -= m_1stEvtEntry;
-      }
+      m_numAvailableEvents = m_reader.getEntries("events");
+      m_numAvailableEvents -= m_1stEvtEntry;
     }
   }
 
@@ -60,6 +58,22 @@ StatusCode PodioDataSvc::initialize() {
     }
   } else {
     m_metadataframe = podio::Frame();
+  }
+
+  IProperty* property;
+  auto       sc = service("ApplicationMgr", property);
+  if (sc == StatusCode::FAILURE) {
+    error() << "Could not get ApplicationMgr properties" << std::endl;
+  }
+  Gaudi::Property<int> evtMax;
+  evtMax.assign(property->getProperty("EvtMax"));
+  m_requestedEventMax = evtMax;
+  m_requestedEventMax -= m_1stEvtEntry;
+
+  // if run with a fixed number of requested events and we have enough
+  // in the file we don't need to check if we run out of events
+  if (m_requestedEventMax > 0 && m_requestedEventMax <= m_numAvailableEvents) {
+    m_bounds_check_needed = false;
   }
 
   return status;
@@ -109,14 +123,20 @@ StatusCode PodioDataSvc::i_setRoot(std::string root_path, DataObject* pRootObj) 
 }
 
 void PodioDataSvc::endOfRead() {
+  m_eventNum++;
+
+  if (!m_bounds_check_needed) {
+    return;
+  }
+
   StatusCode sc;
-  if (m_eventMax != -1) {
-    if (m_eventNum++ >= m_eventMax - 1) {  // we start counting at 0 thus the -1.
-      info() << "Reached end of file with event " << m_eventMax << endmsg;
-      IEventProcessor* eventProcessor;
-      sc = service("ApplicationMgr", eventProcessor);
-      sc = eventProcessor->stopRun();
-    }
+  // m_eventNum already points to the next event here so check if it is available
+  if (m_eventNum >= m_numAvailableEvents) {
+    info() << "Reached end of file with event " << m_eventNum << " (" << m_requestedEventMax << " events requested)"
+           << endmsg;
+    IEventProcessor* eventProcessor;
+    sc = service("ApplicationMgr", eventProcessor);
+    sc = eventProcessor->stopRun();
   }
   // todo: figure out sthg to do with sc (added to silence -Wunused-result)
 }
