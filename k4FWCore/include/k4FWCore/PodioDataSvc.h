@@ -28,6 +28,7 @@
 #include "podio/Frame.h"
 #include "podio/ROOTFrameReader.h"
 // Forward declarations
+#include "k4FWCore/DataWrapper.h"
 class DataWrapperBase;
 class PodioOutput;
 template <typename T> class MetaDataHandle;
@@ -65,7 +66,20 @@ public:
   virtual StatusCode registerObject(std::string_view parentPath, std::string_view fullPath,
                                     DataObject* pObject) override final;
 
-  StatusCode readCollection(const std::string& collectionName);
+  const std::string_view getCollectionType(const std::string& collName);
+
+  template <typename T>
+  StatusCode readCollection(const std::string& collName) {
+  const T* collection(nullptr);
+  collection = static_cast<const T*>(m_eventframe.get(collName));
+  if (collection == nullptr) {
+    error() << "Collection " << collName << " does not exist." << endmsg;
+  }
+  auto wrapper = new DataWrapper<T>;
+  wrapper->setData(collection);
+  m_podio_datawrappers.push_back(wrapper);
+  return DataSvc::registerObject("/Event", "/" + collName, wrapper);
+  }
 
   const podio::Frame& getEventFrame() const { return m_eventframe; }
 

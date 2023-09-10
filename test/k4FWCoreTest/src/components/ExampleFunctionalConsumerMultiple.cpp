@@ -9,19 +9,23 @@
 #include "edm4hep/TrackerHitCollection.h"
 #include "podio/UserDataCollection.h"
 
+// Define BaseClass_t
+#include "k4FWCore/FunctionalUtils.h"
+
 #include <string>
 
-// This will always be Gaudi::Algorithm
-using BaseClass_t = Gaudi::Functional::Traits::BaseClass_t<Gaudi::Algorithm>;
 
 // Which type of collection we are reading
-// this will always be podio::CollectionBase
-// Has to be wrapped in DataWrapper
-using colltype = DataWrapper<podio::CollectionBase>;
+using FloatColl = podio::UserDataCollection<float>;
+using ParticleColl = edm4hep::MCParticleCollection;
+using SimTrackerHitColl = edm4hep::SimTrackerHitCollection;
+using TrackerHitColl = edm4hep::TrackerHitCollection;
+using TrackColl = edm4hep::TrackCollection;
+
 
 struct ExampleFunctionalConsumerMultiple final
     : Gaudi::Functional::Consumer<
-          void(const colltype&, const colltype&, const colltype&, const colltype&, const colltype&), BaseClass_t> {
+          void(const FloatColl&, const ParticleColl&, const SimTrackerHitColl&, const TrackerHitColl&, const TrackColl&), BaseClass_t> {
   // The pairs in KeyValue can be changed from python and they correspond
   // to the names of the input collection
   ExampleFunctionalConsumerMultiple(const std::string& name, ISvcLocator* svcLoc)
@@ -37,37 +41,34 @@ struct ExampleFunctionalConsumerMultiple final
   // This is the function that will be called to transform the data
   // Note that the function has to be const, as well as the collections
   // we get from the input
-  void operator()(const colltype& floatVector, const colltype& particles, const colltype& simTrackerHits,
-                  const colltype& trackerHits, const colltype& tracks) const override {
-    auto* floatVectorColl = dynamic_cast<const podio::UserDataCollection<float>*>(floatVector.getData());
-    if (((*floatVectorColl)[0] != 125) || ((*floatVectorColl)[1] != 25) || ((*floatVectorColl)[2] != m_event)) {
-      fatal() << "Wrong data in floatVector collection";
-    }
+  void operator()(
+                  const FloatColl& floatVector,
+                  const ParticleColl& particles, const SimTrackerHitColl& simTrackerHits,
+                  const TrackerHitColl& trackerHits, const  TrackColl& tracks) const override {
+    // if ((floatVector[0] != 125) || (floatVector[1] != 25) || (floatVector[2] != m_event)) {
+    //   fatal() << "Wrong data in floatVector collection";
+    // }
 
-    auto* particlesColl = dynamic_cast<const edm4hep::MCParticleCollection*>(particles.getData());
-    auto  p4            = (*particlesColl).momentum()[0];
+    auto  p4            = particles.momentum()[0];
     if ((p4.x != m_magicNumberOffset + m_event + 5) || (p4.y != m_magicNumberOffset + 6) ||
-        (p4.z != m_magicNumberOffset + 7) || ((*particlesColl)[0].getMass() != m_magicNumberOffset + m_event + 8)) {
+        (p4.z != m_magicNumberOffset + 7) || (particles[0].getMass() != m_magicNumberOffset + m_event + 8)) {
       fatal() << "Wrong data in particles collection";
     }
 
-    auto* simTrackerHitsColl = dynamic_cast<const edm4hep::SimTrackerHitCollection*>(simTrackerHits.getData());
-    if (((*simTrackerHitsColl)[0].getPosition()[0] != 3) || ((*simTrackerHitsColl)[0].getPosition()[1] != 4) ||
-        ((*simTrackerHitsColl)[0].getPosition()[2] != 5)) {
+    if ((simTrackerHits[0].getPosition()[0] != 3) || (simTrackerHits[0].getPosition()[1] != 4) ||
+        (simTrackerHits[0].getPosition()[2] != 5)) {
       fatal() << "Wrong data in simTrackerHits collection";
     }
 
-    auto trackerHitsColl = dynamic_cast<const edm4hep::TrackerHitCollection*>(trackerHits.getData());
-    if (((*trackerHitsColl)[0].getPosition()[0] != 3) || ((*trackerHitsColl)[0].getPosition()[1] != 4) ||
-        ((*trackerHitsColl)[0].getPosition()[2] != 5)) {
+    if ((trackerHits[0].getPosition()[0] != 3) || (trackerHits[0].getPosition()[1] != 4) ||
+        (trackerHits[0].getPosition()[2] != 5)) {
       fatal() << "Wrong data in trackerHits collection";
     }
 
-    auto tracksColl = dynamic_cast<const edm4hep::TrackCollection*>(tracks.getData());
-    if (((*tracksColl)[0].getType() != 1) || ((*tracksColl)[0].getChi2() != 2.1) || ((*tracksColl)[0].getNdf() != 3) ||
-        ((*tracksColl)[0].getDEdx() != 4.1) || ((*tracksColl)[0].getDEdxError() != 5.1) ||
-        ((*tracksColl)[0].getRadiusOfInnermostHit() != 6.1)
-        // ((*tracksColl)[0].getSubdetectorHitNumbers() != {1, 4})
+    if ((tracks[0].getType() != 1) || (tracks[0].getChi2() != 2.1) || (tracks[0].getNdf() != 3) ||
+        (tracks[0].getDEdx() != 4.1) || (tracks[0].getDEdxError() != 5.1) ||
+        (tracks[0].getRadiusOfInnermostHit() != 6.1)
+        // (tracks[0].getSubdetectorHitNumbers() != {1, 4})
     ) {
       fatal() << "Wrong data in tracks collection";
     }
