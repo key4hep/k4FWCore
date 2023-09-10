@@ -9,24 +9,24 @@
 #include "edm4hep/TrackerHitCollection.h"
 #include "podio/UserDataCollection.h"
 
+// Define BaseClass_t
+#include "k4FWCore/FunctionalUtils.h"
+
 #include <string>
 
-// This will always be Gaudi::Algorithm
-using BaseClass_t = Gaudi::Functional::Traits::BaseClass_t<Gaudi::Algorithm>;
-
 // Which type of collection we are reading
-// this will always be podio::CollectionBase
-// Has to be wrapped in DataWrapper
-using colltype = DataWrapper<podio::CollectionBase>;
+using FloatColl = podio::UserDataCollection<float>;
+using ParticleColl = edm4hep::MCParticleCollection;
+using SimTrackerHitColl = edm4hep::SimTrackerHitCollection;
+using TrackerHitColl = edm4hep::TrackerHitCollection;
+using TrackColl = edm4hep::TrackCollection;
 
 // As a simple example, we'll write an integer and a collection of MCParticles
-using Counter_t  = DataWrapper<podio::UserDataCollection<int>>;
-using Particle_t = DataWrapper<edm4hep::MCParticleCollection>;
+using Counter_t  = podio::UserDataCollection<int>;
+using Particle_t = edm4hep::MCParticleCollection;
 
 struct ExampleFunctionalTransformerMultiple final
-    : Gaudi::Functional::MultiTransformer<std::tuple<Counter_t, Particle_t>(const colltype&, const colltype&,
-                                                                            const colltype&, const colltype&,
-                                                                            const colltype&),
+    : Gaudi::Functional::MultiTransformer<std::tuple<Counter_t, Particle_t>(const FloatColl&, const ParticleColl&, const SimTrackerHitColl&, const TrackerHitColl&, const TrackColl&),
                                           BaseClass_t> {
   ExampleFunctionalTransformerMultiple(const std::string& name, ISvcLocator* svcLoc)
       : MultiTransformer(
@@ -40,17 +40,15 @@ struct ExampleFunctionalTransformerMultiple final
   // This is the function that will be called to transform the data
   // Note that the function has to be const, as well as the collections
   // we get from the input
-  std::tuple<Counter_t, Particle_t> operator()(const colltype& floatVector, const colltype& particles,
-                                               const colltype& simTrackerHits, const colltype& trackerHits,
-                                               const colltype& tracks) const override {
-    auto counter = std::make_unique<podio::UserDataCollection<int>>();
+  std::tuple<Counter_t, Particle_t> operator()(const FloatColl& floatVector, const ParticleColl& particles,
+                                               const SimTrackerHitColl& simTrackerHits, const TrackerHitColl& trackerHits,
+                                               const TrackColl& tracks) const override {
+    Counter_t counter;
 
-    auto* floatVectorColl = dynamic_cast<const podio::UserDataCollection<float>*>(floatVector.getData());
-    counter->push_back(floatVectorColl->size());
+    counter.push_back(floatVector.size());
 
-    auto particlesColl    = dynamic_cast<const edm4hep::MCParticleCollection*>(particles.getData());
-    auto newParticlesColl = std::make_unique<edm4hep::MCParticleCollection>();
-    for (const auto& p : *particlesColl) {
+    auto newParticlesColl = edm4hep::MCParticleCollection();
+    for (const auto& p : particles) {
       // We need to create a new particle since the current one is already in a collection
 
       // We could create a new one
@@ -62,21 +60,15 @@ struct ExampleFunctionalTransformerMultiple final
       newParticle.setTime(p.getTime() + 3);
       newParticle.setMass(p.getMass() + 4);
     }
-    auto particleDW = DataWrapper<edm4hep::MCParticleCollection>(std::move(newParticlesColl));
-    counter->push_back(particlesColl->size());
+    counter.push_back(particles.size());
 
-    auto simTrackerHitsColl = dynamic_cast<const edm4hep::SimTrackerHitCollection*>(simTrackerHits.getData());
-    counter->push_back(simTrackerHitsColl->size());
+    counter.push_back(simTrackerHits.size());
 
-    auto trackerHitsColl = dynamic_cast<const edm4hep::TrackerHitCollection*>(trackerHits.getData());
-    counter->push_back(trackerHitsColl->size());
+    counter.push_back(trackerHits.size());
 
-    auto tracksColl = dynamic_cast<const edm4hep::TrackCollection*>(tracks.getData());
-    counter->push_back(tracksColl->size());
+    counter.push_back(tracks.size());
 
-    auto counterDW = DataWrapper<podio::UserDataCollection<int>>(std::move(counter));
-
-    return std::make_tuple(counterDW, particleDW);
+    return std::make_tuple(std::move(counter), std::move(newParticlesColl));
   }
 };
 
