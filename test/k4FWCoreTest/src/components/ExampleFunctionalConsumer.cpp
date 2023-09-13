@@ -7,7 +7,7 @@
 #include "podio/CollectionBase.h"
 
 // Define BaseClass_t
-#include "k4FWCore/FunctionalUtils.h"
+#include "k4FWCore/BaseClass.h"
 
 #include <string>
 

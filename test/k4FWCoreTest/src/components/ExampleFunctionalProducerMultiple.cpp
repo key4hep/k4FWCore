@@ -1,7 +1,7 @@
 #include "Gaudi/Algorithm.h"
 #include "Gaudi/Property.h"
 #include "GaudiAlg/Producer.h"
-#include "k4FWCore/FunctionalUtils.h"
+#include "k4FWCore/BaseClass.h"
 
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/SimTrackerHitCollection.h"
