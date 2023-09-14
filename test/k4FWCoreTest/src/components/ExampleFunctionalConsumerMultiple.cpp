@@ -1,7 +1,6 @@
 #include "Gaudi/Algorithm.h"
 #include "Gaudi/Property.h"
 #include "GaudiAlg/Consumer.h"
-#include "k4FWCore/DataWrapper.h"
 
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/SimTrackerHitCollection.h"
