@@ -1,5 +1,4 @@
 from Gaudi.Configuration import INFO
-from Gaudi import Configurables
 from Configurables import ExampleFunctionalTransformer
 from Configurables import ApplicationMgr
 from Configurables import k4DataSvc

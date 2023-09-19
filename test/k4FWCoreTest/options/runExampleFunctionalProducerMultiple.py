@@ -1,13 +1,11 @@
 from Gaudi.Configuration import INFO
-from Gaudi import Configurables
 from Configurables import ExampleFunctionalProducerMultiple
 from Configurables import ApplicationMgr
 from Configurables import k4DataSvc
+from Configurables import PodioOutput
 
-from Configurables import k4DataSvc
 podioevent = k4DataSvc("EventDataSvc")
 
-from Configurables import PodioOutput
 out = PodioOutput("out")
 out.filename = "output_k4test_exampledata_producer_multiple.root"
 # Collections can be dropped
