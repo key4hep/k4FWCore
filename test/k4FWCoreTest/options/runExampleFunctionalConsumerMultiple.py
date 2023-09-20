@@ -10,7 +10,8 @@ podioevent.input = "output_k4test_exampledata_producer_multiple.root"
 inp = PodioInput()
 inp.collections = [
     "VectorFloat",
-    "MCParticles",
+    "MCParticles1",
+    "MCParticles2",
     "SimTrackerHits",
     "TrackerHits",
     "Tracks",

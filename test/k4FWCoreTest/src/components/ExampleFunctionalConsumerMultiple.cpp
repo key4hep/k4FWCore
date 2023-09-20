@@ -31,7 +31,7 @@ struct ExampleFunctionalConsumerMultiple final
       : Consumer(name, svcLoc,
                  {
                      KeyValue("InputCollectionFloat", "VectorFloat"),
-                     KeyValue("InputCollectionParticles", "MCParticles"),
+                     KeyValue("InputCollectionParticles", "MCParticles1"),
                      KeyValue("InputCollectionSimTrackerHits", "SimTrackerHits"),
                      KeyValue("InputCollectionTrackerHits", "TrackerHits"),
                      KeyValue("InputCollectionTracks", "Tracks"),

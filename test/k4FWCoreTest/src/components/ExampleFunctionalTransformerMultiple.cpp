@@ -30,9 +30,11 @@ struct ExampleFunctionalTransformerMultiple final
   ExampleFunctionalTransformerMultiple(const std::string& name, ISvcLocator* svcLoc)
       : MultiTransformer(
             name, svcLoc,
-            {KeyValue("InputCollectionFloat", "VectorFloat"), KeyValue("InputCollectionParticles", "MCParticles"),
+            {KeyValue("InputCollectionFloat", "VectorFloat"),
+             KeyValue("InputCollectionParticles", "MCParticles1"),
              KeyValue("InputCollectionSimTrackerHits", "SimTrackerHits"),
-             KeyValue("InputCollectionTrackerHits", "TrackerHits"), KeyValue("InputCollectionTracks", "Tracks")},
+             KeyValue("InputCollectionTrackerHits", "TrackerHits"),
+             KeyValue("InputCollectionTracks", "Tracks")},
             {KeyValue("OutputCollectionCounter", "Counter"), KeyValue("OutputCollectionParticles", "NewMCParticles")}) {
   }
 
