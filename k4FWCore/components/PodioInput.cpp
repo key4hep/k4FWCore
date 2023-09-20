@@ -54,7 +54,7 @@
 DECLARE_COMPONENT(PodioInput)
 
 template <typename T>
-inline void PodioInput::maybeRead(std::string_view CollType, std::string_view collName) const {
+inline void PodioInput::maybeRead(std::string_view collName) const {
   if (m_podioDataSvc->readCollection<T>(std::string(collName)).isFailure()) {
     error() << "Failed to register collection " << collName << endmsg;
   }
@@ -63,151 +63,151 @@ inline void PodioInput::maybeRead(std::string_view CollType, std::string_view co
 void PodioInput::fillReaders() {
   m_readers["edm4hep::MCParticleCollection"] =
       [&](std::string_view collName) {
-        maybeRead<edm4hep::MCParticleCollection>("edm4hep::MCParticleCollection", collName);
+        maybeRead<edm4hep::MCParticleCollection>(collName);
       };
   m_readers["edm4hep::SimTrackerHitCollection"] =
       [&](std::string_view collName) {
-        maybeRead<edm4hep::SimTrackerHitCollection>("edm4hep::SimTrackerHitCollection", collName);
+        maybeRead<edm4hep::SimTrackerHitCollection>(collName);
       };
   m_readers["edm4hep::CaloHitContributionCollection"] =
       [&](std::string_view collName) {
-        maybeRead<edm4hep::CaloHitContributionCollection>("edm4hep::CaloHitContributionCollection", collName);
+        maybeRead<edm4hep::CaloHitContributionCollection>(collName);
       };
   m_readers["edm4hep::SimCalorimeterHitCollection"] =
       [&](std::string_view collName) {
-        maybeRead<edm4hep::SimCalorimeterHitCollection>("edm4hep::SimCalorimeterHitCollection", collName);
+        maybeRead<edm4hep::SimCalorimeterHitCollection>(collName);
       };
   m_readers["edm4hep::RawCalorimeterHitCollection"] =
       [&](std::string_view collName) {
-        maybeRead<edm4hep::RawCalorimeterHitCollection>("edm4hep::RawCalorimeterHitCollection", collName);
+        maybeRead<edm4hep::RawCalorimeterHitCollection>(collName);
       };
   m_readers["edm4hep::CalorimeterHitCollection"] =
       [&](std::string_view collName) {
-        maybeRead<edm4hep::CalorimeterHitCollection>("edm4hep::CalorimeterHitCollection", collName);
+        maybeRead<edm4hep::CalorimeterHitCollection>(collName);
       };
   m_readers["edm4hep::ParticleIDCollection"] =
       [&](std::string_view collName) {
-        maybeRead<edm4hep::ParticleIDCollection>("edm4hep::ParticleIDCollection", collName);
+        maybeRead<edm4hep::ParticleIDCollection>(collName);
       };
   m_readers["edm4hep::ClusterCollection"] =
       [&](std::string_view collName) {
-        maybeRead<edm4hep::ClusterCollection>("edm4hep::ClusterCollection", collName);
+        maybeRead<edm4hep::ClusterCollection>(collName);
       };
   m_readers["edm4hep::TrackerHitCollection"] =
       [&](std::string_view collName) {
-        maybeRead<edm4hep::TrackerHitCollection>("edm4hep::TrackerHitCollection", collName);
+        maybeRead<edm4hep::TrackerHitCollection>(collName);
       };
   m_readers["edm4hep::TrackerHitPlaneCollection"] =
       [&](std::string_view collName) {
-        maybeRead<edm4hep::TrackerHitPlaneCollection>("edm4hep::TrackerHitPlaneCollection", collName);
+        maybeRead<edm4hep::TrackerHitPlaneCollection>(collName);
       };
   m_readers["edm4hep::RawTimeSeriesCollection"] =
       [&](std::string_view collName) {
-        maybeRead<edm4hep::RawTimeSeriesCollection>("edm4hep::RawTimeSeriesCollection", collName);
+        maybeRead<edm4hep::RawTimeSeriesCollection>(collName);
       };
   m_readers["edm4hep::TrackCollection"] =
       [&](std::string_view collName) {
-        maybeRead<edm4hep::TrackCollection>("edm4hep::TrackCollection", collName);
+        maybeRead<edm4hep::TrackCollection>(collName);
       };
   m_readers["edm4hep::VertexCollection"] =
       [&](std::string_view collName) {
-        maybeRead<edm4hep::VertexCollection>("edm4hep::VertexCollection", collName);
+        maybeRead<edm4hep::VertexCollection>(collName);
       };
   m_readers["edm4hep::ReconstructedParticleCollection"] =
       [&](std::string_view collName) {
-        maybeRead<edm4hep::ReconstructedParticleCollection>("edm4hep::ReconstructedParticleCollection", collName);
+        maybeRead<edm4hep::ReconstructedParticleCollection>(collName);
       };
   m_readers["edm4hep::MCRecoParticleAssociationCollection"] =
       [&](std::string_view collName) {
-        maybeRead<edm4hep::MCRecoParticleAssociationCollection>("edm4hep::MCRecoParticleAssociationCollection", collName);
+        maybeRead<edm4hep::MCRecoParticleAssociationCollection>(collName);
       };
   m_readers["edm4hep::MCRecoCaloAssociationCollection"] =
       [&](std::string_view collName) {
-        maybeRead<edm4hep::MCRecoCaloAssociationCollection>("edm4hep::MCRecoCaloAssociationCollection", collName);
+        maybeRead<edm4hep::MCRecoCaloAssociationCollection>(collName);
       };
   m_readers["edm4hep::MCRecoTrackerAssociationCollection"] =
       [&](std::string_view collName) {
-        maybeRead<edm4hep::MCRecoTrackerAssociationCollection>("edm4hep::MCRecoTrackerAssociationCollection", collName);
+        maybeRead<edm4hep::MCRecoTrackerAssociationCollection>(collName);
       };
   m_readers["edm4hep::MCRecoTrackerHitPlaneAssociationCollection"] =
       [&](std::string_view collName) {
-        maybeRead<edm4hep::MCRecoTrackerHitPlaneAssociationCollection>("edm4hep::MCRecoTrackerHitPlaneAssociationCollection", collName);
+        maybeRead<edm4hep::MCRecoTrackerHitPlaneAssociationCollection>(collName);
       };
   m_readers["edm4hep::MCRecoClusterParticleAssociationCollection"] =
       [&](std::string_view collName) {
-        maybeRead<edm4hep::MCRecoClusterParticleAssociationCollection>("edm4hep::MCRecoClusterParticleAssociationCollection", collName);
+        maybeRead<edm4hep::MCRecoClusterParticleAssociationCollection>(collName);
       };
   m_readers["edm4hep::MCRecoTrackParticleAssociationCollection"] =
       [&](std::string_view collName) {
-        maybeRead<edm4hep::MCRecoTrackParticleAssociationCollection>("edm4hep::MCRecoTrackParticleAssociationCollection", collName);
+        maybeRead<edm4hep::MCRecoTrackParticleAssociationCollection>(collName);
       };
   m_readers["edm4hep::RecoParticleVertexAssociationCollection"] =
       [&](std::string_view collName) {
-        maybeRead<edm4hep::RecoParticleVertexAssociationCollection>("edm4hep::RecoParticleVertexAssociationCollection", collName);
+        maybeRead<edm4hep::RecoParticleVertexAssociationCollection>(collName);
       };
   m_readers["edm4hep::SimPrimaryIonizationClusterCollection"] =
       [&](std::string_view collName) {
-        maybeRead<edm4hep::SimPrimaryIonizationClusterCollection>("edm4hep::SimPrimaryIonizationClusterCollection", collName);
+        maybeRead<edm4hep::SimPrimaryIonizationClusterCollection>(collName);
       };
   m_readers["edm4hep::TrackerPulseCollection"] =
       [&](std::string_view collName) {
-        maybeRead<edm4hep::TrackerPulseCollection>("edm4hep::TrackerPulseCollection", collName);
+        maybeRead<edm4hep::TrackerPulseCollection>(collName);
       };
   m_readers["edm4hep::RecIonizationClusterCollection"] =
       [&](std::string_view collName) {
-        maybeRead<edm4hep::RecIonizationClusterCollection>("edm4hep::RecIonizationClusterCollection", collName);
+        maybeRead<edm4hep::RecIonizationClusterCollection>(collName);
       };
   m_readers["edm4hep::TimeSeriesCollection"] =
       [&](std::string_view collName) {
-        maybeRead<edm4hep::TimeSeriesCollection>("edm4hep::TimeSeriesCollection", collName);
+        maybeRead<edm4hep::TimeSeriesCollection>(collName);
       };
   m_readers["edm4hep::RecDqdxCollection"] =
       [&](std::string_view collName) {
-        maybeRead<edm4hep::RecDqdxCollection>("edm4hep::RecDqdxCollection", collName);
+        maybeRead<edm4hep::RecDqdxCollection>(collName);
       };
   m_readers["podio::UserDataCollection<int>"] =
       [&](std::string_view collName) {
-        maybeRead<podio::UserDataCollection<int>>("podio::UserDataCollection<int>", collName);
+        maybeRead<podio::UserDataCollection<int>>(collName);
       };
   m_readers["podio::UserDataCollection<float>"] =
       [&](std::string_view collName) {
-        maybeRead<podio::UserDataCollection<float>>("podio::UserDataCollection<float>", collName);
+        maybeRead<podio::UserDataCollection<float>>(collName);
       };
   m_readers["podio::UserDataCollection<double>"] =
       [&](std::string_view collName) {
-        maybeRead<podio::UserDataCollection<double>>("podio::UserDataCollection<double>", collName);
+        maybeRead<podio::UserDataCollection<double>>(collName);
       };
   m_readers["podio::UserDataCollection<int8_t>"] =
       [&](std::string_view collName) {
-        maybeRead<podio::UserDataCollection<int8_t>>("podio::UserDataCollection<int8_t>", collName);
+        maybeRead<podio::UserDataCollection<int8_t>>(collName);
       };
   m_readers["podio::UserDataCollection<int16_t>"] =
       [&](std::string_view collName) {
-        maybeRead<podio::UserDataCollection<int16_t>>("podio::UserDataCollection<int16_t>", collName);
+        maybeRead<podio::UserDataCollection<int16_t>>(collName);
       };
   m_readers["podio::UserDataCollection<int32_t>"] =
       [&](std::string_view collName) {
-        maybeRead<podio::UserDataCollection<int32_t>>("podio::UserDataCollection<int32_t>", collName);
+        maybeRead<podio::UserDataCollection<int32_t>>(collName);
       };
   m_readers["podio::UserDataCollection<int64_t>"] =
       [&](std::string_view collName) {
-        maybeRead<podio::UserDataCollection<int64_t>>("podio::UserDataCollection<int64_t>", collName);
+        maybeRead<podio::UserDataCollection<int64_t>>(collName);
       };
   m_readers["podio::UserDataCollection<uint8_t>"] =
       [&](std::string_view collName) {
-        maybeRead<podio::UserDataCollection<uint8_t>>("podio::UserDataCollection<uint8_t>", collName);
+        maybeRead<podio::UserDataCollection<uint8_t>>(collName);
       };
   m_readers["podio::UserDataCollection<uint16_t>"] =
       [&](std::string_view collName) {
-        maybeRead<podio::UserDataCollection<uint16_t>>("podio::UserDataCollection<uint16_t>", collName);
+        maybeRead<podio::UserDataCollection<uint16_t>>(collName);
       };
   m_readers["podio::UserDataCollection<uint32_t>"] =
       [&](std::string_view collName) {
-        maybeRead<podio::UserDataCollection<uint32_t>>("podio::UserDataCollection<uint32_t>", collName);
+        maybeRead<podio::UserDataCollection<uint32_t>>(collName);
       };
   m_readers["podio::UserDataCollection<uint64_t>"] =
       [&](std::string_view collName) {
-        maybeRead<podio::UserDataCollection<uint64_t>>("podio::UserDataCollection<uint64_t>", collName);
+        maybeRead<podio::UserDataCollection<uint64_t>>(collName);
       };
 }
 

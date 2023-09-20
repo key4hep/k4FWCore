@@ -44,7 +44,7 @@ public:
 
 private:
   template <typename T>
-  void maybeRead(std::string_view CollType, std::string_view collName) const;
+  void maybeRead(std::string_view collName) const;
   void fillReaders();
   // Name of collections to read. Set by option collections (this is temporary)
   Gaudi::Property<std::vector<std::string>> m_collectionNames{this, "collections", {}, "Places of collections to read"};
