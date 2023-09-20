@@ -13,7 +13,8 @@ out.filename = "output_k4test_exampledata_producer_multiple.root"
 
 producer = ExampleFunctionalProducerMultiple("ExampleFunctionalProducerMultiple",
                                              OutputCollectionFloat="VectorFloat",
-                                             OutputCollectionParticles="MCParticles",
+                                             OutputCollectionParticles1="MCParticles1",
+                                             OutputCollectionParticles2="MCParticles2",
                                              OutputCollectionSimTrackerHits="SimTrackerHits",
                                              OutputCollectionTrackerHits="TrackerHits",
                                              OutputCollectionTracks="Tracks",
