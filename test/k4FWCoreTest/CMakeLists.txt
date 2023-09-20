@@ -216,6 +216,8 @@ set_test_env(ExampleFunctionalConsumer)
 set_tests_properties(ExampleFunctionalConsumer PROPERTIES
                      DEPENDS ExampleFunctionalProducer)
 
+# A dependency on the ExampleFunctionalConsumer is added to make sure
+# they don't run at the same time
 add_test(NAME ExampleFunctionalTransformer
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
          COMMAND ${K4RUN} options/runExampleFunctionalTransformer.py)
