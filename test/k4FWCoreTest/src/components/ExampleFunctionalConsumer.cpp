@@ -3,7 +3,6 @@
 #include "GaudiAlg/Consumer.h"
 
 #include "edm4hep/MCParticleCollection.h"
-#include "podio/CollectionBase.h"
 
 // Define BaseClass_t
 #include "k4FWCore/BaseClass.h"
