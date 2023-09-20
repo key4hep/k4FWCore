@@ -227,7 +227,7 @@ void PodioInput::operator()() const {
     if (m_readers.find(type) != m_readers.end()) {
       m_readers[type](collName);
     } else {
-      maybeRead<podio::CollectionBase>(type, collName);
+      maybeRead<podio::CollectionBase>(collName);
     }
   }
 
