@@ -44,7 +44,7 @@ StatusCode PodioLegacyInput::initialize() {
       error() << "Requested product " << name << " not found." << endmsg;
       return StatusCode::FAILURE;
     }
-    m_collectionIDs.push_back(idTable->collectionID(name));
+    m_collectionIDs.push_back(idTable->collectionID(name).value());
   }
   return StatusCode::SUCCESS;
 }
