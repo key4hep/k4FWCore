@@ -150,7 +150,7 @@ PodioDataSvc::PodioDataSvc(const std::string& name, ISvcLocator* svc) : DataSvc(
 PodioDataSvc::~PodioDataSvc() {}
 
 const std::string_view PodioDataSvc::getCollectionType(const std::string& collName) {
-  auto coll = m_eventframe.get(collName);
+  const auto coll = m_eventframe.get(collName);
   if (coll == nullptr) {
     error() << "Collection " << collName << " does not exist." << endmsg;
   }

@@ -33,7 +33,6 @@ struct ExampleFunctionalTransformer final
       new_particle.setCharge(particle.getCharge() + 10);
       new_particle.setTime(particle.getTime() + 10);
       new_particle.setMass(particle.getMass() + 10);
-      // new_particle.
       coll_out->push_back(new_particle);
     }
     return coll_out;

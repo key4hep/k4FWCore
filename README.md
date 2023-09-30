@@ -69,9 +69,8 @@ make install
 ```
 
 ## Implementing algorithms
-k4FWCore uses (or will use) `Gaudi::Functional` for executing algorithms. In
-`Gaudi::Functional` we have three different base classes that we will use
-depending on how may input and output types they take:
+k4FWCore uses `Gaudi::Functional` for executing algorithms. There are several
+types of algorithms, depending on your use case:
 - The `Consumer` takes inputs but no outputs; can be used for reading
 - The `Producer` takes outputs but no inputs; can be used for generating
   collections or events
@@ -79,11 +78,18 @@ depending on how may input and output types they take:
   `Producer` are a particular case of this one) and takes both inputs and
   outputs
 
-In all cases the implementation process is the same, we'll create a new class
-that will implement `operator()`, that is where our algorithm will be. Simple
-examples can be found in the test folder for each one of these three. In
-addition, there are tests that have either multiple inputs and / or multiple
-outputs (like `ExampleFunctionalProducerMultiple`) that can be used as a
-template for the more typical case when working with multiple inputs or outputs.
+A more complete list of algorithms can be found in
+https://lhcb.github.io/DevelopKit/03a-gaudi/, in the `Gaudi::Functional`
+section.
+
+In all cases the implementation process is the same: we'll create a new class
+that will inherit from one of the previous algorithms. Then, we implement
+`operator()`, where our algorithm will be. This `operator()` will return either
+a single type (including `void`) or a tuple with multiple types. It will take
+one parameter per input. Simple examples can be found in the test folder for
+each one of the above-mentioned algorithms. In addition, there are tests that
+have either multiple inputs and / or multiple outputs (like
+`ExampleFunctionalProducerMultiple`) that can be used as a template for the more
+typical case when working with multiple inputs or outputs.
 
 `GaudiAlg` is deprecated and will be removed in future versions of Gaudi.

@@ -44,9 +44,9 @@ struct ExampleFunctionalConsumerMultiple final
                   const FloatColl& floatVector,
                   const ParticleColl& particles, const SimTrackerHitColl& simTrackerHits,
                   const TrackerHitColl& trackerHits, const  TrackColl& tracks) const override {
-    // if ((floatVector[0] != 125) || (floatVector[1] != 25) || (floatVector[2] != m_event)) {
-    //   fatal() << "Wrong data in floatVector collection";
-    // }
+    if ((floatVector[0] != 125) || (floatVector[1] != 25) || (floatVector[2] != m_event)) {
+      fatal() << "Wrong data in floatVector collection";
+    }
 
     auto  p4            = particles.momentum()[0];
     if ((p4.x != m_magicNumberOffset + m_event + 5) || (p4.y != m_magicNumberOffset + 6) ||
