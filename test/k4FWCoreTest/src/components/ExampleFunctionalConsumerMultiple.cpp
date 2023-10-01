@@ -11,7 +11,9 @@
 // Define BaseClass_t
 #include "k4FWCore/BaseClass.h"
 
+#include <stdexcept>
 #include <string>
+#include <sstream>
 
 
 // Which type of collection we are reading
@@ -44,32 +46,47 @@ struct ExampleFunctionalConsumerMultiple final
                   const FloatColl& floatVector,
                   const ParticleColl& particles, const SimTrackerHitColl& simTrackerHits,
                   const TrackerHitColl& trackerHits, const  TrackColl& tracks) const override {
-    if ((floatVector[0] != 125) || (floatVector[1] != 25) || (floatVector[2] != m_event)) {
-      fatal() << "Wrong data in floatVector collection";
+    if (floatVector.size() != 3) {
+      throw std::runtime_error("Wrong size of floatVector collection, expected 3, got " + std::to_string(floatVector.size()) + "");
+    }
+    if ((floatVector[0] != 125) || (floatVector[1] != 25) || (floatVector[2] != 0)) {
+      std::stringstream error;
+      error << "Wrong data in floatVector collection, expected 125, 25, " << 0 << " got " << floatVector[0] << ", " << floatVector[1] << ", " << floatVector[2] << "";
+      throw std::runtime_error(error.str());
     }
 
     auto  p4            = particles.momentum()[0];
-    if ((p4.x != m_magicNumberOffset + m_event + 5) || (p4.y != m_magicNumberOffset + 6) ||
-        (p4.z != m_magicNumberOffset + 7) || (particles[0].getMass() != m_magicNumberOffset + m_event + 8)) {
-      fatal() << "Wrong data in particles collection";
+    if ((p4.x != m_magicNumberOffset + 5) || (p4.y != m_magicNumberOffset + 6) ||
+        (p4.z != m_magicNumberOffset + 7) || (particles[0].getMass() != m_magicNumberOffset + 8)) {
+      std::stringstream error;
+      error << "Wrong data in particles collection, expected " << m_magicNumberOffset + 5 << ", "
+            << m_magicNumberOffset + 6 << ", " << m_magicNumberOffset + 7 << ", " <<
+        m_magicNumberOffset + 8 << " got " << p4.x << ", " << p4.y << ", " <<
+        p4.z << ", " << particles[0].getMass() << "";
+      throw std::runtime_error(error.str());
     }
 
     if ((simTrackerHits[0].getPosition()[0] != 3) || (simTrackerHits[0].getPosition()[1] != 4) ||
         (simTrackerHits[0].getPosition()[2] != 5)) {
-      fatal() << "Wrong data in simTrackerHits collection";
+      std::stringstream error;
+      error << "Wrong data in simTrackerHits collection, expected 3, 4, 5 got " << simTrackerHits[0].getPosition()[0] << ", " << simTrackerHits[0].getPosition()[1] << ", " << simTrackerHits[0].getPosition()[2] << "";
+      throw std::runtime_error(error.str());
     }
 
     if ((trackerHits[0].getPosition()[0] != 3) || (trackerHits[0].getPosition()[1] != 4) ||
         (trackerHits[0].getPosition()[2] != 5)) {
-      fatal() << "Wrong data in trackerHits collection";
+      std::stringstream error;
+      error << "Wrong data in trackerHits collection, expected 3, 4, 5 got " << trackerHits[0].getPosition()[0] << ", " << trackerHits[0].getPosition()[1] << ", " << trackerHits[0].getPosition()[2] << "";
+      throw std::runtime_error(error.str());
     }
 
-    if ((tracks[0].getType() != 1) || (tracks[0].getChi2() != 2.1) || (tracks[0].getNdf() != 3) ||
-        (tracks[0].getDEdx() != 4.1) || (tracks[0].getDEdxError() != 5.1) ||
-        (tracks[0].getRadiusOfInnermostHit() != 6.1)
-        // (tracks[0].getSubdetectorHitNumbers() != {1, 4})
+    if ((tracks[0].getType() != 1) || (std::abs(tracks[0].getChi2() - 2.1) > 1e-6) || (tracks[0].getNdf() != 3) ||
+        (std::abs(tracks[0].getDEdx() - 4.1) > 1e-6) || (std::abs(tracks[0].getDEdxError() - 5.1) > 1e-6) ||
+        (std::abs(tracks[0].getRadiusOfInnermostHit() - 6.1) > 1e-6)
     ) {
-      fatal() << "Wrong data in tracks collection";
+      std::stringstream error;
+      error << "Wrong data in tracks collection, expected 1, 2.1, 3, 4.1, 5.1, 6.1 got " << tracks[0].getType() << ", " << tracks[0].getChi2() << ", " << tracks[0].getNdf() << ", " << tracks[0].getDEdx() << ", " << tracks[0].getDEdxError() << ", " << tracks[0].getRadiusOfInnermostHit() << "";
+      throw std::runtime_error(error.str());
     }
   }
 
@@ -77,7 +94,6 @@ private:
   // integer to add to the dummy values written to the edm
   Gaudi::Property<int> m_magicNumberOffset{this, "magicNumberOffset", 0,
                                            "Integer to add to the dummy values written to the edm"};
-  int                  m_event{0};
 };
 
 DECLARE_COMPONENT(ExampleFunctionalConsumerMultiple)

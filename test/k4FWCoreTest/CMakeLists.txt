@@ -243,3 +243,15 @@ add_test(NAME ExampleFunctionalTransformerMultiple
 set_test_env(ExampleFunctionalTransformerMultiple)
 set_tests_properties(ExampleFunctionalTransformerMultiple PROPERTIES
                      DEPENDS "ExampleFunctionalProducerMultiple;ExampleFunctionalConsumerMultiple")
+
+add_test(NAME FunctionalChain
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} options/runFunctionalChain.py)
+set_test_env(FunctionalChain)
+
+add_test(NAME FunctionalMix
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} options/runFunctionalMix.py)
+set_test_env(FunctionalChain)
+set_tests_properties(FunctionalMix PROPERTIES
+                     DEPENDS "ExampleFunctionalProducerMultiple")
