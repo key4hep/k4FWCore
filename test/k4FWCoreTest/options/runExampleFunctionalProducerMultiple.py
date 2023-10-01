@@ -1,3 +1,5 @@
+# This is an example using a producer with a multiple outputs and saving that to a file
+
 from Gaudi.Configuration import INFO
 from Configurables import ExampleFunctionalProducerMultiple
 from Configurables import ApplicationMgr

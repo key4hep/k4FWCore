@@ -1,3 +1,6 @@
+# This is an example reading from a file and using a consumer with a single input
+# to check that the contents of the file are the expected ones
+
 from Gaudi.Configuration import INFO
 from Configurables import ExampleFunctionalConsumer
 from Configurables import ApplicationMgr
