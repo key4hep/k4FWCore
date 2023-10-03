@@ -8,11 +8,9 @@
 // Base class used for the Traits template argument of the
 // Gaudi::Functional algorithms
 struct BaseClass_t {
-  template<typename T>
-  using InputHandle = DataObjectReadHandle<DataWrapper<T>>;
-  template<typename T>
-  using OutputHandle = DataObjectWriteHandle<DataWrapper<T>>;
-  
+  template <typename T> using InputHandle  = DataObjectReadHandle<DataWrapper<T>>;
+  template <typename T> using OutputHandle = DataObjectWriteHandle<DataWrapper<T>>;
+
   using BaseClass = Gaudi::Algorithm;
 };
 

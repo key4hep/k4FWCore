@@ -23,7 +23,7 @@ struct ExampleFunctionalTransformer final
   // Note that the function has to be const, as well as all pointers to collections
   // we get from the input
   colltype_out operator()(const colltype_in& input) const override {
-    auto  coll_out = edm4hep::MCParticleCollection();
+    auto coll_out = edm4hep::MCParticleCollection();
     for (const auto& particle : input) {
       auto new_particle = edm4hep::MutableMCParticle();
       new_particle.setPDG(particle.getPDG() + 10);

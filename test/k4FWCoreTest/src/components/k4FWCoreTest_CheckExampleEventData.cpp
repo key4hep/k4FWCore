@@ -39,8 +39,7 @@ StatusCode k4FWCoreTest_CheckExampleEventData::execute() {
   auto floatVector = m_vectorFloatHandle.get();
   if (floatVector->size() != 3 || (*floatVector)[2] != m_event) {
     fatal() << "Contents of vectorfloat collection is not as expected: size = " << floatVector->size()
-            << " (expected 3), contents = " << *floatVector << " (expected [125., 25., " << m_event << "]) "
-            << endmsg;
+            << " (expected 3), contents = " << *floatVector << " (expected [125., 25., " << m_event << "]) " << endmsg;
     // return StatusCode::FAILURE;
   }
 

@@ -18,19 +18,17 @@ using TrackerHit_t    = edm4hep::TrackerHitCollection;
 using Track_t         = edm4hep::TrackCollection;
 
 struct ExampleFunctionalProducerMultiple final
-  : Gaudi::Functional::Producer<std::tuple<Float_t, Particle_t, Particle_t, SimTrackerHit_t, TrackerHit_t, Track_t>(),
+    : Gaudi::Functional::Producer<std::tuple<Float_t, Particle_t, Particle_t, SimTrackerHit_t, TrackerHit_t, Track_t>(),
                                   BaseClass_t> {
   // The pairs in KeyValue can be changed from python and they correspond
   // to the names of the output collections
   ExampleFunctionalProducerMultiple(const std::string& name, ISvcLocator* svcLoc)
       : Producer(
             name, svcLoc,
-            {KeyValue("OutputCollectionFloat", "VectorFloat"),
-             KeyValue("OutputCollectionParticles1", "MCParticles1"),
+            {KeyValue("OutputCollectionFloat", "VectorFloat"), KeyValue("OutputCollectionParticles1", "MCParticles1"),
              KeyValue("OutputCollectionParticles2", "MCParticles2"),
              KeyValue("OutputCollectionSimTrackerHits", "SimTrackerHits"),
-             KeyValue("OutputCollectionTrackerHits", "TrackerHits"),
-             KeyValue("OutputCollectionTracks", "Tracks")}) {}
+             KeyValue("OutputCollectionTrackerHits", "TrackerHits"), KeyValue("OutputCollectionTracks", "Tracks")}) {}
 
   // This is the function that will be called to produce the data
   std::tuple<Float_t, Particle_t, Particle_t, SimTrackerHit_t, TrackerHit_t, Track_t> operator()() const override {

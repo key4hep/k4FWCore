@@ -68,17 +68,16 @@ public:
 
   const std::string_view getCollectionType(const std::string& collName);
 
-  template <typename T>
-  StatusCode readCollection(const std::string& collName) {
-  const T* collection(nullptr);
-  collection = static_cast<const T*>(m_eventframe.get(collName));
-  if (collection == nullptr) {
-    error() << "Collection " << collName << " does not exist." << endmsg;
-  }
-  auto wrapper = new DataWrapper<T>;
-  wrapper->setData(collection);
-  m_podio_datawrappers.push_back(wrapper);
-  return DataSvc::registerObject("/Event", "/" + collName, wrapper);
+  template <typename T> StatusCode readCollection(const std::string& collName) {
+    const T* collection(nullptr);
+    collection = static_cast<const T*>(m_eventframe.get(collName));
+    if (collection == nullptr) {
+      error() << "Collection " << collName << " does not exist." << endmsg;
+    }
+    auto wrapper = new DataWrapper<T>;
+    wrapper->setData(collection);
+    m_podio_datawrappers.push_back(wrapper);
+    return DataSvc::registerObject("/Event", "/" + collName, wrapper);
   }
 
   const podio::Frame& getEventFrame() const { return m_eventframe; }

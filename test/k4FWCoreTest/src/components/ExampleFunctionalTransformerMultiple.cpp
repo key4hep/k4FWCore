@@ -13,27 +13,27 @@
 #include <string>
 
 // Which type of collection we are reading
-using FloatColl = podio::UserDataCollection<float>;
-using ParticleColl = edm4hep::MCParticleCollection;
+using FloatColl         = podio::UserDataCollection<float>;
+using ParticleColl      = edm4hep::MCParticleCollection;
 using SimTrackerHitColl = edm4hep::SimTrackerHitCollection;
-using TrackerHitColl = edm4hep::TrackerHitCollection;
-using TrackColl = edm4hep::TrackCollection;
+using TrackerHitColl    = edm4hep::TrackerHitCollection;
+using TrackColl         = edm4hep::TrackCollection;
 
 // As a simple example, we'll write an integer and a collection of MCParticles
 using Counter_t  = podio::UserDataCollection<int>;
 using Particle_t = edm4hep::MCParticleCollection;
 
 struct ExampleFunctionalTransformerMultiple final
-    : Gaudi::Functional::MultiTransformer<std::tuple<Counter_t, Particle_t>(const FloatColl&, const ParticleColl&, const SimTrackerHitColl&, const TrackerHitColl&, const TrackColl&),
+    : Gaudi::Functional::MultiTransformer<std::tuple<Counter_t, Particle_t>(const FloatColl&, const ParticleColl&,
+                                                                            const SimTrackerHitColl&,
+                                                                            const TrackerHitColl&, const TrackColl&),
                                           BaseClass_t> {
   ExampleFunctionalTransformerMultiple(const std::string& name, ISvcLocator* svcLoc)
       : MultiTransformer(
             name, svcLoc,
-            {KeyValue("InputCollectionFloat", "VectorFloat"),
-             KeyValue("InputCollectionParticles", "MCParticles1"),
+            {KeyValue("InputCollectionFloat", "VectorFloat"), KeyValue("InputCollectionParticles", "MCParticles1"),
              KeyValue("InputCollectionSimTrackerHits", "SimTrackerHits"),
-             KeyValue("InputCollectionTrackerHits", "TrackerHits"),
-             KeyValue("InputCollectionTracks", "Tracks")},
+             KeyValue("InputCollectionTrackerHits", "TrackerHits"), KeyValue("InputCollectionTracks", "Tracks")},
             {KeyValue("OutputCollectionCounter", "Counter"), KeyValue("OutputCollectionParticles", "NewMCParticles")}) {
   }
 
@@ -41,8 +41,9 @@ struct ExampleFunctionalTransformerMultiple final
   // Note that the function has to be const, as well as the collections
   // we get from the input
   std::tuple<Counter_t, Particle_t> operator()(const FloatColl& floatVector, const ParticleColl& particles,
-                                               const SimTrackerHitColl& simTrackerHits, const TrackerHitColl& trackerHits,
-                                               const TrackColl& tracks) const override {
+                                               const SimTrackerHitColl& simTrackerHits,
+                                               const TrackerHitColl&    trackerHits,
+                                               const TrackColl&         tracks) const override {
     Counter_t counter;
 
     counter.push_back(floatVector.size());

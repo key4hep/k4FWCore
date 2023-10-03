@@ -22,16 +22,19 @@ struct ExampleFunctionalConsumer final : Gaudi::Functional::Consumer<void(const 
   // Note that the function has to be const, as well as the collections
   // we get from the input
   void operator()(const colltype& input) const override {
-    int   i    = 0;
+    int i = 0;
     for (const auto& particle : input) {
-      if ((particle.getPDG() != 1 + i + m_possibleOffset) || (particle.getGeneratorStatus() != 2 + i + m_possibleOffset) ||
-          (particle.getSimulatorStatus() != 3 + i + m_possibleOffset) || (particle.getCharge() != 4 + i + m_possibleOffset) ||
-          (particle.getTime() != 5 + i + m_possibleOffset) || (particle.getMass() != 6 + i + m_possibleOffset)) {
+      if ((particle.getPDG() != 1 + i + m_possibleOffset) ||
+          (particle.getGeneratorStatus() != 2 + i + m_possibleOffset) ||
+          (particle.getSimulatorStatus() != 3 + i + m_possibleOffset) ||
+          (particle.getCharge() != 4 + i + m_possibleOffset) || (particle.getTime() != 5 + i + m_possibleOffset) ||
+          (particle.getMass() != 6 + i + m_possibleOffset)) {
         std::stringstream error;
-        error << "Wrong data in MCParticle collection, expected " << 1 + i + m_possibleOffset << ", " << 2 + i + m_possibleOffset << ", "
-              << 3 + i + m_possibleOffset << ", " << 4 + i + m_possibleOffset << ", " << 5 + i + m_possibleOffset << ", " << 6 + i + m_possibleOffset << " got "
-              << particle.getPDG() << ", " << particle.getGeneratorStatus() << ", " << particle.getSimulatorStatus() << ", " << particle.getCharge() << ", "
-              << particle.getTime() << ", " << particle.getMass() << "";
+        error << "Wrong data in MCParticle collection, expected " << 1 + i + m_possibleOffset << ", "
+              << 2 + i + m_possibleOffset << ", " << 3 + i + m_possibleOffset << ", " << 4 + i + m_possibleOffset
+              << ", " << 5 + i + m_possibleOffset << ", " << 6 + i + m_possibleOffset << " got " << particle.getPDG()
+              << ", " << particle.getGeneratorStatus() << ", " << particle.getSimulatorStatus() << ", "
+              << particle.getCharge() << ", " << particle.getTime() << ", " << particle.getMass() << "";
         throw std::runtime_error(error.str());
       }
       i++;

@@ -44,7 +44,7 @@ public:
 public:
   DataWrapper() : m_data(nullptr){};
   DataWrapper(T&& coll) {
-    m_data    = new T(std::move(coll));
+    m_data   = new T(std::move(coll));
     is_owner = true;
   }
   DataWrapper(std::unique_ptr<T> uptr) : m_data(uptr.get()) {
@@ -57,9 +57,8 @@ public:
   void         setData(const T* data) { m_data = data; }
   virtual void resetData() { m_data = nullptr; }
 
-  operator const T&() const & {
-    return *m_data;
-  }
+  operator const T&() const& { return *m_data; }
+
 private:
   /// try to cast to collectionBase; may return nullptr;
   virtual podio::CollectionBase* collectionBase();
