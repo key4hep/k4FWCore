@@ -1,4 +1,3 @@
-#include "Gaudi/Algorithm.h"
 #include "Gaudi/Property.h"
 #include "GaudiAlg/Producer.h"
 #include "k4FWCore/BaseClass.h"
