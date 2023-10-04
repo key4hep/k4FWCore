@@ -17,12 +17,14 @@
  * limitations under the License.
  */
 #include "k4FWCore/PodioDataSvc.h"
+#include <GaudiKernel/StatusCode.h>
 #include "GaudiKernel/IConversionSvc.h"
 #include "GaudiKernel/IEventProcessor.h"
 #include "GaudiKernel/IProperty.h"
 #include "GaudiKernel/ISvcLocator.h"
-
 #include "k4FWCore/DataWrapper.h"
+
+#include "podio/CollectionBase.h"
 
 #include "TTree.h"
 
@@ -147,16 +149,12 @@ PodioDataSvc::PodioDataSvc(const std::string& name, ISvcLocator* svc) : DataSvc(
 /// Standard Destructor
 PodioDataSvc::~PodioDataSvc() {}
 
-StatusCode PodioDataSvc::readCollection(const std::string& collName) {
-  const podio::CollectionBase* collection(nullptr);
-  collection = m_eventframe.get(collName);
-  if (collection == nullptr) {
+const std::string_view PodioDataSvc::getCollectionType(const std::string& collName) {
+  const auto coll = m_eventframe.get(collName);
+  if (coll == nullptr) {
     error() << "Collection " << collName << " does not exist." << endmsg;
   }
-  auto wrapper = new DataWrapper<podio::CollectionBase>;
-  wrapper->setData(collection);
-  m_podio_datawrappers.push_back(wrapper);
-  return DataSvc::registerObject("/Event", "/" + collName, wrapper);
+  return coll->getTypeName();
 }
 
 StatusCode PodioDataSvc::registerObject(std::string_view parentPath, std::string_view fullPath, DataObject* pObject) {

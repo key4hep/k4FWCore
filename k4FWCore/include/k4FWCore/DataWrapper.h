@@ -43,11 +43,21 @@ public:
 
 public:
   DataWrapper() : m_data(nullptr){};
+  DataWrapper(T&& coll) {
+    m_data   = new T(std::move(coll));
+    is_owner = true;
+  }
+  DataWrapper(std::unique_ptr<T> uptr) : m_data(uptr.get()) {
+    uptr.release();
+    is_owner = false;
+  };
   virtual ~DataWrapper();
 
-  const T*     getData() { return m_data; }
+  const T*     getData() const { return m_data; }
   void         setData(const T* data) { m_data = data; }
   virtual void resetData() { m_data = nullptr; }
+
+  operator const T&() const& { return *m_data; }
 
 private:
   /// try to cast to collectionBase; may return nullptr;
@@ -55,10 +65,11 @@ private:
 
 private:
   const T* m_data;
+  bool     is_owner{true};
 };
 
 template <class T> DataWrapper<T>::~DataWrapper() {
-  if (m_data != nullptr)
+  if (is_owner && !m_data)
     delete m_data;
 }
 
