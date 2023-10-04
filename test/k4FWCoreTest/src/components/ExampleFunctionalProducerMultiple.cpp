@@ -30,14 +30,14 @@
 #include <string>
 
 // Which type of collections we are producing
-using Float_t         = podio::UserDataCollection<float>;
-using Particle_t      = edm4hep::MCParticleCollection;
-using SimTrackerHit_t = edm4hep::SimTrackerHitCollection;
-using TrackerHit_t    = edm4hep::TrackerHitCollection;
-using Track_t         = edm4hep::TrackCollection;
+using Float         = podio::UserDataCollection<float>;
+using Particle      = edm4hep::MCParticleCollection;
+using SimTrackerHit = edm4hep::SimTrackerHitCollection;
+using TrackerHit    = edm4hep::TrackerHitCollection;
+using Track         = edm4hep::TrackCollection;
 
 struct ExampleFunctionalProducerMultiple final
-    : Gaudi::Functional::Producer<std::tuple<Float_t, Particle_t, Particle_t, SimTrackerHit_t, TrackerHit_t, Track_t>(),
+    : Gaudi::Functional::Producer<std::tuple<Float, Particle, Particle, SimTrackerHit, TrackerHit, Track>(),
                                   BaseClass_t> {
   // The pairs in KeyValue can be changed from python and they correspond
   // to the names of the output collections
@@ -50,7 +50,7 @@ struct ExampleFunctionalProducerMultiple final
              KeyValue("OutputCollectionTrackerHits", "TrackerHits"), KeyValue("OutputCollectionTracks", "Tracks")}) {}
 
   // This is the function that will be called to produce the data
-  std::tuple<Float_t, Particle_t, Particle_t, SimTrackerHit_t, TrackerHit_t, Track_t> operator()() const override {
+  std::tuple<Float, Particle, Particle, SimTrackerHit, TrackerHit, Track> operator()() const override {
     // The following was copied and adapted from the
     // k4FWCoreTest_CreateExampleEventData test
 
@@ -92,7 +92,7 @@ struct ExampleFunctionalProducerMultiple final
     track.addToTrackerHits(trackerHit);
     track.addToTracks(track2);
 
-    return std::make_tuple(std::move(floatVector), std::move(particles), Particle_t(), std::move(simTrackerHits),
+    return std::make_tuple(std::move(floatVector), std::move(particles), Particle(), std::move(simTrackerHits),
                            std::move(trackerHits), std::move(tracks));
   }
 

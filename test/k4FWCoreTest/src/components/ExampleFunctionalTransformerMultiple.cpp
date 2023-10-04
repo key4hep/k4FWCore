@@ -39,13 +39,13 @@ using TrackerHitColl    = edm4hep::TrackerHitCollection;
 using TrackColl         = edm4hep::TrackCollection;
 
 // As a simple example, we'll write an integer and a collection of MCParticles
-using Counter_t  = podio::UserDataCollection<int>;
-using Particle_t = edm4hep::MCParticleCollection;
+using Counter  = podio::UserDataCollection<int>;
+using Particle = edm4hep::MCParticleCollection;
 
 struct ExampleFunctionalTransformerMultiple final
-    : Gaudi::Functional::MultiTransformer<std::tuple<Counter_t, Particle_t>(const FloatColl&, const ParticleColl&,
-                                                                            const SimTrackerHitColl&,
-                                                                            const TrackerHitColl&, const TrackColl&),
+    : Gaudi::Functional::MultiTransformer<std::tuple<Counter, Particle>(const FloatColl&, const ParticleColl&,
+                                                                        const SimTrackerHitColl&, const TrackerHitColl&,
+                                                                        const TrackColl&),
                                           BaseClass_t> {
   ExampleFunctionalTransformerMultiple(const std::string& name, ISvcLocator* svcLoc)
       : MultiTransformer(
@@ -59,11 +59,10 @@ struct ExampleFunctionalTransformerMultiple final
   // This is the function that will be called to transform the data
   // Note that the function has to be const, as well as the collections
   // we get from the input
-  std::tuple<Counter_t, Particle_t> operator()(const FloatColl& floatVector, const ParticleColl& particles,
-                                               const SimTrackerHitColl& simTrackerHits,
-                                               const TrackerHitColl&    trackerHits,
-                                               const TrackColl&         tracks) const override {
-    Counter_t counter;
+  std::tuple<Counter, Particle> operator()(const FloatColl& floatVector, const ParticleColl& particles,
+                                           const SimTrackerHitColl& simTrackerHits, const TrackerHitColl& trackerHits,
+                                           const TrackColl& tracks) const override {
+    Counter counter;
 
     counter.push_back(floatVector.size());
 

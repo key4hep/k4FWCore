@@ -25,17 +25,14 @@
 
 #include <string>
 
-// Which collection we are producing
-using colltype = edm4hep::MCParticleCollection;
-
-struct ExampleFunctionalProducer final : Gaudi::Functional::Producer<colltype(), BaseClass_t> {
+struct ExampleFunctionalProducer final : Gaudi::Functional::Producer<edm4hep::MCParticleCollection(), BaseClass_t> {
   // The pair in KeyValue can be changed from python and it corresponds
   // to the name of the output collection
   ExampleFunctionalProducer(const std::string& name, ISvcLocator* svcLoc)
       : Producer(name, svcLoc, KeyValue("OutputCollection", "MCParticles")) {}
 
   // This is the function that will be called to produce the data
-  colltype operator()() const override {
+  edm4hep::MCParticleCollection operator()() const override {
     auto coll = edm4hep::MCParticleCollection();
     coll.push_back({1, 2, 3, 4, 5, 6, {}, {}, {}, {}, {}, {}});
     coll.push_back({2, 3, 4, 5, 6, 7, {}, {}, {}, {}, {}, {}});

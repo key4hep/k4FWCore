@@ -28,10 +28,8 @@
 #include <stdexcept>
 #include <string>
 
-// Which type of collection we are reading
-using colltype = edm4hep::MCParticleCollection;
-
-struct ExampleFunctionalConsumer final : Gaudi::Functional::Consumer<void(const colltype& input), BaseClass_t> {
+struct ExampleFunctionalConsumer final
+    : Gaudi::Functional::Consumer<void(const edm4hep::MCParticleCollection& input), BaseClass_t> {
   // The pair in KeyValue can be changed from python and it corresponds
   // to the name of the input collection
   ExampleFunctionalConsumer(const std::string& name, ISvcLocator* svcLoc)
@@ -40,7 +38,7 @@ struct ExampleFunctionalConsumer final : Gaudi::Functional::Consumer<void(const 
   // This is the function that will be called to transform the data
   // Note that the function has to be const, as well as the collections
   // we get from the input
-  void operator()(const colltype& input) const override {
+  void operator()(const edm4hep::MCParticleCollection& input) const override {
     int i = 0;
     for (const auto& particle : input) {
       if ((particle.getPDG() != 1 + i + m_possibleOffset) ||
