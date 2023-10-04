@@ -92,4 +92,4 @@ have either multiple inputs and / or multiple outputs (like
 `ExampleFunctionalProducerMultiple`) that can be used as a template for the more
 typical case when working with multiple inputs or outputs.
 
-`GaudiAlg` is deprecated and will be removed in future versions of Gaudi.
+**`GaudiAlg` is deprecated and will be removed in future versions of Gaudi.**
