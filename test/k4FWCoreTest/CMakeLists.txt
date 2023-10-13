@@ -32,6 +32,12 @@ set(k4fwcoretest_plugin_sources
   src/components/k4FWCoreTest_cellID_reader.cpp
   src/components/k4FWCoreTest_cellID_writer.cpp
   src/components/k4FWCoreTest_CheckExampleEventData.cpp
+  src/components/ExampleFunctionalProducer.cpp
+  src/components/ExampleFunctionalConsumer.cpp
+  src/components/ExampleFunctionalTransformer.cpp
+  src/components/ExampleFunctionalProducerMultiple.cpp
+  src/components/ExampleFunctionalConsumerMultiple.cpp
+  src/components/ExampleFunctionalTransformerMultiple.cpp
 )
 
 gaudi_add_module(k4FWCoreTestPlugins
@@ -198,3 +204,54 @@ add_test(NAME TestExec
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
          COMMAND ${K4RUN} --dry-run options/TestExec.py)
 set_test_env(TestExec)
+add_test(NAME ExampleFunctionalProducer
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} options/runExampleFunctionalProducer.py)
+set_test_env(ExampleFunctionalProducer)
+
+add_test(NAME ExampleFunctionalConsumer
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} options/runExampleFunctionalConsumer.py)
+set_test_env(ExampleFunctionalConsumer)
+set_tests_properties(ExampleFunctionalConsumer PROPERTIES
+                     DEPENDS ExampleFunctionalProducer)
+
+# A dependency on the ExampleFunctionalConsumer is added to make sure
+# they don't run at the same time
+add_test(NAME ExampleFunctionalTransformer
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} options/runExampleFunctionalTransformer.py)
+set_test_env(ExampleFunctionalTransformer)
+set_tests_properties(ExampleFunctionalTransformer PROPERTIES
+                     DEPENDS "ExampleFunctionalProducer;ExampleFunctionalConsumer")
+
+add_test(NAME ExampleFunctionalProducerMultiple
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} options/runExampleFunctionalProducerMultiple.py)
+set_test_env(ExampleFunctionalProducerMultiple)
+
+add_test(NAME ExampleFunctionalConsumerMultiple
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} options/runExampleFunctionalConsumerMultiple.py)
+set_test_env(ExampleFunctionalConsumerMultiple)
+set_tests_properties(ExampleFunctionalConsumerMultiple PROPERTIES
+                     DEPENDS ExampleFunctionalProducerMultiple)
+
+add_test(NAME ExampleFunctionalTransformerMultiple
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} options/runExampleFunctionalTransformerMultiple.py)
+set_test_env(ExampleFunctionalTransformerMultiple)
+set_tests_properties(ExampleFunctionalTransformerMultiple PROPERTIES
+                     DEPENDS "ExampleFunctionalProducerMultiple;ExampleFunctionalConsumerMultiple")
+
+add_test(NAME FunctionalChain
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} options/runFunctionalChain.py)
+set_test_env(FunctionalChain)
+
+add_test(NAME FunctionalMix
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+         COMMAND ${K4RUN} options/runFunctionalMix.py)
+set_test_env(FunctionalMix)
+set_tests_properties(FunctionalMix PROPERTIES
+                     DEPENDS "ExampleFunctionalProducerMultiple")

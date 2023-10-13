@@ -54,8 +54,10 @@ public:
 
 private:
   /// integer to add to the dummy values written to the edm
-  Gaudi::Property<int> m_magicNumberOffset{this, "magicNumberOffset", 0,
+  Gaudi::Property<int>  m_magicNumberOffset{this, "magicNumberOffset", 0,
                                            "Integer to add to the dummy values written to the edm"};
+  Gaudi::Property<bool> m_keepEventNumberZero{this, "keepEventNumberZero", false,
+                                              "Don't add the event number to the dummy values written"};
   /// Handle for the MCParticles to be written
   DataHandle<edm4hep::MCParticleCollection>    m_mcParticleHandle{"MCParticles", Gaudi::DataHandle::Reader, this};
   DataHandle<podio::UserDataCollection<float>> m_vectorFloatHandle{"VectorFloat", Gaudi::DataHandle::Reader, this};
