@@ -48,14 +48,6 @@ include(CTest)
 
 set(K4RUN ${PROJECT_SOURCE_DIR}/k4FWCore/scripts/k4run)
 
-#--- The genConf directory has been renamed to genConfDir in Gaudi 35r1
-#--- See https://gitlab.cern.ch/gaudi/Gaudi/-/merge_requests/1158
-set(GAUDI_GENCONF_DIR "genConfDir")
-if (${Gaudi_VERSION} VERSION_LESS 35.1)
-  set(GAUDI_GENCONF_DIR "genConf")
-endif()
-
-
 function(set_test_env _testname)
   set_property(TEST ${_testname} APPEND PROPERTY ENVIRONMENT "ROOT_INCLUDE_PATH=$<$<TARGET_EXISTS:podio::podio>:$<TARGET_FILE_DIR:podio::podio>/../include>:$<$<TARGET_EXISTS:EDM4HEP::edm4hep>:$<TARGET_FILE_DIR:EDM4HEP::edm4hep>/../include>:$ENV{ROOT_INCLUDE_PATH}")
   set_property(TEST ${_testname} APPEND PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}:${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME}:${PROJECT_BINARY_DIR}/test/k4FWCoreTest:$<$<TARGET_EXISTS:ROOT::Core>:$<TARGET_FILE_DIR:ROOT::Core>>:$<$<TARGET_EXISTS:EDM4HEP::edm4hep>:$<TARGET_FILE_DIR:EDM4HEP::edm4hep>>:$<$<TARGET_EXISTS:podio::podio>:$<TARGET_FILE_DIR:podio::podio>>:$ENV{LD_LIBRARY_PATH}")
