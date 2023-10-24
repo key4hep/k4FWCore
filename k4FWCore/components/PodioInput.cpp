@@ -21,10 +21,10 @@
 
 #include "k4FWCore/PodioDataSvc.h"
 
-#include "edm4hep/EventHeaderCollection.h"
 #include "edm4hep/CaloHitContributionCollection.h"
 #include "edm4hep/CalorimeterHitCollection.h"
 #include "edm4hep/ClusterCollection.h"
+#include "edm4hep/EventHeaderCollection.h"
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/MCRecoCaloAssociationCollection.h"
 #include "edm4hep/MCRecoClusterParticleAssociationCollection.h"
