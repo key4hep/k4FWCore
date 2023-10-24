@@ -85,7 +85,7 @@ add_test(NAME AlgorithmWithTFileCheckFrameworkOutput
 set_property(TEST AlgorithmWithTFileCheckFrameworkOutput APPEND PROPERTY DEPENDS AlgorithmWithTFile)
 set_test_env(AlgorithmWithTFileCheckFrameworkOutput)
 add_test(NAME AlgorithmWithTFileCheckMyTFileOutput
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR} 
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
          COMMAND  python scripts/check_TestAlgorithmWithTFile_myTFile_nonempty.py)
 set_property(TEST AlgorithmWithTFileCheckMyTFileOutput APPEND PROPERTY DEPENDS AlgorithmWithTFile)
 set_test_env(AlgorithmWithTFileCheckMyTFileOutput)
