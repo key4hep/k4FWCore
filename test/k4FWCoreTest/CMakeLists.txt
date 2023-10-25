@@ -17,12 +17,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ]]
 
-################################################################################
-# Package: k4FWCoreTest
-################################################################################
-
-find_package(EDM4HEP)
-
 file(GLOB k4fwcoretest_plugin_sources src/components/*.cpp)
 
 gaudi_add_module(k4FWCoreTestPlugins
@@ -44,7 +38,6 @@ function(add_test_with_env testname)
   set(TEST_ARGUMENTS "")
 
   foreach(arg ${ARGN})
-    message(STATUS "arg: ${arg}")
     if(arg STREQUAL "PROPERTIES")
       set(TEST_PROPERTIES_FOUND TRUE)
     else()
@@ -116,8 +109,6 @@ add_test_with_env(Testk4runHelpOnly options/TestArgs.py --help PROPERTIES PASS_R
 
 add_test_with_env(ExampleFunctionalProducer options/runExampleFunctionalProducer.py)
 add_test_with_env(ExampleFunctionalConsumer options/runExampleFunctionalConsumer.py PROPERTIES DEPENDS ExampleFunctionalProducer)
-# A dependency on the ExampleFunctionalConsumer is added to make sure they don't
-# run at the same time
 add_test_with_env(ExampleFunctionalTransformer options/runExampleFunctionalTransformer.py PROPERTIES DEPENDS ExampleFunctionalProducer)
 add_test_with_env(ExampleFunctionalProducerMultiple options/runExampleFunctionalProducerMultiple.py)
 add_test_with_env(ExampleFunctionalConsumerMultiple options/runExampleFunctionalConsumerMultiple.py PROPERTIES DEPENDS ExampleFunctionalProducerMultiple)

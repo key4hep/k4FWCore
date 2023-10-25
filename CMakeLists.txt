@@ -20,12 +20,10 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.15)
 
 project(k4FWCore)
 
-find_package(ROOT COMPONENTS RIO Tree)
-
-#---------------------------------------------------------------
-# Load macros and functions for Gaudi-based projects
-find_package(Gaudi)
-#---------------------------------------------------------------
+find_package(ROOT COMPONENTS RIO Tree REQUIRED)
+find_package(Gaudi REQUIRED)
+find_package(podio REQUIRED)
+find_package(EDM4HEP REQUIRED)
 
 include(GNUInstallDirs)
 include(CTest)
