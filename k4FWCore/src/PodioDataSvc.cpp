@@ -50,14 +50,12 @@ StatusCode PodioDataSvc::initialize() {
       if (m_reading_legacy_file) {
         warning() << "Reading PODIO file(s) in legacy format." << endmsg;
         m_legacy_reader.openFiles(m_filenames);
-        m_eventMax = m_reader.getEntries("events");
+        m_numAvailableEvents = m_reader.getEntries("events");
       } else {
         m_reader.openFiles(m_filenames);
-        m_eventMax = m_reader.getEntries("events");
+        m_numAvailableEvents = m_reader.getEntries("events");
       }
-      if (m_1stEvtEntry != 0) {
-        m_eventMax -= m_1stEvtEntry;
-      }
+      m_numAvailableEvents -= m_1stEvtEntry;
     }
   }
 
