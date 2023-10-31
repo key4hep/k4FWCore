@@ -53,8 +53,6 @@ function(add_test_with_env testname)
            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
            COMMAND ${K4RUN} ${TEST_ARGUMENTS})
   if(TEST_PROPERTIES_FOUND)
-    # string(REPLACE ";" " " TEST_PROPERTIES "${TEST_PROPERTIES}")
-    message(STATUS "Setting test properties for ${testname}: ${TEST_PROPERTIES}")
     set_tests_properties(${testname} PROPERTIES ${TEST_PROPERTIES})
   endif()
   set_test_env(${testname})
