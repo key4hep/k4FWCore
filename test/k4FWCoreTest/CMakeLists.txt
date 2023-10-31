@@ -34,13 +34,12 @@ function(set_test_env testname)
 endfunction()
 
 function(add_test_with_env testname)
-  set(TEST_PROPERTIES "")
-  set(TEST_ARGUMENTS "")
-
   foreach(arg ${ARGN})
     if(arg STREQUAL "PROPERTIES")
       set(TEST_PROPERTIES_FOUND TRUE)
     else()
+      # For tests that depend on multiple tests and the original cmake way is to
+      # add a colon between them this should make it work
       string(REPLACE ";" "\\\\;" arg ${arg})
       if(TEST_PROPERTIES_FOUND)
         list(APPEND TEST_PROPERTIES ${arg})
