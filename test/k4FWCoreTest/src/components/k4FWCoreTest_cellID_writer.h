@@ -26,6 +26,8 @@
 #include "k4FWCore/DataHandle.h"
 #include "k4FWCore/MetaDataHandle.h"
 
+#include "edm4hep/Constants.h"
+
 // datamodel
 #include "edm4hep/SimTrackerHitCollection.h"
 
@@ -55,7 +57,7 @@ private:
   /// Handle for the SimTrackerHits to be written
   DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitWriterHandle{"SimTrackerHits", Gaudi::DataHandle::Writer,
                                                                            this};
-  MetaDataHandle<std::string>                  m_cellIDHandle{m_simTrackerHitWriterHandle, "CellIDEncodingString",
+  MetaDataHandle<std::string>                  m_cellIDHandle{m_simTrackerHitWriterHandle, edm4hep::CellIDEncoding,
                                              Gaudi::DataHandle::Writer};
 };
 #endif /* K4FWCORE_K4FWCORETEST_CELLID_WRITER */
