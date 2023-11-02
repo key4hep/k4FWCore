@@ -68,14 +68,48 @@ public:
 
   const std::string_view getCollectionType(const std::string& collName);
 
-  template <typename T> StatusCode readCollection(const std::string& collName) {
-    const T* collection(nullptr);
-    collection = static_cast<const T*>(m_eventframe.get(collName));
-    if (collection == nullptr) {
+  template<typename T>
+  struct is_map
+  {
+      static constexpr bool value = false;
+  };
+
+
+  template <typename... Args>
+  struct is_map<std::map<Args...>>
+  {
+      static constexpr bool value = true;
+  };
+
+  template <typename T>
+  std::enable_if_t<!is_map<T>::value,StatusCode>
+  readCollection(const std::string& collName) {
+    const T* collection = static_cast<const T*>(m_eventframe.get(collName));
+    if (!collection) {
       error() << "Collection " << collName << " does not exist." << endmsg;
     }
     auto wrapper = new DataWrapper<T>;
     wrapper->setData(collection);
+    m_podio_datawrappers.push_back(wrapper);
+    return DataSvc::registerObject("/Event", "/" + collName, wrapper);
+  }
+
+  template <typename T>
+  std::enable_if_t<is_map<T>::value,StatusCode>
+  readCollection(const std::string& collName) {
+    std::istringstream iss(collName);
+    std::string token;
+    auto map = new std::map<std::string, typename T::value_type::second_type>();
+    // Assume collName is a space-separated list of collection names
+    while (iss >> token) {
+      auto collection = dynamic_cast<typename T::value_type::second_type>(const_cast<podio::CollectionBase*>(m_eventframe.get(token)));
+      if (!collection) {
+        error() << "Collection " << token << " does not exist." << endmsg;
+      }
+      (*map)[token] = collection;
+    }
+    auto wrapper = new DataWrapper<T>;
+    wrapper->setData(map);
     m_podio_datawrappers.push_back(wrapper);
     return DataSvc::registerObject("/Event", "/" + collName, wrapper);
   }
