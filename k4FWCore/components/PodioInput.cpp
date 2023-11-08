@@ -24,6 +24,7 @@
 #include "edm4hep/CaloHitContributionCollection.h"
 #include "edm4hep/CalorimeterHitCollection.h"
 #include "edm4hep/ClusterCollection.h"
+#include "edm4hep/EventHeaderCollection.h"
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/MCRecoCaloAssociationCollection.h"
 #include "edm4hep/MCRecoClusterParticleAssociationCollection.h"
@@ -169,6 +170,9 @@ void PodioInput::fillReaders() {
   };
   m_readers["podio::UserDataCollection<uint64_t>"] = [&](std::string_view collName) {
     maybeRead<podio::UserDataCollection<uint64_t>>(collName);
+  };
+  m_readers["edm4hep::EventHeaderCollection"] = [&](std::string_view collName) {
+    maybeRead<edm4hep::EventHeaderCollection>(collName);
   };
 }
 
