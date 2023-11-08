@@ -27,6 +27,7 @@
 #include "edm4hep/Cluster.h"
 
 struct tower {
+  int eta;
   int theta;
   int phi;
 };
@@ -55,6 +56,10 @@ public:
    *   @return Radius
    */
   virtual float radiusForPosition() const = 0;
+  /**  Get the map of cells contained within a tower.
+   *   @return Map of cells in a tower
+   */
+  virtual std::map<std::pair<uint, uint>, std::vector<edm4hep::CalorimeterHit>> cellsInTowers() const = 0;
   /**  Get the tower IDs in theta.
    *   @param[in] aTheta Position of the calorimeter cell in theta
    *   @return ID (theta) of a tower
