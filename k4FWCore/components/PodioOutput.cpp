@@ -59,8 +59,21 @@ StatusCode PodioOutput::execute() {
   } else {
     try {
       m_framewriter->writeFrame(frame, "events", m_collection_names_to_write);
-    } catch (std::runtime_error& e) {
-      error() << "Could not write event: " << e.what() << endmsg;
+    } catch (std::runtime_error&) {
+      // In this error message we are only interested in the ones that are
+      // missing, since only a missing collection can trigger the exception
+      // here. Additional collections that are present in the Frame are not
+      // necessarily an issue here, because we might just be configured to not
+      // write all of them
+      const auto& [missing, _] = m_framewriter->checkConsistency(frame.getAvailableCollections(), "events");
+      error() << "Could not write event, because the following collections are not present: ";
+      std::string sep = "";
+      for (const auto& n : missing) {
+        error() << sep << n;
+        sep = ", ";
+      }
+      error() << endmsg;
+
       return StatusCode::FAILURE;
     }
   }
