@@ -57,7 +57,12 @@ StatusCode PodioOutput::execute() {
     }
     m_framewriter->writeFrame(frame, "events", m_collection_names_to_write);
   } else {
-    m_framewriter->writeFrame(frame, "events", m_collection_names_to_write);
+    try {
+      m_framewriter->writeFrame(frame, "events", m_collection_names_to_write);
+    } catch (std::runtime_error& e) {
+      error() << "Could not write event: " << e.what() << endmsg;
+      return StatusCode::FAILURE;
+    }
   }
   m_firstEvent = false;
 
