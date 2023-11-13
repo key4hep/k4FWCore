@@ -26,6 +26,8 @@
 #include "Gaudi/Algorithm.h"
 #include "GaudiKernel/DataObjectHandle.h"
 
+#include "edm4hep/Constants.h"
+
 #include "TTree.h"
 
 #include <type_traits>
@@ -213,7 +215,7 @@ template <typename T> T* DataHandle<T>::createAndPut() {
 template <typename T> const std::string DataHandle<T>::getCollMetadataCellID(const unsigned int id) {
   if (auto lpds = dynamic_cast<PodioLegacyDataSvc*>(m_eds.get())) {
     auto colMD = lpds->getProvider().getCollectionMetaData(id);
-    return colMD.getValue<std::string>("CellIDEncodingString");
+    return colMD.getValue<std::string>(edm4hep::CellIDEncoding);
   }
 
   throw GaudiException("getCollMetadataCellID is only implemented for the legacy data svc",

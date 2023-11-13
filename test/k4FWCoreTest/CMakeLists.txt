@@ -21,7 +21,7 @@ limitations under the License.
 # Package: k4FWCoreTest
 ################################################################################
 
-find_package(EDM4HEP)
+find_package(EDM4HEP 0.10.01 REQUIRED)
 
 set(k4fwcoretest_plugin_sources
   src/components/TestDataHandleUniquePtr.cpp
