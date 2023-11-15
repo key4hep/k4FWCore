@@ -68,8 +68,8 @@ StatusCode PodioOutput::execute() {
       const auto& [missing, _] = m_framewriter->checkConsistency(frame.getAvailableCollections(), "events");
       error() << "Could not write event, because the following collections are not present: ";
       std::string sep = "";
-      for (const auto& n : missing) {
-        error() << sep << n;
+      for (const auto& name : missing) {
+        error() << sep << name;
         sep = ", ";
       }
       error() << endmsg;
