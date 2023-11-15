@@ -24,6 +24,7 @@
 #include "edm4hep/CaloHitContributionCollection.h"
 #include "edm4hep/CalorimeterHitCollection.h"
 #include "edm4hep/ClusterCollection.h"
+#include "edm4hep/Constants.h"
 #include "edm4hep/EventHeaderCollection.h"
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/MCRecoCaloAssociationCollection.h"
@@ -183,6 +184,11 @@ PodioInput::PodioInput(const std::string& name, ISvcLocator* svcLoc) : Consumer(
     error() << "Could not get PodioDataSvc" << endmsg;
   }
   fillReaders();
+
+  auto key = edm4hep::EventHeaderName;
+  if (std::find(m_collectionNames.begin(), m_collectionNames.end(), key) == m_collectionNames.end()) {
+    m_collectionNames.value().push_back(key);
+  }
 }
 
 void PodioInput::operator()() const {
