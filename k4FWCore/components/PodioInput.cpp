@@ -184,14 +184,15 @@ PodioInput::PodioInput(const std::string& name, ISvcLocator* svcLoc) : Consumer(
     error() << "Could not get PodioDataSvc" << endmsg;
   }
   fillReaders();
-
-  auto key = edm4hep::EventHeaderName;
-  if (std::find(m_collectionNames.begin(), m_collectionNames.end(), key) == m_collectionNames.end()) {
-    m_collectionNames.value().push_back(key);
-  }
 }
 
 void PodioInput::operator()() const {
+  if (m_podioDataSvc->hasCollection(edm4hep::EventHeaderName)) {
+    m_readers[edm4hep::EventHeaderCollection::typeName](edm4hep::EventHeaderName);
+  } else {
+    info() << "No EventHeader collection found in the event. Not reading it" << endmsg;
+  }
+
   for (auto& collName : m_collectionNames) {
     debug() << "Registering collection to read " << collName << endmsg;
     auto type = m_podioDataSvc->getCollectionType(collName);
