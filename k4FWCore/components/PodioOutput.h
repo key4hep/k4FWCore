@@ -27,7 +27,7 @@
 #include <vector>
 
 // forward declarations
-class PodioDataSvc;
+class k4DataSvc;
 
 class PodioOutput : public GaudiAlgorithm {
 public:
@@ -54,7 +54,7 @@ private:
                                                 "An optional file path to copy the outputfile to."};
   /// Switch for keeping or dropping outputs
   KeepDropSwitch m_switch;
-  PodioDataSvc*  m_podioDataSvc;
+  k4DataSvc*     m_podioDataSvc;
   /// The actual ROOT frame writer
   std::unique_ptr<podio::ROOTFrameWriter> m_framewriter;
   /// The stored collections
