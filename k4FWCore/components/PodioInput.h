@@ -26,7 +26,7 @@
 #include <string>
 #include <vector>
 
-class PodioDataSvc;
+class k4DataSvc;
 
 /** @class PodioInput
  *
@@ -51,7 +51,7 @@ private:
   Gaudi::Property<std::vector<std::string>> m_collectionNames{
       this, "collections", {}, "Collections that should be read (default all)"};
   // Data service: needed to register objects and get collection IDs. Just an observing pointer.
-  PodioDataSvc*                                                             m_podioDataSvc;
+  k4DataSvc*                                                                m_podioDataSvc;
   mutable std::map<std::string_view, std::function<void(std::string_view)>> m_readers;
 };
 
