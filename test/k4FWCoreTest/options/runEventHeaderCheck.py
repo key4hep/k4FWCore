@@ -25,12 +25,14 @@ from Configurables import ExampleEventHeaderConsumer
 from Configurables import ApplicationMgr
 
 podioevent = k4DataSvc("EventDataSvc")
-podioevent.input = "output_k4test_exampledata_producer_multiple.root"
+podioevent.input = "eventHeader.root"
 
 inp = PodioInput()
 inp.collections = []
 
-consumer = ExampleEventHeaderConsumer()
+consumer = ExampleEventHeaderConsumer(
+    "EventHeaderCheck", runNumber=42, eventNumberOffset=42
+)
 
 ApplicationMgr(
     TopAlg=[inp, consumer],

@@ -16,16 +16,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <GaudiKernel/ISvcLocator.h>
-#include "GaudiAlg/Consumer.h"
 
 #include "edm4hep/Constants.h"
 #include "edm4hep/EventHeaderCollection.h"
 
 #include "k4FWCore/BaseClass.h"
 
+#include <Gaudi/Property.h>
+#include <GaudiAlg/Consumer.h>
+#include <GaudiKernel/ISvcLocator.h>
+
+#include <fmt/core.h>
+#include <fmt/format.h>
+
+#include <atomic>
 #include <optional>
 #include <stdexcept>
+#include <string>
 
 struct ExampleEventHeaderConsumer final
     : Gaudi::Functional::Consumer<void(const edm4hep::EventHeaderCollection&), BaseClass_t> {
@@ -36,10 +43,27 @@ struct ExampleEventHeaderConsumer final
     if (evtHeaderColl.empty()) {
       throw std::runtime_error("EventHeader collection is empty");
     }
-    if (!evtHeaderColl[0].isAvailable()) {
+    const auto evtHeader = evtHeaderColl[0];
+    if (!evtHeader.isAvailable()) {
       throw std::runtime_error("Cannot get a valid EventHeader");
     }
+
+    if (evtHeader.getRunNumber() != m_runNumber) {
+      throw std::runtime_error(fmt::format("Run number is not set correctly (expected {}, actual {})",
+                                           m_runNumber.value(), evtHeader.getRunNumber()));
+    }
+
+    const auto expectedEvent = m_evtCounter++ + m_eventNumberOffset;
+    if (evtHeader.getEventNumber() != expectedEvent) {
+      throw std::runtime_error(fmt::format("Event number is not set correctly (expected {}, actual {})", expectedEvent,
+                                           evtHeader.getEventNumber()));
+    }
   }
+
+  Gaudi::Property<int>          m_runNumber{this, "runNumber", 0, "The expected run number"};
+  Gaudi::Property<int>          m_eventNumberOffset{this, "eventNumberOffset", 0,
+                                           "The event number offset where events will start counting from"};
+  mutable std::atomic<unsigned> m_evtCounter{0};
 };
 
 DECLARE_COMPONENT(ExampleEventHeaderConsumer)

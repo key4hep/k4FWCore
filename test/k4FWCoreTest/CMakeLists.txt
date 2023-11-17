@@ -95,6 +95,7 @@ add_test_with_env(TestDataHandleUniquePtr options/TestDataHandleUniquePtr.py)
 add_test_with_env(TestUniqueIDGenSvc options/TestUniqueIDGenSvc.py)
 add_test_with_env(CreateLegacyExampleEventData options/createLegacyExampleEventData.py)
 add_test_with_env(TestEventHeaderFiller options/createEventHeader.py)
+add_test_with_env(EventHeaderCheck options/runEventHeaderCheck.py PROPERTIES DEPENDS TestEventHeaderFiller)
 add_test(NAME TestExec WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR} COMMAND python options/TestExec.py)
 set_test_env(TestExec)
 
@@ -112,4 +113,3 @@ add_test_with_env(ExampleFunctionalConsumerMultiple options/runExampleFunctional
 add_test_with_env(ExampleFunctionalTransformerMultiple options/runExampleFunctionalTransformerMultiple.py PROPERTIES DEPENDS ExampleFunctionalProducerMultiple)
 add_test_with_env(FunctionalChain options/runFunctionalChain.py)
 add_test_with_env(FunctionalMix options/runFunctionalMix.py PROPERTIES DEPENDS ExampleFunctionalProducerMultiple)
-add_test_with_env(EventHeaderCheck options/runEventHeaderCheck.py PROPERTIES DEPENDS ExampleFunctionalProducerMultiple)
