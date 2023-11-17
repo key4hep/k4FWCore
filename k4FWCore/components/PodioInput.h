@@ -46,7 +46,8 @@ private:
   template <typename T> void maybeRead(std::string_view collName) const;
   void                       fillReaders();
   // Name of collections to read. Set by option collections (this is temporary)
-  Gaudi::Property<std::vector<std::string>> m_collectionNames{this, "collections", {}, "Places of collections to read"};
+  Gaudi::Property<std::vector<std::string>> m_collectionNames{
+      this, "collections", {}, "Collections that should be read (default all)"};
   // Data service: needed to register objects and get collection IDs. Just an observing pointer.
   PodioDataSvc*                                                             m_podioDataSvc;
   mutable std::map<std::string_view, std::function<void(std::string_view)>> m_readers;

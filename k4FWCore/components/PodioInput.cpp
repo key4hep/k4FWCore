@@ -193,7 +193,15 @@ void PodioInput::operator()() const {
     info() << "No EventHeader collection found in the event. Not reading it" << endmsg;
   }
 
-  for (const auto& collName : m_collectionNames) {
+  const auto& collsToRead = [&]() {
+    if (m_collectionNames.empty()) {
+      return m_podioDataSvc->getEventFrame().getAvailableCollections();
+    } else {
+      return m_collectionNames.value();
+    }
+  }();
+
+  for (const auto& collName : collsToRead) {
     debug() << "Registering collection to read " << collName << endmsg;
     if (!m_podioDataSvc->getEventFrame().get(collName)) {
       warning() << "Collection " << collName << " is not available from file." << endmsg;
