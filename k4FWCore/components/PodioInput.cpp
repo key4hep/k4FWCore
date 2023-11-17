@@ -186,6 +186,17 @@ PodioInput::PodioInput(const std::string& name, ISvcLocator* svcLoc) : Consumer(
   fillReaders();
 }
 
+StatusCode PodioInput::initialize() {
+  // If someone uses the collections property from the command line and passes
+  // an empty string we assume they want all collections (as a simple way to
+  // override whatever is in the options file)
+  if (m_collectionNames.size() == 1 && m_collectionNames[0].empty()) {
+    m_collectionNames.clear();
+  }
+
+  return StatusCode::SUCCESS;
+}
+
 void PodioInput::operator()() const {
   if (m_podioDataSvc->getEventFrame().get(edm4hep::EventHeaderName)) {
     m_readers[edm4hep::EventHeaderCollection::typeName](edm4hep::EventHeaderName);

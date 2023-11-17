@@ -42,6 +42,8 @@ public:
   PodioInput(const std::string& name, ISvcLocator* svcLoc);
   void operator()() const override;
 
+  StatusCode initialize() final;
+
 private:
   template <typename T> void maybeRead(std::string_view collName) const;
   void                       fillReaders();

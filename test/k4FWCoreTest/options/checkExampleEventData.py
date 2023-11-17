@@ -26,14 +26,19 @@ podioevent.input = "output_k4test_exampledata.root"
 
 from Configurables import PodioInput
 
+from k4FWCore.parseArgs import parser
+
+parser.add_argument(
+    "--collections",
+    action="extend",
+    nargs="?",
+    help="The input collections to read",
+    default=["VectorFloat", "MCParticles", "SimTrackerHits", "TrackerHits", "Tracks"],
+)
+my_args = parser.parse_known_args()[0]
+
 inp = PodioInput()
-inp.collections = [
-    "VectorFloat",
-    "MCParticles",
-    "SimTrackerHits",
-    "TrackerHits",
-    "Tracks",
-]
+inp.collections = my_args.collections
 
 from Configurables import k4FWCoreTest_CheckExampleEventData
 

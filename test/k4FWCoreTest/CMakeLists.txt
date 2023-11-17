@@ -60,6 +60,7 @@ endfunction()
 add_test_with_env(CreateExampleEventData options/createExampleEventData.py)
 
 add_test_with_env(CheckExampleEventData options/checkExampleEventData.py PROPERTIES DEPENDS CreateExampleEventData)
+add_test_with_env(CheckExampleEventData_noCollections options/checkExampleEventData.py --collections= PROPERTIES DEPENDS CreateExampleEventData)
 add_test_with_env(CheckExampleEventData_toolong -n 999 options/checkExampleEventData.py PROPERTIES PASS_REGULAR_EXPRESSION
                   "Application Manager Terminated successfully with a user requested ScheduledStop" DEPENDS CreateExampleEventData)
 add_test_with_env(CheckExampleEventData_unbounded options/checkExampleEventData.py -n 999 PROPERTIES PASS_REGULAR_EXPRESSION
