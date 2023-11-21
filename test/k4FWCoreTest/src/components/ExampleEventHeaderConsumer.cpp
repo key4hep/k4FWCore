@@ -30,7 +30,6 @@
 #include <fmt/format.h>
 
 #include <atomic>
-#include <optional>
 #include <stdexcept>
 #include <string>
 
