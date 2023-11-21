@@ -93,8 +93,6 @@ public:
   /// TODO: Make this private again after conversions have been properly solved
   podio::Frame& getMetaDataFrame() { return m_metadataframe; }
 
-  bool hasCollection(const std::string& name) const { return m_eventframe.get(name); }
-
 private:
   /// PODIO reader for ROOT files
   podio::ROOTFrameReader m_reader;

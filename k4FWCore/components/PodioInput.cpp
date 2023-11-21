@@ -187,7 +187,7 @@ PodioInput::PodioInput(const std::string& name, ISvcLocator* svcLoc) : Consumer(
 }
 
 void PodioInput::operator()() const {
-  if (m_podioDataSvc->hasCollection(edm4hep::EventHeaderName)) {
+  if (m_podioDataSvc->getEventFrame().get(edm4hep::EventHeaderName)) {
     m_readers[edm4hep::EventHeaderCollection::typeName](edm4hep::EventHeaderName);
   } else {
     info() << "No EventHeader collection found in the event. Not reading it" << endmsg;
