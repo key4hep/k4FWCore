@@ -24,7 +24,7 @@
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/SimTrackerHitCollection.h"
 #include "edm4hep/TrackCollection.h"
-#include "edm4hep/TrackerHitCollection.h"
+#include "edm4hep/TrackerHit3DCollection.h"
 #include "podio/UserDataCollection.h"
 
 #include <string>
@@ -33,7 +33,7 @@
 using Float         = podio::UserDataCollection<float>;
 using Particle      = edm4hep::MCParticleCollection;
 using SimTrackerHit = edm4hep::SimTrackerHitCollection;
-using TrackerHit    = edm4hep::TrackerHitCollection;
+using TrackerHit    = edm4hep::TrackerHit3DCollection;
 using Track         = edm4hep::TrackCollection;
 
 struct ExampleFunctionalProducerMultiple final
@@ -71,7 +71,7 @@ struct ExampleFunctionalProducerMultiple final
     auto hit            = simTrackerHits.create();
     hit.setPosition({3, 4, 5});
 
-    auto trackerHits = edm4hep::TrackerHitCollection();
+    auto trackerHits = edm4hep::TrackerHit3DCollection();
     auto trackerHit  = trackerHits.create();
     trackerHit.setPosition({3, 4, 5});
 

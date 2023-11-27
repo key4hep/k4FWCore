@@ -45,7 +45,7 @@
 #include "edm4hep/SimTrackerHitCollection.h"
 #include "edm4hep/TimeSeriesCollection.h"
 #include "edm4hep/TrackCollection.h"
-#include "edm4hep/TrackerHitCollection.h"
+#include "edm4hep/TrackerHit3DCollection.h"
 #include "edm4hep/TrackerHitPlaneCollection.h"
 #include "edm4hep/TrackerPulseCollection.h"
 #include "edm4hep/VertexCollection.h"
@@ -85,8 +85,8 @@ void PodioInput::fillReaders() {
   m_readers["edm4hep::ClusterCollection"] = [&](std::string_view collName) {
     maybeRead<edm4hep::ClusterCollection>(collName);
   };
-  m_readers["edm4hep::TrackerHitCollection"] = [&](std::string_view collName) {
-    maybeRead<edm4hep::TrackerHitCollection>(collName);
+  m_readers["edm4hep::TrackerHit3DCollection"] = [&](std::string_view collName) {
+    maybeRead<edm4hep::TrackerHit3DCollection>(collName);
   };
   m_readers["edm4hep::TrackerHitPlaneCollection"] = [&](std::string_view collName) {
     maybeRead<edm4hep::TrackerHitPlaneCollection>(collName);

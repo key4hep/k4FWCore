@@ -32,7 +32,7 @@
 namespace edm4hep {
   class MCParticleCollection;
   class SimTrackerHitCollection;
-  class TrackerHitCollection;
+  class TrackerHit3DCollection;
   class SimCaloHitCollection;
   class TrackCollection;
 }  // namespace edm4hep
@@ -69,7 +69,7 @@ private:
   DataHandle<edm4hep::MCParticleCollection> m_mcParticleHandle{"MCParticles", Gaudi::DataHandle::Writer, this};
   /// Handle for the SimTrackerHits to be written
   DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitHandle{"SimTrackerHits", Gaudi::DataHandle::Writer, this};
-  DataHandle<edm4hep::TrackerHitCollection>    m_TrackerHitHandle{"TrackerHits", Gaudi::DataHandle::Writer, this};
+  DataHandle<edm4hep::TrackerHit3DCollection>  m_TrackerHitHandle{"TrackerHits", Gaudi::DataHandle::Writer, this};
 
   /// Handle for the Tracks to be written
   DataHandle<edm4hep::TrackCollection> m_trackHandle{"Tracks", Gaudi::DataHandle::Writer, this};

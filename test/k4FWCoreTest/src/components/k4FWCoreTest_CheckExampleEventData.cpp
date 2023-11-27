@@ -23,7 +23,7 @@
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/SimTrackerHitCollection.h"
 #include "edm4hep/TrackCollection.h"
-#include "edm4hep/TrackerHitCollection.h"
+#include "edm4hep/TrackerHit3DCollection.h"
 
 DECLARE_COMPONENT(k4FWCoreTest_CheckExampleEventData)
 
