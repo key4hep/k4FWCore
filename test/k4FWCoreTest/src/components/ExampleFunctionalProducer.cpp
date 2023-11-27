@@ -34,8 +34,8 @@ struct ExampleFunctionalProducer final : Gaudi::Functional::Producer<edm4hep::MC
   // This is the function that will be called to produce the data
   edm4hep::MCParticleCollection operator()() const override {
     auto coll = edm4hep::MCParticleCollection();
-    coll.create(1, 2, 3, static_cast<float>(4.), static_cast<float>(5.), static_cast<float>(6.));
-    coll.create(2, 3, 4, static_cast<float>(5.), static_cast<float>(6.), static_cast<float>(7.));
+    coll.create(1, 2, 3, 4.f, 5.f, 6.f);
+    coll.create(2, 3, 4, 5.f, 6.f, 7.f);
     // We have to return whatever collection type we specified in the
     // template argument
     return coll;
