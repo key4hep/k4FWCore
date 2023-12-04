@@ -186,6 +186,17 @@ PodioInput::PodioInput(const std::string& name, ISvcLocator* svcLoc) : Consumer(
   fillReaders();
 }
 
+StatusCode PodioInput::initialize() {
+  // If someone uses the collections property from the command line and passes
+  // an empty string we assume they want all collections (as a simple way to
+  // override whatever is in the options file)
+  if (m_collectionNames.size() == 1 && m_collectionNames[0].empty()) {
+    m_collectionNames.clear();
+  }
+
+  return StatusCode::SUCCESS;
+}
+
 void PodioInput::operator()() const {
   if (m_podioDataSvc->getEventFrame().get(edm4hep::EventHeaderName)) {
     m_readers[edm4hep::EventHeaderCollection::typeName](edm4hep::EventHeaderName);
@@ -193,8 +204,20 @@ void PodioInput::operator()() const {
     info() << "No EventHeader collection found in the event. Not reading it" << endmsg;
   }
 
-  for (auto& collName : m_collectionNames) {
+  const auto& collsToRead = [&]() {
+    if (m_collectionNames.empty()) {
+      return m_podioDataSvc->getEventFrame().getAvailableCollections();
+    } else {
+      return m_collectionNames.value();
+    }
+  }();
+
+  for (const auto& collName : collsToRead) {
     debug() << "Registering collection to read " << collName << endmsg;
+    if (!m_podioDataSvc->getEventFrame().get(collName)) {
+      warning() << "Collection " << collName << " is not available from file." << endmsg;
+      continue;
+    }
     auto type = m_podioDataSvc->getCollectionType(collName);
     if (m_readers.find(type) != m_readers.end()) {
       m_readers[type](collName);

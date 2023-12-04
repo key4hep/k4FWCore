@@ -68,17 +68,21 @@ evtSvc = k4DataSvc("EventDataSvc")
 evtSvc.input = "/path/to/your/input-file.root"
 
 podioInput = PodioInput()
-podioInput.collections = [
-    # the complete list of collection names to read
-]
 ```
-
-**Note that currently only the collections that are inside the `collections`
-list will be read and become available for later algorithms.**
 
 It is possible to change the input file from the command line via
 ```bash
 k4run <your-options-file> --EventDataSvc.input=<input-file>
+```
+
+By default the `PodioInput` will read all collections that are available from
+the input file. It is possible to limit the collections that should become
+available via the `collections` option
+
+```python
+podioInput.collections = [
+  # List of collection names that should be made available
+]
 ```
 
 ## Writing events
