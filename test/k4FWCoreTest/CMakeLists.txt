@@ -58,6 +58,7 @@ function(add_test_with_env testname)
 endfunction()
 
 add_test_with_env(CreateExampleEventData options/createExampleEventData.py)
+add_test_with_env(CreateExampleEventDataInDirectory options/createExampleEventDataInDirectory.py)
 
 add_test_with_env(CheckExampleEventData options/checkExampleEventData.py PROPERTIES DEPENDS CreateExampleEventData)
 add_test_with_env(CheckExampleEventData_noCollections options/checkExampleEventData.py --collections= PROPERTIES DEPENDS CreateExampleEventData)

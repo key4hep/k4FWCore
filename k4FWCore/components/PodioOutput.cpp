@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 #include <cstdlib>
+#include <filesystem>
 
 #include "PodioOutput.h"
 #include "k4FWCore/PodioDataSvc.h"
@@ -36,6 +37,20 @@ StatusCode PodioOutput::initialize() {
   if (nullptr == m_podioDataSvc) {
     error() << "Could not get DataSvc!" << endmsg;
     return StatusCode::FAILURE;
+  }
+
+  // check whether output directory needs to be created and eventualy create it
+  auto outDirPath = std::filesystem::path(m_filename.value()).parent_path();
+  if (!outDirPath.empty() && !std::filesystem::is_directory(outDirPath)) {
+    debug() << "Creating output directory:" << endmsg;
+    debug() << outDirPath << endmsg;
+    auto success = std::filesystem::create_directories(outDirPath);
+    if (!success) {
+      error() << "Output directory can't be created!" << endmsg;
+      error() << outDirPath << endmsg;
+
+      return StatusCode::FAILURE;
+    }
   }
 
   m_framewriter = std::make_unique<podio::ROOTWriter>(m_filename);
