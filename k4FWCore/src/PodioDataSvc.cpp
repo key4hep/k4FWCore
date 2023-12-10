@@ -153,6 +153,7 @@ const std::string_view PodioDataSvc::getCollectionType(const std::string& collNa
   const auto coll = m_eventframe.get(collName);
   if (coll == nullptr) {
     error() << "Collection " << collName << " does not exist." << endmsg;
+    return "";
   }
   return coll->getTypeName();
 }

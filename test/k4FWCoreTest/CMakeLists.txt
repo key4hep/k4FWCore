@@ -17,28 +17,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ]]
 
-################################################################################
-# Package: k4FWCoreTest
-################################################################################
-
-find_package(EDM4HEP)
-
-set(k4fwcoretest_plugin_sources
-  src/components/TestDataHandleUniquePtr.cpp
-  src/components/TestUniqueIDGenSvc.cpp
-  src/components/k4FWCoreTest_AlgorithmWithTFile.cpp
-  src/components/k4FWCoreTest_CreateExampleEventData.cpp
-  src/components/k4FWCoreTest_HelloWorldAlg.cpp
-  src/components/k4FWCoreTest_cellID_reader.cpp
-  src/components/k4FWCoreTest_cellID_writer.cpp
-  src/components/k4FWCoreTest_CheckExampleEventData.cpp
-  src/components/ExampleFunctionalProducer.cpp
-  src/components/ExampleFunctionalConsumer.cpp
-  src/components/ExampleFunctionalTransformer.cpp
-  src/components/ExampleFunctionalProducerMultiple.cpp
-  src/components/ExampleFunctionalConsumerMultiple.cpp
-  src/components/ExampleFunctionalTransformerMultiple.cpp
-)
+file(GLOB k4fwcoretest_plugin_sources src/components/*.cpp)
 
 gaudi_add_module(k4FWCoreTestPlugins
                  SOURCES ${k4fwcoretest_plugin_sources}
@@ -48,202 +27,90 @@ include(CTest)
 
 set(K4RUN ${PROJECT_SOURCE_DIR}/k4FWCore/scripts/k4run)
 
-function(set_test_env _testname)
-  set_property(TEST ${_testname} APPEND PROPERTY ENVIRONMENT "ROOT_INCLUDE_PATH=$<$<TARGET_EXISTS:podio::podio>:$<TARGET_FILE_DIR:podio::podio>/../include>:$<$<TARGET_EXISTS:EDM4HEP::edm4hep>:$<TARGET_FILE_DIR:EDM4HEP::edm4hep>/../include>:$ENV{ROOT_INCLUDE_PATH}")
-  set_property(TEST ${_testname} APPEND PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}:${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME}:${PROJECT_BINARY_DIR}/test/k4FWCoreTest:$<$<TARGET_EXISTS:ROOT::Core>:$<TARGET_FILE_DIR:ROOT::Core>>:$<$<TARGET_EXISTS:EDM4HEP::edm4hep>:$<TARGET_FILE_DIR:EDM4HEP::edm4hep>>:$<$<TARGET_EXISTS:podio::podio>:$<TARGET_FILE_DIR:podio::podio>>:$ENV{LD_LIBRARY_PATH}")
-  set_property(TEST ${_testname} APPEND PROPERTY ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME}/genConfDir:${PROJECT_BINARY_DIR}/test/k4FWCoreTest/genConfDir:$ENV{PYTHONPATH}")
+function(set_test_env testname)
+  set_property(TEST ${testname} APPEND PROPERTY ENVIRONMENT "ROOT_INCLUDE_PATH=$<$<TARGET_EXISTS:podio::podio>:$<TARGET_FILE_DIR:podio::podio>/../include>:$<$<TARGET_EXISTS:EDM4HEP::edm4hep>:$<TARGET_FILE_DIR:EDM4HEP::edm4hep>/../include>:$ENV{ROOT_INCLUDE_PATH}")
+  set_property(TEST ${testname} APPEND PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${PROJECT_BINARY_DIR}:${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME}:${PROJECT_BINARY_DIR}/test/k4FWCoreTest:$<$<TARGET_EXISTS:ROOT::Core>:$<TARGET_FILE_DIR:ROOT::Core>>:$<$<TARGET_EXISTS:EDM4HEP::edm4hep>:$<TARGET_FILE_DIR:EDM4HEP::edm4hep>>:$<$<TARGET_EXISTS:podio::podio>:$<TARGET_FILE_DIR:podio::podio>>:$ENV{LD_LIBRARY_PATH}")
+  set_property(TEST ${testname} APPEND PROPERTY ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME}/genConfDir:${PROJECT_BINARY_DIR}/test/k4FWCoreTest/genConfDir:$ENV{PYTHONPATH}")
 endfunction()
 
+function(add_test_with_env testname)
+  foreach(arg ${ARGN})
+    if(arg STREQUAL "PROPERTIES")
+      set(TEST_PROPERTIES_FOUND TRUE)
+    else()
+      # For tests that depend on multiple tests and the original cmake way is to
+      # add a colon between them this should make it work
+      string(REPLACE ";" "\\\\;" arg ${arg})
+      if(TEST_PROPERTIES_FOUND)
+        list(APPEND TEST_PROPERTIES ${arg})
+      else()
+        list(APPEND TEST_ARGUMENTS ${arg})
+      endif()
+    endif()
+  endforeach()
+  add_test(NAME ${testname}
+           WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+           COMMAND ${K4RUN} ${TEST_ARGUMENTS})
+  if(TEST_PROPERTIES_FOUND)
+    set_tests_properties(${testname} PROPERTIES ${TEST_PROPERTIES})
+  endif()
+  set_test_env(${testname})
+endfunction()
 
-add_test(NAME CreateExampleEventData
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} options/createExampleEventData.py)
-set_test_env(CreateExampleEventData)
+add_test_with_env(CreateExampleEventData options/createExampleEventData.py)
 
-add_test(NAME CheckExampleEventData
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} options/checkExampleEventData.py
-)
-set_test_env(CheckExampleEventData)
-set_tests_properties( CheckExampleEventData
-         PROPERTIES
-         DEPENDS CreateExampleEventData)
-
-add_test(NAME CheckExampleEventData_toolong
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} -n 999 options/checkExampleEventData.py
-)
-set_test_env(CheckExampleEventData_toolong)
-set_tests_properties( CheckExampleEventData_toolong
-         PROPERTIES PASS_REGULAR_EXPRESSION "Application Manager Terminated successfully with a user requested ScheduledStop"
-         DEPENDS CreateExampleEventData)
-
-add_test(NAME CheckExampleEventData_unbounded
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} -n -1 options/checkExampleEventData.py
-)
-set_test_env(CheckExampleEventData_unbounded)
-set_tests_properties( CheckExampleEventData_unbounded
-         PROPERTIES
-         DEPENDS CreateExampleEventData)
-
-add_test(NAME CreateExampleEventData_cellID
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} options/createExampleEventData_cellID.py)
-set_test_env(CreateExampleEventData_cellID)
-
-add_test(NAME TwoProducers
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} options/TwoProducers.py --filename output_k4fwcore_test_twoproducer2.root --magicNumberOffset.Producer2 12345 --Producer1.magicNumberOffset 54321 )
-set_test_env(TwoProducers)
-
-add_test(NAME ReadExampleEventData
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} options/readExampleEventData.py)
-set_test_env(ReadExampleEventData)
+add_test_with_env(CheckExampleEventData options/checkExampleEventData.py PROPERTIES DEPENDS CreateExampleEventData)
+add_test_with_env(CheckExampleEventData_noCollections options/checkExampleEventData.py --collections= PROPERTIES DEPENDS CreateExampleEventData)
+add_test_with_env(CheckExampleEventData_toolong -n 999 options/checkExampleEventData.py PROPERTIES PASS_REGULAR_EXPRESSION
+                  "Application Manager Terminated successfully with a user requested ScheduledStop" DEPENDS CreateExampleEventData)
+add_test_with_env(CheckExampleEventData_unbounded options/checkExampleEventData.py -n 999 PROPERTIES PASS_REGULAR_EXPRESSION
+                  "Application Manager Terminated successfully with a user requested ScheduledStop" DEPENDS CreateExampleEventData)
+add_test_with_env(ReadExampleEventData options/readExampleEventData.py)
 set_property(TEST ReadExampleEventData APPEND PROPERTY DEPENDS CreateExampleEventData)
+add_test_with_env(ReadExampleDataFromNthEvent options/readExampleDataFromNthEvent.py PROPERTIES DEPENDS CreateExampleEventData)
 
-add_test(NAME ReadExampleDataFromNthEvent
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} options/readExampleDataFromNthEvent.py)
-set_test_env(ReadExampleDataFromNthEvent)
-set_property(TEST ReadExampleDataFromNthEvent APPEND PROPERTY DEPENDS CreateExampleEventData)
-
-add_test(NAME AlgorithmWithTFile
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} options/TestAlgorithmWithTFile.py)
-set_test_env(AlgorithmWithTFile)
-
+add_test_with_env(AlgorithmWithTFile options/TestAlgorithmWithTFile.py)
 add_test(NAME AlgorithmWithTFileCheckFrameworkOutput
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
          COMMAND  python scripts/check_TestAlgorithmWithTFile_framework_nonempty.py)
 set_property(TEST AlgorithmWithTFileCheckFrameworkOutput APPEND PROPERTY DEPENDS AlgorithmWithTFile)
 set_test_env(AlgorithmWithTFileCheckFrameworkOutput)
-
 add_test(NAME AlgorithmWithTFileCheckMyTFileOutput
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
          COMMAND  python scripts/check_TestAlgorithmWithTFile_myTFile_nonempty.py)
 set_property(TEST AlgorithmWithTFileCheckMyTFileOutput APPEND PROPERTY DEPENDS AlgorithmWithTFile)
 set_test_env(AlgorithmWithTFileCheckMyTFileOutput)
 
-add_test(NAME CheckCommandLineArguments
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} options/createHelloWorld.py --HelloWorldAlg1.PerEventPrintMessage TwasBrilligAndTheSlithyToves
+add_test_with_env(CreateExampleEventData_cellID options/createExampleEventData_cellID.py)
+add_test_with_env(TwoProducers options/TwoProducers.py --filename output_k4fwcore_test_twoproducer.root
+                  --magicNumberOffset.Producer2 12345 --Producer1.magicNumberOffset 54321)
+add_test_with_env(CheckCommandLineArguments options/createHelloWorld.py --HelloWorldAlg1.PerEventPrintMessage TwasBrilligAndTheSlithyToves
+PROPERTIES PASS_REGULAR_EXPRESSION "TwasBrilligAndTheSlithyToves"
 )
-set_tests_properties(CheckCommandLineArguments PROPERTIES
-  PASS_REGULAR_EXPRESSION "TwasBrilligAndTheSlithyToves"
-)
-set_test_env(CheckCommandLineArguments)
-
 add_test(NAME checkKeepDropSwitch
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
          COMMAND python scripts/check_KeepDropSwitch.py)
 set_test_env(checkKeepDropSwitch)
 set_property(TEST checkKeepDropSwitch APPEND PROPERTY DEPENDS ReadExampleEventData)
-
-add_test(NAME TestDataHandleUniquePtr
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} options/TestDataHandleUniquePtr.py)
-set_test_env(TestDataHandleUniquePtr)
-
-add_test(NAME TestUniqueIDGenSvc
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} options/TestUniqueIDGenSvc.py)
-set_test_env(TestUniqueIDGenSvc)
-
-
-add_test(NAME CreateLegacyExampleEventData
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} options/createLegacyExampleEventData.py)
-set_test_env(CreateLegacyExampleEventData)
-
-
-add_test(NAME TestEventHeaderFiller
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} options/createEventHeader.py)
-set_test_env(TestEventHeaderFiller)
-
-
-add_test(NAME Testk4runNoArguments
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN})
-set_test_env(Testk4runNoArguments)
-set_tests_properties(Testk4runNoArguments
-  PROPERTIES PASS_REGULAR_EXPRESSION "Usage: k4run <options_file.py>, use --help to get a complete list of arguments")
-
-add_test(NAME Testk4runCustomArguments
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} --foo=42 options/TestArgs.py)
-set_test_env(Testk4runCustomArguments)
-set_tests_properties(Testk4runCustomArguments
-  PROPERTIES PASS_REGULAR_EXPRESSION "The answer is 42")
-
-add_test(NAME Testk4runVerboseOutput
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} --verbose options/TestArgs.py)
-set_test_env(Testk4runVerboseOutput)
-set_tests_properties(Testk4runVerboseOutput
-  PROPERTIES PASS_REGULAR_EXPRESSION " VERBOSE ")
-
-add_test(NAME Testk4runHelpOnly
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} --help)
-set_test_env(Testk4runHelpOnly)
-set_tests_properties(Testk4runHelpOnly
-  PROPERTIES PASS_REGULAR_EXPRESSION "show this help message and exit")
-
-add_test(NAME TestExec
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} --dry-run options/TestExec.py)
+add_test_with_env(TestDataHandleUniquePtr options/TestDataHandleUniquePtr.py)
+add_test_with_env(TestUniqueIDGenSvc options/TestUniqueIDGenSvc.py)
+add_test_with_env(CreateLegacyExampleEventData options/createLegacyExampleEventData.py)
+add_test_with_env(TestEventHeaderFiller options/createEventHeader.py)
+add_test_with_env(EventHeaderCheck options/runEventHeaderCheck.py PROPERTIES DEPENDS TestEventHeaderFiller)
+add_test(NAME TestExec WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR} COMMAND python options/TestExec.py)
 set_test_env(TestExec)
-add_test(NAME ExampleFunctionalProducer
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} options/runExampleFunctionalProducer.py)
-set_test_env(ExampleFunctionalProducer)
 
-add_test(NAME ExampleFunctionalConsumer
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} options/runExampleFunctionalConsumer.py)
-set_test_env(ExampleFunctionalConsumer)
-set_tests_properties(ExampleFunctionalConsumer PROPERTIES
-                     DEPENDS ExampleFunctionalProducer)
+add_test_with_env(Testk4runNoArguments PROPERTIES PASS_REGULAR_EXPRESSION "Usage: k4run <options_file.py>, use --help to get a complete list of arguments")
+add_test_with_env(Testk4runCustomArguments options/TestArgs.py --foo=42 PROPERTIES PASS_REGULAR_EXPRESSION "The answer is 42")
+add_test_with_env(Testk4runVerboseOutput options/TestArgs.py --verbose PROPERTIES PASS_REGULAR_EXPRESSION " VERBOSE ")
+add_test_with_env(Testk4runHelpOnly options/TestArgs.py --help PROPERTIES PASS_REGULAR_EXPRESSION "show this help message and exit")
 
-# A dependency on the ExampleFunctionalConsumer is added to make sure
-# they don't run at the same time
-add_test(NAME ExampleFunctionalTransformer
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} options/runExampleFunctionalTransformer.py)
-set_test_env(ExampleFunctionalTransformer)
-set_tests_properties(ExampleFunctionalTransformer PROPERTIES
-                     DEPENDS "ExampleFunctionalProducer;ExampleFunctionalConsumer")
 
-add_test(NAME ExampleFunctionalProducerMultiple
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} options/runExampleFunctionalProducerMultiple.py)
-set_test_env(ExampleFunctionalProducerMultiple)
-
-add_test(NAME ExampleFunctionalConsumerMultiple
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} options/runExampleFunctionalConsumerMultiple.py)
-set_test_env(ExampleFunctionalConsumerMultiple)
-set_tests_properties(ExampleFunctionalConsumerMultiple PROPERTIES
-                     DEPENDS ExampleFunctionalProducerMultiple)
-
-add_test(NAME ExampleFunctionalTransformerMultiple
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} options/runExampleFunctionalTransformerMultiple.py)
-set_test_env(ExampleFunctionalTransformerMultiple)
-set_tests_properties(ExampleFunctionalTransformerMultiple PROPERTIES
-                     DEPENDS "ExampleFunctionalProducerMultiple;ExampleFunctionalConsumerMultiple")
-
-add_test(NAME FunctionalChain
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} options/runFunctionalChain.py)
-set_test_env(FunctionalChain)
-
-add_test(NAME FunctionalMix
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND ${K4RUN} options/runFunctionalMix.py)
-set_test_env(FunctionalMix)
-set_tests_properties(FunctionalMix PROPERTIES
-                     DEPENDS "ExampleFunctionalProducerMultiple")
+add_test_with_env(ExampleFunctionalProducer options/runExampleFunctionalProducer.py)
+add_test_with_env(ExampleFunctionalConsumer options/runExampleFunctionalConsumer.py PROPERTIES DEPENDS ExampleFunctionalProducer)
+add_test_with_env(ExampleFunctionalTransformer options/runExampleFunctionalTransformer.py PROPERTIES DEPENDS ExampleFunctionalProducer)
+add_test_with_env(ExampleFunctionalProducerMultiple options/runExampleFunctionalProducerMultiple.py)
+add_test_with_env(ExampleFunctionalConsumerMultiple options/runExampleFunctionalConsumerMultiple.py PROPERTIES DEPENDS ExampleFunctionalProducerMultiple)
+add_test_with_env(ExampleFunctionalTransformerMultiple options/runExampleFunctionalTransformerMultiple.py PROPERTIES DEPENDS ExampleFunctionalProducerMultiple)
+add_test_with_env(FunctionalChain options/runFunctionalChain.py)
+add_test_with_env(FunctionalMix options/runFunctionalMix.py PROPERTIES DEPENDS ExampleFunctionalProducerMultiple)

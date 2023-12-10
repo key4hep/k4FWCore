@@ -69,6 +69,11 @@ public:
   const std::string_view getCollectionType(const std::string& collName);
 
   template <typename T> StatusCode readCollection(const std::string& collName) {
+    DataObject* objectPtr = nullptr;
+    if (DataSvc::findObject("/Event", "/" + collName, objectPtr)) {
+      debug() << "Collection " << collName << " already read, not reading it again" << endmsg;
+      return StatusCode::SUCCESS;
+    }
     const T* collection(nullptr);
     collection = static_cast<const T*>(m_eventframe.get(collName));
     if (collection == nullptr) {

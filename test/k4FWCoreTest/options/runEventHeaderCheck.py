@@ -17,40 +17,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from Gaudi.Configuration import *
 
+from Gaudi.Configuration import INFO
 from Configurables import k4DataSvc
-
-podioevent = k4DataSvc("EventDataSvc")
-podioevent.input = "output_k4test_exampledata.root"
-
 from Configurables import PodioInput
-
-from k4FWCore.parseArgs import parser
-
-parser.add_argument(
-    "--collections",
-    action="extend",
-    nargs="?",
-    help="The input collections to read",
-    default=["VectorFloat", "MCParticles", "SimTrackerHits", "TrackerHits", "Tracks"],
-)
-my_args = parser.parse_known_args()[0]
-
-inp = PodioInput()
-inp.collections = my_args.collections
-
-from Configurables import k4FWCoreTest_CheckExampleEventData
-
-checker = k4FWCoreTest_CheckExampleEventData()
-
+from Configurables import ExampleEventHeaderConsumer
 from Configurables import ApplicationMgr
 
+podioevent = k4DataSvc("EventDataSvc")
+podioevent.input = "eventHeader.root"
+
+inp = PodioInput()
+inp.collections = []
+
+consumer = ExampleEventHeaderConsumer(
+    "EventHeaderCheck", runNumber=42, eventNumberOffset=42
+)
+
 ApplicationMgr(
-    TopAlg=[inp, checker],
+    TopAlg=[inp, consumer],
     EvtSel="NONE",
-    EvtMax=100,
+    EvtMax=-1,
     ExtSvc=[podioevent],
     OutputLevel=INFO,
-    StopOnSignal=True,
 )
