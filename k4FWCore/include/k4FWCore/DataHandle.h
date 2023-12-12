@@ -21,7 +21,6 @@
 
 #include "k4FWCore/DataWrapper.h"
 #include "k4FWCore/PodioDataSvc.h"
-#include "k4FWCore/PodioLegacyDataSvc.h"
 
 #include "Gaudi/Algorithm.h"
 #include "GaudiKernel/DataObjectHandle.h"
@@ -86,55 +85,17 @@ template <typename T> DataHandle<T>::~DataHandle() {
 template <typename T>
 DataHandle<T>::DataHandle(DataObjID& descriptor, Gaudi::DataHandle::Mode a, IDataHandleHolder* fatherAlg)
     : DataObjectHandle<DataWrapper<T>>(descriptor, a, fatherAlg), m_eds("EventDataSvc", "DataHandle") {}
-/// The DataHandle::Writer constructor is used to create the corresponding branch in the output file
+
 template <typename T>
 DataHandle<T>::DataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode a, IDataHandleHolder* fatherAlg)
     : DataObjectHandle<DataWrapper<T>>(descriptor, a, fatherAlg), m_eds("EventDataSvc", "DataHandle") {
   if (a == Gaudi::DataHandle::Writer) {
-    StatusCode sc = m_eds.retrieve();
-    m_dataPtr     = nullptr;
-    PodioDataSvc* podio_data_service;
-
-    podio_data_service = dynamic_cast<PodioDataSvc*>(m_eds.get());
+    StatusCode sc            = m_eds.retrieve();
+    m_dataPtr                = nullptr;
+    auto* podio_data_service = dynamic_cast<PodioDataSvc*>(m_eds.get());
     if (nullptr != podio_data_service) {
       if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
         m_dataPtr = new T();
-      }
-    } else {
-      // This is the legacy implementation kept for a transition period
-      PodioLegacyDataSvc* plds;
-      plds = dynamic_cast<PodioLegacyDataSvc*>(m_eds.get());
-      if (nullptr != plds) {
-        if constexpr (std::is_convertible<T*, podio::CollectionBase*>::value) {
-          // case 1: T is a podio collection
-          // for this case creation of branches is still handled in PodioOutput
-          // (but could be moved here in the future)
-        } else if constexpr (std::is_integral_v<T>) {
-          // case 2: T is some integer type
-          // the call signature for TTree Branch is different for primitive types
-          // in particular, we pass the pointer, not the adress of the pointer
-          // and have to append a char indicating type (see TTree documentation)
-          // therefore  space needs to be allocated for the integer
-          m_dataPtr   = new T();
-          TTree* tree = plds->eventDataTree();
-          tree->Branch(descriptor.c_str(), m_dataPtr, (descriptor + "/I").c_str());
-        } else if constexpr (std::is_floating_point_v<T>) {
-          // case 3: T is some floating point type
-          // similar case 2, distinguish floats and doubles by size
-          m_dataPtr   = new T();
-          TTree* tree = plds->eventDataTree();
-          if (sizeof(T) > 4) {
-            tree->Branch(descriptor.c_str(), m_dataPtr, (descriptor + "/D").c_str());
-          } else {
-            tree->Branch(descriptor.c_str(), m_dataPtr, (descriptor + "/F").c_str());
-          }
-        } else {
-          // case 4: T is any other type (for which exists a root dictionary,
-          // otherwise i/o will fail)
-          // this includes std::vectors of ints, floats
-          TTree* tree = plds->eventDataTree();
-          tree->Branch(descriptor.c_str(), &m_dataPtr);
-        }
       }
     }
   }
@@ -209,17 +170,6 @@ template <typename T> T* DataHandle<T>::createAndPut() {
   T* objectp = new T();
   this->put(objectp);
   return objectp;
-}
-
-// Temporary workaround for k4MarlinWrapper
-template <typename T> const std::string DataHandle<T>::getCollMetadataCellID(const unsigned int id) {
-  if (auto lpds = dynamic_cast<PodioLegacyDataSvc*>(m_eds.get())) {
-    auto colMD = lpds->getProvider().getCollectionMetaData(id);
-    return colMD.getValue<std::string>(edm4hep::CellIDEncoding);
-  }
-
-  throw GaudiException("getCollMetadataCellID is only implemented for the legacy data svc",
-                       "Cannot get collection metadata", StatusCode::FAILURE);
 }
 
 // temporary to allow property declaration
