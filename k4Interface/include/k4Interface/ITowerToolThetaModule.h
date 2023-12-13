@@ -36,7 +36,7 @@ struct tower {
  *  Abstract interface to tower building tool.
  *
  *  @author Anna Zaborowska
- *  @Modified by Tong Li (t.li at cern.ch), for SW clustering at FCCee where the CaloTower is created from Theta-Phi
+ *  @Modified by Tong Li (t.li at cern.ch), for sliding-window clustering at FCCee where the CaloTower is created from Theta-Phi
  */
 
 class ITowerToolThetaModule : virtual public IAlgTool {
