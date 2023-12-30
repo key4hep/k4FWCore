@@ -41,7 +41,7 @@ public:
    * by the first one
    * @throws IIOSvc::EndOfInput
    */
-  virtual std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, podio::Frame> next( ) = 0;
+  virtual std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, std::vector<std::string>, podio::Frame> next( ) = 0;
   virtual std::shared_ptr<std::vector<std::string>> getCollectionNames() const = 0;
 
   virtual std::shared_ptr<podio::ROOTFrameWriter> getWriter() = 0;
