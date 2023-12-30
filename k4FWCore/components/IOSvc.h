@@ -50,7 +50,7 @@ public:
   StatusCode initialize() override;
   StatusCode finalize() override;
 
-  std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, podio::Frame> next() override;
+  std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, std::vector<std::string>, podio::Frame> next() override;
 
   std::shared_ptr<std::vector<std::string>> getCollectionNames() const override {
     return std::make_shared<std::vector<std::string>>(m_collectionNames);
@@ -64,7 +64,6 @@ protected:
   Gaudi::Property<unsigned int> m_bufferNbEvents{
       this, "BufferNbEvents", 20000,
       "approximate size of the buffer used to prefetch rawbanks in terms of number of events. Default is 20000"};
-  Gaudi::Property<std::vector<std::string>> m_input{this, "Input", {}, "List of inputs"};
   Gaudi::Property<unsigned int> m_nbSkippedEvents{this, "NSkip", 0, "First event to process"};
 
   Gaudi::Property<std::vector<std::string>> m_collectionNames{this, "CollectionNames", {}, "List of files to read"};

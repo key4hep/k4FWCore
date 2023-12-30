@@ -49,7 +49,7 @@ StatusCode IOSvc::initialize() {
 
 StatusCode IOSvc::finalize() { return Service::finalize(); }
 
-std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, podio::Frame> IOSvc::next() {
+std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, std::vector<std::string>, podio::Frame> IOSvc::next() {
   info() << "IOSvc::next()" << endmsg;
   podio::Frame frame;
   {
@@ -68,7 +68,7 @@ std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, podio::Frame> IO
     collections.push_back(std::shared_ptr<podio::CollectionBase>(ptr));
   }
 
-  return std::make_tuple(collections, std::move(frame));
+  return std::make_tuple(collections, m_collectionNames, std::move(frame));
 }
 
 // After every event if there is still a frame in the TES
