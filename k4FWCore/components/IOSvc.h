@@ -71,6 +71,7 @@ protected:
   Gaudi::Property<std::string> m_writingFileName{this, "output", {}, "List of files to read"};
   Gaudi::Property<std::vector<std::string>> m_outputCommands{
       this, "outputCommands", {"keep *"}, "A set of commands to declare which collections to keep or drop."};
+  Gaudi::Property<std::string> m_inputType{this, "ioType", "ROOT", "Type of input file (ROOT, RNTuple)"};
 
   /// lock for handling the change of buffer
   std::mutex m_changeBufferLock;
@@ -101,6 +102,9 @@ protected:
   SmartIF<IDataProviderSvc> m_dataSvc;
   SmartIF<IIncidentSvc> m_incidentSvc;
   void handle(const Incident& incident) override;
+
+  int m_entries{0};
+  int m_nextEntry{0};
 };
 
 #endif

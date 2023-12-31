@@ -20,10 +20,8 @@
 #include "Gaudi/Functional/utilities.h"
 #include "GaudiKernel/FunctionalFilterDecision.h"
 #include "GaudiKernel/StatusCode.h"
-#include "GaudiKernel/IDataHandleHolder.h"
 #include "GaudiKernel/AnyDataWrapper.h"
-#include "GaudiKernel/DataHandle.h"
-#include "GaudiKernel/IDataManagerSvc.h"
+#include "GaudiKernel/IDataProviderSvc.h"
 
 #include "IIOSvc.h"
 
@@ -76,9 +74,6 @@ class CollectionPusher : public Gaudi::Functional::details::BaseClass_t<Gaudi::F
       }
     }
 
-    // TODO/FIXME: how does the callee know in which order to produce the outputs?
-    //             (note: 'missing' items can be specified by making Out an std::optional<Out>,
-    //              and only those entries which contain an Out are stored)
     virtual std::tuple<vector_of_<Out>, std::vector<std::string>> operator()() const = 0;
 
   private:
@@ -88,9 +83,6 @@ class CollectionPusher : public Gaudi::Functional::details::BaseClass_t<Gaudi::F
     // Gaudi::Property<std::vector<DataObjID>> m_inputLocations; // TODO/FIXME: remove this duplication...
     // TODO/FIXME: replace vector of DataObjID property + call-back with a
     //             vector<handle> property ... as soon as declareProperty can deal with that.
-    template <typename T>
-    using OutputHandle = Gaudi::Functional::details::OutputHandle_t<Traits_, Gaudi::Functional::details::remove_optional_t<T>>;
-    mutable std::vector<OutputHandle<Out>> m_outputs;
     ServiceHandle<IDataProviderSvc> datasvc{this, "EventDataSvc", "EventDataSvc"};
 
   };
@@ -126,14 +118,15 @@ public:
     return StatusCode::SUCCESS;
   }
 
+  // The IOSvc takes care of reading and passing the data
+  // By convention the Frame is pushed to the store
+  // so that it's deleted at the right time
   std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, std::vector<std::string>> operator()() const override {
-    info() << "Reader::operator()" << endmsg;
     auto val = iosvc->next();
 
     auto eds = eventSvc().as<IDataProviderSvc>();
     auto frame = std::move(std::get<2>(val));
 
-    // We'll hand the ownership of 
     auto tmp = new AnyDataWrapper<podio::Frame>(std::move(frame));
     auto code = eds->registerObject("/Event/_Frame", tmp);
 
