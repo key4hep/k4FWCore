@@ -110,5 +110,7 @@ add_test_with_env(FunctionalsMultipleMemory options/ExampleFunctionalsMultipleMe
 add_test_with_env(FunctionalProducer options/ExampleFunctionalProducer.py)
 add_test_with_env(FunctionalProducerMultiple options/ExampleFunctionalProducerMultiple.py)
 add_test_with_env(FunctionalsFile options/ExampleFunctionalsFile.py PROPERTIES DEPENDS ExampleFunctionalProducer)
+add_test_with_env(FunctionalsFile_toolong -n 999 options/ExampleFunctionalsFile.py PROPERTIES DEPENDS ExampleFunctionalProducer PASS_REGULAR_EXPRESSION
+                  "Application Manager Terminated successfully with a user requested ScheduledStop")
 add_test_with_env(FunctionalsMultipleFile options/ExampleFunctionalsFileMultiple.py PROPERTIES DEPENDS ExampleFunctionalProducerMultiple)
 add_test_with_env(FunctionalMix options/runFunctionalMix.py PROPERTIES DEPENDS ExampleFunctionalProducerMultiple)
