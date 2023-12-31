@@ -19,8 +19,6 @@
 #include <memory>
 #include <vector>
 
-#pragma once
-
 /**
  * The interface implemented by any class making IO and reading RawEvent Data
  */
@@ -35,12 +33,6 @@ public:
   /// InterfaceID
   DeclareInterfaceID( IIOSvc, 1, 0 );
 
-  /**
-   * get next event from input
-   * @return a pair RawEvent, shared_ptr<Buffer> where the second one holds the data pointed to
-   * by the first one
-   * @throws IIOSvc::EndOfInput
-   */
   virtual std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, std::vector<std::string>, podio::Frame> next( ) = 0;
   virtual std::shared_ptr<std::vector<std::string>> getCollectionNames() const = 0;
 

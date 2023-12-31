@@ -26,6 +26,7 @@
 #include "k4FWCore/KeepDropSwitch.h"
 
 #include "GaudiKernel/AnyDataWrapper.h"
+#include "GaudiKernel/IEventProcessor.h"
 
 #include <mutex>
 #include <thread>
@@ -35,6 +36,7 @@ StatusCode IOSvc::initialize() {
   if (!m_readingFileNames.empty()) {
     m_reader = std::make_unique<podio::ROOTFrameReader>();
     m_reader->openFiles(m_readingFileNames);
+    m_entries = m_reader->getEntries(podio::Category::Event);
   }
 
   m_switch = KeepDropSwitch(m_outputCommands);
@@ -54,16 +56,22 @@ std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, std::vector<std:
   podio::Frame frame;
   {
     std::scoped_lock<std::mutex> lock(m_changeBufferLock);
-    frame = podio::Frame(std::move(m_reader->readNextEntry(podio::Category::Event)));
+    frame = podio::Frame(std::move(m_reader->readEntry(podio::Category::Event, m_nextEntry)));
+    m_nextEntry++;
     if (m_collectionNames.empty()) {
         m_collectionNames = frame.getAvailableCollections();
     }
   }
 
+  if (m_nextEntry >= m_entries) {
+    IEventProcessor* eventProcessor;
+    StatusCode sc = service("ApplicationMgr", eventProcessor);
+    sc = eventProcessor->stopRun();
+  }
+
   std::vector<std::shared_ptr<podio::CollectionBase>> collections;
 
   for (const auto& name : m_collectionNames) {
-    info() << "Collection name: " << name << endmsg;
     auto ptr = const_cast<podio::CollectionBase*>(frame.get(name));
     collections.push_back(std::shared_ptr<podio::CollectionBase>(ptr));
   }

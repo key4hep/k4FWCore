@@ -24,8 +24,8 @@ from Configurables import ApplicationMgr
 from Configurables import EventDataSvc, IOSvc, Reader
 
 svc = IOSvc("IOSvc")
-svc.FileNames = ["eventHeader.root"]
-svc.CollectionNames = ['MCParticles']
+svc.input = ["eventHeader.root"]
+# svc.CollectionNames = ['MCParticles']
 
 reader = Reader("Reader")
 

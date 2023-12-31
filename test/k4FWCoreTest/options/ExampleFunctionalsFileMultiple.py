@@ -48,7 +48,7 @@ transformer = ExampleFunctionalTransformerMultiple("Transformer",
 
 mgr = ApplicationMgr(TopAlg=[reader, transformer, writer],
                EvtSel="NONE",
-               EvtMax=10,
+               EvtMax=-1,
                ExtSvc=[EventDataSvc("EventDataSvc")],
                OutputLevel=INFO,
                )

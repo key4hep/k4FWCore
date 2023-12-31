@@ -20,15 +20,15 @@
 #include "GaudiKernel/AnyDataWrapper.h"
 #include "GaudiKernel/IDataManagerSvc.h"
 #include "GaudiKernel/IDataProviderSvc.h"
-#include "GaudiKernel/IHiveWhiteBoard.h"
 #include "GaudiKernel/SmartDataPtr.h"
 #include "GaudiKernel/StatusCode.h"
 
 #include "podio/Frame.h"
-
 #include "edm4hep/MCParticleCollection.h"
 
 #include "IIOSvc.h"
+
+#include "k4FWCore/DataWrapper.h"
 
 #include <memory>
 #include <thread>
@@ -69,7 +69,6 @@ public:
   void getOutputCollections(IRegistry* pObj) const {
     SmartIF<IDataManagerSvc> m_mgr;
     m_mgr = eventSvc();
-    info() << "pObj = " << pObj << endmsg;
     if (!pObj) {
       error() << "Failed to retrieve root object" << endmsg;
       return;
@@ -135,17 +134,26 @@ public:
         error() << "Failed to unregister collection " << coll << endmsg;
         return;
       }
+      info() << "Retrieved collection " << coll << endmsg;
       const auto collection = dynamic_cast<AnyDataWrapper<std::shared_ptr<podio::CollectionBase>>*>(p);
       if (!collection) {
-        error() << "Failed to cast collection " << coll << endmsg;
-        return;
+
+        // Check the case when the data has been produced using the old DataHandle
+        const auto old_collection = dynamic_cast<DataWrapper<podio::CollectionBase>*>(p);
+        if (!old_collection) {
+          error() << "Failed to cast collection " << coll << endmsg;
+          return;
+        }
+        else {
+          std::unique_ptr<podio::CollectionBase> uptr(const_cast<podio::CollectionBase*>(old_collection->getData()));
+          ptr->getData().put(std::move(uptr), coll);
+        }
+
       }
       else {
-        // info() << "collection = " << collection << endmsg;
-        // info() << "Collection " << coll << " has " << collection->getData()->size() << " elements" << endmsg;
+        std::unique_ptr<podio::CollectionBase> uptr(collection->getData().get());
+        ptr->getData().put(std::move(uptr), coll);
       }
-      std::unique_ptr<podio::CollectionBase> uptr(collection->getData().get());
-      ptr->getData().put(std::move(uptr), coll);
     }
 
     // ptr->addRef();
