@@ -10,6 +10,8 @@
 
 namespace k4FWCore {
 
+static const std::string frameLocation = "/_Frame";
+
 namespace details {
 
   template <typename T, typename P, std::enable_if_t<!std::is_same_v<std::shared_ptr<podio::CollectionBase>, P>, int> = 0>

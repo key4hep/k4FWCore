@@ -39,4 +39,5 @@ public:
   virtual std::shared_ptr<podio::ROOTFrameWriter> getWriter() = 0;
   virtual void deleteWriter() = 0;
   virtual void deleteReader() = 0;
+  virtual bool writeCollection( const std::string& collName) = 0;
 };

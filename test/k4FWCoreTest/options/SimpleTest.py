@@ -4,7 +4,8 @@
 from Configurables import AlgResourcePool, AvalancheSchedulerSvc
 from Configurables import HiveSlimEventLoopMgr, HiveWhiteBoard
 from Configurables import ApplicationMgr, Gaudi__Sequencer
-from Configurables import ExampleFunctionalProducer, ExampleFunctionalConsumer, Reader, IOSvc, Writer
+from Configurables import ExampleFunctionalProducer, ExampleFunctionalConsumer, Reader, IOSvc, Writer, EventDataSvc
+from Configurables import ExampleFunctionalProducerMultiple, ExampleFunctionalConsumerMultiple
 from Gaudi.Configuration import INFO, DEBUG, WARNING
 
 evtslots = 1
@@ -15,18 +16,18 @@ threads = 1
 # It is useful to call it EventDataSvc to replace the usual data service with
 # the whiteboard transparently.
 
-whiteboard = HiveWhiteBoard("EventDataSvc",
-                            EventSlots=evtslots,
-                            ForceLeaves=True,
-                            )
+# whiteboard = HiveWhiteBoard("EventDataSvc",
+#                             EventSlots=evtslots,
+#                             ForceLeaves=True,
+#                             )
 
 # Event Loop Manager -----------------------------------------------------------
 # It's called slim since it has less functionalities overall than the good-old
 # event loop manager. Here we just set its outputlevel to DEBUG.
 
-slimeventloopmgr = HiveSlimEventLoopMgr(
-    SchedulerName="AvalancheSchedulerSvc", OutputLevel=WARNING
-)
+# slimeventloopmgr = HiveSlimEventLoopMgr(
+#     SchedulerName="AvalancheSchedulerSvc", OutputLevel=WARNING
+# )
 
 # AvalancheScheduler -----------------------------------------------------------
 # We just decide how many algorithms in flight we want to have and how many
@@ -39,10 +40,14 @@ scheduler = AvalancheSchedulerSvc(ThreadPoolSize=threads, OutputLevel=WARNING)
 # Nothing special here, we just set the debug level.
 AlgResourcePool(OutputLevel=DEBUG)
 
-a1 = ExampleFunctionalProducer("First")
-a2 = ExampleFunctionalConsumer("Consumer")
+a1 = ExampleFunctionalProducer("FirstSingle")
+a2 = ExampleFunctionalConsumer("ConsumerSingle")
+b1 = ExampleFunctionalProducerMultiple("First")
+b2 = ExampleFunctionalConsumerMultiple("Consumer")
 # a2 = ExampleFunctionalProducer("Second", OutputCollection="MySecondCollection")
 # a3 = ExampleFunctionalProducer("Third", OutputCollection="MyThirdCollection")
+
+datasvc = EventDataSvc("EventDataSvc")
 
 
 svc = IOSvc("IOSvc")
@@ -58,14 +63,14 @@ save = Writer("Writer")
 save.CollectionNames = ['MCParticles']
 save.Cardinality = 1
 
-node = Gaudi__Sequencer("Node", Members=[io, a1], Sequential=True, OutputLevel=INFO)
+# node = Gaudi__Sequencer("Node", Members=[io, a1], Sequential=True, OutputLevel=INFO)
 
 app = ApplicationMgr(
-    EvtMax=1e7,
+    EvtMax=10,
     EvtSel="NONE",
-    ExtSvc=[whiteboard],
-    EventLoop=slimeventloopmgr,
-    TopAlg=[node],
+    ExtSvc=[datasvc],
+    TopAlg=[b1, b2],
+    # TopAlg=[io, a2],
     MessageSvcType="InertMessageSvc",
     OutputLevel=INFO,
 )

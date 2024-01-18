@@ -28,6 +28,8 @@
 #include "podio/CollectionBase.h"
 #include "podio/Frame.h"
 
+#include "k4FWCore/FunctionalUtils.h"
+
 #include <memory>
 
 template <typename Container>
@@ -62,7 +64,7 @@ class CollectionPusher : public Gaudi::Functional::details::BaseClass_t<Gaudi::F
         // }
         for (unsigned i = 0; i != outColls.size(); ++i) {
           auto objectp = std::make_unique<AnyDataWrapper<Out>>( std::move( outColls[i] ) );
-          if ( auto sc = datasvc->registerObject( outputLocations[i], objectp.get() ); sc.isFailure() ) {
+          if ( auto sc = m_dataSvc->registerObject( outputLocations[i], objectp.get() ); sc.isFailure() ) {
           }
           // The store has the ownership so we shouldn't delete the object
           auto ptr = objectp.release();
@@ -83,7 +85,7 @@ class CollectionPusher : public Gaudi::Functional::details::BaseClass_t<Gaudi::F
     // Gaudi::Property<std::vector<DataObjID>> m_inputLocations; // TODO/FIXME: remove this duplication...
     // TODO/FIXME: replace vector of DataObjID property + call-back with a
     //             vector<handle> property ... as soon as declareProperty can deal with that.
-    ServiceHandle<IDataProviderSvc> datasvc{this, "EventDataSvc", "EventDataSvc"};
+    ServiceHandle<IDataProviderSvc> m_dataSvc{this, "EventDataSvc", "EventDataSvc"};
 
   };
 
@@ -128,7 +130,7 @@ public:
     auto frame = std::move(std::get<2>(val));
 
     auto tmp = new AnyDataWrapper<podio::Frame>(std::move(frame));
-    auto code = eds->registerObject("/Event/_Frame", tmp);
+    auto code = eds->registerObject("/Event" + k4FWCore::frameLocation, tmp);
 
     return std::make_tuple(std::get<0>(val), std::get<1>(val));
   }

@@ -49,8 +49,8 @@ function(add_test_with_env testname)
     endif()
   endforeach()
   add_test(NAME ${testname}
-           WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-           COMMAND ${K4RUN} ${TEST_ARGUMENTS})
+           # WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+           COMMAND ${K4RUN} ${CMAKE_CURRENT_LIST_DIR}/${TEST_ARGUMENTS})
   if(TEST_PROPERTIES_FOUND)
     set_tests_properties(${testname} PROPERTIES ${TEST_PROPERTIES})
   endif()
@@ -62,7 +62,7 @@ add_test_with_env(CreateExampleEventDataInDirectory options/createExampleEventDa
 
 add_test_with_env(CheckExampleEventData options/checkExampleEventData.py PROPERTIES DEPENDS CreateExampleEventData)
 add_test_with_env(CheckExampleEventData_noCollections options/checkExampleEventData.py --collections= PROPERTIES DEPENDS CreateExampleEventData)
-add_test_with_env(CheckExampleEventData_toolong -n 999 options/checkExampleEventData.py PROPERTIES PASS_REGULAR_EXPRESSION
+add_test_with_env(CheckExampleEventData_toolong options/checkExampleEventData.py -n 999 PROPERTIES PASS_REGULAR_EXPRESSION
                   "Application Manager Terminated successfully with a user requested ScheduledStop" DEPENDS CreateExampleEventData)
 add_test_with_env(CheckExampleEventData_unbounded options/checkExampleEventData.py -n -1 PROPERTIES PASS_REGULAR_EXPRESSION
                   "Application Manager Terminated successfully with a user requested ScheduledStop" DEPENDS CreateExampleEventData)
@@ -99,18 +99,25 @@ add_test_with_env(EventHeaderCheck options/runEventHeaderCheck.py PROPERTIES DEP
 add_test(NAME TestExec WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR} COMMAND python options/TestExec.py)
 set_test_env(TestExec)
 
-add_test_with_env(Testk4runNoArguments PROPERTIES PASS_REGULAR_EXPRESSION "Usage: k4run <options_file.py>, use --help to get a complete list of arguments")
+add_test(NAME Testk4runNoArgumentsHelp COMMAND ${K4RUN})
+set_tests_properties(Testk4runNoArgumentsHelp PROPERTIES PASS_REGULAR_EXPRESSION "Usage: k4run <options_file.py>, use --help to get a complete list of arguments")
 add_test_with_env(Testk4runCustomArguments options/TestArgs.py --foo=42 PROPERTIES PASS_REGULAR_EXPRESSION "The answer is 42")
 add_test_with_env(Testk4runVerboseOutput options/TestArgs.py --verbose PROPERTIES PASS_REGULAR_EXPRESSION " VERBOSE ")
 add_test_with_env(Testk4runHelpOnly options/TestArgs.py --help PROPERTIES PASS_REGULAR_EXPRESSION "show this help message and exit")
 
 
-add_test_with_env(FunctionalsMemory options/ExampleFunctionalsMemory.py)
-add_test_with_env(FunctionalsMultipleMemory options/ExampleFunctionalsMultipleMemory.py)
+add_test_with_env(FunctionalMemory options/ExampleFunctionalMemory.py)
+add_test_with_env(FunctionalMTMemory options/ExampleFunctionalMTMemory.py)
+add_test_with_env(FunctionalMultipleMemory options/ExampleFunctionalMultipleMemory.py)
 add_test_with_env(FunctionalProducer options/ExampleFunctionalProducer.py)
 add_test_with_env(FunctionalProducerMultiple options/ExampleFunctionalProducerMultiple.py)
-add_test_with_env(FunctionalsFile options/ExampleFunctionalsFile.py PROPERTIES DEPENDS ExampleFunctionalProducer)
-add_test_with_env(FunctionalsFile_toolong -n 999 options/ExampleFunctionalsFile.py PROPERTIES DEPENDS ExampleFunctionalProducer PASS_REGULAR_EXPRESSION
+add_test_with_env(FunctionalFile options/ExampleFunctionalFile.py PROPERTIES DEPENDS ExampleFunctionalProducer)
+add_test_with_env(FunctionalMTFile options/ExampleFunctionalMTFile.py PROPERTIES DEPENDS ExampleFunctionalProducer)
+add_test_with_env(FunctionalFile_toolong options/ExampleFunctionalFile.py -n 999 PROPERTIES DEPENDS ExampleFunctionalProducer PASS_REGULAR_EXPRESSION
                   "Application Manager Terminated successfully with a user requested ScheduledStop")
-add_test_with_env(FunctionalsMultipleFile options/ExampleFunctionalsFileMultiple.py PROPERTIES DEPENDS ExampleFunctionalProducerMultiple)
+add_test_with_env(FunctionalMultipleFile options/ExampleFunctionalFileMultiple.py PROPERTIES DEPENDS ExampleFunctionalProducerMultiple)
 add_test_with_env(FunctionalMix options/runFunctionalMix.py PROPERTIES DEPENDS ExampleFunctionalProducerMultiple)
+add_test_with_env(FunctionalOutputCommands outputCommands/ExampleFunctionalOutputCommands.py PROPERTIES DEPENDS ExampleFunctionalProducerMultiple)
+
+add_test(NAME FunctionalCheckFiles COMMAND python3 ${CMAKE_CURRENT_LIST_DIR}/options/CheckOutputFiles.py)
+set_property(TEST FunctionalCheckFiles APPEND PROPERTY DEPENDS FunctionalFile)
