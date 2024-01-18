@@ -27,12 +27,8 @@
 
 #include <string>
 
-// Which type of collection we are reading and writing
-using colltype_in  = edm4hep::MCParticleCollection;
-using colltype_out = edm4hep::MCParticleCollection;
-
 struct ExampleFunctionalTransformer final
-    : k4FWCore::Transformer<colltype_out(const colltype_in&)> {
+    : k4FWCore::Transformer<  edm4hep::MCParticleCollection(const edm4hep::MCParticleCollection&)> {
   ExampleFunctionalTransformer(const std::string& name, ISvcLocator* svcLoc)
       : Transformer(name, svcLoc, KeyValue("InputCollection", "MCParticles"),
                     KeyValue("OutputCollection", "NewMCParticles")) {}
@@ -40,7 +36,8 @@ struct ExampleFunctionalTransformer final
   // This is the function that will be called to transform the data
   // Note that the function has to be const, as well as all pointers to collections
   // we get from the input
-  colltype_out operator()(const colltype_in& input) const override {
+  edm4hep::MCParticleCollection operator()(const edm4hep::MCParticleCollection& input) const override {
+    info() << "Transforming " << input.size() << " particles" << endmsg;
     auto coll_out = edm4hep::MCParticleCollection();
     for (const auto& particle : input) {
       auto new_particle = edm4hep::MutableMCParticle();

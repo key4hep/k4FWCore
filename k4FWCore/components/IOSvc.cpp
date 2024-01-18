@@ -35,7 +35,12 @@
 StatusCode IOSvc::initialize() {
   if (!m_readingFileNames.empty()) {
     m_reader = std::make_unique<podio::ROOTFrameReader>();
-    m_reader->openFiles(m_readingFileNames);
+    try {
+      m_reader->openFiles(m_readingFileNames);
+    } catch (std::runtime_error& e) {
+      error() << "Error when opening files: " << e.what() << endmsg;
+      throw e;
+    }
     m_entries = m_reader->getEntries(podio::Category::Event);
   }
 
@@ -46,17 +51,25 @@ StatusCode IOSvc::initialize() {
 
   m_dataSvc = service("EventDataSvc");
 
+  m_hiveWhiteBoard = service("EventDataSvc");
+
   return Service::initialize();
 }
 
 StatusCode IOSvc::finalize() { return Service::finalize(); }
 
 std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, std::vector<std::string>, podio::Frame> IOSvc::next() {
-  info() << "IOSvc::next()" << endmsg;
+
   podio::Frame frame;
   {
     std::scoped_lock<std::mutex> lock(m_changeBufferLock);
-    frame = podio::Frame(std::move(m_reader->readEntry(podio::Category::Event, m_nextEntry)));
+    info() << "m_nextEntry = " << m_nextEntry << " m_entries = " << m_entries << endmsg;
+    if (m_nextEntry < m_entries) {
+      frame = podio::Frame(std::move(m_reader->readEntry(podio::Category::Event, m_nextEntry)));
+    }
+    else {
+      return std::make_tuple(std::vector<std::shared_ptr<podio::CollectionBase>>(), std::vector<std::string>(), std::move(frame));
+    }
     m_nextEntry++;
     if (m_collectionNames.empty()) {
         m_collectionNames = frame.getAvailableCollections();
@@ -64,9 +77,14 @@ std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, std::vector<std:
   }
 
   if (m_nextEntry >= m_entries) {
-    IEventProcessor* eventProcessor;
-    StatusCode sc = service("ApplicationMgr", eventProcessor);
-    sc = eventProcessor->stopRun();
+  // if (true) {
+    auto ep = serviceLocator()->as<IEventProcessor>();
+    StatusCode sc = ep->stopRun();
+    if (sc.isFailure()) {
+      error() << "Error when stopping run" << endmsg;
+      throw GaudiException("Error when stopping run", name(), StatusCode::FAILURE);
+    }
+    info() << "m_nextEntry = " << m_nextEntry << " m_entries = " << m_entries << endmsg;
   }
 
   std::vector<std::shared_ptr<podio::CollectionBase>> collections;
@@ -83,9 +101,25 @@ std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, std::vector<std:
 // that means it hasn't been written so the collections inside the Frame
 // should be removed so that they are deleted when the Frame is deleted
 void IOSvc::handle( const Incident& incident ) {
+
+  StatusCode code;
+  if (m_hiveWhiteBoard) {
+    if (!incident.context().valid()) {
+      info() << "No context found in IOSvc" << endmsg;
+      return;
+    }
+    info() << "Setting store to " << incident.context().slot() << endmsg;
+    code = m_hiveWhiteBoard->selectStore(incident.context().slot());
+    if (code.isFailure()) {
+      error() << "Error when setting store" << endmsg;
+      throw GaudiException("Error when setting store", name(), StatusCode::FAILURE);
+    }
+  }
+  info() << "IOSvc::handle()" << endmsg;
   DataObject *p;
-  auto code = m_dataSvc->retrieveObject("/Event/_Frame", p);
+  code = m_dataSvc->retrieveObject("/Event/_Frame", p);
   if (code.isFailure()) {
+    info() << "No frame found" << endmsg;
     return;
   }
 
@@ -94,6 +128,7 @@ void IOSvc::handle( const Incident& incident ) {
     DataObject *collPtr;
     code = m_dataSvc->retrieveObject("/Event/" + coll, collPtr);
     if (code.isSuccess()) {
+      info() << "Removing collection: " << coll << endmsg;
       code = m_dataSvc->unregisterObject(collPtr);
     }
     // else {
@@ -108,6 +143,10 @@ void IOSvc::setReadingCollectionNames(const std::vector<std::string>& names) {
 
 void IOSvc::setReadingFileNames(const std::vector<std::string>& names) {
   m_readingFileNames = names;
+}
+
+bool IOSvc::writeCollection(const std::string& collName) {
+  return m_switch.isOn(collName);
 }
 
 DECLARE_COMPONENT(IOSvc)

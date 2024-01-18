@@ -21,30 +21,28 @@
 # to check that the contents of the file are the expected ones
 
 from Gaudi.Configuration import INFO
-from Configurables import ExampleFunctionalTransformerMultiple
+from Configurables import ExampleFunctionalTransformer
 from Configurables import ApplicationMgr
 from Configurables import EventDataSvc, IOSvc
-from Configurables import Reader, SaveToFile
-import podio
+from Configurables import Reader, Writer
 
 svc = IOSvc("IOSvc")
-svc.input = ['output_k4test_exampledata_producer_multiple.root']
-svc.output = 'output_k4test_exampledata_transformer_multiple.root'
+svc.input = ['output_k4test_exampledata_producer.root']
+svc.output = 'functional_transformer.root'
 # svc.CollectionNames = ['MCParticles']
 
 reader = Reader("Reader")
 
-writer = SaveToFile("Writer")
+writer = Writer("Writer")
 
 # out = PodioOutput("out")
 # out.filename = "output_k4test_exampledata_transformer.root"
 # # The collections that we don't drop will also be present in the output file
 # out.outputCommands = ["drop MCParticles"]
 
-transformer = ExampleFunctionalTransformerMultiple("Transformer",
-                                           # InputCollection="MCParticles",
-                                           # OutputCollection="NewMCParticles")
-                                                   )
+transformer = ExampleFunctionalTransformer("Transformer",
+                                           InputCollection="MCParticles",
+                                           OutputCollection="NewMCParticles")
 
 mgr = ApplicationMgr(TopAlg=[reader, transformer, writer],
                EvtSel="NONE",
@@ -52,7 +50,6 @@ mgr = ApplicationMgr(TopAlg=[reader, transformer, writer],
                ExtSvc=[EventDataSvc("EventDataSvc")],
                OutputLevel=INFO,
                )
-# podio_reader = podio.root_io.Reader('output_k4test_exampledata_transformer.root')
-# for frame in podio_reader.get('events'):
-#     frame.get('NewMCParticles')
+
+
     

@@ -24,6 +24,7 @@
 #include "GaudiKernel/IIncidentListener.h"
 #include "GaudiKernel/IIncidentSvc.h"
 #include "GaudiKernel/IDataProviderSvc.h"
+#include "GaudiKernel/IHiveWhiteBoard.h"
 
 #include "podio/ROOTFrameReader.h"
 #include "podio/ROOTFrameWriter.h"
@@ -73,7 +74,6 @@ protected:
       this, "outputCommands", {"keep *"}, "A set of commands to declare which collections to keep or drop."};
   Gaudi::Property<std::string> m_inputType{this, "ioType", "ROOT", "Type of input file (ROOT, RNTuple)"};
 
-  /// lock for handling the change of buffer
   std::mutex m_changeBufferLock;
 
   KeepDropSwitch m_switch;
@@ -101,10 +101,13 @@ protected:
 
   SmartIF<IDataProviderSvc> m_dataSvc;
   SmartIF<IIncidentSvc> m_incidentSvc;
+  SmartIF<IHiveWhiteBoard> m_hiveWhiteBoard;
   void handle(const Incident& incident) override;
 
   int m_entries{0};
   int m_nextEntry{0};
+  
+  bool writeCollection(const std::string& collName) override;
 };
 
 #endif
