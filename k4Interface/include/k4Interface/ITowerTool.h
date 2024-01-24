@@ -26,11 +26,6 @@
 #include "edm4hep/CalorimeterHitCollection.h"
 #include "edm4hep/Cluster.h"
 
-struct tower {
-  int eta;
-  int phi;
-};
-
 /** @class ITowerTool RecInterface/RecInterface/ITowerTool.h ITowerTool.h
  *
  *  Abstract interface to tower building tool.
@@ -41,10 +36,13 @@ struct tower {
 class ITowerTool : virtual public IAlgTool {
 public:
   DeclareInterfaceID(ITowerTool, 1, 0);
+
   /**  Find number of calorimeter towers.
-   *   @return Struct containing number of towers in eta and phi.
+   *   @param[out] nEta number of towers in eta.
+   *   @param[out] nPhi number of towers in phi.
    */
-  virtual tower towersNumber() = 0;
+  virtual void towersNumber(int& nEta, int& nPhi) = 0;
+
   /**  Build calorimeter towers.
    *   @param[out] aTowers Calorimeter towers.
    *   @param[in] fillTowersCells Whether to fill maps of cells into towers, for later use in attachCells
