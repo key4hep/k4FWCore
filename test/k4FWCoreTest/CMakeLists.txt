@@ -1,5 +1,5 @@
 #[[
-Copyright (c) 2014-2023 Key4hep-Project.
+Copyright (c) 2014-2024 Key4hep-Project.
 
 This file is part of Key4hep.
 See https://key4hep.github.io/key4hep-doc/ for further info.
@@ -63,7 +63,7 @@ add_test_with_env(CheckExampleEventData options/checkExampleEventData.py PROPERT
 add_test_with_env(CheckExampleEventData_noCollections options/checkExampleEventData.py --collections= PROPERTIES DEPENDS CreateExampleEventData)
 add_test_with_env(CheckExampleEventData_toolong -n 999 options/checkExampleEventData.py PROPERTIES PASS_REGULAR_EXPRESSION
                   "Application Manager Terminated successfully with a user requested ScheduledStop" DEPENDS CreateExampleEventData)
-add_test_with_env(CheckExampleEventData_unbounded options/checkExampleEventData.py -n 999 PROPERTIES PASS_REGULAR_EXPRESSION
+add_test_with_env(CheckExampleEventData_unbounded options/checkExampleEventData.py -n -1 PROPERTIES PASS_REGULAR_EXPRESSION
                   "Application Manager Terminated successfully with a user requested ScheduledStop" DEPENDS CreateExampleEventData)
 add_test_with_env(ReadExampleEventData options/readExampleEventData.py)
 set_property(TEST ReadExampleEventData APPEND PROPERTY DEPENDS CreateExampleEventData)
