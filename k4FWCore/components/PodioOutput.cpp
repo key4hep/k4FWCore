@@ -18,6 +18,9 @@
  */
 #include <cstdlib>
 #include <filesystem>
+#include <system_error>
+
+#include "GaudiKernel/MsgStream.h"
 
 #include "PodioOutput.h"
 #include "k4FWCore/PodioDataSvc.h"
@@ -39,18 +42,19 @@ StatusCode PodioOutput::initialize() {
     return StatusCode::FAILURE;
   }
 
-  // check whether output directory needs to be created and eventualy create it
+  // check whether output directory needs to be created and eventually create it
   auto outDirPath = std::filesystem::path(m_filename.value()).parent_path();
   if (!outDirPath.empty() && !std::filesystem::is_directory(outDirPath)) {
-    debug() << "Creating output directory:" << endmsg;
-    debug() << outDirPath << endmsg;
-    auto success = std::filesystem::create_directories(outDirPath);
-    if (!success) {
-      error() << "Output directory can't be created!" << endmsg;
-      error() << outDirPath << endmsg;
+    std::error_code ec;
+    std::filesystem::create_directories(outDirPath, ec);
+    if (ec.value() != 0) {
+      error() << "Output directory \""<< outDirPath << "\" was not created!"
+              << endmsg;
+      error() << "Error " << ec.value() << ": " << ec.message() << endmsg;
 
       return StatusCode::FAILURE;
     }
+    debug() << "Created output directory: " << outDirPath << endmsg;
   }
 
   m_framewriter = std::make_unique<podio::ROOTWriter>(m_filename);
