@@ -48,8 +48,7 @@ StatusCode PodioOutput::initialize() {
     std::error_code ec;
     std::filesystem::create_directories(outDirPath, ec);
     if (ec.value() != 0) {
-      error() << "Output directory \""<< outDirPath << "\" was not created!"
-              << endmsg;
+      error() << "Output directory \"" << outDirPath << "\" was not created!" << endmsg;
       error() << "Error " << ec.value() << ": " << ec.message() << endmsg;
 
       return StatusCode::FAILURE;
