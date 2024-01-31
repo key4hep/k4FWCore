@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Key4hep-Project.
+ * Copyright (c) 2014-2024 Key4hep-Project.
  *
  * This file is part of Key4hep.
  * See https://key4hep.github.io/key4hep-doc/ for further info.
@@ -23,6 +23,7 @@
 #include "GaudiKernel/IAlgTool.h"
 
 // datamodel
+#include "edm4hep/CalorimeterHit.h"
 #include "edm4hep/CalorimeterHitCollection.h"
 #include "edm4hep/Cluster.h"
 
@@ -36,13 +37,14 @@
 
 class ITowerToolThetaModule : virtual public IAlgTool {
 public:
+  virtual ~ITowerToolThetaModule() {}
   DeclareInterfaceID(ITowerToolThetaModule, 1, 0);
 
   /**  Find number of calorimeter towers.
    *   @param[out] nTheta number of towers in theta.
    *   @param[out] nPhi number of towers in phi.
    */
-  virtual void towersNumber(int& nTheta, int& nPhi) = 0;
+  virtual void towersNumber(const int& nTheta, const int& nPhi) = 0;
   /**  Build calorimeter towers.
    *   @param[out] aTowers Calorimeter towers.
    *   @param[in] fillTowersCells Whether to fill maps of cells into towers, for later use in attachCells
