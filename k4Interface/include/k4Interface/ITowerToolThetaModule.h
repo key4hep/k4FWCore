@@ -37,14 +37,14 @@
 
 class ITowerToolThetaModule : virtual public IAlgTool {
 public:
-  virtual ~ITowerToolThetaModule() {}
+  //virtual ~ITowerToolThetaModule() {}
   DeclareInterfaceID(ITowerToolThetaModule, 1, 0);
 
   /**  Find number of calorimeter towers.
    *   @param[out] nTheta number of towers in theta.
    *   @param[out] nPhi number of towers in phi.
    */
-  virtual void towersNumber(const int& nTheta, const int& nPhi) = 0;
+  virtual void towersNumber(int& nTheta, int& nPhi) = 0;
   /**  Build calorimeter towers.
    *   @param[out] aTowers Calorimeter towers.
    *   @param[in] fillTowersCells Whether to fill maps of cells into towers, for later use in attachCells

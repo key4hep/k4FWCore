@@ -23,6 +23,7 @@
 #include "GaudiKernel/IAlgTool.h"
 
 // datamodel
+#include "edm4hep/CalorimeterHit.h"
 #include "edm4hep/CalorimeterHitCollection.h"
 #include "edm4hep/Cluster.h"
 
