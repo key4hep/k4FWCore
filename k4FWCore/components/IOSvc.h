@@ -28,10 +28,8 @@
 
 #include "podio/ROOTFrameReader.h"
 #include "podio/ROOTFrameWriter.h"
-#include "podio/ROOTRNTupleReader.h"
-#include "podio/ROOTRNTupleWriter.h"
-#include "podio/IROOTFrameReader.h"
-#include "podio/IROOTFrameWriter.h"
+#include "podio/RNTupleReader.h"
+#include "podio/RNTupleWriter.h"
 
 #include "k4FWCore/KeepDropSwitch.h"
 
@@ -78,7 +76,7 @@ protected:
 
   KeepDropSwitch m_switch;
 
-  std::unique_ptr<podio::IROOTFrameReader> m_reader{nullptr};
+  std::unique_ptr<podio::ROOTFrameReader> m_reader{nullptr};
   std::shared_ptr<podio::ROOTFrameWriter> m_writer{nullptr};
 
   std::shared_ptr<podio::ROOTFrameWriter> getWriter() override {

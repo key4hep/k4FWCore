@@ -77,6 +77,8 @@ if(BUILD_TESTING)
   add_subdirectory(test/k4FWCoreTest)
 endif()
 
+add_subdirectory(python)
+
 option(ENABLE_CPACK "Whether or not to use cpack config" OFF)
 if(ENABLE_CPACK)
   include(cmake/${PROJECT_NAME}CPack.cmake)

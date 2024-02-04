@@ -115,7 +115,6 @@ void IOSvc::handle( const Incident& incident ) {
       throw GaudiException("Error when setting store", name(), StatusCode::FAILURE);
     }
   }
-  info() << "IOSvc::handle()" << endmsg;
   DataObject *p;
   code = m_dataSvc->retrieveObject("/Event/_Frame", p);
   if (code.isFailure()) {
