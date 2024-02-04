@@ -23,8 +23,8 @@
 #include "GaudiKernel/SmartDataPtr.h"
 #include "GaudiKernel/StatusCode.h"
 
-#include "podio/Frame.h"
 #include "edm4hep/MCParticleCollection.h"
+#include "podio/Frame.h"
 
 #include "IIOSvc.h"
 
@@ -38,24 +38,22 @@
 class Writer final : public Gaudi::Functional::Consumer<void(const EventContext&)> {
 public:
   Writer(const std::string& name, ISvcLocator* svcLoc) : Consumer(name, svcLoc) {
-
     // Non-reeentrant algorithms have a cardinality of 1
     setProperty("Cardinality", 1).ignore();
-
   }
 
   mutable Gaudi::Property<std::vector<std::string>> m_OutputNames{this, "CollectionNames", {}};
-  mutable std::set<std::string> m_availableCollections;
-  mutable std::vector<std::string> m_collectionsToAdd;
-  mutable std::vector<std::string> m_collectionsRemaining;
-  mutable std::vector<std::string> m_collectionsToSave;
+  mutable std::set<std::string>                     m_availableCollections;
+  mutable std::vector<std::string>                  m_collectionsToAdd;
+  mutable std::vector<std::string>                  m_collectionsRemaining;
+  mutable std::vector<std::string>                  m_collectionsToSave;
 
   mutable std::mutex m_mutex;
 
-  ServiceHandle<IIOSvc> iosvc{this, "IOSvc", "IOSvc"};
+  ServiceHandle<IIOSvc>          iosvc{this, "IOSvc", "IOSvc"};
   ServiceHandle<IHiveWhiteBoard> m_hiveWhiteBoard{this, "EventDataSvc", "EventDataSvc"};
-  SmartIF<IDataProviderSvc> m_dataSvc;
-  mutable bool m_first {true};
+  SmartIF<IDataProviderSvc>      m_dataSvc;
+  mutable bool                   m_first{true};
 
   StatusCode initialize() override {
     if (!iosvc.isValid()) {
@@ -73,6 +71,42 @@ public:
   }
 
   StatusCode finalize() override {
+
+    podio::Frame config_metadata_frame;
+
+    //// prepare job options metadata ///////////////////////
+    // retrieve the configuration of the job
+    // and write it to file as vector of strings
+    std::vector<std::string> config_data;
+    for (const auto& per_property : Gaudi::svcLocator()->getOptsSvc().items()) {
+      std::stringstream config_stream;
+      // sample output:
+      // HepMCToEDMConverter.genparticles = "GenParticles";
+      // Note that quotes are added to all property values,
+      // which leads to problems with ints, lists, dicts and bools.
+      // For theses types, the quotes must be removed in postprocessing.
+      config_stream << std::get<0>(per_property) << " = \"" << std::get<1>(per_property) << "\";" << std::endl;
+      config_data.push_back(config_stream.str());
+    }
+    // Some default components are not captured by the job option service
+    // and have to be traversed like this. Note that Gaudi!577 will improve this.
+    for (const auto* name : {"NTupleSvc"}) {
+      std::stringstream config_stream;
+      auto svc = service<IProperty>(name);
+      if (!svc.isValid())
+        continue;
+      for (const auto* property : svc->getProperties()) {
+        config_stream << name << "." << property->name() << " = \"" << property->toString() << "\";" << std::endl;
+      }
+      config_data.push_back(config_stream.str());
+    }
+
+    config_metadata_frame.putParameter("gaudiConfigOptions", config_data);
+    if (auto env_key4hep_stack = std::getenv("KEY4HEP_STACK")) {
+      config_metadata_frame.putParameter("key4hepstack", env_key4hep_stack);
+    }
+    iosvc->getWriter()->writeFrame(config_metadata_frame, "configuration_metadata");
+
     iosvc->deleteWriter();
     return StatusCode::SUCCESS;
   }
@@ -98,7 +132,7 @@ public:
       return;
     }
     std::vector<IRegistry*> leaves;
-    StatusCode sc = m_mgr->objectLeaves(pObj, leaves);
+    StatusCode              sc = m_mgr->objectLeaves(pObj, leaves);
     if (!sc.isSuccess()) {
       error() << "Failed to retrieve object leaves" << endmsg;
       return;
@@ -118,9 +152,7 @@ public:
     }
   }
 
-  // void operator()() const override {
   void operator()(const EventContext& ctx) const override {
-
     // It seems that even when setting Cardinality to 1,
     // more than one instance is created
     std::scoped_lock<std::mutex> lock(m_mutex);
@@ -141,13 +173,13 @@ public:
       }
     }
 
-    DataObject *p;
+    DataObject* p;
     code = m_dataSvc->retrieveObject("/Event" + k4FWCore::frameLocation, p);
     AnyDataWrapper<podio::Frame>* ptr;
     // This is the case when we are reading from a file
     if (code.isSuccess()) {
       code = m_dataSvc->unregisterObject(p);
-      ptr = dynamic_cast<AnyDataWrapper<podio::Frame>*>(p);
+      ptr  = dynamic_cast<AnyDataWrapper<podio::Frame>*>(p);
     }
     // This is the case when no reading is being done
     // needs to be fixed? (new without delete)
@@ -156,7 +188,6 @@ public:
     }
 
     if (m_first) {
-
       // Assume all the output collections are the same for all events
       // and cache them
       getOutputCollections();
@@ -166,8 +197,7 @@ public:
           const auto& frameCollections = ptr->getData().getAvailableCollections();
           if (std::find(frameCollections.begin(), frameCollections.end(), coll) == frameCollections.end()) {
             m_collectionsToAdd.push_back(coll);
-          }
-          else {
+          } else {
             m_collectionsRemaining.push_back(coll);
           }
         }
@@ -177,19 +207,6 @@ public:
     }
 
     for (auto& coll : ptr->getData().getAvailableCollections()) {
-      info() << "Available collection " << coll << endmsg;
-    }
-
-    for (auto& coll : m_collectionsToAdd) {
-      info() << "Saving collection " << coll << endmsg;
-    }
-   
-    for (auto& coll : m_collectionsRemaining) {
-      info() << "Collection " << coll << " already saved" << endmsg;
-    }
-
-
-    for (auto& coll : ptr->getData().getAvailableCollections()) {
       DataObject* storeCollection;
       code = m_dataSvc->retrieveObject("/Event/" + coll, storeCollection);
       if (code.isFailure()) {
@@ -217,31 +234,29 @@ public:
         error() << "Failed to unregister collection " << coll << endmsg;
         return;
       }
-      info() << "Retrieved collection " << coll << endmsg;
       const auto collection = dynamic_cast<AnyDataWrapper<std::shared_ptr<podio::CollectionBase>>*>(storeCollection);
       if (!collection) {
-
         // Check the case when the data has been produced using the old DataHandle
         const auto old_collection = dynamic_cast<DataWrapper<podio::CollectionBase>*>(storeCollection);
         if (!old_collection) {
           error() << "Failed to cast collection " << coll << endmsg;
           return;
-        }
-        else {
+        } else {
           std::unique_ptr<podio::CollectionBase> uptr(const_cast<podio::CollectionBase*>(old_collection->getData()));
           ptr->getData().put(std::move(uptr), coll);
         }
 
-      }
-      else {
+      } else {
         std::unique_ptr<podio::CollectionBase> uptr(collection->getData().get());
         ptr->getData().put(std::move(uptr), coll);
       }
     }
 
-    info() << "Writing frame, with time: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() << endmsg;
+    info() << "Writing frame, with time: "
+           << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+                  .count()
+           << endmsg;
     iosvc->getWriter()->writeFrame(ptr->getData(), podio::Category::Event, m_collectionsToSave);
-
   }
 };
 

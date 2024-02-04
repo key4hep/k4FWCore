@@ -22,8 +22,8 @@
 
 from Gaudi.Configuration import INFO
 from Configurables import ExampleFunctionalProducerMultiple, ExampleFunctionalTransformerMultiple, ExampleFunctionalConsumerMultiple
-from Configurables import ApplicationMgr
 from Configurables import EventDataSvc
+from k4FWCore import ApplicationMgr
 
 transformer = ExampleFunctionalTransformerMultiple("Transformer",
                                                    InputCollectionFloat="VectorFloat",

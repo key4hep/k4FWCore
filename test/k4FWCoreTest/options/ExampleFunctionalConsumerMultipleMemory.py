@@ -23,7 +23,7 @@
 from Gaudi.Configuration import INFO
 from Configurables import ExampleFunctionalProducerMultiple, ExampleFunctionalConsumerMultiple
 from Configurables import EventDataSvc
-from Configurables import ApplicationMgr
+from k4FWCore import ApplicationMgr
 
 producer = ExampleFunctionalProducerMultiple("Producer",
                                              OutputCollectionFloat="VectorFloat",

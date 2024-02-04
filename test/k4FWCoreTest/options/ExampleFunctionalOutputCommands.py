@@ -22,9 +22,8 @@
 
 from Gaudi.Configuration import INFO
 from Configurables import ExampleFunctionalTransformerMultiple
-from Configurables import ApplicationMgr
-from Configurables import EventDataSvc, IOSvc
-from Configurables import Reader, Writer
+from Configurables import EventDataSvc
+from k4FWCore import ApplicationMgr, IOSvc
 
 svc = IOSvc("IOSvc")
 svc.input = ['output_k4test_exampledata_producer_multiple.root']
@@ -33,16 +32,12 @@ svc.outputCommands = ["drop Tracks",
                       "drop Counter",
                       "drop NewMCParticles",]
 
-reader = Reader("Reader")
-
-writer = Writer("Writer")
-
 transformer = ExampleFunctionalTransformerMultiple("Transformer",
                                            # InputCollection="MCParticles",
                                            # OutputCollection="NewMCParticles")
                                                    )
 
-mgr = ApplicationMgr(TopAlg=[reader, transformer, writer],
+mgr = ApplicationMgr(TopAlg=[transformer],
                EvtSel="NONE",
                EvtMax=-1,
                ExtSvc=[EventDataSvc("EventDataSvc")],

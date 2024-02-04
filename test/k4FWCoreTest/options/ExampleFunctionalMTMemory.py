@@ -22,7 +22,8 @@
 
 from Gaudi.Configuration import INFO, WARNING
 from Configurables import ExampleFunctionalProducer, ExampleFunctionalTransformer, ExampleFunctionalConsumer
-from Configurables import ApplicationMgr, HiveWhiteBoard, HiveSlimEventLoopMgr, AvalancheSchedulerSvc
+from Configurables import HiveWhiteBoard, HiveSlimEventLoopMgr, AvalancheSchedulerSvc
+from k4FWCore import ApplicationMgr
 
 evtslots = 5
 threads = 3

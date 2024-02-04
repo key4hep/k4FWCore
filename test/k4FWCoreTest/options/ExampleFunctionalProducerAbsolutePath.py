@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014-2023 Key4hep-Project.
+# Copyright (c) 2014-2024 Key4hep-Project.
 #
 # This file is part of Key4hep.
 # See https://key4hep.github.io/key4hep-doc/ for further info.
@@ -17,28 +17,21 @@
 # limitations under the License.
 #
 
-# This is an example reading from a file and using a consumer with several inputs
-# to check that the contents of the file are the expected ones
+# This is an example using a producer with a single output and saving that to a file
 
 from Gaudi.Configuration import INFO
-from Configurables import ExampleFunctionalTransformer
 from Configurables import EventDataSvc
+from Configurables import ExampleFunctionalProducer
 from k4FWCore import ApplicationMgr, IOSvc
 
-svc = IOSvc("IOSvc")
-svc.input = ['output_k4test_exampledata_producer.root']
-svc.output = 'functional_transformer.root'
+io = IOSvc("IOSvc")
+io.output = "/tmp/a/b/c/output_k4test_exampledata_producer.root"
 
-transformer = ExampleFunctionalTransformer("Transformer",
-                                           InputCollection="MCParticles",
-                                           OutputCollection="NewMCParticles")
+producer = ExampleFunctionalProducer("ExampleFunctionalProducer")
 
-mgr = ApplicationMgr(TopAlg=[transformer],
+ApplicationMgr(TopAlg=[producer],
                EvtSel="NONE",
-               EvtMax=-1,
+               EvtMax=10,
                ExtSvc=[EventDataSvc("EventDataSvc")],
                OutputLevel=INFO,
                )
-
-
-    
