@@ -29,10 +29,6 @@
 // datamodel
 namespace edm4hep {
   class MCParticleCollection;
-  class SimTrackerHitCollection;
-  class TrackerHitCollection;
-  class SimCaloHitCollection;
-  class TrackCollection;
 }  // namespace edm4hep
 
 class k4FWCoreTest_CheckExampleEventData : public GaudiAlgorithm {

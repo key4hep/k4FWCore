@@ -24,7 +24,6 @@
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/SimTrackerHitCollection.h"
 #include "edm4hep/TrackCollection.h"
-#include "edm4hep/TrackerHit3DCollection.h"
 #if __has_include("edm4hep/EDM4hepVersion.h")
 #include "edm4hep/EDM4hepVersion.h"
 #else

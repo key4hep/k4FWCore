@@ -25,6 +25,17 @@
 // key4hep
 #include "k4FWCore/DataHandle.h"
 
+// edm4hep
+#if __has_include("edm4hep/TrackerHit3DCollection.h")
+#include "edm4hep/TrackerHit3DCollection.h"
+#else
+#include "edm4hep/TrackerHitCollection.h"
+namespace edm4hep {
+  using TrackerHit3DCollection = edm4hep::TrackerHitCollection;
+}  // namespace edm4hep
+#endif
+#include "edm4hep/TrackerHitPlaneCollection.h"
+
 // podio
 #include "podio/UserDataCollection.h"
 
@@ -32,7 +43,6 @@
 namespace edm4hep {
   class MCParticleCollection;
   class SimTrackerHitCollection;
-  class TrackerHit3DCollection;
   class SimCaloHitCollection;
   class TrackCollection;
 }  // namespace edm4hep
