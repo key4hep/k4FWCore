@@ -95,6 +95,11 @@ void PodioInput::fillReaders() {
   m_readers["edm4hep::TrackerHit3DCollection"] = [&](std::string_view collName) {
     maybeRead<edm4hep::TrackerHit3DCollection>(collName);
   };
+  m_readers["edm4hep::TrackerHitCollection"] = [&](std::string_view collName) {
+    warning() << "Reading a TrackerHitCollection via TrackerHit3DCollection (" << collName
+              << "). Make sure to transition properly" << endmsg;
+    maybeRead<edm4hep::TrackerHit3DCollection>(collName);
+  };
   m_readers["edm4hep::TrackerHitPlaneCollection"] = [&](std::string_view collName) {
     maybeRead<edm4hep::TrackerHitPlaneCollection>(collName);
   };
