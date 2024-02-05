@@ -47,31 +47,43 @@ namespace k4FWCore {
           std::tuple<>, Gaudi::Functional::details::filter_evtcontext<decltype(transformType(std::declval<In>()))...>,
           Traits_>::DataHandleMixin;
 
-      // derived classes are NOT allowed to implement execute ...
-      StatusCode execute(const EventContext& ctx) const override final {
-        try {
-          if constexpr (std::is_same_v<
-                            std::decay_t<decltype(std::get<0>(this->m_inputs))>,
-                            DataObjectReadHandle<std::map<std::string, std::shared_ptr<podio::CollectionBase>>>>) {
-            Gaudi::Algorithm::info() << "CONSUMER::::" << std::get<0>(this->m_inputs).objKey() << endmsg;
-            // DataObjectReadHandle<std::map<std::string, std::shared_ptr<podio::CollectionBase>>> handle = std::get<0>(this->m_inputs);
-            // handle.
+      // When reading multiple collections we assume that the variable used is a
+      // std::map<std::string, std::shared_ptr<podio::CollectionBase>>
+      // and read the collections in a space separated string
+      template <size_t Index, typename... Handles>
+      void transformAndApplyAlgoAtIndex(const std::tuple<Handles...>& handles) const {
+        if constexpr (Index < sizeof...(Handles)) {
+          using HandleType = std::decay_t<decltype(std::get<Index>(handles))>;
 
+          if constexpr (std::is_same_v<
+                            HandleType,
+                            DataObjectReadHandle<std::map<std::string, std::shared_ptr<podio::CollectionBase>>>>) {
+            // Transformation logic for the specific type
             auto               map = std::map<std::string, std::shared_ptr<podio::CollectionBase>>();
-            std::istringstream ss(std::get<0>(this->m_inputs).objKey());
+            std::istringstream ss(std::get<Index>(handles).objKey());
             std::string        token;
             while (ss >> token) {
               DataObject* p;
-              this->evtSvc()->retrieveObject(token, p);
+              auto sc = this->evtSvc()->retrieveObject(token, p);
+              if (!sc.isSuccess()) {
+                throw GaudiException("Failed to retrieve object " + token, "Consumer", StatusCode::FAILURE);
+              }
               const auto collection = dynamic_cast<AnyDataWrapper<std::shared_ptr<podio::CollectionBase>>*>(p);
               map[token]            = collection->getData();
             }
-            std::get<0>(this->m_inputs).put(std::move(map));
-
-            filter_evtcontext_ttt<In...>::apply(*this, ctx, this->m_inputs);
-          } else {
-            filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs);
+            std::get<Index>(handles).put(std::move(map));
           }
+
+          // Recursive call for the next index
+          transformAndApplyAlgoAtIndex<Index + 1>(handles);
+        }
+      }
+
+      // derived classes are NOT allowed to implement execute ...
+      StatusCode execute(const EventContext& ctx) const override final {
+        try {
+          transformAndApplyAlgoAtIndex<0>(this->m_inputs);
+          filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs);
           return Gaudi::Functional::FilterDecision::PASSED;
         } catch (GaudiException& e) {
           (e.code() ? this->warning() : this->error()) << e.tag() << " : " << e.message() << endmsg;

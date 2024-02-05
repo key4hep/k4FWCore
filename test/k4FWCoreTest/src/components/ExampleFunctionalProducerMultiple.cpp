@@ -36,7 +36,6 @@ using Particle      = edm4hep::MCParticleCollection;
 using SimTrackerHit = edm4hep::SimTrackerHitCollection;
 using TrackerHit    = edm4hep::TrackerHitCollection;
 using Track         = edm4hep::TrackCollection;
-using Ptr = std::shared_ptr<podio::CollectionBase>;
 
 struct ExampleFunctionalProducerMultiple final
   : k4FWCore::Producer<std::tuple<Float, Particle, Particle, SimTrackerHit, TrackerHit, Track>()> {

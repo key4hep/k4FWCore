@@ -61,8 +61,6 @@ struct ExampleFunctionalConsumerRuntimeCollections final
 private:
   // We can define any property we want that can be set from python
   // and use it inside operator()
-  Gaudi::Property<int> m_numberOfCollections{this, "NumberOfCollections", 1,
-                                             "Example int that can be used in the algorithm"};
   Gaudi::Property<int> m_offset{this, "Offset", 10, "Integer to add to the dummy values written to the edm"};
 };
 
