@@ -61,7 +61,8 @@ struct ExampleFunctionalProducerMultiple final
 
     auto particles = edm4hep::MCParticleCollection();
     edm4hep::Vector3d v{0, 0, 0};
-    particles.create(1, 2, 3, 4.f, 5.f, 6.f, v, v, v);
+    edm4hep::Vector3f vv{0, 0, 0};
+    particles.create(1, 2, 3, 4.f, 5.f, 6.f, v, v, vv);
     particles.create(2, 3, 4, 5.f, 6.f, 7.f);
 
     auto simTrackerHits = edm4hep::SimTrackerHitCollection();
