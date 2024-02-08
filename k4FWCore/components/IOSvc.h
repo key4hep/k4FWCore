@@ -26,8 +26,8 @@
 #include "GaudiKernel/IDataProviderSvc.h"
 #include "GaudiKernel/IHiveWhiteBoard.h"
 
-#include "podio/ROOTFrameReader.h"
-#include "podio/ROOTFrameWriter.h"
+#include "podio/ROOTReader.h"
+#include "podio/ROOTWriter.h"
 #include "podio/RNTupleReader.h"
 #include "podio/RNTupleWriter.h"
 
@@ -76,12 +76,12 @@ protected:
 
   KeepDropSwitch m_switch;
 
-  std::unique_ptr<podio::ROOTFrameReader> m_reader{nullptr};
-  std::shared_ptr<podio::ROOTFrameWriter> m_writer{nullptr};
+  std::unique_ptr<podio::ROOTReader> m_reader{nullptr};
+  std::shared_ptr<podio::ROOTWriter> m_writer{nullptr};
 
-  std::shared_ptr<podio::ROOTFrameWriter> getWriter() override {
+  std::shared_ptr<podio::ROOTWriter> getWriter() override {
     if (!m_writer) {
-      m_writer = std::shared_ptr<podio::ROOTFrameWriter>(new podio::ROOTFrameWriter(m_writingFileName.value()));
+      m_writer = std::shared_ptr<podio::ROOTWriter>(new podio::ROOTWriter(m_writingFileName.value()));
     }
     return m_writer;
   }
