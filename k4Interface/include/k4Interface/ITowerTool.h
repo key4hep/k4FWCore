@@ -85,6 +85,8 @@ public:
   virtual void attachCells(float aEta, float aPhi, uint aHalfEtaFinal, uint aHalfPhiFinal,
                            edm4hep::MutableCluster& aEdmCluster, edm4hep::CalorimeterHitCollection* aEdmClusterCells,
                            bool aEllipse) = 0;
+
+  virtual ~ITowerTool() {}
 };
 
 #endif /* RECINTERFACE_ITOWERTOOL_H */
