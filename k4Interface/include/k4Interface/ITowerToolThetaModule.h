@@ -16,8 +16,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef RECINTERFACE_ITOWERTOOL_H
-#define RECINTERFACE_ITOWERTOOL_H
+#ifndef RECINTERFACE_ITOWERTOOLTHETAMODULE_H
+#define RECINTERFACE_ITOWERTOOLTHETAMODULE_H
 
 // Gaudi
 #include "GaudiKernel/IAlgTool.h"
@@ -27,66 +27,66 @@
 #include "edm4hep/CalorimeterHitCollection.h"
 #include "edm4hep/Cluster.h"
 
-/** @class ITowerTool RecInterface/RecInterface/ITowerTool.h ITowerTool.h
+/** @class ITowerToolThetaModule RecInterface/RecInterface/ITowerToolThetaModule.h ITowerToolThetaModule.h
  *
  *  Abstract interface to tower building tool.
  *
  *  @author Anna Zaborowska
+ *  @Modified by Tong Li (t.li at cern.ch), for sliding-window clustering at FCCee where the CaloTower is created from Theta-Phi
  */
 
-class ITowerTool : virtual public IAlgTool {
+class ITowerToolThetaModule : virtual public IAlgTool {
 public:
-  DeclareInterfaceID(ITowerTool, 1, 0);
+  DeclareInterfaceID(ITowerToolThetaModule, 1, 0);
 
   /**  Find number of calorimeter towers.
-   *   @param[out] nEta number of towers in eta.
+   *   @param[out] nTheta number of towers in theta.
    *   @param[out] nPhi number of towers in phi.
    */
-  virtual void towersNumber(int& nEta, int& nPhi) = 0;
-
+  virtual void towersNumber(int& nTheta, int& nPhi) = 0;
   /**  Build calorimeter towers.
    *   @param[out] aTowers Calorimeter towers.
    *   @param[in] fillTowersCells Whether to fill maps of cells into towers, for later use in attachCells
    *   @return Size of the cell collection.
    */
   virtual uint buildTowers(std::vector<std::vector<float>>& aTowers, bool fillTowersCells = true) = 0;
-  /**  Get the radius for the position calculation.
-   *   @return Radius
+  /**  Get the map of cells contained within a tower.
+   *   @return Map of cells in a tower
    */
-  virtual float radiusForPosition() const = 0;
-  /**  Get the tower IDs in eta.
-   *   @param[in] aEta Position of the calorimeter cell in eta
-   *   @return ID (eta) of a tower
+  virtual std::map<std::pair<uint, uint>, std::vector<edm4hep::CalorimeterHit>> cellsInTowers() const = 0;
+  /**  Get the tower IDs in theta.
+   *   @param[in] aTheta Position of the calorimeter cell in theta
+   *   @return ID (theta) of a tower
    */
-  virtual uint idEta(float aEta) const = 0;
+  virtual uint idTheta(float aTheta) const = 0;
   /**  Get the tower IDs in phi.
    *   @param[in] aPhi Position of the calorimeter cell in phi
    *   @return ID (phi) of a tower
    */
   virtual uint idPhi(float aPhi) const = 0;
-  /**  Get the eta position of the centre of the tower.
-   *   @param[in] aIdEta ID (eta) of a tower
+  /**  Get the theta position of the centre of the tower.
+   *   @param[in] aIdTheta ID (theta) of a tower
    *   @return Position of the centre of the tower
    */
-  virtual float eta(int aIdEta) const = 0;
+  virtual float theta(int aIdTheta) const = 0;
   /**  Get the phi position of the centre of the tower.
    *   @param[in] aIdPhi ID (phi) of a tower
    *   @return Position of the centre of the tower
    */
   virtual float phi(int aIdPhi) const = 0;
   /**  Find cells belonging to a cluster.
-   *   @param[in] aEta Position of the middle tower of a cluster in eta
+   *   @param[in] aTheta Position of the middle tower of a cluster in theta
    *   @param[in] aPhi Position of the middle tower of a cluster in phi
-   *   @param[in] aHalfEtaFinal Half size of cluster in eta (in units of tower size). Cluster size is 2*aHalfEtaFinal+1
+   *   @param[in] aHalfThetaFinal Half size of cluster in theta (in units of tower size). Cluster size is 2*aHalfThetaFinal+1
    *   @param[in] aHalfPhiFinal Half size of cluster in phi (in units of tower size). Cluster size is 2*aHalfPhiFinal+1
    *   @param[out] aEdmCluster Cluster of interest
    *   @param[out] aEdmClusterCells Cluster cells which belong to the cluster of interest
    */
-  virtual void attachCells(float aEta, float aPhi, uint aHalfEtaFinal, uint aHalfPhiFinal,
+  virtual void attachCells(float aTheta, float aPhi, uint aHalfThetaFinal, uint aHalfPhiFinal,
                            edm4hep::MutableCluster& aEdmCluster, edm4hep::CalorimeterHitCollection* aEdmClusterCells,
                            bool aEllipse) = 0;
 
-  virtual ~ITowerTool() {}
+  virtual ~ITowerToolThetaModule() {}
 };
 
-#endif /* RECINTERFACE_ITOWERTOOL_H */
+#endif /* RECINTERFACE_ITOWERTOOLTHETAMODULE_H */
