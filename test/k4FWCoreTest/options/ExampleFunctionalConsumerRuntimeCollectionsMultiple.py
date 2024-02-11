@@ -53,11 +53,11 @@ producer2 = ExampleFunctionalProducerMultiple("Producer2",
                                               )
 
 consumer = ExampleFunctionalConsumerRuntimeCollectionsMultiple("Consumer",
-                                     Particles="MCParticles0 MCParticles1 MCParticles2 MCParticles3 MCParticles4",
-                                     Tracks="Tracks0 Tracks1 Tracks2",
-                                     SimTrackerHits="SimTrackerHits0",
-                                     Offset=0,
-                                     )
+                                                               Particles=["MCParticles0", "MCParticles1", "MCParticles2", "MCParticles3", "MCParticles4"],
+                                                               Tracks=["Tracks0", "Tracks1", "Tracks2"],
+                                                               SimTrackerHits=["SimTrackerHits0"],
+                                                               Offset=0,
+                                                               )
 
 
 ApplicationMgr(TopAlg=[producer0, producer1, producer2, consumer],

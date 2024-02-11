@@ -21,7 +21,8 @@
 
 #include "edm4hep/MCParticleCollection.h"
 
-#include "k4FWCore/Consumer.h"
+// #include "k4FWCore/Consumer.h"
+#include "k4FWCore/NewConsumer.h"
 
 #include <memory>
 #include <string>
@@ -31,7 +32,7 @@ struct ExampleFunctionalConsumerRuntimeCollections final
   // The pair in KeyValue can be changed from python and it corresponds
   // to the name of the output collection
   ExampleFunctionalConsumerRuntimeCollections(const std::string& name, ISvcLocator* svcLoc)
-      : Consumer(name, svcLoc, KeyValue("InputCollection", "MCParticles")) {}
+    : Consumer(name, svcLoc, KeyValues("InputCollection", {"DefaultValue"})) {}
 
   // This is the function that will be called to produce the data
   void operator()(const std::map<std::string, std::shared_ptr<podio::CollectionBase>>& input) const override {

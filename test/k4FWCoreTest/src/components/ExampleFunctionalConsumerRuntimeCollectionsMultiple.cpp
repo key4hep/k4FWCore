@@ -23,7 +23,8 @@
 #include "edm4hep/SimTrackerHitCollection.h"
 #include "edm4hep/TrackCollection.h"
 
-#include "k4FWCore/Consumer.h"
+// #include "k4FWCore/Consumer.h"
+#include "k4FWCore/NewConsumer.h"
 
 #include <memory>
 #include <string>
@@ -35,12 +36,8 @@ struct ExampleFunctionalConsumerRuntimeCollectionsMultiple final
   // The pair in KeyValue can be changed from python and it corresponds
   // to the name of the output collection
   ExampleFunctionalConsumerRuntimeCollectionsMultiple(const std::string& name, ISvcLocator* svcLoc)
-      : Consumer(name, svcLoc,
-                 {
-                     KeyValue("Particles", "MCParticles"),
-                     KeyValue("Tracks", "MCParticles"),
-                     KeyValue("SimTrackerHits", "MCParticles"),
-                 }) {}
+    : Consumer(name, svcLoc, {KeyValues("Particles", {"MCParticles"}), KeyValues("Tracks", {"MCParticles"}), KeyValues("SimTrackerHits", {"MCParticles"})}) {}
+    // : Consumer(name, svcLoc, {KeyValue("Particles", ("MCParticles")), KeyValue("Tracks", ("MCParticles")), KeyValue("SimTrackerHits", ("MCParticles"))}) {}
 
   // This is the function that will be called to produce the data
   void operator()(const std::map<std::string, std::shared_ptr<podio::CollectionBase>>& particleMap,
