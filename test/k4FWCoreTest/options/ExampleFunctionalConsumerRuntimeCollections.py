@@ -21,7 +21,7 @@
 
 from Gaudi.Configuration import INFO
 from Configurables import ExampleFunctionalProducer, ExampleFunctionalConsumerRuntimeCollections
-from Configurables import ApplicationMgr
+from k4FWCore import ApplicationMgr
 from Configurables import EventDataSvc
 
 producer0 = ExampleFunctionalProducer("Producer0",

@@ -39,11 +39,11 @@ transformer = ExampleFunctionalTransformerMultiple("Transformer",
 producer = ExampleFunctionalProducerMultiple("Producer")
 
 consumer = ExampleFunctionalConsumerMultiple("Consumer",
-                                             InputCollectionFloat="VectorFloat",
-                                             InputCollectionParticles="NewMCParticles",
-                                             InputCollectionSimTrackerHits="SimTrackerHits",
-                                             InputCollectionTrackerHits="TrackerHits",
-                                             InputCollectionTracks="Tracks",
+                                             InputCollectionFloat=["VectorFloat"],
+                                             InputCollectionParticles=["NewMCParticles"],
+                                             InputCollectionSimTrackerHits=["SimTrackerHits"],
+                                             InputCollectionTrackerHits=["TrackerHits"],
+                                             InputCollectionTracks=["Tracks"],
                                              Offset=10,
                                              )
 
