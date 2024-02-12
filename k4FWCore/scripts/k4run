@@ -6,6 +6,8 @@ import argparse
 from multiprocessing import cpu_count
 import logging
 
+from k4FWCore.utils import load_file
+
 # these default properties are filtered as otherwise they will clutter the argument list
 FILTER_GAUDI_PROPS = [
     "ContextService",
@@ -53,10 +55,6 @@ FILTER_GAUDI_PROPS = [
 
 seen_files = set()
 option_db = {}
-
-
-def load_file(file):
-    exec(file.read(), {})
 
 
 def add_arguments(parser, app_mgr):
