@@ -39,12 +39,14 @@ inp.collections = [
     "Tracks",
 ]
 
-consumer = ExampleFunctionalConsumerMultiple("ExampleFunctionalConsumerMultiple",
-                                     )
+consumer = ExampleFunctionalConsumerMultiple(
+    "ExampleFunctionalConsumerMultiple",
+)
 
-ApplicationMgr(TopAlg=[inp, consumer],
-               EvtSel="NONE",
-               EvtMax=10,
-               ExtSvc=[podioevent],
-               OutputLevel=INFO,
-               )
+ApplicationMgr(
+    TopAlg=[inp, consumer],
+    EvtSel="NONE",
+    EvtMax=10,
+    ExtSvc=[podioevent],
+    OutputLevel=INFO,
+)

@@ -19,25 +19,29 @@
 from Gaudi.Configuration import *
 
 from Configurables import EventHeaderCreator
-eventHeaderCreator = EventHeaderCreator("eventHeaderCreator",
-    runNumber = 42,
-    eventNumberOffset = 42,
-    OutputLevel=DEBUG)
+
+eventHeaderCreator = EventHeaderCreator(
+    "eventHeaderCreator", runNumber=42, eventNumberOffset=42, OutputLevel=DEBUG
+)
 
 from Configurables import k4DataSvc
-podioevent  = k4DataSvc("EventDataSvc")
+
+podioevent = k4DataSvc("EventDataSvc")
 
 from Configurables import PodioOutput
+
 out = PodioOutput("out")
 out.filename = "eventHeader.root"
 
 from Configurables import ApplicationMgr
+
 ApplicationMgr(
-    TopAlg = [
-              eventHeaderCreator,
-              out,
-              ],
-    EvtSel = 'NONE',
-    EvtMax   = 2,
-    ExtSvc = [podioevent],
-    StopOnSignal = True)
+    TopAlg=[
+        eventHeaderCreator,
+        out,
+    ],
+    EvtSel="NONE",
+    EvtMax=2,
+    ExtSvc=[podioevent],
+    StopOnSignal=True,
+)

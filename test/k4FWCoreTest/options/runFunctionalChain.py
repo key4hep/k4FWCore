@@ -36,20 +36,25 @@ out = PodioOutput("out")
 out.filename = "functional_chain.root"
 
 producer = ExampleFunctionalProducer("ExampleFunctionalProducer")
-consumer = ExampleFunctionalConsumer("ExampleFunctionalConsumer",
-                                     InputCollection="MCParticles",
-                                     )
-transformer = ExampleFunctionalTransformer("ExampleFunctionalTransformer",
-                                           InputCollection="MCParticles",
-                                           OutputCollection="NewMCParticles")
-new_consumer = ExampleFunctionalConsumer("ExampleFunctionalConsumer2",
-                                         InputCollection="NewMCParticles",
-                                         )
+consumer = ExampleFunctionalConsumer(
+    "ExampleFunctionalConsumer",
+    InputCollection="MCParticles",
+)
+transformer = ExampleFunctionalTransformer(
+    "ExampleFunctionalTransformer",
+    InputCollection="MCParticles",
+    OutputCollection="NewMCParticles",
+)
+new_consumer = ExampleFunctionalConsumer(
+    "ExampleFunctionalConsumer2",
+    InputCollection="NewMCParticles",
+)
 new_consumer.PossibleOffset = 10
 
-ApplicationMgr(TopAlg=[producer, consumer, transformer, new_consumer, out],
-               EvtSel="NONE",
-               EvtMax=10,
-               ExtSvc=[event_data_svc],
-               OutputLevel=INFO,
-               )
+ApplicationMgr(
+    TopAlg=[producer, consumer, transformer, new_consumer, out],
+    EvtSel="NONE",
+    EvtMax=10,
+    ExtSvc=[event_data_svc],
+    OutputLevel=INFO,
+)

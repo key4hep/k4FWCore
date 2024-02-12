@@ -35,9 +35,10 @@ out.filename = "output_k4test_exampledata_producer.root"
 
 producer = ExampleFunctionalProducer("ExampleFunctionalProducer")
 
-ApplicationMgr(TopAlg=[producer, out],
-               EvtSel="NONE",
-               EvtMax=10,
-               ExtSvc=[k4DataSvc("EventDataSvc")],
-               OutputLevel=INFO,
-               )
+ApplicationMgr(
+    TopAlg=[producer, out],
+    EvtSel="NONE",
+    EvtMax=10,
+    ExtSvc=[k4DataSvc("EventDataSvc")],
+    OutputLevel=INFO,
+)
