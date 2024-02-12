@@ -54,7 +54,6 @@ install(TARGETS k4FWCore k4FWCorePlugins
 # Copy python parsing file to genConfDir in Gaudi
 add_custom_command(
         TARGET k4FWCore POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-                ${PROJECT_SOURCE_DIR}/k4FWCore/python/k4FWCore/parseArgs.py
-                ${CMAKE_CURRENT_BINARY_DIR}/genConfDir/k4FWCore/parseArgs.py)
-
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+                ${PROJECT_SOURCE_DIR}/k4FWCore/python/k4FWCore
+                ${CMAKE_CURRENT_BINARY_DIR}/genConfDir/k4FWCore)
