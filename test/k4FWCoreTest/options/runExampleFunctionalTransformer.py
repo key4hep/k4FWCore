@@ -40,13 +40,16 @@ out.filename = "output_k4test_exampledata_transformer.root"
 # The collections that we don't drop will also be present in the output file
 out.outputCommands = ["drop MCParticles"]
 
-transformer = ExampleFunctionalTransformer("ExampleFunctionalTransformer",
-                                           InputCollection="MCParticles",
-                                           OutputCollection="NewMCParticles")
+transformer = ExampleFunctionalTransformer(
+    "ExampleFunctionalTransformer",
+    InputCollection="MCParticles",
+    OutputCollection="NewMCParticles",
+)
 
-ApplicationMgr(TopAlg=[inp, transformer, out],
-               EvtSel="NONE",
-               EvtMax=10,
-               ExtSvc=[k4DataSvc("EventDataSvc")],
-               OutputLevel=INFO,
-               )
+ApplicationMgr(
+    TopAlg=[inp, transformer, out],
+    EvtSel="NONE",
+    EvtMax=10,
+    ExtSvc=[k4DataSvc("EventDataSvc")],
+    OutputLevel=INFO,
+)

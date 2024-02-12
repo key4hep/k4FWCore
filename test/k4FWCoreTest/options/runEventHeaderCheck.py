@@ -30,9 +30,7 @@ podioevent.input = "eventHeader.root"
 inp = PodioInput()
 inp.collections = []
 
-consumer = ExampleEventHeaderConsumer(
-    "EventHeaderCheck", runNumber=42, eventNumberOffset=42
-)
+consumer = ExampleEventHeaderConsumer("EventHeaderCheck", runNumber=42, eventNumberOffset=42)
 
 ApplicationMgr(
     TopAlg=[inp, consumer],

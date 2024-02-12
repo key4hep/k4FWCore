@@ -34,13 +34,15 @@ inp.collections = [
     "MCParticles",
 ]
 
-consumer = ExampleFunctionalConsumer("ExampleFunctionalConsumer",
-                                     InputCollection="MCParticles",
-                                     )
+consumer = ExampleFunctionalConsumer(
+    "ExampleFunctionalConsumer",
+    InputCollection="MCParticles",
+)
 
-ApplicationMgr(TopAlg=[inp, consumer],
-               EvtSel="NONE",
-               EvtMax=10,
-               ExtSvc=[podioevent],
-               OutputLevel=INFO,
-               )
+ApplicationMgr(
+    TopAlg=[inp, consumer],
+    EvtSel="NONE",
+    EvtMax=10,
+    ExtSvc=[podioevent],
+    OutputLevel=INFO,
+)
