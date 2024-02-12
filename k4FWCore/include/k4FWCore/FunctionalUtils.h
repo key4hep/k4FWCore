@@ -17,22 +17,38 @@ namespace k4FWCore {
   namespace details {
 
     // This function will be used to modify std::shared_ptr<podio::CollectionBase> to the actual collection type
-    template <typename T, typename P>
-    const auto& maybeTransformToEDM4hep(const P& arg) {
-      return arg;
-    }
+    template <typename T, typename P> const auto& maybeTransformToEDM4hep(const P& arg) { return arg; }
 
     template <typename T, typename P>
-    requires std::same_as<P, std::shared_ptr<podio::CollectionBase>>
+      requires std::same_as<P, std::shared_ptr<podio::CollectionBase>>
     const auto& maybeTransformToEDM4hep(const P& arg) {
       return static_cast<const T&>(*arg);
     }
+
+    template <typename T> struct is_map_like : std::false_type {};
+
+    template <typename Value> struct is_map_like<std::map<std::string, Value>> : std::true_type {};
+
+    template <typename T> struct ExtractInnerType;
+
+    // Specialization for DataObjectReadHandle with map and shared_ptr
+    template <typename Value>
+    struct ExtractInnerType<DataObjectReadHandle<std::map<std::string, std::shared_ptr<Value>>>> {
+      using type = Value;
+    };
 
     template <typename T>
     std::enable_if_t<std::is_base_of_v<podio::CollectionBase, T>, std::shared_ptr<podio::CollectionBase>> transformType(
         const T& arg) {
       return std::shared_ptr<podio::CollectionBase>(arg);
     }
+
+    // template <typename T>
+    // std::enable_if_t<std::is_base_of_v<podio::CollectionBase, T>, std::map<std::string, std::shared_ptr<T>>>
+    // transformType(const std::map<std::string, std::shared_ptr<T>>& arg) {
+    //   return std::map<std::string, std::shared_ptr<T>>();
+    // }
+
     template <typename T>
     std::enable_if_t<!std::is_base_of_v<podio::CollectionBase, T>, T> transformType(const T& arg) {
       // Default: no transformation
