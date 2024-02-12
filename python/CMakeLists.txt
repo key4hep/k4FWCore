@@ -1,0 +1,6 @@
+install(FILES ${to_install} DESTINATION ${podio_PYTHON_INSTALLDIR})
+
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/k4FWCore
+  DESTINATION python
+  )
+
