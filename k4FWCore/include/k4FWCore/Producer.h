@@ -19,20 +19,9 @@
 #ifndef FWCORE_PRODUCER_H
 #define FWCORE_PRODUCER_H
 
-#include "FunctionalUtils.h"
-#include "Gaudi/Functional/details.h"
-#include "Gaudi/Functional/utilities.h"
-#include <GaudiKernel/CommonMessaging.h>
-#include <GaudiKernel/FunctionalFilterDecision.h>
-
-#include "podio/CollectionBase.h"
-
-#include "k4FWCore/FunctionalUtils.h"
 #include "k4FWCore/Transformer.h"
 
-#include <type_traits>
-#include <utility>
-
+#include <tuple>
 
 
 namespace k4FWCore {

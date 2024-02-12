@@ -28,10 +28,10 @@
 #include <string>
 
 struct ExampleFunctionalTransformer final
-    : k4FWCore::Transformer<  edm4hep::MCParticleCollection(const edm4hep::MCParticleCollection&)> {
+    : k4FWCore::Transformer<edm4hep::MCParticleCollection(const edm4hep::MCParticleCollection&)> {
   ExampleFunctionalTransformer(const std::string& name, ISvcLocator* svcLoc)
-      : Transformer(name, svcLoc, KeyValue("InputCollection", "MCParticles"),
-                    KeyValue("OutputCollection", "NewMCParticles")) {}
+    : Transformer(name, svcLoc, {KeyValues("InputCollection", {"MCParticles"})},
+                  {KeyValues("OutputCollection", {"NewMCParticles"})}) {}
 
   // This is the function that will be called to transform the data
   // Note that the function has to be const, as well as all pointers to collections
@@ -54,8 +54,7 @@ struct ExampleFunctionalTransformer final
 
 private:
   // integer to add to the dummy values written to the edm
-  Gaudi::Property<int> m_offset{this, "Offset", 10,
-      "Integer to add to the dummy values written to the edm"};
+  Gaudi::Property<int> m_offset{this, "Offset", 10, "Integer to add to the dummy values written to the edm"};
 };
 
 DECLARE_COMPONENT(ExampleFunctionalTransformer)
