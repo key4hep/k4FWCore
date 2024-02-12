@@ -36,7 +36,7 @@
 struct ExampleEventHeaderConsumer final
     : k4FWCore::Consumer<void(const edm4hep::EventHeaderCollection&)> {
   ExampleEventHeaderConsumer(const std::string& name, ISvcLocator* svcLoc)
-      : Consumer(name, svcLoc, {KeyValue("EventHeaderName", edm4hep::EventHeaderName)}) {}
+    : Consumer(name, svcLoc, {KeyValues("EventHeaderName", {edm4hep::EventHeaderName})}) {}
 
   void operator()(const edm4hep::EventHeaderCollection& evtHeaderColl) const {
     if (evtHeaderColl.empty()) {

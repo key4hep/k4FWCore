@@ -23,14 +23,13 @@
 #include "edm4hep/SimTrackerHitCollection.h"
 #include "edm4hep/TrackCollection.h"
 
-// #include "k4FWCore/Consumer.h"
-#include "k4FWCore/NewConsumer.h"
+#include "k4FWCore/Consumer.h"
 
 #include <memory>
 #include <string>
 
 struct ExampleFunctionalConsumerRuntimeCollectionsMultiple final
-    : k4FWCore::Consumer<void(const std::map<std::string, std::shared_ptr<podio::CollectionBase>>& particleMap,
+  : k4FWCore::Consumer<void(const std::map<std::string, std::shared_ptr<edm4hep::MCParticleCollection>>& particleMap,
                               const std::map<std::string, std::shared_ptr<podio::CollectionBase>>& trackMap,
                               const edm4hep::SimTrackerHitCollection&                              simTrackerHits)> {
   // The pair in KeyValue can be changed from python and it corresponds
@@ -40,7 +39,7 @@ struct ExampleFunctionalConsumerRuntimeCollectionsMultiple final
     // : Consumer(name, svcLoc, {KeyValue("Particles", ("MCParticles")), KeyValue("Tracks", ("MCParticles")), KeyValue("SimTrackerHits", ("MCParticles"))}) {}
 
   // This is the function that will be called to produce the data
-  void operator()(const std::map<std::string, std::shared_ptr<podio::CollectionBase>>& particleMap,
+  void operator()(const std::map<std::string, std::shared_ptr<edm4hep::MCParticleCollection>>& particleMap,
                   const std::map<std::string, std::shared_ptr<podio::CollectionBase>>& trackMap,
                   const edm4hep::SimTrackerHitCollection&                              simTrackerHits) const override {
     info() << "Received " << particleMap.size() << " particle collections and " << trackMap.size() << " track collections"
