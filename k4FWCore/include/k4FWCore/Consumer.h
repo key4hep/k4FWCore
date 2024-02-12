@@ -19,9 +19,7 @@
 #ifndef FWCORE_CONSUMER_H
 #define FWCORE_CONSUMER_H
 
-#include <GaudiKernel/DataObjectHandle.h>
 #include <GaudiKernel/FunctionalFilterDecision.h>
-#include "FunctionalUtils.h"
 #include "Gaudi/Functional/details.h"
 #include "Gaudi/Functional/utilities.h"
 
@@ -29,7 +27,7 @@
 
 #include "k4FWCore/FunctionalUtils.h"
 
-#include "GaudiKernel/CommonMessaging.h"
+// #include "GaudiKernel/CommonMessaging.h"
 
 #include <memory>
 #include <type_traits>
@@ -70,13 +68,11 @@ namespace k4FWCore {
                 this,
                 std::get<I>(inputs).first,
                 {DataObjID{std::get<I>(inputs).second[0]}},
-                [this, inputs](Gaudi::Details::PropertyBase&) {
+                [this](Gaudi::Details::PropertyBase&) {
                   if constexpr (!is_map_like<In>::value) {
-                    Gaudi::Algorithm::info() << "Inside the lambda for " << std::get<I>(inputs).first << endmsg;
                     auto& handle  = std::get<I>(m_inputs);
                     auto& ins     = m_inputLocations[I];
                     handle        = InputHandle_t<decltype(transformType(std::declval<In>()))>(ins.value()[0], this);
-                    Gaudi::Algorithm::info() << "Input location (inside lambda): " << ins << endmsg;
                   }
                 },
                 Gaudi::Details::Property::ImmediatelyInvokeHandler{true}
@@ -86,10 +82,6 @@ namespace k4FWCore {
             m_inputs{InputHandle_t<decltype(transformType(std::declval<In>()))>(std::get<I>(inputs).first, this)...}
 
       {
-        Gaudi::Algorithm::info() << "Creating Consumer with " << sizeof...(In) << " inputs" << endmsg;
-        for (auto& val : std::get<0>(inputs).second) {
-          Gaudi::Algorithm::info() << "Input location: " << val << endmsg;
-        }
         // if constexpr (std::is_same_v<In, std::map<std::string, std::shared_ptr<podio::CollectionBase>>>) {
         //   // for (auto& value : std::get<I...>(inputs).second) {
         //   //   Gaudi::Algorithm::info() << "Adding extra input " << value << endmsg;
@@ -116,8 +108,6 @@ namespace k4FWCore {
         if constexpr (Index < sizeof...(Handles)) {
           if constexpr (is_map_like<std::tuple_element_t<Index, std::tuple<In...>>>::value) {
             
-            Gaudi::Algorithm::info() << "Treating as a map: " << std::get<Index>(handles).objKey() << endmsg;
-              
             using EDM4hepType = typename ExtractInnerType<typename std::decay_t<decltype(std::get<Index>(handles))>>::type;
             auto map = std::map<std::string, std::shared_ptr<EDM4hepType>>();
 
@@ -150,9 +140,6 @@ namespace k4FWCore {
 
       // derived classes are NOT allowed to implement execute ...
       StatusCode execute(const EventContext& ctx) const override final {
-        for (auto& prop : m_inputLocations) {
-          Gaudi::Algorithm::info() << "Input location: " << prop << endmsg;
-        }
         try {
           transformAndApplyAlgoAtIndex<0>(this->m_inputs);
           filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs);
