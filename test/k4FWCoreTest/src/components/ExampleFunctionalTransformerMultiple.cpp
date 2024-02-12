@@ -55,10 +55,10 @@ struct ExampleFunctionalTransformerMultiple final
   ExampleFunctionalTransformerMultiple(const std::string& name, ISvcLocator* svcLoc)
       : MultiTransformer(
             name, svcLoc,
-            {KeyValue("InputCollectionFloat", "VectorFloat"), KeyValue("InputCollectionParticles", "MCParticles1"),
-             KeyValue("InputCollectionSimTrackerHits", "SimTrackerHits"),
-             KeyValue("InputCollectionTrackerHits", "TrackerHits"), KeyValue("InputCollectionTracks", "Tracks")},
-            {KeyValue("OutputCollectionCounter", "Counter"), KeyValue("OutputCollectionParticles", "NewMCParticles")}) {
+            {KeyValues("InputCollectionFloat", {"VectorFloat"}), KeyValues("InputCollectionParticles", {"MCParticles1"}),
+             KeyValues("InputCollectionSimTrackerHits", {"SimTrackerHits"}),
+             KeyValues("InputCollectionTrackerHits", {"TrackerHits"}), KeyValues("InputCollectionTracks", {"Tracks"})},
+            {KeyValues("OutputCollectionCounter", {"Counter"}), KeyValues("OutputCollectionParticles", {"NewMCParticles"})}) {
   }
 
   // This is the function that will be called to transform the data
