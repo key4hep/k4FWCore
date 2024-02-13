@@ -44,10 +44,11 @@ struct ExampleFunctionalProducerMultiple final
   ExampleFunctionalProducerMultiple(const std::string& name, ISvcLocator* svcLoc)
       : Producer(
             name, svcLoc,
-            {KeyValue("OutputCollectionFloat", "VectorFloat"), KeyValue("OutputCollectionParticles1", "MCParticles1"),
-             KeyValue("OutputCollectionParticles2", "MCParticles2"),
-             KeyValue("OutputCollectionSimTrackerHits", "SimTrackerHits"),
-             KeyValue("OutputCollectionTrackerHits", "TrackerHits"), KeyValue("OutputCollectionTracks", "Tracks")}) {}
+            {},
+            {KeyValues("OutputCollectionFloat", {"VectorFloat"}), KeyValues("OutputCollectionParticles1", {"MCParticles1"}),
+             KeyValues("OutputCollectionParticles2", {"MCParticles2"}),
+             KeyValues("OutputCollectionSimTrackerHits", {"SimTrackerHits"}),
+             KeyValues("OutputCollectionTrackerHits", {"TrackerHits"}), KeyValues("OutputCollectionTracks", {"Tracks"})}) {}
 
   // This is the function that will be called to produce the data
   std::tuple<Float, Particle, Particle, SimTrackerHit, TrackerHit, Track> operator()() const override {
