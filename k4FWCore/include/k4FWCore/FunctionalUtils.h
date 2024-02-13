@@ -2,13 +2,13 @@
 
 #include "Gaudi/Functional/details.h"
 #include "Gaudi/Functional/utilities.h"
-#include "GaudiKernel/CommonMessaging.h"
 
 #include "podio/CollectionBase.h"
 
 #include <stdexcept>
 #include <tuple>
 #include <type_traits>
+#include <unordered_map>
 
 namespace k4FWCore {
 
@@ -29,38 +29,27 @@ namespace k4FWCore {
 
     template <typename Value> struct is_map_like<std::map<std::string, Value>> : std::true_type {};
 
-    static std::atomic<int> i = 0;
+    inline std::string hash_string(const std::string& str) {
+      std::string result = "_";
+      for (auto& c : std::to_string(std::hash<std::string>{}(str))) {
+        result += 'a' + (c - '0');
+      }
+      return result;
+    }
 
     template <typename T, typename K>
     std::string getName(const K& first, bool pair=false) {
-      // Gaudi::Algorithm::info() << "T is " << typeid(T).name() << endmsg;
-      // Gaudi::Algorithm::info() << "getName " << first.first << endmsg;
       if constexpr (is_map_like<T>::value) {
         if (pair) {
-          // Gaudi::Algorithm::info() << "returning " << "_" + std::to_string(i) << endmsg;
-          return "_" + std::to_string(i++);
+          return hash_string(first.first);
         }
-        // Gaudi::Algorithm::info() << "returning " << first.first << endmsg;
         return first.first;
       }
       if (pair) {
-        // Gaudi::Algorithm::info() << "returning " << first.first << endmsg;
         return first.first;
       }
-      // Gaudi::Algorithm::info() << "returning " << "_" + std::to_string(i) << endmsg;
-      return "_" + std::to_string(i++);
+      return hash_string(first.first);
     }
-
-
-    template <typename... Args>
-    struct CountType {
-      static constexpr size_t value = 0;
-    };
-
-    template <typename First, typename... Rest>
-    struct CountType<First, Rest...> {
-      static constexpr size_t value = (is_map_like<First>::value ? 1 : 0) + CountType<Rest...>::value;
-    };
 
     template <typename T> struct ExtractInnerType;
 
