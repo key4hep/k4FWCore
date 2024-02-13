@@ -19,7 +19,33 @@
 #
 import os
 from io import TextIOWrapper
-from typing import Union
+from typing import Union, Optional
+import importlib.util
+import importlib.abc
+from importlib.machinery import SourceFileLoader, ModuleSpec
+
+
+def import_from(filename: os.PathLike, module_name: Optional[str] = None) -> ModuleSpec:
+    """Import a module by filename optionally giving it a module name
+
+    The module name is what will be visible in error messages, e.g. when trying
+    to get an attribute from the imported module
+
+    Args:
+        filename: file to load
+        module_name: name of the module that should be used internally. If not
+            provided this will be computed from the filename
+
+    Return:
+        The module imported from the provided file
+    """
+    filename = os.path.abspath(filename)
+    module_name = module_name or os.path.basename(filename).replace(".", "_")
+    loader = SourceFileLoader(module_name, filename)
+    spec = importlib.util.spec_from_loader(loader.name, loader)
+    module = importlib.util.module_from_spec(spec)
+    loader.exec_module(module)
+    return module
 
 
 def load_file(opt_file: Union[TextIOWrapper, os.PathLike]) -> None:
