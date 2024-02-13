@@ -25,37 +25,37 @@ from k4FWCore import ApplicationMgr
 from Configurables import EventDataSvc
 
 producer0 = ExampleFunctionalProducerMultiple("Producer0",
-                                              OutputCollectionFloat="VectorFloat0",
-                                              OutputCollectionParticles1="MCParticles0",
-                                              OutputCollectionParticles2="MCParticles1",
-                                              OutputCollectionSimTrackerHits="SimTrackerHits0",
-                                              OutputCollectionTrackerHits="TrackerHits0",
-                                              OutputCollectionTracks="Tracks0",
+                                              OutputCollectionFloat=["VectorFloat0"],
+                                              OutputCollectionParticles1=["MCParticles0"],
+                                              OutputCollectionParticles2=["MCParticles1"],
+                                              OutputCollectionSimTrackerHits=["SimTrackerHits0"],
+                                              OutputCollectionTrackerHits=["TrackerHits0"],
+                                              OutputCollectionTracks=["Tracks0"],
                                               ExampleInt=5
                                               )
 producer1 = ExampleFunctionalProducerMultiple("Producer1",
-                                              OutputCollectionFloat="VectorFloat1",
-                                              OutputCollectionParticles1="MCParticles2",
-                                              OutputCollectionParticles2="MCParticles3",
-                                              OutputCollectionSimTrackerHits="SimTrackerHits1",
-                                              OutputCollectionTrackerHits="TrackerHits1",
-                                              OutputCollectionTracks="Tracks1",
+                                              OutputCollectionFloat=["VectorFloat1"],
+                                              OutputCollectionParticles1=["MCParticles2"],
+                                              OutputCollectionParticles2=["MCParticles3"],
+                                              OutputCollectionSimTrackerHits=["SimTrackerHits1"],
+                                              OutputCollectionTrackerHits=["TrackerHits1"],
+                                              OutputCollectionTracks=["Tracks1"],
                                               ExampleInt=5
                                               )
 producer2 = ExampleFunctionalProducerMultiple("Producer2",
-                                              OutputCollectionFloat="VectorFloat2",
-                                              OutputCollectionParticles1="MCParticles4",
-                                              OutputCollectionParticles2="MCParticles5",
-                                              OutputCollectionSimTrackerHits="SimTrackerHits2",
-                                              OutputCollectionTrackerHits="TrackerHits2",
-                                              OutputCollectionTracks="Tracks2",
+                                              OutputCollectionFloat=["VectorFloat2"],
+                                              OutputCollectionParticles1=["MCParticles4"],
+                                              OutputCollectionParticles2=["MCParticles5"],
+                                              OutputCollectionSimTrackerHits=["SimTrackerHits2"],
+                                              OutputCollectionTrackerHits=["TrackerHits2"],
+                                              OutputCollectionTracks=["Tracks2"],
                                               ExampleInt=5
                                               )
 
 consumer = ExampleFunctionalConsumerRuntimeCollectionsMultiple("Consumer",
                                                                Particles=["MCParticles0", "MCParticles1", "MCParticles2", "MCParticles3", "MCParticles4"],
                                                                Tracks=["Tracks0", "Tracks1", "Tracks2"],
-                                                               SimTrackerHits=["SimTrackerHits0"],
+                                                               SimTrackerHits="SimTrackerHits0",
                                                                Offset=0,
                                                                )
 

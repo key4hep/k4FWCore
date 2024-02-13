@@ -52,6 +52,7 @@ namespace k4FWCore {
       // Gaudi::Property<std::vector<DataObjID>>                                      m_inputLocations;
       // std::map<std::string, Gaudi::Property<std::vector<DataObjID>>>                                      m_inputLocations;
       std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)> m_inputLocations{};
+      std::array<Gaudi::Property<DataObjID>, sizeof...(In)> m_inputLocationsPair{};
       mutable std::map<std::string, std::vector<std::string>>            m_inputLocationsMap;
 
       using base_class = Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>;
@@ -60,28 +61,33 @@ namespace k4FWCore {
       using KeyValues = typename base_class::KeyValues;
       using InKeys    = Gaudi::Functional::details::RepeatValues_<KeyValues, sizeof...(In)>;
 
-      // Consumer(std::string name, ISvcLocator* locator, const std::vector<KeyValues>& inputs)
       template <typename IArgs, std::size_t... I>
       Consumer(std::string name, ISvcLocator* locator, const IArgs& inputs, std::index_sequence<I...>)
-          : base_class(std::move(name), locator),
+        : base_class(std::move(name), locator),
             m_inputLocations{Gaudi::Property<std::vector<DataObjID>>{
                 this,
-                std::get<I>(inputs).first,
-                {DataObjID{std::get<I>(inputs).second[0]}},
-                [this](Gaudi::Details::PropertyBase&) {
-                  if constexpr (!is_map_like<In>::value) {
-                    auto& handle  = std::get<I>(m_inputs);
-                    auto& ins     = m_inputLocations[I];
-                    handle        = InputHandle_t<decltype(transformType(std::declval<In>()))>(ins.value()[0], this);
-                  }
-                },
-                Gaudi::Details::Property::ImmediatelyInvokeHandler{true}
+                getName<In>(std::get<I>(inputs),false),
+                {DataObjID{std::get<I>(inputs).second[0]}}
             }
         ...},
-            // m_inputs{std::tuple<InputHandle_t<decltype(transformType<In>...)>>(InputHandle_t<decltype(transformType<In>...)>(std::get<I>(inputs).first, this)...)}
+          m_inputLocationsPair{Gaudi::Property<DataObjID>{
+              this,
+              getName<In>(std::get<I>(inputs),true),
+              DataObjID{std::get<I>(inputs).second[0]},
+              [this](Gaudi::Details::PropertyBase&) {
+                if constexpr (!is_map_like<In>::value) {
+                  auto& handle  = std::get<I>(m_inputs);
+                  auto& ins     = m_inputLocationsPair[I];
+                  handle        = InputHandle_t<decltype(transformType(std::declval<In>()))>(ins.value(), this);
+                }
+              },
+              Gaudi::Details::Property::ImmediatelyInvokeHandler{true}
+          }
+        ...},
             m_inputs{InputHandle_t<decltype(transformType(std::declval<In>()))>(std::get<I>(inputs).first, this)...}
 
       {
+
         // if constexpr (std::is_same_v<In, std::map<std::string, std::shared_ptr<podio::CollectionBase>>>) {
         //   // for (auto& value : std::get<I...>(inputs).second) {
         //   //   Gaudi::Algorithm::info() << "Adding extra input " << value << endmsg;
@@ -95,6 +101,8 @@ namespace k4FWCore {
       }
 
       constexpr static std::size_t N_in = sizeof...(In);
+      constexpr static std::size_t N_inMap = CountType<In...>::value;
+      constexpr static std::size_t N_inPair = N_in - N_inMap;
 
       Consumer(std::string name, ISvcLocator* locator,
                Gaudi::Functional::details::RepeatValues_<KeyValues, N_in> const& inputs)
