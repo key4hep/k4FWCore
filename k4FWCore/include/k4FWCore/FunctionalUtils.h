@@ -29,6 +29,39 @@ namespace k4FWCore {
 
     template <typename Value> struct is_map_like<std::map<std::string, Value>> : std::true_type {};
 
+    static std::atomic<int> i = 0;
+
+    template <typename T, typename K>
+    std::string getName(const K& first, bool pair=false) {
+      // Gaudi::Algorithm::info() << "T is " << typeid(T).name() << endmsg;
+      // Gaudi::Algorithm::info() << "getName " << first.first << endmsg;
+      if constexpr (is_map_like<T>::value) {
+        if (pair) {
+          // Gaudi::Algorithm::info() << "returning " << "_" + std::to_string(i) << endmsg;
+          return "_" + std::to_string(i++);
+        }
+        // Gaudi::Algorithm::info() << "returning " << first.first << endmsg;
+        return first.first;
+      }
+      if (pair) {
+        // Gaudi::Algorithm::info() << "returning " << first.first << endmsg;
+        return first.first;
+      }
+      // Gaudi::Algorithm::info() << "returning " << "_" + std::to_string(i) << endmsg;
+      return "_" + std::to_string(i++);
+    }
+
+
+    template <typename... Args>
+    struct CountType {
+      static constexpr size_t value = 0;
+    };
+
+    template <typename First, typename... Rest>
+    struct CountType<First, Rest...> {
+      static constexpr size_t value = (is_map_like<First>::value ? 1 : 0) + CountType<Rest...>::value;
+    };
+
     template <typename T> struct ExtractInnerType;
 
     // Specialization for DataObjectReadHandle with map and shared_ptr
