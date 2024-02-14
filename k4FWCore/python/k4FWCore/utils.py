@@ -57,6 +57,9 @@ def import_from(
 
     """
     filename = os.path.abspath(filename)
+    if not os.path.exists(filename):
+        raise FileNotFoundError(f"No such file: '{filename}'")
+
     module_name = module_name or os.path.basename(filename).replace(".", "_")
     loader = SourceFileLoader(module_name, filename)
     spec = importlib.util.spec_from_loader(loader.name, loader)
