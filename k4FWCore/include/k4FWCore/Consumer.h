@@ -45,18 +45,15 @@ namespace k4FWCore {
       template <typename T>
       using InputHandle_t = Gaudi::Functional::details::InputHandle_t<Traits_, std::remove_pointer_t<T>>;
 
-      std::tuple<InputHandle_t<decltype(transformType(std::declval<In>()))>...>
-          m_inputs;
+      std::tuple<InputHandle_t<decltype(transformType(std::declval<In>()))>...>                 m_inputs;
       std::map<std::string, std::vector<InputHandle_t<std::shared_ptr<podio::CollectionBase>>>> m_extraInputs;
-      std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)> m_inputLocations{};
-      std::array<Gaudi::Property<DataObjID>, sizeof...(In)>              m_inputLocationsPair{};
-      mutable std::map<std::string, std::vector<std::string>>            m_inputLocationsMap;
+      std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)>                        m_inputLocations{};
+      std::array<Gaudi::Property<DataObjID>, sizeof...(In)>                                     m_inputLocationsPair{};
+      mutable std::map<std::string, std::vector<std::string>>                                   m_inputLocationsMap;
 
       using base_class = Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>;
 
-      using KeyValue  = typename base_class::KeyValue;
       using KeyValues = typename base_class::KeyValues;
-      using InKeys    = Gaudi::Functional::details::RepeatValues_<KeyValues, sizeof...(In)>;
 
       template <typename IArgs, std::size_t... I>
       Consumer(std::string name, ISvcLocator* locator, const IArgs& inputs, std::index_sequence<I...>)
@@ -69,7 +66,7 @@ namespace k4FWCore {
                   if constexpr (!is_map_like<In>::value) {
                     auto& handle = std::get<I>(m_inputs);
                     auto& ins    = m_inputLocationsPair[I];
-                    handle       = InputHandle_t<decltype(transformType(std::declval<In>()))>(ins.value(), this);
+                    handle       = {ins.value(), this};
                   }
                 },
                 Gaudi::Details::Property::ImmediatelyInvokeHandler{true}}...},
@@ -92,11 +89,8 @@ namespace k4FWCore {
                Gaudi::Functional::details::RepeatValues_<KeyValues, sizeof...(In)> const& inputs)
           : Consumer(std::move(name), locator, inputs, std::index_sequence_for<In...>{}) {}
 
-      // When reading multiple collections we assume that the variable used is a
-      // std::map<std::string, std::shared_ptr<podio::CollectionBase>>
-      // and read the collections in a space separated string
       template <size_t Index, typename... Handles>
-      void transformAndApplyAlgoAtIndex(const std::tuple<Handles...>& handles) const {
+      void readMapInputs(const std::tuple<Handles...>& handles) const {
         if constexpr (Index < sizeof...(Handles)) {
           if constexpr (is_map_like<std::tuple_element_t<Index, std::tuple<In...>>>::value) {
             using EDM4hepType =
@@ -126,14 +120,14 @@ namespace k4FWCore {
           }
 
           // Recursive call for the next index
-          transformAndApplyAlgoAtIndex<Index + 1>(handles);
+          readMapInputs<Index + 1>(handles);
         }
       }
 
       // derived classes are NOT allowed to implement execute ...
       StatusCode execute(const EventContext& ctx) const override final {
         try {
-          transformAndApplyAlgoAtIndex<0>(this->m_inputs);
+          readMapInputs<0>(this->m_inputs);
           filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs);
           return Gaudi::Functional::FilterDecision::PASSED;
         } catch (GaudiException& e) {
