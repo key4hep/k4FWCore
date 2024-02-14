@@ -30,8 +30,8 @@ svc.input = 'output_k4test_exampledata_producer.root'
 svc.output = 'functional_transformer.root'
 
 transformer = ExampleFunctionalTransformer("Transformer",
-                                           InputCollection=["MCParticles"],
-                                           OutputCollection=["NewMCParticles"])
+                                           InputCollection="MCParticles",
+                                           OutputCollection="NewMCParticles")
 
 mgr = ApplicationMgr(TopAlg=[transformer],
                EvtSel="NONE",
