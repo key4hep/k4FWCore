@@ -26,7 +26,7 @@ from importlib.machinery import SourceFileLoader
 
 
 def import_from(
-    filename: os.PathLike,
+    filename: Union[str, os.PathLike],
     module_name: Optional[str] = None,
     global_vars: Optional[Dict[str, Any]] = None,
 ) -> Any:
@@ -42,11 +42,9 @@ def import_from(
     Args:
         filename (str): The path to the file from which to import the module.
         module_name (Optional[str]): The name to assign to the module. Defaults
-                                     to None, in which case the filename is used
-                                     as the module name.
+            to None, in which case the filename is used as the module name.
         global_vars (Optional[Dict[str, Any]]): A dictionary of global variables
-                                                to inject into the module's
-                                                namespace. Defaults to None.
+            to inject into the module's namespace. Defaults to None.
 
     Returns:
         Any: The imported module with the specified modifications.
