@@ -21,24 +21,27 @@
 
 #include "edm4hep/MCParticleCollection.h"
 
-#include "k4FWCore/Producer.h"
+#include "k4FWCore/Transformer.h"
 
 #include <string>
 
-struct ExampleFunctionalProducerRuntimeCollections final : k4FWCore::Producer<std::map<std::string, std::shared_ptr<edm4hep::MCParticleCollection>>()> {
+using mapType = std::map<std::string, std::shared_ptr<edm4hep::MCParticleCollection>>;
+
+struct ExampleFunctionalTransformerRuntimeCollections final : k4FWCore::Transformer<mapType(const mapType& input)> {
   // The pair in KeyValue can be changed from python and it corresponds
   // to the name of the output collection
-  ExampleFunctionalProducerRuntimeCollections(const std::string& name, ISvcLocator* svcLoc)
-    : Producer(name, svcLoc, {}, {KeyValues("OutputCollections", {"MCParticles"})}) {}
+  ExampleFunctionalTransformerRuntimeCollections(const std::string& name, ISvcLocator* svcLoc)
+    : Transformer(name, svcLoc, {KeyValues("InputCollections", {"MCParticles"})}, {KeyValues("OutputCollections", {"MCParticles"})}) {}
 
   // This is the function that will be called to produce the data
-  std::map<std::string, std::shared_ptr<edm4hep::MCParticleCollection>> operator()() const override {
+  mapType operator()(const mapType& input) const override {
     std::map<std::string, std::shared_ptr<edm4hep::MCParticleCollection>> m_outputCollections;
-    for (int i = 0; i < m_numberOfCollections; ++i) {
-      std::string name = "MCParticles" + std::to_string(i);
+    for (int i = 0; i < input.size(); ++i) {
+      std::string name = "NewMCParticles" + std::to_string(i);
+      auto old_coll = input.at("MCParticles" + std::to_string(i));
       auto coll = std::make_shared<edm4hep::MCParticleCollection>();
-      coll->create(1, 2, 3, 4.f, 5.f, 6.f);
-      coll->create(2, 3, 4, 5.f, 6.f, 7.f);
+      coll->push_back(old_coll->at(0).clone());
+      coll->push_back(old_coll->at(1).clone());
       m_outputCollections[name] = coll;
     }
     return m_outputCollections;
@@ -51,4 +54,4 @@ private:
   Gaudi::Property<int> m_numberOfCollections{this, "NumberOfCollections", 3, "Example int that can be used in the algorithm"};
 };
 
-DECLARE_COMPONENT(ExampleFunctionalProducerRuntimeCollections)
+DECLARE_COMPONENT(ExampleFunctionalTransformerRuntimeCollections)

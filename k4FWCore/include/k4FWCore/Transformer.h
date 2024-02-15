@@ -47,53 +47,47 @@ namespace k4FWCore {
       template <typename T>
       using InputHandle_t = Gaudi::Functional::details::InputHandle_t<Traits_, std::remove_pointer_t<T>>;
       template <typename T>
-      using OutputHandle_t = Gaudi::Functional::details::InputHandle_t<Traits_, std::remove_pointer_t<T>>;
+      using OutputHandle_t = Gaudi::Functional::details::OutputHandle_t<Traits_, std::remove_pointer_t<T>>;
 
-      std::tuple<InputHandle_t<decltype(transformType(std::declval<In>()))>...>
-          m_inputs;  //   and make the handles properties instead...
-      std::tuple<OutputHandle_t<decltype(transformType(std::declval<Out>()))>>
-          m_outputs;  //   and make the handles properties instead...
+      std::tuple<InputHandle_t<decltype(transformType(std::declval<In>()))>...>                  m_inputs;
+      std::tuple<OutputHandle_t<decltype(transformType(std::declval<Out>()))>>                   m_outputs;
       std::map<std::string, std::vector<InputHandle_t<std::shared_ptr<podio::CollectionBase>>>>  m_extraInputs;
       std::map<std::string, std::vector<OutputHandle_t<std::shared_ptr<podio::CollectionBase>>>> m_extraOutputs;
-      // Gaudi::Property<std::vector<DataObjID>>                                      m_inputLocations;
-      // std::map<std::string, Gaudi::Property<std::vector<DataObjID>>>                                      m_inputLocations;
-      std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)> m_inputLocations{};
-      mutable std::map<std::string, std::vector<std::string>>            m_inputLocationsMap;
-      std::array<Gaudi::Property<std::vector<DataObjID>>, 1> m_outputLocations{};
-      mutable std::map<std::string, std::vector<std::string>>            m_outputLocationsMap;
+      std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)>                         m_inputLocations{};
+      std::array<Gaudi::Property<DataObjID>, sizeof...(In)>                                      m_inputLocationsPair{};
+      mutable std::map<std::string, std::vector<std::string>>                                    m_inputLocationsMap;
+      std::array<Gaudi::Property<std::vector<DataObjID>>, 1>                                     m_outputLocations{};
+      std::array<Gaudi::Property<DataObjID>, 1>               m_outputLocationsPair{};
 
       using base_class = Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>;
 
-      using KeyValue  = typename base_class::KeyValue;
       using KeyValues = typename base_class::KeyValues;
-      using InKeys    = Gaudi::Functional::details::RepeatValues_<KeyValues, sizeof...(In)>;
-      using OutKeys   = Gaudi::Functional::details::RepeatValues_<KeyValues, 1>;
 
       template <typename IArgs, typename OArgs, std::size_t... I, std::size_t... J>
       Transformer(std::string name, ISvcLocator* locator, const IArgs& inputs, std::index_sequence<I...>,
-                       const OArgs& outputs, std::index_sequence<J...>)
+                  const OArgs& outputs, std::index_sequence<J...>)
           : base_class(std::move(name), locator),
             m_inputLocations{Gaudi::Property<std::vector<DataObjID>>{
-                this,
-                std::get<I>(inputs).first,
-                {DataObjID{std::get<I>(inputs).second[0]}},
+                this, getName<In>(std::get<I>(inputs), false), {DataObjID{std::get<I>(inputs).second[0]}}}...},
+            m_inputLocationsPair{Gaudi::Property<DataObjID>{
+                this, getName<In>(std::get<I>(inputs), true), DataObjID{std::get<I>(inputs).second[0]},
                 [this](Gaudi::Details::PropertyBase&) {
                   if constexpr (!is_map_like<In>::value) {
                     auto& handle = std::get<I>(m_inputs);
-                    auto& ins    = m_inputLocations[I];
-                    handle       = InputHandle_t<decltype(transformType(std::declval<In>()))>(ins.value()[0], this);
+                    auto& ins    = m_inputLocationsPair[I];
+                    handle       = {ins.value(), this};
                   }
                 },
                 Gaudi::Details::Property::ImmediatelyInvokeHandler{true}}...},
             m_outputLocations{Gaudi::Property<std::vector<DataObjID>>{
-                this,
-                std::get<J>(outputs).first,
-                {DataObjID{std::get<J>(outputs).second[0]}},
+                this, getName<Out>(std::get<J>(outputs), false), {DataObjID{std::get<J>(outputs).second[0]}}}...},
+            m_outputLocationsPair{Gaudi::Property<DataObjID>{
+                this, getName<Out>(std::get<J>(outputs), true), DataObjID{std::get<J>(outputs).second[0]},
                 [this](Gaudi::Details::PropertyBase&) {
                   if constexpr (!is_map_like<Out>::value) {
                     auto& handle = std::get<J>(m_outputs);
-                    auto& ins    = m_outputLocations[J];
-                    handle       = OutputHandle_t<decltype(transformType(std::declval<Out>()))>(ins.value()[0], this);
+                    auto& ins    = m_outputLocationsPair[J];
+                    handle       = {ins.value(), this};
                   }
                 },
                 Gaudi::Details::Property::ImmediatelyInvokeHandler{true}}...},
@@ -118,16 +112,12 @@ namespace k4FWCore {
       constexpr static std::size_t N_out = 1;
 
       Transformer(std::string name, ISvcLocator* locator,
-                       Gaudi::Functional::details::RepeatValues_<KeyValues, N_in> const&  inputs,
-                       Gaudi::Functional::details::RepeatValues_<KeyValues, N_out> const& outputs)
+                  Gaudi::Functional::details::RepeatValues_<KeyValues, N_in> const&  inputs,
+                  Gaudi::Functional::details::RepeatValues_<KeyValues, N_out> const& outputs)
           : Transformer(std::move(name), locator, inputs, std::index_sequence_for<In...>{}, outputs,
-                             std::index_sequence_for<Out>{}) {}
+                        std::index_sequence_for<Out>{}) {}
 
-      // When reading multiple collections we assume that the variable used is a
-      // std::map<std::string, std::shared_ptr<podio::CollectionBase>>
-      // and read the collections in a space separated string
-      template <size_t Index, typename... Handles>
-      void transformAndApplyAlgoAtIndex(const std::tuple<Handles...>& handles) const {
+      template <size_t Index, typename... Handles> void readMapInputs(const std::tuple<Handles...>& handles) const {
         if constexpr (Index < sizeof...(Handles)) {
           if constexpr (is_map_like<std::tuple_element_t<Index, std::tuple<In...>>>::value) {
             using EDM4hepType =
@@ -157,22 +147,59 @@ namespace k4FWCore {
           }
 
           // Recursive call for the next index
-          transformAndApplyAlgoAtIndex<Index + 1>(handles);
+          readMapInputs<Index + 1>(handles);
+        }
+      }
+
+      template <size_t Index, typename... Handles> void putMapInputs(const std::tuple<Handles...>& handles) const {
+        if constexpr (Index < sizeof...(Handles)) {
+          if constexpr (is_map_like<std::tuple_element_t<Index, std::tuple<In...>>>::value) {
+            using EDM4hepType =
+                typename ExtractInnerType<typename std::decay_t<decltype(std::get<Index>(handles))>>::type;
+            auto map = std::map<std::string, std::shared_ptr<EDM4hepType>>();
+
+            // To be locked
+            if (!m_inputLocationsMap.contains(std::get<Index>(handles).objKey())) {
+              auto vec = std::vector<std::string>();
+              vec.reserve(m_inputLocations[Index].value().size());
+              for (auto& val : m_inputLocations[Index].value()) {
+                vec.push_back(val.key());
+              }
+              m_inputLocationsMap[std::get<Index>(handles).objKey()] = vec;
+            }
+
+            for (auto& value : m_inputLocationsMap.at(std::get<Index>(handles).objKey())) {
+              DataObject* p;
+              auto        sc = this->evtSvc()->retrieveObject(value, p);
+              if (!sc.isSuccess()) {
+                throw GaudiException("Failed to retrieve object " + value, "Transformer", StatusCode::FAILURE);
+              }
+              const auto collection = dynamic_cast<AnyDataWrapper<std::shared_ptr<podio::CollectionBase>>*>(p);
+              map[value]            = std::dynamic_pointer_cast<EDM4hepType>(collection->getData());
+            }
+            std::get<Index>(handles).put(std::move(map));
+          }
+
+          // Recursive call for the next index
+          readMapInputs<Index + 1>(handles);
         }
       }
 
       // derived classes are NOT allowed to implement execute ...
       StatusCode execute(const EventContext& ctx) const override final {
         try {
-          transformAndApplyAlgoAtIndex<0>(this->m_inputs);
-          if constexpr (sizeof...(In) == 0) {
-            Gaudi::Functional::details::put(std::get<0>(this->m_outputs), ptrOrCast((*this)()));
-          } else if constexpr (std::tuple_size_v<Gaudi::Functional::details::filter_evtcontext<In...>> == 0) {
-            Gaudi::Functional::details::put(std::get<0>(this->m_outputs), (*this)(ctx));
+          readMapInputs<0>(this->m_inputs);
+          if constexpr (is_map_like<Out>::value) {
+            for (auto [key, val] : filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs)) {
+              auto        shared = std::dynamic_pointer_cast<podio::CollectionBase>(val);
+              auto        w      = new AnyDataWrapper<std::shared_ptr<podio::CollectionBase>>(std::move(shared));
+              DataObject* p      = w;
+              auto        sc     = this->evtSvc()->registerObject(key, p);
+            }
           } else {
-            Gaudi::Functional::details::put(std::get<0>(this->m_outputs),
-                ptrOrCast(std::move(filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs)))
-                                                );
+            Gaudi::Functional::details::put(
+                std::get<0>(this->m_outputs),
+                ptrOrCast(std::move(filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs))));
           }
           return Gaudi::Functional::FilterDecision::PASSED;
         } catch (GaudiException& e) {
@@ -185,11 +212,6 @@ namespace k4FWCore {
       virtual Out operator()(const In&...) const = 0;
     };
 
-
-
-
-
-
     template <typename Signature, typename Traits_> struct MultiTransformer;
 
     template <typename... Out, typename... In, typename Traits_>
@@ -200,57 +222,50 @@ namespace k4FWCore {
       template <typename T>
       using InputHandle_t = Gaudi::Functional::details::InputHandle_t<Traits_, std::remove_pointer_t<T>>;
       template <typename T>
-      using OutputHandle_t = Gaudi::Functional::details::InputHandle_t<Traits_, std::remove_pointer_t<T>>;
+      using OutputHandle_t = Gaudi::Functional::details::OutputHandle_t<Traits_, std::remove_pointer_t<T>>;
 
-      std::tuple<InputHandle_t<decltype(transformType(std::declval<In>()))>...>
-          m_inputs;  //   and make the handles properties instead...
-      std::tuple<OutputHandle_t<decltype(transformType(std::declval<Out>()))>...>
-          m_outputs;  //   and make the handles properties instead...
+      std::tuple<InputHandle_t<decltype(transformType(std::declval<In>()))>...>                  m_inputs;
+      std::tuple<OutputHandle_t<decltype(transformType(std::declval<Out>()))>...>                m_outputs;
       std::map<std::string, std::vector<InputHandle_t<std::shared_ptr<podio::CollectionBase>>>>  m_extraInputs;
       std::map<std::string, std::vector<OutputHandle_t<std::shared_ptr<podio::CollectionBase>>>> m_extraOutputs;
-      // Gaudi::Property<std::vector<DataObjID>>                                      m_inputLocations;
-      // std::map<std::string, Gaudi::Property<std::vector<DataObjID>>>                                      m_inputLocations;
-      std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)> m_inputLocations{};
-      mutable std::map<std::string, std::vector<std::string>>            m_inputLocationsMap;
-      std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(Out)> m_outputLocations{};
-      mutable std::map<std::string, std::vector<std::string>>            m_outputLocationsMap;
+      std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)>                         m_inputLocations{};
+      std::array<Gaudi::Property<DataObjID>, sizeof...(In)>                                      m_inputLocationsPair{};
+      mutable std::map<std::string, std::vector<std::string>>                                    m_inputLocationsMap;
+      std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(Out)>                        m_outputLocations{};
+      std::array<Gaudi::Property<DataObjID>, sizeof...(Out)>  m_outputLocationsPair{};
 
       using base_class = Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>;
 
-      using KeyValue  = typename base_class::KeyValue;
       using KeyValues = typename base_class::KeyValues;
-      using InKeys    = Gaudi::Functional::details::RepeatValues_<KeyValues, sizeof...(In)>;
-      using OutKeys   = Gaudi::Functional::details::RepeatValues_<KeyValues, sizeof...(Out)>;
 
       template <typename IArgs, typename OArgs, std::size_t... I, std::size_t... J>
       MultiTransformer(std::string name, ISvcLocator* locator, const IArgs& inputs, std::index_sequence<I...>,
                        const OArgs& outputs, std::index_sequence<J...>)
           : base_class(std::move(name), locator),
             m_inputLocations{Gaudi::Property<std::vector<DataObjID>>{
-                this,
-                std::get<I>(inputs).first,
-                {DataObjID{std::get<I>(inputs).second[0]}},
+                this, getName<In>(std::get<I>(inputs), false), {DataObjID{std::get<I>(inputs).second[0]}}}...},
+            m_inputLocationsPair{Gaudi::Property<DataObjID>{
+                this, getName<In>(std::get<I>(inputs), true), DataObjID{std::get<I>(inputs).second[0]},
                 [this](Gaudi::Details::PropertyBase&) {
                   if constexpr (!is_map_like<In>::value) {
                     auto& handle = std::get<I>(m_inputs);
-                    auto& ins    = m_inputLocations[I];
-                    handle       = InputHandle_t<decltype(transformType(std::declval<In>()))>(ins.value()[0], this);
+                    auto& ins    = m_inputLocationsPair[I];
+                    handle       = {ins.value(), this};
                   }
                 },
                 Gaudi::Details::Property::ImmediatelyInvokeHandler{true}}...},
             m_outputLocations{Gaudi::Property<std::vector<DataObjID>>{
-                this,
-                std::get<J>(outputs).first,
-                {DataObjID{std::get<J>(outputs).second[0]}},
+                this, getName<Out>(std::get<J>(outputs), false), {DataObjID{std::get<J>(outputs).second[0]}}}...},
+            m_outputLocationsPair{Gaudi::Property<DataObjID>{
+                this, getName<Out>(std::get<J>(outputs), true), DataObjID{std::get<J>(outputs).second[0]},
                 [this](Gaudi::Details::PropertyBase&) {
                   if constexpr (!is_map_like<Out>::value) {
                     auto& handle = std::get<J>(m_outputs);
-                    auto& ins    = m_outputLocations[J];
-                    handle       = OutputHandle_t<decltype(transformType(std::declval<Out>()))>(ins.value()[0], this);
+                    auto& ins    = m_outputLocationsPair[J];
+                    handle       = {ins.value(), this};
                   }
                 },
                 Gaudi::Details::Property::ImmediatelyInvokeHandler{true}}...},
-            // m_inputs{std::tuple<InputHandle_t<decltype(transformType<In>...)>>(InputHandle_t<decltype(transformType<In>...)>(std::get<I>(inputs).first, this)...)}
             m_inputs{InputHandle_t<decltype(transformType(std::declval<In>()))>(std::get<I>(inputs).first, this)...},
             m_outputs{OutputHandle_t<decltype(transformType(std::declval<Out>()))>(std::get<J>(outputs).first, this)...}
 
@@ -276,11 +291,7 @@ namespace k4FWCore {
           : MultiTransformer(std::move(name), locator, inputs, std::index_sequence_for<In...>{}, outputs,
                              std::index_sequence_for<Out...>{}) {}
 
-      // When reading multiple collections we assume that the variable used is a
-      // std::map<std::string, std::shared_ptr<podio::CollectionBase>>
-      // and read the collections in a space separated string
-      template <size_t Index, typename... Handles>
-      void transformAndApplyAlgoAtIndex(const std::tuple<Handles...>& handles) const {
+      template <size_t Index, typename... Handles> void readMapInputs(const std::tuple<Handles...>& handles) const {
         if constexpr (Index < sizeof...(Handles)) {
           if constexpr (is_map_like<std::tuple_element_t<Index, std::tuple<In...>>>::value) {
             using EDM4hepType =
@@ -310,32 +321,43 @@ namespace k4FWCore {
           }
 
           // Recursive call for the next index
-          transformAndApplyAlgoAtIndex<Index + 1>(handles);
+          readMapInputs<Index + 1>(handles);
+        }
+      }
+
+      template <size_t Index, typename... Handles> void putMapOutputs(std::tuple<Handles...>&& handles) const {
+        if constexpr (Index < sizeof...(Handles)) {
+          if constexpr (is_map_like<std::tuple_element_t<Index, std::tuple<Out...>>>::value) {
+            using EDM4hepType =
+                typename ExtractInnerType<typename std::decay_t<decltype(std::get<Index>(handles))>>::type;
+            auto map = std::map<std::string, std::shared_ptr<EDM4hepType>>();
+
+            for (auto [key, val] : std::get<Index>(handles)) {
+              auto        shared = std::dynamic_pointer_cast<podio::CollectionBase>(val);
+              auto        w      = new AnyDataWrapper<std::shared_ptr<podio::CollectionBase>>(std::move(shared));
+              DataObject* p      = w;
+              auto        sc     = this->evtSvc()->registerObject(key, p);
+            }
+
+          }
+          else {
+            Gaudi::Functional::details::put(
+                std::get<Index>(m_outputs),
+                ptrOrCast(std::move(std::get<Index>(handles))));
+          }
+
+          // Recursive call for the next index
+          putMapOutputs<Index + 1>(std::move(handles));
         }
       }
 
       // derived classes are NOT allowed to implement execute ...
       StatusCode execute(const EventContext& ctx) const override final {
         try {
-          transformAndApplyAlgoAtIndex<0>(this->m_inputs);
-          std::apply(
-              [this, &ctx](auto&... ohandle) {
-                if constexpr (sizeof...(In) == 0) {
-                  std::apply(
-                      [&ohandle...](auto&&... data) {
-                        (Gaudi::Functional::details::put(ohandle, ptrOrCast(std::forward<decltype(data)>(data))), ...);
-                      },
-                      (*this)());
-                } else {
-                  std::apply(
-                      [&ohandle...](auto&&... data) {
-                        // (Gaudi::Functional::details::put(ohandle, std::forward<decltype(data)>(data)), ...);
-                        (Gaudi::Functional::details::put(ohandle, ptrOrCast(std::forward<decltype(data)>(data))), ...);
-                      },
-                      filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs));
-                }
-              },
-              this->m_outputs);
+          readMapInputs<0>(this->m_inputs);
+
+          auto tmp = filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs);
+          putMapOutputs<0>(std::move(tmp));
           return Gaudi::Functional::FilterDecision::PASSED;
         } catch (GaudiException& e) {
           (e.code() ? this->warning() : this->error()) << e.tag() << " : " << e.message() << endmsg;

@@ -5,6 +5,7 @@
 
 #include "podio/CollectionBase.h"
 
+#include <memory>
 #include <stdexcept>
 #include <tuple>
 #include <type_traits>
@@ -53,9 +54,13 @@ namespace k4FWCore {
 
     template <typename T> struct ExtractInnerType;
 
-    // Specialization for DataObjectReadHandle with map and shared_ptr
     template <typename Value>
     struct ExtractInnerType<DataObjectReadHandle<std::map<std::string, std::shared_ptr<Value>>>> {
+      using type = Value;
+    };
+
+    template <typename Value>
+    struct ExtractInnerType<std::map<std::string, std::shared_ptr<Value>>> {
       using type = Value;
     };
 
