@@ -23,11 +23,11 @@
 #include "GaudiKernel/AnyDataWrapper.h"
 #include "GaudiKernel/IDataProviderSvc.h"
 
-#include "IIOSvc.h"
 
 #include "podio/CollectionBase.h"
 #include "podio/Frame.h"
 
+#include "IIOSvc.h"
 #include "k4FWCore/FunctionalUtils.h"
 
 #include <memory>
