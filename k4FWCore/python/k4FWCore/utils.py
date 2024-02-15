@@ -95,3 +95,65 @@ def load_file(opt_file: Union[TextIOWrapper, str, os.PathLike]) -> None:
         code = compile(opt_file.read(), opt_file.name, "exec")
 
     exec(code, globals())
+
+
+class SequenceLoader:
+    """A class for loading algorithm sequences onto a list of algorithms
+
+    It dynamically loads algorithms from Python files based on the given
+    sequence names. In the import process it will look for a Sequence of
+    algorithms which might have configuration constants that depend on some
+    global calibration configuration. These constants are provided during the
+    import of a sequence, such that the imported python files do not need to
+    define all of them.
+    """
+
+    def __init__(self, alg_list: list, global_vars: Optional[Dict[str, Any]] = None) -> None:
+        """Initialize the SequenceLoader
+
+        This initializes a SequenceLoader with the list of algorithms to which
+        dynamically loaded algorithms should be appended to. It optionally takes
+        some global calibration constants that should be injected during import
+        of the sequence files
+
+        Args:
+            alg_list (List): A list to store loaded sequence algorithms.
+            global_vars (Optional[Dict[str, Any]]): A dictionary of global
+                variables for the sequences. Defaults to None. The keys in this
+                dictionary will be the available variables in the imported
+                module and the values will be the values of these variables.
+        """
+        self.alg_list = alg_list
+        self.global_vars = global_vars
+
+    def load(self, sequence: str) -> None:
+        """Loads a sequence algorithm from a specified Python file and appends
+        it to the algorithm list
+
+        The method constructs the filename from the sequence parameter name and
+        imports the sequence from the imported module.
+
+        Args:
+            sequence (str): The name of the sequence to load. The sequence name
+                should correspond to a Python file and class name following the
+                pattern `{sequence}.py` and `{sequence}Sequence`, respectively.
+
+        Examples:
+            >>> alg_list = []
+            >>> seq_loader = SequenceLoader(alg_list)
+            >>> seq_loader.load("Tracking/TrackingDigi")
+
+            This will import the file `Tracking/TrackingDigi.py` and add the
+            sequence of algorithms that is defined in `TrackingDigiSequence` in
+            that file to the alg_list
+        """
+        filename = f"{sequence}.py"
+        seq_name = f"{sequence.split('/')[-1]}Sequence"
+
+        seq_module = import_from(
+            filename,
+            global_vars=self.global_vars,
+        )
+
+        seq = getattr(seq_module, seq_name)
+        self.alg_list.extend(seq)
