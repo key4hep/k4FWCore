@@ -31,27 +31,25 @@
 #include <string>
 
 // Which type of collections we are producing
-using Float         = podio::UserDataCollection<float>;
-using Particle      = edm4hep::MCParticleCollection;
-using SimTrackerHit = edm4hep::SimTrackerHitCollection;
-using TrackerHit    = edm4hep::TrackerHitCollection;
-using Track         = edm4hep::TrackCollection;
 
-struct ExampleFunctionalProducerMultiple final
-  : k4FWCore::Producer<std::tuple<Float, Particle, Particle, SimTrackerHit, TrackerHit, Track>()> {
+using retType =
+    std::tuple<podio::UserDataCollection<float>, edm4hep::MCParticleCollection, edm4hep::MCParticleCollection,
+               edm4hep::SimTrackerHitCollection, edm4hep::TrackerHitCollection, edm4hep::TrackCollection>;
+
+struct ExampleFunctionalProducerMultiple final : k4FWCore::Producer<retType()> {
   // The pairs in KeyValue can be changed from python and they correspond
   // to the names of the output collections
   ExampleFunctionalProducerMultiple(const std::string& name, ISvcLocator* svcLoc)
-      : Producer(
-            name, svcLoc,
-            {},
-            {KeyValues("OutputCollectionFloat", {"VectorFloat"}), KeyValues("OutputCollectionParticles1", {"MCParticles1"}),
-             KeyValues("OutputCollectionParticles2", {"MCParticles2"}),
-             KeyValues("OutputCollectionSimTrackerHits", {"SimTrackerHits"}),
-             KeyValues("OutputCollectionTrackerHits", {"TrackerHits"}), KeyValues("OutputCollectionTracks", {"Tracks"})}) {}
+      : Producer(name, svcLoc, {},
+                 {KeyValues("OutputCollectionFloat", {"VectorFloat"}),
+                  KeyValues("OutputCollectionParticles1", {"MCParticles1"}),
+                  KeyValues("OutputCollectionParticles2", {"MCParticles2"}),
+                  KeyValues("OutputCollectionSimTrackerHits", {"SimTrackerHits"}),
+                  KeyValues("OutputCollectionTrackerHits", {"TrackerHits"}),
+                  KeyValues("OutputCollectionTracks", {"Tracks"})}) {}
 
   // This is the function that will be called to produce the data
-  std::tuple<Float, Particle, Particle, SimTrackerHit, TrackerHit, Track> operator()() const override {
+  retType operator()() const override {
     // The following was copied and adapted from the
     // k4FWCoreTest_CreateExampleEventData test
 
@@ -60,7 +58,7 @@ struct ExampleFunctionalProducerMultiple final
     floatVector.push_back(25.);
     floatVector.push_back(m_event);
 
-    auto particles = edm4hep::MCParticleCollection();
+    auto              particles = edm4hep::MCParticleCollection();
     edm4hep::Vector3d v{0, 0, 0};
     edm4hep::Vector3f vv{0, 0, 0};
     particles.create(1, 2, 3, 4.f, 5.f, 6.f, v, v, vv);
@@ -91,8 +89,8 @@ struct ExampleFunctionalProducerMultiple final
     track.addToTrackerHits(trackerHit);
     track.addToTracks(track2);
 
-    return std::make_tuple(std::move(floatVector), std::move(particles), Particle(), std::move(simTrackerHits),
-                           std::move(trackerHits), std::move(tracks));
+    return std::make_tuple(std::move(floatVector), std::move(particles), edm4hep::MCParticleCollection(),
+                           std::move(simTrackerHits), std::move(trackerHits), std::move(tracks));
   }
 
 private:

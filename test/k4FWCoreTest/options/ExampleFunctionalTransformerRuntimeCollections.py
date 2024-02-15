@@ -20,29 +20,40 @@
 # to check that the contents of the file are the expected ones
 
 from Gaudi.Configuration import INFO
-from Configurables import ExampleFunctionalProducerRuntimeCollections, ExampleFunctionalConsumer
+from Configurables import ExampleFunctionalTransformerRuntimeCollections, ExampleFunctionalConsumer, ExampleFunctionalProducer
 from Configurables import ApplicationMgr
 from Configurables import EventDataSvc
 
-producer = ExampleFunctionalProducerRuntimeCollections("Producer",
-                                                       OutputCollections=["MCParticles0", "MCParticles1", "MCParticles2"],
+producer0 = ExampleFunctionalProducer("Producer0",
+                                     OutputCollection="MCParticles0",
+                                     )
+producer1 = ExampleFunctionalProducer("Producer1",
+                                     OutputCollection="MCParticles1",
+                                     )
+producer2 = ExampleFunctionalProducer("Producer2",
+                                     OutputCollection="MCParticles2",
+                                     )
+
+transformer = ExampleFunctionalTransformerRuntimeCollections("Transformer",
+                                                       InputCollections=["MCParticles0", "MCParticles1", "MCParticles2"],
+                                                       OutputCollections=["NewMCParticles0", "NewMCParticles1", "NewMCParticles2"],
                                                        )
 
 consumer0 = ExampleFunctionalConsumer("Consumer0",
-                                     InputCollection="MCParticles0",
+                                     InputCollection="NewMCParticles0",
                                      Offset=0,
                                      )
 consumer1 = ExampleFunctionalConsumer("Consumer1",
-                                     InputCollection="MCParticles1",
+                                     InputCollection="NewMCParticles1",
                                      Offset=0,
                                      )
 consumer2 = ExampleFunctionalConsumer("Consumer2",
-                                     InputCollection="MCParticles2",
+                                     InputCollection="NewMCParticles2",
                                      Offset=0,
                                      )
 
 
-ApplicationMgr(TopAlg=[producer, consumer0, consumer1, consumer2],
+ApplicationMgr(TopAlg=[producer0, producer1, producer2, transformer, consumer0, consumer1, consumer2],
                EvtSel="NONE",
                EvtMax=10,
                ExtSvc=[EventDataSvc("EventDataSvc")],
