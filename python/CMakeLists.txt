@@ -7,5 +7,12 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/k4FWCore DESTINATION python)
 # k4FWCore will give the right result
 file(GLOB_RECURSE python_files ${CMAKE_CURRENT_SOURCE_DIR}/k4FWCore/*.py
      EXCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/k4FWCore/__init__.py)
-add_custom_target(copy_python_files ALL COMMAND
-  ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/k4FWCore ${CMAKE_BINARY_DIR}/k4FWCore/genConfDir/k4FWCore)
+
+# add_custom_command(
+#     OUTPUT ${CMAKE_BINARY_DIR}/k4FWCore/genConfDir/k4FWCore/copied.txt
+#     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/k4FWCore ${CMAKE_BINARY_DIR}/k4FWCore/genConfDir/k4FWCore
+#     COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_BINARY_DIR}/k4FWCore/genConfDir/k4FWCore/copied.txt
+#     DEPENDS ${python_files}
+# )
+
+# add_custom_target(copy_python_files ALL DEPENDS ${CMAKE_BINARY_DIR}/k4FWCore/genConfDir/k4FWCore/copied.txt)
