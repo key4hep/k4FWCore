@@ -39,7 +39,7 @@ namespace k4FWCore {
     template <typename T, typename P> const auto& maybeTransformToEDM4hep(const P& arg) { return arg; }
 
     template <typename T, typename P>
-      requires std::same_as<P, std::shared_ptr<podio::CollectionBase>>
+    requires std::same_as<P, std::shared_ptr<podio::CollectionBase>>
     const auto& maybeTransformToEDM4hep(const P& arg) { return static_cast<const T&>(*arg); }
 
     template <typename T> struct is_map_like : std::false_type {};
