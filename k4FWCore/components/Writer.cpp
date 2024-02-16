@@ -1,4 +1,5 @@
-/* * Copyright (c) 2014-2024 Key4hep-Project.
+/*
+ * Copyright (c) 2014-2024 Key4hep-Project.
  *
  * This file is part of Key4hep.
  * See https://key4hep.github.io/key4hep-doc/ for further info.

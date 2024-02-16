@@ -1,3 +1,4 @@
+#
 # Copyright (c) 2014-2024 Key4hep-Project.
 #
 # This file is part of Key4hep.
@@ -58,10 +59,10 @@ transformer = ExampleFunctionalTransformerRuntimeCollectionsMultiple("Transforme
                                                        InputCollectionSimTrackerHits=["SimTrackerHits0", "SimTrackerHits1", "SimTrackerHits2"],
                                                        InputCollectionTrackerHits=["TrackerHits0", "TrackerHits1", "TrackerHits2"],
                                                        InputCollectionTracks=["Tracks0", "Tracks1", "Tracks2"],
-                                                       OutputCollectionFloat=["NewVectorFloat0", "NewVectorFloat1", "NewVectorFloat2"],              
+                                                       OutputCollectionFloat=["NewVectorFloat0", "NewVectorFloat1", "NewVectorFloat2"],
                                                        OutputCollectionParticles1=["NewMCParticles0", "NewMCParticles1", "NewMCParticles2"],
                                                        OutputCollectionParticles2=["NewMCParticles0", "NewMCParticles1", "NewMCParticles2"],
-                                                       OutputCollectionSimTrackerHits=["NewSimTrackerHits0", "NewSimTrackerHits1", "NewSimTrackerHits2"],           
+                                                       OutputCollectionSimTrackerHits=["NewSimTrackerHits0", "NewSimTrackerHits1", "NewSimTrackerHits2"],
                                                        OutputCollectionTrackerHits=["NewTrackerHits0", "NewTrackerHits1", "NewTrackerHits2"],
                                                        OutputCollectionTracks=["NewTracks0", "NewTracks1", "NewTracks2"],
                                                        Offset=0,

@@ -52,8 +52,8 @@ mgr = ApplicationMgr(TopAlg=[transformer],
                EvtSel="NONE",
                EvtMax=-1,
                ExtSvc=[whiteboard],
-               EventLoop=slimeventloopmgr,      
+               EventLoop=slimeventloopmgr,
                MessageSvcType="InertMessageSvc",
                OutputLevel=INFO,
                )
-    
+
