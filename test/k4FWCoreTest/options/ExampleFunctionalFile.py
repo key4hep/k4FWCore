@@ -40,5 +40,3 @@ mgr = ApplicationMgr(TopAlg=[transformer],
                OutputLevel=INFO,
                )
 
-
-    

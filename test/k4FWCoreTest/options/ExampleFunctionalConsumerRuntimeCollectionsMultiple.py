@@ -1,3 +1,4 @@
+#
 # Copyright (c) 2014-2024 Key4hep-Project.
 #
 # This file is part of Key4hep.
