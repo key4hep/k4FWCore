@@ -3,7 +3,7 @@ import podio
 def check_collections(filename, names):
     podio_reader = podio.root_io.Reader(filename)
     for frame in podio_reader.get('events'):
-        available = set(frame.collections)
+        available = set(frame.getAvailableCollections())
         if available != set(names):
             print(f'These collections should be in the frame but are not: {set(names) - available}')
             print(f'These collections are in the frame but should not be: {available - set(names)}')
