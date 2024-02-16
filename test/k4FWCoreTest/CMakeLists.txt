@@ -101,6 +101,7 @@ add_test(NAME TestExec WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR} COMMAND pytho
 set_test_env(TestExec)
 
 add_test(NAME Testk4runNoArgumentsHelp COMMAND ${K4RUN})
+set_test_env(Testk4runNoArgumentsHelp)
 set_tests_properties(Testk4runNoArgumentsHelp PROPERTIES PASS_REGULAR_EXPRESSION "Usage: k4run <options_file.py>, use --help to get a complete list of arguments")
 add_test_with_env(Testk4runCustomArguments options/TestArgs.py --foo=42 PROPERTIES PASS_REGULAR_EXPRESSION "The answer is 42")
 add_test_with_env(Testk4runVerboseOutput options/TestArgs.py --verbose PROPERTIES PASS_REGULAR_EXPRESSION " VERBOSE ")
