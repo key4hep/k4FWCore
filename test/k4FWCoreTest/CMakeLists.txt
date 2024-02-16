@@ -94,7 +94,7 @@ PROPERTIES PASS_REGULAR_EXPRESSION "TwasBrilligAndTheSlithyToves"
 )
 add_test(NAME checkKeepDropSwitch
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND python scripts/check_KeepDropSwitch.py ${CMAKE_BINARY_DIR}/test/k4FWCoreTest/output_k4test_exampledata_2.root)
+         COMMAND python scripts/check_KeepDropSwitch.py ${PROJECT_BINARY_DIR}/test/k4FWCoreTest/output_k4test_exampledata_2.root)
 set_test_env(checkKeepDropSwitch)
 set_property(TEST checkKeepDropSwitch APPEND PROPERTY DEPENDS ReadExampleEventData)
 add_test_with_env(TestUniqueIDGenSvc options/TestUniqueIDGenSvc.py)

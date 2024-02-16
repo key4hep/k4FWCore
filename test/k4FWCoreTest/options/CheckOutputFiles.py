@@ -16,7 +16,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import podio
+try:
+    import podio
+except ImportError:
+    import os
+    print(f'PYTHONPATH={os.environ["PYTHONPATH"]}')
+    raise
 
 def check_collections(filename, names):
     podio_reader = podio.root_io.Reader(filename)
