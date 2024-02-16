@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Key4hep-Project.
+ * Copyright (c) 2014-2024 Key4hep-Project.
  *
  * This file is part of Key4hep.
  * See https://key4hep.github.io/key4hep-doc/ for further info.
@@ -20,11 +20,11 @@
 #define FWCORE_IOSVC_H
 
 #include "Gaudi/Property.h"
-#include "GaudiKernel/Service.h"
-#include "GaudiKernel/IIncidentListener.h"
-#include "GaudiKernel/IIncidentSvc.h"
 #include "GaudiKernel/IDataProviderSvc.h"
 #include "GaudiKernel/IHiveWhiteBoard.h"
+#include "GaudiKernel/IIncidentListener.h"
+#include "GaudiKernel/IIncidentSvc.h"
+#include "GaudiKernel/Service.h"
 
 #include "podio/ROOTReader.h"
 #include "podio/ROOTWriter.h"
@@ -41,6 +41,7 @@
 
 class IOSvc : public extends<Service, IIOSvc, IIncidentListener> {
   using extends::extends;
+
 public:
   // Gaudi doesn't run the destructor of the Services so we have to
   // manually ask for the writer to be deleted so it will call finish()
@@ -49,7 +50,8 @@ public:
   StatusCode initialize() override;
   StatusCode finalize() override;
 
-  std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, std::vector<std::string>, podio::Frame> next() override;
+  std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, std::vector<std::string>, podio::Frame> next()
+      override;
 
   std::shared_ptr<std::vector<std::string>> getCollectionNames() const override {
     return std::make_shared<std::vector<std::string>>(m_collectionNames);
@@ -59,7 +61,6 @@ public:
   void setReadingFileNames(const std::vector<std::string>& names);
 
 protected:
-
   Gaudi::Property<unsigned int> m_bufferNbEvents{
       this, "BufferNbEvents", 20000,
       "approximate size of the buffer used to prefetch rawbanks in terms of number of events. Default is 20000"};
@@ -67,7 +68,7 @@ protected:
 
   Gaudi::Property<std::vector<std::string>> m_collectionNames{this, "CollectionNames", {}, "List of files to read"};
   Gaudi::Property<std::vector<std::string>> m_readingFileNames{this, "input", {}, "List of files to read"};
-  Gaudi::Property<std::string> m_writingFileName{this, "output", {}, "List of files to read"};
+  Gaudi::Property<std::string>              m_writingFileName{this, "output", {}, "List of files to read"};
   Gaudi::Property<std::vector<std::string>> m_outputCommands{
       this, "outputCommands", {"keep *"}, "A set of commands to declare which collections to keep or drop."};
   Gaudi::Property<std::string> m_inputType{this, "ioType", "ROOT", "Type of input file (ROOT, RNTuple)"};
@@ -98,13 +99,13 @@ protected:
   }
 
   SmartIF<IDataProviderSvc> m_dataSvc;
-  SmartIF<IIncidentSvc> m_incidentSvc;
-  SmartIF<IHiveWhiteBoard> m_hiveWhiteBoard;
-  void handle(const Incident& incident) override;
+  SmartIF<IIncidentSvc>     m_incidentSvc;
+  SmartIF<IHiveWhiteBoard>  m_hiveWhiteBoard;
+  void                      handle(const Incident& incident) override;
 
   int m_entries{0};
   int m_nextEntry{0};
-  
+
   bool writeCollection(const std::string& collName) override;
 };
 

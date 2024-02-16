@@ -30,7 +30,7 @@ struct ExampleFunctionalProducer final : k4FWCore::Producer<edm4hep::MCParticleC
   // The pair in KeyValue can be changed from python and it corresponds
   // to the name of the output collection
   ExampleFunctionalProducer(const std::string& name, ISvcLocator* svcLoc)
-    : Producer(name, svcLoc, {}, KeyValues("OutputCollection", {"MCParticles"})) {}
+      : Producer(name, svcLoc, {}, KeyValues("OutputCollection", {"MCParticles"})) {}
 
   // This is the function that will be called to produce the data
   edm4hep::MCParticleCollection operator()() const override {

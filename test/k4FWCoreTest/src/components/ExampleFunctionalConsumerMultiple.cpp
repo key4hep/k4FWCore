@@ -46,18 +46,18 @@ using TrackerHitColl    = edm4hep::TrackerHit3DCollection;
 using TrackColl         = edm4hep::TrackCollection;
 
 struct ExampleFunctionalConsumerMultiple final
-    : k4FWCore::Consumer<void(const FloatColl&, const ParticleColl&, const SimTrackerHitColl&,
-                                       const TrackerHitColl&, const TrackColl&)> {
+    : k4FWCore::Consumer<void(const FloatColl&, const ParticleColl&, const SimTrackerHitColl&, const TrackerHitColl&,
+                              const TrackColl&)> {
   // The pairs in KeyValue can be changed from python and they correspond
   // to the names of the input collection
   ExampleFunctionalConsumerMultiple(const std::string& name, ISvcLocator* svcLoc)
       : Consumer(name, svcLoc,
                  {
-                   KeyValues("InputCollectionFloat", {"VectorFloat"}),
-                   KeyValues("InputCollectionParticles", {"MCParticles1"}),
-                   KeyValues("InputCollectionSimTrackerHits", {"SimTrackerHits"}),
-                   KeyValues("InputCollectionTrackerHits", {"TrackerHits"}),
-                   KeyValues("InputCollectionTracks", {"Tracks"}),
+                     KeyValues("InputCollectionFloat", {"VectorFloat"}),
+                     KeyValues("InputCollectionParticles", {"MCParticles1"}),
+                     KeyValues("InputCollectionSimTrackerHits", {"SimTrackerHits"}),
+                     KeyValues("InputCollectionTrackerHits", {"TrackerHits"}),
+                     KeyValues("InputCollectionTracks", {"Tracks"}),
                  }) {}
 
   // This is the function that will be called to transform the data
@@ -78,17 +78,15 @@ struct ExampleFunctionalConsumerMultiple final
 
     int i = 0;
     for (const auto& particle : particles) {
-      if ((particle.getPDG() != 1 + i + m_offset) ||
-          (particle.getGeneratorStatus() != 2 + i + m_offset) ||
-          (particle.getSimulatorStatus() != 3 + i + m_offset) ||
-          (particle.getCharge() != 4 + i + m_offset) || (particle.getTime() != 5 + i + m_offset) ||
-          (particle.getMass() != 6 + i + m_offset)) {
+      if ((particle.getPDG() != 1 + i + m_offset) || (particle.getGeneratorStatus() != 2 + i + m_offset) ||
+          (particle.getSimulatorStatus() != 3 + i + m_offset) || (particle.getCharge() != 4 + i + m_offset) ||
+          (particle.getTime() != 5 + i + m_offset) || (particle.getMass() != 6 + i + m_offset)) {
         std::stringstream error;
-        error << "Wrong data in MCParticle collection, expected " << 1 + i + m_offset << ", "
-              << 2 + i + m_offset << ", " << 3 + i + m_offset << ", " << 4 + i + m_offset
-              << ", " << 5 + i + m_offset << ", " << 6 + i + m_offset << " got " << particle.getPDG()
-              << ", " << particle.getGeneratorStatus() << ", " << particle.getSimulatorStatus() << ", "
-              << particle.getCharge() << ", " << particle.getTime() << ", " << particle.getMass() << "";
+        error << "Wrong data in MCParticle collection, expected " << 1 + i + m_offset << ", " << 2 + i + m_offset
+              << ", " << 3 + i + m_offset << ", " << 4 + i + m_offset << ", " << 5 + i + m_offset << ", "
+              << 6 + i + m_offset << " got " << particle.getPDG() << ", " << particle.getGeneratorStatus() << ", "
+              << particle.getSimulatorStatus() << ", " << particle.getCharge() << ", " << particle.getTime() << ", "
+              << particle.getMass() << "";
         throw std::runtime_error(error.str());
       }
       i++;
@@ -122,8 +120,7 @@ struct ExampleFunctionalConsumerMultiple final
   }
 
 private:
-  Gaudi::Property<int> m_offset{this, "Offset", 10,
-      "Integer to add to the dummy values written to the edm"};
+  Gaudi::Property<int> m_offset{this, "Offset", 10, "Integer to add to the dummy values written to the edm"};
 };
 
 DECLARE_COMPONENT(ExampleFunctionalConsumerMultiple)

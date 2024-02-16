@@ -31,27 +31,28 @@ struct ExampleFunctionalTransformerRuntimeCollections final : k4FWCore::Transfor
   // The pair in KeyValue can be changed from python and it corresponds
   // to the name of the output collection
   ExampleFunctionalTransformerRuntimeCollections(const std::string& name, ISvcLocator* svcLoc)
-    : Transformer(name, svcLoc, {KeyValues("InputCollections", {"MCParticles"})}, {KeyValues("OutputCollections", {"MCParticles"})}) {}
+      : Transformer(name, svcLoc, {KeyValues("InputCollections", {"MCParticles"})},
+                    {KeyValues("OutputCollections", {"MCParticles"})}) {}
 
   // This is the function that will be called to produce the data
   mapType operator()(const mapType& input) const override {
     std::map<std::string, std::shared_ptr<edm4hep::MCParticleCollection>> m_outputCollections;
     for (int i = 0; i < input.size(); ++i) {
-      std::string name = "NewMCParticles" + std::to_string(i);
-      auto old_coll = input.at("MCParticles" + std::to_string(i));
-      auto coll = std::make_shared<edm4hep::MCParticleCollection>();
+      std::string name     = "NewMCParticles" + std::to_string(i);
+      auto        old_coll = input.at("MCParticles" + std::to_string(i));
+      auto        coll     = std::make_shared<edm4hep::MCParticleCollection>();
       coll->push_back(old_coll->at(0).clone());
       coll->push_back(old_coll->at(1).clone());
       m_outputCollections[name] = coll;
     }
     return m_outputCollections;
-
   }
 
 private:
   // We can define any property we want that can be set from python
   // and use it inside operator()
-  Gaudi::Property<int> m_numberOfCollections{this, "NumberOfCollections", 3, "Example int that can be used in the algorithm"};
+  Gaudi::Property<int> m_numberOfCollections{this, "NumberOfCollections", 3,
+                                             "Example int that can be used in the algorithm"};
 };
 
 DECLARE_COMPONENT(ExampleFunctionalTransformerRuntimeCollections)

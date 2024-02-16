@@ -20,13 +20,15 @@
 #ifndef K4FWCORE_FUNCTIONALUTILS_H
 #define K4FWCORE_FUNCTIONALUTILS_H
 
-#include "Gaudi/Algorithm.h"
+#include "GaudiAlg/GaudiAlgorithm.h"
 #include "GaudiKernel/DataObjectHandle.h"
 #include "k4FWCore/DataWrapper.h"
 
 // Base class used for the Traits template argument of the
 // Gaudi::Functional algorithms
-struct [[deprecated("Functional algorithms using the BaseClass.h header are deprecated and will be removed in the future")]] BaseClass_t {
+struct [[deprecated(
+    "Functional algorithms using the BaseClass.h header are deprecated and will be removed in the "
+    "future")]] BaseClass_t {
   template <typename T> using InputHandle  = DataObjectReadHandle<DataWrapper<T>>;
   template <typename T> using OutputHandle = DataObjectWriteHandle<DataWrapper<T>>;
 

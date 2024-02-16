@@ -23,29 +23,26 @@
 
 #include <tuple>
 
-
 namespace k4FWCore {
 
   namespace details {
 
-    template <typename Signature, typename Traits_>
-    struct Producer;
+    template <typename Signature, typename Traits_> struct Producer;
 
     template <typename... Out, typename Traits_>
     struct Producer<std::tuple<Out...>(), Traits_> : MultiTransformer<std::tuple<Out...>(), Traits_> {
       using MultiTransformer<std::tuple<Out...>(), Traits_>::MultiTransformer;
     };
 
-    template <typename Out, typename Traits_>
-    struct Producer<Out(), Traits_> : Transformer<Out(), Traits_> {
+    template <typename Out, typename Traits_> struct Producer<Out(), Traits_> : Transformer<Out(), Traits_> {
       using Transformer<Out(), Traits_>::Transformer;
     };
 
-  } // namespace details
+  }  // namespace details
 
   template <typename Signature, typename Traits_ = Gaudi::Functional::Traits::useDefaults>
   using Producer = details::Producer<Signature, Traits_>;
 
-} // namespace k4FWCore
+}  // namespace k4FWCore
 
-#endif // FWCORE_PRODUCER_H
+#endif  // FWCORE_PRODUCER_H

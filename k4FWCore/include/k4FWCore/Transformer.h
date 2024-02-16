@@ -57,7 +57,7 @@ namespace k4FWCore {
       std::array<Gaudi::Property<DataObjID>, sizeof...(In)>                                      m_inputLocationsPair{};
       mutable std::map<std::string, std::vector<std::string>>                                    m_inputLocationsMap;
       std::array<Gaudi::Property<std::vector<DataObjID>>, 1>                                     m_outputLocations{};
-      std::array<Gaudi::Property<DataObjID>, 1>               m_outputLocationsPair{};
+      std::array<Gaudi::Property<DataObjID>, 1> m_outputLocationsPair{};
 
       using base_class = Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>;
 
@@ -232,7 +232,7 @@ namespace k4FWCore {
       std::array<Gaudi::Property<DataObjID>, sizeof...(In)>                                      m_inputLocationsPair{};
       mutable std::map<std::string, std::vector<std::string>>                                    m_inputLocationsMap;
       std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(Out)>                        m_outputLocations{};
-      std::array<Gaudi::Property<DataObjID>, sizeof...(Out)>  m_outputLocationsPair{};
+      std::array<Gaudi::Property<DataObjID>, sizeof...(Out)> m_outputLocationsPair{};
 
       using base_class = Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>;
 
@@ -339,11 +339,8 @@ namespace k4FWCore {
               auto        sc     = this->evtSvc()->registerObject(key, p);
             }
 
-          }
-          else {
-            Gaudi::Functional::details::put(
-                std::get<Index>(m_outputs),
-                ptrOrCast(std::move(std::get<Index>(handles))));
+          } else {
+            Gaudi::Functional::details::put(std::get<Index>(m_outputs), ptrOrCast(std::move(std::get<Index>(handles))));
           }
 
           // Recursive call for the next index
