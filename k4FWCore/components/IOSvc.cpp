@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Key4hep-Project.
+ * Copyright (c) 2014-2024 Key4hep-Project.
  *
  * This file is part of Key4hep.
  * See https://key4hep.github.io/key4hep-doc/ for further info.
@@ -59,26 +59,25 @@ StatusCode IOSvc::initialize() {
 StatusCode IOSvc::finalize() { return Service::finalize(); }
 
 std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, std::vector<std::string>, podio::Frame> IOSvc::next() {
-
   podio::Frame frame;
   {
     std::scoped_lock<std::mutex> lock(m_changeBufferLock);
     info() << "m_nextEntry = " << m_nextEntry << " m_entries = " << m_entries << endmsg;
     if (m_nextEntry < m_entries) {
       frame = podio::Frame(std::move(m_reader->readEntry(podio::Category::Event, m_nextEntry)));
-    }
-    else {
-      return std::make_tuple(std::vector<std::shared_ptr<podio::CollectionBase>>(), std::vector<std::string>(), std::move(frame));
+    } else {
+      return std::make_tuple(std::vector<std::shared_ptr<podio::CollectionBase>>(), std::vector<std::string>(),
+                             std::move(frame));
     }
     m_nextEntry++;
     if (m_collectionNames.empty()) {
-        m_collectionNames = frame.getAvailableCollections();
+      m_collectionNames = frame.getAvailableCollections();
     }
   }
 
   if (m_nextEntry >= m_entries) {
-  // if (true) {
-    auto ep = serviceLocator()->as<IEventProcessor>();
+    // if (true) {
+    auto       ep = serviceLocator()->as<IEventProcessor>();
     StatusCode sc = ep->stopRun();
     if (sc.isFailure()) {
       error() << "Error when stopping run" << endmsg;
@@ -100,8 +99,7 @@ std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, std::vector<std:
 // After every event if there is still a frame in the TES
 // that means it hasn't been written so the collections inside the Frame
 // should be removed so that they are deleted when the Frame is deleted
-void IOSvc::handle( const Incident& incident ) {
-
+void IOSvc::handle(const Incident& incident) {
   StatusCode code;
   if (m_hiveWhiteBoard) {
     if (!incident.context().valid()) {
@@ -115,7 +113,7 @@ void IOSvc::handle( const Incident& incident ) {
       throw GaudiException("Error when setting store", name(), StatusCode::FAILURE);
     }
   }
-  DataObject *p;
+  DataObject* p;
   code = m_dataSvc->retrieveObject("/Event/_Frame", p);
   if (code.isFailure()) {
     info() << "No frame found" << endmsg;
@@ -124,7 +122,7 @@ void IOSvc::handle( const Incident& incident ) {
 
   auto frame = dynamic_cast<AnyDataWrapper<podio::Frame>*>(p);
   for (const auto& coll : frame->getData().getAvailableCollections()) {
-    DataObject *collPtr;
+    DataObject* collPtr;
     code = m_dataSvc->retrieveObject("/Event/" + coll, collPtr);
     if (code.isSuccess()) {
       info() << "Removing collection: " << coll << endmsg;
@@ -136,16 +134,10 @@ void IOSvc::handle( const Incident& incident ) {
   }
 }
 
-void IOSvc::setReadingCollectionNames(const std::vector<std::string>& names) {
-  m_collectionNames = names;
-}
+void IOSvc::setReadingCollectionNames(const std::vector<std::string>& names) { m_collectionNames = names; }
 
-void IOSvc::setReadingFileNames(const std::vector<std::string>& names) {
-  m_readingFileNames = names;
-}
+void IOSvc::setReadingFileNames(const std::vector<std::string>& names) { m_readingFileNames = names; }
 
-bool IOSvc::writeCollection(const std::string& collName) {
-  return m_switch.isOn(collName);
-}
+bool IOSvc::writeCollection(const std::string& collName) { return m_switch.isOn(collName); }
 
 DECLARE_COMPONENT(IOSvc)

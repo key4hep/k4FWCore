@@ -38,8 +38,7 @@ namespace k4FWCore {
       return result;
     }
 
-    template <typename T, typename K>
-    std::string getName(const K& first, bool pair=false) {
+    template <typename T, typename K> std::string getName(const K& first, bool pair = false) {
       if constexpr (is_map_like<T>::value) {
         if (pair) {
           return hash_string(first.first);
@@ -59,8 +58,7 @@ namespace k4FWCore {
       using type = Value;
     };
 
-    template <typename Value>
-    struct ExtractInnerType<std::map<std::string, std::shared_ptr<Value>>> {
+    template <typename Value> struct ExtractInnerType<std::map<std::string, std::shared_ptr<Value>>> {
       using type = Value;
     };
 

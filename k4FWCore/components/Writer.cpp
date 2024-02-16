@@ -1,4 +1,4 @@
-/* * Copyright (c) 2014-2023 Key4hep-Project.
+/* * Copyright (c) 2014-2024 Key4hep-Project.
  *
  * This file is part of Key4hep.
  * See https://key4hep.github.io/key4hep-doc/ for further info.
@@ -71,7 +71,6 @@ public:
   }
 
   StatusCode finalize() override {
-
     podio::Frame config_metadata_frame;
 
     //// prepare job options metadata ///////////////////////
@@ -92,7 +91,7 @@ public:
     // and have to be traversed like this. Note that Gaudi!577 will improve this.
     for (const auto* name : {"NTupleSvc"}) {
       std::stringstream config_stream;
-      auto svc = service<IProperty>(name);
+      auto              svc = service<IProperty>(name);
       if (!svc.isValid())
         continue;
       for (const auto* property : svc->getProperties()) {

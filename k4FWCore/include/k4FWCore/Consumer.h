@@ -89,8 +89,7 @@ namespace k4FWCore {
                Gaudi::Functional::details::RepeatValues_<KeyValues, sizeof...(In)> const& inputs)
           : Consumer(std::move(name), locator, inputs, std::index_sequence_for<In...>{}) {}
 
-      template <size_t Index, typename... Handles>
-      void readMapInputs(const std::tuple<Handles...>& handles) const {
+      template <size_t Index, typename... Handles> void readMapInputs(const std::tuple<Handles...>& handles) const {
         if constexpr (Index < sizeof...(Handles)) {
           if constexpr (is_map_like<std::tuple_element_t<Index, std::tuple<In...>>>::value) {
             using EDM4hepType =

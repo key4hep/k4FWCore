@@ -49,17 +49,17 @@ using Counter  = podio::UserDataCollection<int>;
 using Particle = edm4hep::MCParticleCollection;
 
 struct ExampleFunctionalTransformerMultiple final
-    : k4FWCore::MultiTransformer<std::tuple<Counter, Particle>(const FloatColl&, const ParticleColl&,
-                                                                        const SimTrackerHitColl&, const TrackerHitColl&,
-                                                                        const TrackColl&)> {
+    : k4FWCore::MultiTransformer<std::tuple<Counter, Particle>(
+          const FloatColl&, const ParticleColl&, const SimTrackerHitColl&, const TrackerHitColl&, const TrackColl&)> {
   ExampleFunctionalTransformerMultiple(const std::string& name, ISvcLocator* svcLoc)
       : MultiTransformer(
             name, svcLoc,
-            {KeyValues("InputCollectionFloat", {"VectorFloat"}), KeyValues("InputCollectionParticles", {"MCParticles1"}),
+            {KeyValues("InputCollectionFloat", {"VectorFloat"}),
+             KeyValues("InputCollectionParticles", {"MCParticles1"}),
              KeyValues("InputCollectionSimTrackerHits", {"SimTrackerHits"}),
              KeyValues("InputCollectionTrackerHits", {"TrackerHits"}), KeyValues("InputCollectionTracks", {"Tracks"})},
-            {KeyValues("OutputCollectionCounter", {"Counter"}), KeyValues("OutputCollectionParticles", {"NewMCParticles"})}) {
-  }
+            {KeyValues("OutputCollectionCounter", {"Counter"}),
+             KeyValues("OutputCollectionParticles", {"NewMCParticles"})}) {}
 
   // This is the function that will be called to transform the data
   // Note that the function has to be const, as well as the collections
@@ -92,8 +92,7 @@ struct ExampleFunctionalTransformerMultiple final
     return std::make_tuple(std::move(counter), std::move(newParticlesColl));
   }
 
-  Gaudi::Property<int> m_offset{this, "Offset", 10,
-      "Integer to add to the dummy values written to the edm"};
+  Gaudi::Property<int> m_offset{this, "Offset", 10, "Integer to add to the dummy values written to the edm"};
 };
 
 DECLARE_COMPONENT(ExampleFunctionalTransformerMultiple)

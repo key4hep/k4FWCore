@@ -64,7 +64,7 @@ namespace k4FWCore {
             std::string        token;
             while (ss >> token) {
               DataObject* p;
-              auto sc = this->evtSvc()->retrieveObject(token, p);
+              auto        sc = this->evtSvc()->retrieveObject(token, p);
               if (!sc.isSuccess()) {
                 throw GaudiException("Failed to retrieve object " + token, "Consumer", StatusCode::FAILURE);
               }
