@@ -73,10 +73,11 @@ endif()
 
 add_subdirectory(k4FWCore)
 add_subdirectory(k4Interface)
-add_subdirectory(python)
 if(BUILD_TESTING)
   add_subdirectory(test/k4FWCoreTest)
 endif()
+# It has to go after tests since some files are copied if the tests are built
+add_subdirectory(python)
 
 
 option(ENABLE_CPACK "Whether or not to use cpack config" OFF)
