@@ -71,6 +71,7 @@ set_property(TEST ReadExampleEventData APPEND PROPERTY DEPENDS CreateExampleEven
 add_test_with_env(ReadExampleDataFromNthEvent options/readExampleDataFromNthEvent.py PROPERTIES DEPENDS CreateExampleEventData)
 
 add_test_with_env(AlgorithmWithTFile options/TestAlgorithmWithTFile.py)
+set_property(TEST AlgorithmWithTFile WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 add_test(NAME AlgorithmWithTFileCheckFrameworkOutput
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
          COMMAND  python scripts/check_TestAlgorithmWithTFile_framework_nonempty.py)
