@@ -52,7 +52,7 @@ public:
   mutable std::mutex m_mutex;
 
   ServiceHandle<IIOSvc>          iosvc{this, "IOSvc", "IOSvc"};
-  ServiceHandle<IHiveWhiteBoard> m_hiveWhiteBoard{this, "EventDataSvc", "EventDataSvc"};
+  SmartIF<IHiveWhiteBoard> m_hiveWhiteBoard;
   SmartIF<IDataProviderSvc>      m_dataSvc;
   mutable bool                   m_first{true};
 
@@ -66,6 +66,12 @@ public:
     if (!m_dataSvc) {
       error() << "Unable to locate IDataSvc interface" << endmsg;
       return StatusCode::FAILURE;
+    }
+
+    m_hiveWhiteBoard = service<IHiveWhiteBoard>("EventDataSvc", true);
+    if (!m_hiveWhiteBoard) {
+      debug() << "Unable to locate IHiveWhiteBoard interface. This isn't a problem if we are not running in a multi-threaded environment"
+             << endmsg;
     }
 
     return StatusCode::SUCCESS;
@@ -252,7 +258,7 @@ public:
       }
     }
 
-    info() << "Writing frame, with time: "
+    debug() << "Writing frame, with time: "
            << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
                   .count()
            << endmsg;
