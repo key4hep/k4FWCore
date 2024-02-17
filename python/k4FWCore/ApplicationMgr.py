@@ -18,8 +18,7 @@
 #
 from Configurables import ApplicationMgr as AppMgr
 from Configurables import Reader, Writer, IOSvc
-
-# seq = Gaudi__Sequencer("Node", Members=[reader, transformer, writer], Sequential=True, OutputLevel=INFO)
+from Configurables import Gaudi__Sequencer
 
 class ApplicationMgr:
 
@@ -32,4 +31,4 @@ class ApplicationMgr:
                 if 'input' in props:
                     self._mgr.TopAlg =  [Reader("Reader")] + self._mgr.TopAlg
                 if 'output' in props:
-                    self._mgr.TopAlg = self._mgr.TopAlg + [Writer("Writer")]
+                    self._mgr.TopAlg = [Gaudi__Sequencer("Sequencer", Members=[*self._mgr.TopAlg, Writer("Writer")], Sequential=True)]
