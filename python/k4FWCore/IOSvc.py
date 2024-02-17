@@ -37,9 +37,6 @@ class IOSvc:
         if attr == 'input':
             if isinstance(value, str):
                 value = [value]
-            for inp in value:
-                if os.path.dirname(inp) and not os.path.exists(inp):
-                    os.makedirs(os.path.dirname(inp))
         if attr == 'output':
             if os.path.dirname(value) and not os.path.exists(os.path.dirname(value)):
                 os.makedirs(os.path.dirname(value))
