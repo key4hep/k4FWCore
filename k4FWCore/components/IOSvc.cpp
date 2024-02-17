@@ -116,7 +116,6 @@ void IOSvc::handle(const Incident& incident) {
   DataObject* p;
   code = m_dataSvc->retrieveObject("/Event/_Frame", p);
   if (code.isFailure()) {
-    info() << "No frame found" << endmsg;
     return;
   }
 
