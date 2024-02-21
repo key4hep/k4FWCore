@@ -40,7 +40,7 @@ slimeventloopmgr = HiveSlimEventLoopMgr("HiveSlimEventLoopMgr",
 scheduler = AvalancheSchedulerSvc(ThreadPoolSize=threads, OutputLevel=WARNING)
 
 svc = IOSvc("IOSvc")
-svc.input = ['output_k4test_exampledata_producer.root']
+svc.input = 'output_k4test_exampledata_producer.root'
 svc.output = 'functional_transformerMT.root'
 
 
