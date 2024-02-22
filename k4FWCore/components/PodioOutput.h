@@ -22,7 +22,15 @@
 #include "GaudiAlg/GaudiAlgorithm.h"
 #include "k4FWCore/KeepDropSwitch.h"
 #include "podio/CollectionBase.h"
+#include "podio/podioVersion.h"
+#if PODIO_BUILD_VERSION >= PODIO_VERSION(0, 99, 0)
+#include "podio/ROOTWriter.h"
+#else
 #include "podio/ROOTFrameWriter.h"
+namespace podio {
+using ROOTWriter = podio::ROOTFrameWriter;
+}
+#endif
 
 #include <vector>
 
@@ -56,7 +64,7 @@ private:
   KeepDropSwitch m_switch;
   PodioDataSvc*  m_podioDataSvc;
   /// The actual ROOT frame writer
-  std::unique_ptr<podio::ROOTFrameWriter> m_framewriter;
+  std::unique_ptr<podio::ROOTWriter> m_framewriter;
   /// The stored collections
   std::vector<podio::CollectionBase*> m_storedCollections;
   /// The collections to write out
