@@ -32,7 +32,6 @@ namespace edm4hep {
   using TrackerHit3DCollection = edm4hep::TrackerHitCollection;
 }  // namespace edm4hep
 #endif
-#include "edm4hep/TrackerHitPlaneCollection.h"
 #include "podio/UserDataCollection.h"
 
 #include <string>
