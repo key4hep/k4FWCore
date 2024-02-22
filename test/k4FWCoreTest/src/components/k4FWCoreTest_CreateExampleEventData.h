@@ -25,6 +25,16 @@
 // key4hep
 #include "k4FWCore/DataHandle.h"
 
+// edm4hep
+#if __has_include("edm4hep/TrackerHit3DCollection.h")
+#include "edm4hep/TrackerHit3DCollection.h"
+#else
+#include "edm4hep/TrackerHitCollection.h"
+namespace edm4hep {
+  using TrackerHit3DCollection = edm4hep::TrackerHitCollection;
+}  // namespace edm4hep
+#endif
+
 // podio
 #include "podio/UserDataCollection.h"
 
@@ -32,7 +42,6 @@
 namespace edm4hep {
   class MCParticleCollection;
   class SimTrackerHitCollection;
-  class TrackerHitCollection;
   class SimCaloHitCollection;
   class TrackCollection;
 }  // namespace edm4hep
@@ -69,7 +78,7 @@ private:
   DataHandle<edm4hep::MCParticleCollection> m_mcParticleHandle{"MCParticles", Gaudi::DataHandle::Writer, this};
   /// Handle for the SimTrackerHits to be written
   DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitHandle{"SimTrackerHits", Gaudi::DataHandle::Writer, this};
-  DataHandle<edm4hep::TrackerHitCollection>    m_TrackerHitHandle{"TrackerHits", Gaudi::DataHandle::Writer, this};
+  DataHandle<edm4hep::TrackerHit3DCollection>  m_TrackerHitHandle{"TrackerHits", Gaudi::DataHandle::Writer, this};
 
   /// Handle for the Tracks to be written
   DataHandle<edm4hep::TrackCollection> m_trackHandle{"Tracks", Gaudi::DataHandle::Writer, this};

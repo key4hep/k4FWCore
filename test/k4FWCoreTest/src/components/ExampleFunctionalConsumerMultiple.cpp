@@ -23,7 +23,14 @@
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/SimTrackerHitCollection.h"
 #include "edm4hep/TrackCollection.h"
+#if __has_include("edm4hep/TrackerHit3DCollection.h")
+#include "edm4hep/TrackerHit3DCollection.h"
+#else
 #include "edm4hep/TrackerHitCollection.h"
+namespace edm4hep {
+  using TrackerHit3DCollection = edm4hep::TrackerHitCollection;
+}  // namespace edm4hep
+#endif
 #include "podio/UserDataCollection.h"
 
 // Define BaseClass_t
@@ -37,7 +44,7 @@
 using FloatColl         = podio::UserDataCollection<float>;
 using ParticleColl      = edm4hep::MCParticleCollection;
 using SimTrackerHitColl = edm4hep::SimTrackerHitCollection;
-using TrackerHitColl    = edm4hep::TrackerHitCollection;
+using TrackerHitColl    = edm4hep::TrackerHit3DCollection;
 using TrackColl         = edm4hep::TrackCollection;
 
 struct ExampleFunctionalConsumerMultiple final
