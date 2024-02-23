@@ -38,7 +38,7 @@ StatusCode PodioOutput::initialize() {
     return StatusCode::FAILURE;
   }
 
-  m_framewriter = std::make_unique<podio::ROOTFrameWriter>(m_filename);
+  m_framewriter = std::make_unique<podio::ROOTWriter>(m_filename);
   m_switch      = KeepDropSwitch(m_outputCommands);
 
   return StatusCode::SUCCESS;

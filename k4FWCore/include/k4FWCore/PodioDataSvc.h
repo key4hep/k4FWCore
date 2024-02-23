@@ -26,7 +26,15 @@
 #include "podio/CollectionBase.h"
 #include "podio/CollectionIDTable.h"
 #include "podio/Frame.h"
+#include "podio/podioVersion.h"
+#if PODIO_BUILD_VERSION >= PODIO_VERSION(0, 99, 0)
+#include "podio/ROOTReader.h"
+#else
 #include "podio/ROOTFrameReader.h"
+namespace podio {
+  using ROOTReader = podio::ROOTFrameReader;
+}
+#endif
 // Forward declarations
 #include "k4FWCore/DataWrapper.h"
 class DataWrapperBase;
@@ -95,7 +103,7 @@ public:
 
 private:
   /// PODIO reader for ROOT files
-  podio::ROOTFrameReader m_reader;
+  podio::ROOTReader m_reader;
   /// PODIO Frame, used to initialise collections
   podio::Frame m_eventframe;
   /// PODIO Frame, used to store metadata
