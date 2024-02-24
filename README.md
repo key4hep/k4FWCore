@@ -1,6 +1,6 @@
 # k4FWCore (key4hep FrameWork Core)
 
-k4FWCore is a Gaudi package that provides the PodioDataService, which allows to
+ k4FWCore is a Gaudi package that provides the PodioDataService, which allows to
 use podio-based event data models like EDM4hep in Gaudi workflows.
 
 k4FWCore also provides the `k4run` script used to run Gaudi steering files.
