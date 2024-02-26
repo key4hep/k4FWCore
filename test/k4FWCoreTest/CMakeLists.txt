@@ -113,3 +113,16 @@ add_test_with_env(ExampleFunctionalConsumerMultiple options/runExampleFunctional
 add_test_with_env(ExampleFunctionalTransformerMultiple options/runExampleFunctionalTransformerMultiple.py PROPERTIES DEPENDS ExampleFunctionalProducerMultiple)
 add_test_with_env(FunctionalChain options/runFunctionalChain.py)
 add_test_with_env(FunctionalMix options/runFunctionalMix.py PROPERTIES DEPENDS ExampleFunctionalProducerMultiple)
+
+add_test_with_env(k4run_ArgHandling_defaults options/k4run_ArgHandlingTest.py)
+add_test_with_env(k4run_ArgHandling_singleValues options/k4run_ArgHandlingTest.py
+  --ArgChecker.testCase singleValues
+  --ArgChecker.integer 123
+  --ArgChecker.float 1.23
+  --ArgChecker.string "some string with spaces even"
+)
+add_test_with_env(k4run_ArgHandling_vectorValues options/k4run_ArgHandlingTest.py
+  --ArgChecker.testCase vectorValues
+  --ArgChecker.stringVec one,two,three
+  --ArgChecker.intVec 42,84,123
+)

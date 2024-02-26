@@ -26,6 +26,17 @@ def load_file(file):
   exec(file.read(), {})
 
 
+def _make_list_parser(type_f):
+  """Make a list parser function that can be passed to argparse to return a list
+  of arguments from a comma separated list. Potentially converting elements
+  according to type_f
+  """
+  def _parse_list(arg_string):
+    return [type_f(arg) for arg in arg_string.split(",")]
+
+  return _parse_list
+
+
 def add_arguments(parser, app_mgr):
   # length increases when properties of an algorithm with tools are inspected
   # see https://github.com/key4hep/k4FWCore/pull/138
@@ -46,18 +57,13 @@ def add_arguments(parser, app_mgr):
       if propvalue == conf.propertyNoValue:
           propvalue = conf.getDefaultProperty(prop) # thus get the default value
       proptype = type(props[prop][0])
-      # if the property is a list of something, we need to set argparse nargs to '+'
-      propnargs = "?"
       if proptype == list:
           # tricky edgecase: if the default is an empty list there is no way to get the type
           if len(propvalue) == 0:
-          # just skip for now
-          #print("Warning: argparse cannot deduce type for property %s of %s. Needs to be set in options file." % (prop, conf.name()))
-            continue
+            proptype = _make_list_parser(str)
           else:
             # deduce type from first item of the list
-            proptype = type(propvalue[0])
-          propnargs = "+"
+            proptype = _make_list_parser(type(propvalue[0]))
 
       # add the argument twice, once as "--PodioOutput.filename"
       # and once as "--filename.PodioOutput"
@@ -65,7 +71,7 @@ def add_arguments(parser, app_mgr):
       propNameReversed = prop + '.' + conf.name()
       option_db[propName] = (conf, propName)
       parser.add_argument( f"--{propName}", f"--{propNameReversed}", type=proptype, help=props[prop][1],
-          nargs=propnargs,
+          nargs="?",
           default=propvalue)
 
 
