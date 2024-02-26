@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 #ifndef SIMG4INTERFACE_ISIMG4MAGNETICFIELDTOOL_H
-#define SIMG4INTERFACE_ISIM4MAGNETICFIELDTOOL_H
+#define SIMG4INTERFACE_ISIMG4MAGNETICFIELDTOOL_H
 
 // from Gaudi
 #include "GaudiKernel/IAlgTool.h"
