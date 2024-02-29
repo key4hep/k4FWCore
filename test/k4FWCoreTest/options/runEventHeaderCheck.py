@@ -29,7 +29,9 @@ svc.input = ["eventHeader.root"]
 
 reader = Reader("Reader")
 
-consumer = ExampleEventHeaderConsumer("EventHeaderCheck", runNumber=42, eventNumberOffset=42)
+consumer = ExampleEventHeaderConsumer(
+    "EventHeaderCheck", runNumber=42, eventNumberOffset=42
+)
 
 ApplicationMgr(
     TopAlg=[reader, consumer],

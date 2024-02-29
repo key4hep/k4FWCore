@@ -22,7 +22,14 @@
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/SimTrackerHitCollection.h"
 #include "edm4hep/TrackCollection.h"
+#if __has_include("edm4hep/TrackerHit3DCollection.h")
+#include "edm4hep/TrackerHit3DCollection.h"
+#else
 #include "edm4hep/TrackerHitCollection.h"
+namespace edm4hep {
+  using TrackerHit3DCollection = edm4hep::TrackerHitCollection;
+}  // namespace edm4hep
+#endif
 #include "podio/UserDataCollection.h"
 
 #include "k4FWCore/Transformer.h"
@@ -35,14 +42,14 @@
 using FloatColl         = std::map<std::string, std::shared_ptr<podio::UserDataCollection<float>>>;
 using ParticleColl      = std::map<std::string, std::shared_ptr<edm4hep::MCParticleCollection>>;
 using SimTrackerHitColl = std::map<std::string, std::shared_ptr<edm4hep::SimTrackerHitCollection>>;
-using TrackerHitColl    = std::map<std::string, std::shared_ptr<edm4hep::TrackerHitCollection>>;
+using TrackerHitColl    = std::map<std::string, std::shared_ptr<edm4hep::TrackerHit3DCollection>>;
 using TrackColl         = std::map<std::string, std::shared_ptr<edm4hep::TrackCollection>>;
 
 using retType = std::tuple<std::map<std::string, std::shared_ptr<podio::UserDataCollection<float>>>,
                            std::map<std::string, std::shared_ptr<edm4hep::MCParticleCollection>>,
                            std::map<std::string, std::shared_ptr<edm4hep::MCParticleCollection>>,
                            std::map<std::string, std::shared_ptr<edm4hep::SimTrackerHitCollection>>,
-                           std::map<std::string, std::shared_ptr<edm4hep::TrackerHitCollection>>,
+                           std::map<std::string, std::shared_ptr<edm4hep::TrackerHit3DCollection>>,
                            std::map<std::string, std::shared_ptr<edm4hep::TrackCollection>>>;
 
 struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
@@ -78,7 +85,7 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
     auto particleMapOut      = std::map<std::string, std::shared_ptr<edm4hep::MCParticleCollection>>();
     auto particle2MapOut     = std::map<std::string, std::shared_ptr<edm4hep::MCParticleCollection>>();
     auto simTrackerHitMapOut = std::map<std::string, std::shared_ptr<edm4hep::SimTrackerHitCollection>>();
-    auto trackerHitMapOut    = std::map<std::string, std::shared_ptr<edm4hep::TrackerHitCollection>>();
+    auto trackerHitMapOut    = std::map<std::string, std::shared_ptr<edm4hep::TrackerHit3DCollection>>();
     auto trackMapOut         = std::map<std::string, std::shared_ptr<edm4hep::TrackCollection>>();
 
     if (floatMap.size() != 3) {
@@ -154,7 +161,7 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
     }
 
     for (auto& [key, trackerHits] : trackerHitMap) {
-      auto ptr = std::make_shared<edm4hep::TrackerHitCollection>();
+      auto ptr = std::make_shared<edm4hep::TrackerHit3DCollection>();
       if ((trackerHits->at(0).getPosition()[0] != 3) || (trackerHits->at(0).getPosition()[1] != 4) ||
           (trackerHits->at(0).getPosition()[2] != 5)) {
         std::stringstream error;

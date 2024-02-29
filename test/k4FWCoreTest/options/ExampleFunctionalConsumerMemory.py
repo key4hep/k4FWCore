@@ -25,17 +25,20 @@ from Configurables import ExampleFunctionalProducer, ExampleFunctionalConsumer
 from Configurables import EventDataSvc
 from k4FWCore import ApplicationMgr
 
-producer = ExampleFunctionalProducer("ExampleFunctionalProducer",
-                                     OutputCollection="MCParticles",
-                                     )
+producer = ExampleFunctionalProducer(
+    "ExampleFunctionalProducer",
+    OutputCollection="MCParticles",
+)
 
-consumer = ExampleFunctionalConsumer("ExampleFunctionalConsumer",
-                                     InputCollection="MCParticles",
-                                     )
+consumer = ExampleFunctionalConsumer(
+    "ExampleFunctionalConsumer",
+    InputCollection="MCParticles",
+)
 
-ApplicationMgr(TopAlg=[producer, consumer],
-               EvtSel="NONE",
-               EvtMax=10,
-               ExtSvc=[EventDataSvc("EventDataSvc")],
-               OutputLevel=INFO,
-               )
+ApplicationMgr(
+    TopAlg=[producer, consumer],
+    EvtSel="NONE",
+    EvtMax=10,
+    ExtSvc=[EventDataSvc("EventDataSvc")],
+    OutputLevel=INFO,
+)

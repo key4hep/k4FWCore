@@ -21,36 +21,43 @@
 # to check that the contents of the file are the expected ones
 
 from Gaudi.Configuration import INFO
-from Configurables import ExampleFunctionalProducerMultiple, ExampleFunctionalTransformerMultiple, ExampleFunctionalConsumerMultiple
+from Configurables import (
+    ExampleFunctionalProducerMultiple,
+    ExampleFunctionalTransformerMultiple,
+    ExampleFunctionalConsumerMultiple,
+)
 from Configurables import EventDataSvc
 from k4FWCore import ApplicationMgr
 
-transformer = ExampleFunctionalTransformerMultiple("Transformer",
-                                                   InputCollectionFloat="VectorFloat",
-                                                   InputCollectionParticles="MCParticles1",
-                                                   InputCollectionSimTrackerHits="SimTrackerHits",
-                                                   InputCollectionTrackerHits="TrackerHits",
-                                                   InputCollectionTracks="Tracks",
-                                                   OutputCollectionCounter="Counter",
-                                                   OutputCollectionParticles="NewMCParticles",
-                                                   Offset=10,
-                                                   )
+transformer = ExampleFunctionalTransformerMultiple(
+    "Transformer",
+    InputCollectionFloat="VectorFloat",
+    InputCollectionParticles="MCParticles1",
+    InputCollectionSimTrackerHits="SimTrackerHits",
+    InputCollectionTrackerHits="TrackerHits",
+    InputCollectionTracks="Tracks",
+    OutputCollectionCounter="Counter",
+    OutputCollectionParticles="NewMCParticles",
+    Offset=10,
+)
 
 producer = ExampleFunctionalProducerMultiple("Producer")
 
-consumer = ExampleFunctionalConsumerMultiple("Consumer",
-                                             InputCollectionFloat="VectorFloat",
-                                             InputCollectionParticles="NewMCParticles",
-                                             InputCollectionSimTrackerHits="SimTrackerHits",
-                                             InputCollectionTrackerHits="TrackerHits",
-                                             InputCollectionTracks="Tracks",
-                                             Offset=10,
-                                             )
+consumer = ExampleFunctionalConsumerMultiple(
+    "Consumer",
+    InputCollectionFloat="VectorFloat",
+    InputCollectionParticles="NewMCParticles",
+    InputCollectionSimTrackerHits="SimTrackerHits",
+    InputCollectionTrackerHits="TrackerHits",
+    InputCollectionTracks="Tracks",
+    Offset=10,
+)
 
 
-ApplicationMgr(TopAlg=[producer, transformer, consumer],
-               EvtSel="NONE",
-               EvtMax=10,
-               ExtSvc=[EventDataSvc("EventDataSvc")],
-               OutputLevel=INFO,
-               )
+ApplicationMgr(
+    TopAlg=[producer, transformer, consumer],
+    EvtSel="NONE",
+    EvtMax=10,
+    ExtSvc=[EventDataSvc("EventDataSvc")],
+    OutputLevel=INFO,
+)

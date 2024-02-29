@@ -21,8 +21,14 @@
 #
 
 from Gaudi.Configuration import INFO
-from Configurables import ExampleFunctionalConsumerMultiple, ExampleFunctionalTransformerMultiple
-from Configurables import ExampleFunctionalProducerMultiple, k4FWCoreTest_CreateExampleEventData
+from Configurables import (
+    ExampleFunctionalConsumerMultiple,
+    ExampleFunctionalTransformerMultiple,
+)
+from Configurables import (
+    ExampleFunctionalProducerMultiple,
+    k4FWCoreTest_CreateExampleEventData,
+)
 from Configurables import k4FWCoreTest_CheckExampleEventData
 from Configurables import ApplicationMgr
 from Configurables import k4DataSvc
@@ -41,7 +47,9 @@ inp.collections = [
     "Tracks",
 ]
 
-consumer_input_functional = ExampleFunctionalConsumerMultiple("ExampleFunctionalConsumerMultiple")
+consumer_input_functional = ExampleFunctionalConsumerMultiple(
+    "ExampleFunctionalConsumerMultiple"
+)
 consumer_input_algorithm = k4FWCoreTest_CheckExampleEventData("CheckExampleEventData")
 consumer_input_algorithm.mcparticles = "MCParticles1"
 consumer_input_algorithm.keepEventNumberZero = True
@@ -74,13 +82,17 @@ producer_algorithm.trackhits = "TrackerHits__"
 producer_algorithm.tracks = "Tracks__"
 producer_algorithm.vectorfloat = "VectorFloat__"
 
-consumer_produceralg_functional = ExampleFunctionalConsumerMultiple("FunctionalConsumerAlgorithm")
+consumer_produceralg_functional = ExampleFunctionalConsumerMultiple(
+    "FunctionalConsumerAlgorithm"
+)
 consumer_produceralg_algorithm = k4FWCoreTest_CheckExampleEventData("CheckAlgorithm")
 consumer_produceralg_algorithm.mcparticles = "FunctionalMCParticles"
 consumer_produceralg_algorithm.keepEventNumberZero = True
 
 # Let's also run the transformer, why not
-transformer_functional = ExampleFunctionalTransformerMultiple("FunctionalTransformerMultiple")
+transformer_functional = ExampleFunctionalTransformerMultiple(
+    "FunctionalTransformerMultiple"
+)
 
 out = PodioOutput("out")
 out.filename = "output_k4test_exampledata_functional_mix.root"

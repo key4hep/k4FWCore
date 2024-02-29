@@ -21,31 +21,39 @@
 # to check that the contents of the file are the expected ones
 
 from Gaudi.Configuration import INFO
-from Configurables import ExampleFunctionalProducerRuntimeCollections, ExampleFunctionalConsumer
+from Configurables import (
+    ExampleFunctionalProducerRuntimeCollections,
+    ExampleFunctionalConsumer,
+)
 from Configurables import ApplicationMgr
 from Configurables import EventDataSvc
 
-producer = ExampleFunctionalProducerRuntimeCollections("Producer",
-                                                       OutputCollections=["MCParticles0", "MCParticles1", "MCParticles2"],
-                                                       )
+producer = ExampleFunctionalProducerRuntimeCollections(
+    "Producer",
+    OutputCollections=["MCParticles0", "MCParticles1", "MCParticles2"],
+)
 
-consumer0 = ExampleFunctionalConsumer("Consumer0",
-                                     InputCollection="MCParticles0",
-                                     Offset=0,
-                                     )
-consumer1 = ExampleFunctionalConsumer("Consumer1",
-                                     InputCollection="MCParticles1",
-                                     Offset=0,
-                                     )
-consumer2 = ExampleFunctionalConsumer("Consumer2",
-                                     InputCollection="MCParticles2",
-                                     Offset=0,
-                                     )
+consumer0 = ExampleFunctionalConsumer(
+    "Consumer0",
+    InputCollection="MCParticles0",
+    Offset=0,
+)
+consumer1 = ExampleFunctionalConsumer(
+    "Consumer1",
+    InputCollection="MCParticles1",
+    Offset=0,
+)
+consumer2 = ExampleFunctionalConsumer(
+    "Consumer2",
+    InputCollection="MCParticles2",
+    Offset=0,
+)
 
 
-ApplicationMgr(TopAlg=[producer, consumer0, consumer1, consumer2],
-               EvtSel="NONE",
-               EvtMax=10,
-               ExtSvc=[EventDataSvc("EventDataSvc")],
-               OutputLevel=INFO,
-               )
+ApplicationMgr(
+    TopAlg=[producer, consumer0, consumer1, consumer2],
+    EvtSel="NONE",
+    EvtMax=10,
+    ExtSvc=[EventDataSvc("EventDataSvc")],
+    OutputLevel=INFO,
+)

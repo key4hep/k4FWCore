@@ -29,9 +29,10 @@ io.output = "/tmp/a/b/c/output_k4test_exampledata_producer.root"
 
 producer = ExampleFunctionalProducer("ExampleFunctionalProducer")
 
-ApplicationMgr(TopAlg=[producer],
-               EvtSel="NONE",
-               EvtMax=10,
-               ExtSvc=[EventDataSvc("EventDataSvc")],
-               OutputLevel=INFO,
-               )
+ApplicationMgr(
+    TopAlg=[producer],
+    EvtSel="NONE",
+    EvtMax=10,
+    ExtSvc=[EventDataSvc("EventDataSvc")],
+    OutputLevel=INFO,
+)
