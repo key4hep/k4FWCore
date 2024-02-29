@@ -25,7 +25,14 @@
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/SimTrackerHitCollection.h"
 #include "edm4hep/TrackCollection.h"
+#if __has_include("edm4hep/TrackerHit3DCollection.h")
+#include "edm4hep/TrackerHit3DCollection.h"
+#else
 #include "edm4hep/TrackerHitCollection.h"
+namespace edm4hep {
+  using TrackerHit3DCollection = edm4hep::TrackerHitCollection;
+}  // namespace edm4hep
+#endif
 #include "podio/UserDataCollection.h"
 
 #include <string>
@@ -34,7 +41,7 @@
 
 using retType =
     std::tuple<podio::UserDataCollection<float>, edm4hep::MCParticleCollection, edm4hep::MCParticleCollection,
-               edm4hep::SimTrackerHitCollection, edm4hep::TrackerHitCollection, edm4hep::TrackCollection>;
+               edm4hep::SimTrackerHitCollection, edm4hep::TrackerHit3DCollection, edm4hep::TrackCollection>;
 
 struct ExampleFunctionalProducerMultiple final : k4FWCore::Producer<retType()> {
   // The pairs in KeyValue can be changed from python and they correspond
@@ -68,7 +75,7 @@ struct ExampleFunctionalProducerMultiple final : k4FWCore::Producer<retType()> {
     auto hit            = simTrackerHits.create();
     hit.setPosition({3, 4, 5});
 
-    auto trackerHits = edm4hep::TrackerHitCollection();
+    auto trackerHits = edm4hep::TrackerHit3DCollection();
     auto trackerHit  = trackerHits.create();
     trackerHit.setPosition({3, 4, 5});
 

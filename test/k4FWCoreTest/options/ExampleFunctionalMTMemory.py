@@ -21,17 +21,22 @@
 # to check that the contents of the file are the expected ones
 
 from Gaudi.Configuration import INFO, WARNING
-from Configurables import ExampleFunctionalProducer, ExampleFunctionalTransformer, ExampleFunctionalConsumer
+from Configurables import (
+    ExampleFunctionalProducer,
+    ExampleFunctionalTransformer,
+    ExampleFunctionalConsumer,
+)
 from Configurables import HiveWhiteBoard, HiveSlimEventLoopMgr, AvalancheSchedulerSvc
 from k4FWCore import ApplicationMgr
 
 evtslots = 5
 threads = 3
 
-whiteboard = HiveWhiteBoard("EventDataSvc",
-                            EventSlots=evtslots,
-                            ForceLeaves=True,
-                            )
+whiteboard = HiveWhiteBoard(
+    "EventDataSvc",
+    EventSlots=evtslots,
+    ForceLeaves=True,
+)
 
 slimeventloopmgr = HiveSlimEventLoopMgr(
     SchedulerName="AvalancheSchedulerSvc", OutputLevel=WARNING
@@ -39,23 +44,24 @@ slimeventloopmgr = HiveSlimEventLoopMgr(
 
 scheduler = AvalancheSchedulerSvc(ThreadPoolSize=threads, OutputLevel=WARNING)
 
-transformer = ExampleFunctionalTransformer("Transformer",
-                                           InputCollection="MCParticles",
-                                           OutputCollection="NewMCParticles")
+transformer = ExampleFunctionalTransformer(
+    "Transformer", InputCollection="MCParticles", OutputCollection="NewMCParticles"
+)
 
-producer = ExampleFunctionalProducer("Producer",
-                                     OutputCollection="MCParticles")
+producer = ExampleFunctionalProducer("Producer", OutputCollection="MCParticles")
 
-consumer = ExampleFunctionalConsumer("Consumer",
-                                     InputCollection="NewMCParticles",
-                                     Offset=10,
-                                     )
+consumer = ExampleFunctionalConsumer(
+    "Consumer",
+    InputCollection="NewMCParticles",
+    Offset=10,
+)
 
 
-ApplicationMgr(TopAlg=[producer, transformer, consumer],
-               EvtSel="NONE",
-               EvtMax=10,
-               EventLoop=slimeventloopmgr,
-               ExtSvc=[whiteboard],
-               OutputLevel=INFO,
-               )
+ApplicationMgr(
+    TopAlg=[producer, transformer, consumer],
+    EvtSel="NONE",
+    EvtMax=10,
+    EventLoop=slimeventloopmgr,
+    ExtSvc=[whiteboard],
+    OutputLevel=INFO,
+)

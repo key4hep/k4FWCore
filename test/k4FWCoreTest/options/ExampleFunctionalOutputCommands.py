@@ -26,20 +26,24 @@ from Configurables import EventDataSvc
 from k4FWCore import ApplicationMgr, IOSvc
 
 svc = IOSvc("IOSvc")
-svc.input = ['output_k4test_exampledata_producer_multiple.root']
-svc.output = 'functional_transformer_multiple_output_commands.root'
-svc.outputCommands = ["drop Tracks",
-                      "drop Counter",
-                      "drop NewMCParticles",]
+svc.input = ["output_k4test_exampledata_producer_multiple.root"]
+svc.output = "functional_transformer_multiple_output_commands.root"
+svc.outputCommands = [
+    "drop Tracks",
+    "drop Counter",
+    "drop NewMCParticles",
+]
 
-transformer = ExampleFunctionalTransformerMultiple("Transformer",
-                                           # InputCollection="MCParticles",
-                                           # OutputCollection="NewMCParticles")
-                                                   )
+transformer = ExampleFunctionalTransformerMultiple(
+    "Transformer",
+    # InputCollection="MCParticles",
+    # OutputCollection="NewMCParticles")
+)
 
-mgr = ApplicationMgr(TopAlg=[transformer],
-               EvtSel="NONE",
-               EvtMax=-1,
-               ExtSvc=[EventDataSvc("EventDataSvc")],
-               OutputLevel=INFO,
-               )
+mgr = ApplicationMgr(
+    TopAlg=[transformer],
+    EvtSel="NONE",
+    EvtMax=-1,
+    ExtSvc=[EventDataSvc("EventDataSvc")],
+    OutputLevel=INFO,
+)
