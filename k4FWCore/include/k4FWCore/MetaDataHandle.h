@@ -57,8 +57,8 @@ template <typename T> MetaDataHandle<T>::~MetaDataHandle() {}
 template <typename T>
 MetaDataHandle<T>::MetaDataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode a)
     : m_eds("EventDataSvc", "DataHandle"), m_descriptor(descriptor), m_mode(a) {
-  StatusCode sc        = m_eds.retrieve();
-  m_podio_data_service = dynamic_cast<PodioDataSvc*>(m_eds.get());
+  StatusCode sc [[maybe_unused]] = m_eds.retrieve();
+  m_podio_data_service           = dynamic_cast<PodioDataSvc*>(m_eds.get());
   checkPodioDataSvc();
 }
 
@@ -67,8 +67,8 @@ template <typename T>
 MetaDataHandle<T>::MetaDataHandle(const Gaudi::DataHandle& handle, const std::string& descriptor,
                                   Gaudi::DataHandle::Mode a)
     : m_eds("EventDataSvc", "DataHandle"), m_descriptor(descriptor), m_dataHandle(&handle), m_mode(a) {
-  StatusCode sc        = m_eds.retrieve();
-  m_podio_data_service = dynamic_cast<PodioDataSvc*>(m_eds.get());
+  StatusCode sc [[maybe_unused]] = m_eds.retrieve();
+  m_podio_data_service           = dynamic_cast<PodioDataSvc*>(m_eds.get());
   checkPodioDataSvc();
 }
 
