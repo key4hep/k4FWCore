@@ -21,14 +21,12 @@
 
 from Gaudi.Configuration import INFO
 from Configurables import ExampleFunctionalProducer
-from Configurables import ApplicationMgr
-from Configurables import k4DataSvc
-from Configurables import PodioOutput
+from Configurables import EventDataSvc
+from k4FWCore import ApplicationMgr, IOSvc
 
-podioevent = k4DataSvc("EventDataSvc")
 
-out = PodioOutput("out")
-out.filename = "output_k4test_exampledata_producer.root"
+iosvc = IOSvc("IOSvc")
+iosvc.output = "output_k4test_exampledata_producer.root"
 # Collections can be dropped
 # out.outputCommands = ["drop *"]
 
@@ -36,9 +34,9 @@ out.filename = "output_k4test_exampledata_producer.root"
 producer = ExampleFunctionalProducer("ExampleFunctionalProducer")
 
 ApplicationMgr(
-    TopAlg=[producer, out],
+    TopAlg=[producer],
     EvtSel="NONE",
     EvtMax=10,
-    ExtSvc=[k4DataSvc("EventDataSvc")],
+    ExtSvc=[EventDataSvc("EventDataSvc")],
     OutputLevel=INFO,
 )
