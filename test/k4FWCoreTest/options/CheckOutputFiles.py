@@ -27,7 +27,11 @@ except ImportError:
 
 def check_collections(filename, names):
     podio_reader = podio.root_io.Reader(filename)
-    for frame in podio_reader.get("events"):
+    frames = podio_reader.get("events")
+    if not len(frames) and len(names):
+        print(f"File {filename} is empty but {names} are expected")
+        raise RuntimeError("File is empty but should not be")
+    for frame in frames:
         available = set(frame.getAvailableCollections())
         if available != set(names):
             print(
@@ -58,3 +62,4 @@ check_collections(
     ["VectorFloat", "MCParticles1", "MCParticles2", "SimTrackerHits", "TrackerHits"],
 )
 check_collections("/tmp/a/b/c/output_k4test_exampledata_producer.root", ["MCParticles"])
+check_collections("functional_transformer_runtime_empty.root", [])
