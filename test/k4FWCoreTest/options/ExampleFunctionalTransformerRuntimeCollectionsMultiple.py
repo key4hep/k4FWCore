@@ -26,7 +26,7 @@ from Configurables import (
     ExampleFunctionalConsumerMultiple,
     ExampleFunctionalProducerMultiple,
 )
-from Configurables import ApplicationMgr
+from k4FWCore import ApplicationMgr
 from Configurables import EventDataSvc
 
 producer0 = ExampleFunctionalProducerMultiple(
