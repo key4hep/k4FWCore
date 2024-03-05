@@ -25,7 +25,7 @@ from Configurables import (
     ExampleFunctionalProducerRuntimeCollections,
     ExampleFunctionalConsumer,
 )
-from Configurables import ApplicationMgr
+from k4FWCore import ApplicationMgr
 from Configurables import EventDataSvc
 
 producer = ExampleFunctionalProducerRuntimeCollections(
