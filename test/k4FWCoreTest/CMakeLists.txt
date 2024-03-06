@@ -108,7 +108,7 @@ add_test_with_env(Testk4runVerboseOutput options/TestArgs.py --verbose PROPERTIE
 add_test_with_env(Testk4runHelpOnly options/TestArgs.py --help PROPERTIES PASS_REGULAR_EXPRESSION "show this help message and exit")
 
 
-add_test_with_env(FunctionalMemory options/ExampleFunctionalMemory.py)
+add_test_with_env(FunctionalMemory options/ExampleFunctionalMemory.py PROPERTIES PASS_REGULAR_EXPRESSION "Application Manager Terminated successfully with a user requested ScheduledStop")
 add_test_with_env(FunctionalMTMemory options/ExampleFunctionalMTMemory.py)
 add_test_with_env(FunctionalMultipleMemory options/ExampleFunctionalMultipleMemory.py)
 add_test_with_env(FunctionalProducer options/ExampleFunctionalProducer.py)
