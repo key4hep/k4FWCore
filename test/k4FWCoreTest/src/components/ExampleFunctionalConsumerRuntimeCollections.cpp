@@ -26,14 +26,14 @@
 #include <string>
 
 struct ExampleFunctionalConsumerRuntimeCollections final
-    : k4FWCore::Consumer<void(const std::map<std::string, edm4hep::MCParticleCollection&>& input)> {
+    : k4FWCore::Consumer<void(const std::map<std::string, const edm4hep::MCParticleCollection&>& input)> {
   // The pair in KeyValue can be changed from python and it corresponds
   // to the name of the output collection
   ExampleFunctionalConsumerRuntimeCollections(const std::string& name, ISvcLocator* svcLoc)
       : Consumer(name, svcLoc, KeyValues("InputCollection", {"DefaultValue"})) {}
 
   // This is the function that will be called to produce the data
-  void operator()(const std::map<std::string, edm4hep::MCParticleCollection&>& input) const override {
+  void operator()(const std::map<std::string, const edm4hep::MCParticleCollection&>& input) const override {
     if (input.size() != 3) {
       fatal() << "Wrong size of the input map, expected 3, got " << input.size() << endmsg;
     }

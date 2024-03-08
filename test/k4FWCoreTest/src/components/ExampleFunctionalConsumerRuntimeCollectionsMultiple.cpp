@@ -28,8 +28,8 @@
 #include <string>
 
 struct ExampleFunctionalConsumerRuntimeCollectionsMultiple final
-    : k4FWCore::Consumer<void(const std::map<std::string, edm4hep::MCParticleCollection&>& particleMap,
-                              const std::map<std::string, edm4hep::TrackCollection&>&         trackMap,
+    : k4FWCore::Consumer<void(const std::map<std::string, const edm4hep::MCParticleCollection&>& particleMap,
+                              const std::map<std::string, const edm4hep::TrackCollection&>&         trackMap,
                               const edm4hep::SimTrackerHitCollection& simTrackerHits)> {
   // The pair in KeyValue can be changed from python and it corresponds
   // to the name of the output collection
@@ -40,8 +40,8 @@ struct ExampleFunctionalConsumerRuntimeCollectionsMultiple final
   // : Consumer(name, svcLoc, {KeyValue("Particles", ("MCParticles")), KeyValue("Tracks", ("MCParticles")), KeyValue("SimTrackerHits", ("MCParticles"))}) {}
 
   // This is the function that will be called to produce the data
-  void operator()(const std::map<std::string, edm4hep::MCParticleCollection&>& particleMap,
-                  const std::map<std::string, edm4hep::TrackCollection&>&         trackMap,
+  void operator()(const std::map<std::string, const edm4hep::MCParticleCollection&>& particleMap,
+                  const std::map<std::string, const edm4hep::TrackCollection&>&         trackMap,
                   const edm4hep::SimTrackerHitCollection& simTrackerHits) const override {
     info() << "Received " << particleMap.size() << " particle collections and " << trackMap.size()
            << " track collections" << endmsg;
