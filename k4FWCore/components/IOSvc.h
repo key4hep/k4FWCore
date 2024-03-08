@@ -34,15 +34,12 @@
 #include "IIOSvc.h"
 
 #include <string>
-#include <type_traits>
 #include <vector>
 
 class IOSvc : public extends<Service, IIOSvc, IIncidentListener> {
   using extends::extends;
 
 public:
-  // Gaudi doesn't run the destructor of the Services so we have to
-  // manually ask for the writer to be deleted so it will call finish()
   ~IOSvc() override = default;
 
   StatusCode initialize() override;
@@ -80,21 +77,15 @@ protected:
 
   std::shared_ptr<podio::ROOTWriter> getWriter() override {
     if (!m_writer) {
-      m_writer = std::shared_ptr<podio::ROOTWriter>(new podio::ROOTWriter(m_writingFileName.value()));
+      m_writer = std::make_shared<podio::ROOTWriter>(m_writingFileName.value());
     }
     return m_writer;
   }
 
-  void deleteWriter() override {
-    if (m_writer) {
-      m_writer = nullptr;
-    }
-  }
-  void deleteReader() override {
-    if (m_reader) {
-      m_reader = nullptr;
-    }
-  }
+  // Gaudi doesn't always run the destructor of the Services so we have to
+  // manually ask for the writer to be deleted so it will call finish()
+  void deleteWriter() override { m_writer.reset(); }
+  void deleteReader() override { m_reader.reset(); }
 
   SmartIF<IDataProviderSvc> m_dataSvc;
   SmartIF<IIncidentSvc>     m_incidentSvc;
