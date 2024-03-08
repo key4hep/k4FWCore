@@ -21,24 +21,24 @@
 # to check that the contents of the file are the expected ones
 
 from Gaudi.Configuration import INFO
-from Configurables import ExampleFunctionalTransformer
-from k4FWCore import ApplicationMgr, IOSvc
+from Configurables import ExampleFunctionalTransformer, ExampleFunctionalProducer, ExampleFunctionalConsumer
+from k4FWCore import ApplicationMgr
 from Configurables import EventDataSvc
 
-iosvc = IOSvc()
-iosvc.input = "output_k4test_exampledata_producer.root"
-iosvc.output = "output_k4test_exampledata_transformer.root"
-# The collections that we don't drop will also be present in the output file
-# out.outputCommands = ["drop MCParticles"]
-
 transformer = ExampleFunctionalTransformer(
-    "ExampleFunctionalTransformer",
-    InputCollection="MCParticles",
-    OutputCollection="NewMCParticles",
+    "Transformer", InputCollection="MCParticles", OutputCollection="NewMCParticles"
+)
+
+producer = ExampleFunctionalProducer("Producer", OutputCollection="MCParticles")
+
+consumer = ExampleFunctionalConsumer(
+    "Consumer",
+    InputCollection="NewMCParticles",
+    Offset=10,
 )
 
 ApplicationMgr(
-    TopAlg=[transformer],
+    TopAlg=[producer, transformer, consumer],
     EvtSel="NONE",
     EvtMax=10,
     ExtSvc=[EventDataSvc("EventDataSvc")],
