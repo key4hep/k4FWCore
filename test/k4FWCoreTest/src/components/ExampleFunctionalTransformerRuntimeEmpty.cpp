@@ -34,7 +34,7 @@
 
 using mapType = std::map<std::string, std::shared_ptr<edm4hep::MCParticleCollection>>;
 
-struct ExampleFunctionalTransformerRuntimeEmpty final : k4FWCore::Transformer<mapType(const mapType& input)> {
+struct ExampleFunctionalTransformerRuntimeEmpty final : k4FWCore::Transformer<std::map<std::string, edm4hep::MCParticleCollection>(const mapType& input)> {
   // The pair in KeyValue can be changed from python and it corresponds
   // to the name of the output collection
   ExampleFunctionalTransformerRuntimeEmpty(const std::string& name, ISvcLocator* svcLoc)
@@ -42,9 +42,9 @@ struct ExampleFunctionalTransformerRuntimeEmpty final : k4FWCore::Transformer<ma
                     {KeyValues("OutputCollections", {"MCParticles"})}) {}
 
   // This is the function that will be called to produce the data
-  mapType operator()(const mapType& input) const override {
+  std::map<std::string, edm4hep::MCParticleCollection> operator()(const mapType& input) const override {
     // We just return an empty map to make sure it works fine
-    std::map<std::string, std::shared_ptr<edm4hep::MCParticleCollection>> outputCollections;
+    std::map<std::string, edm4hep::MCParticleCollection> outputCollections;
     return outputCollections;
   }
 
