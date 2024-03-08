@@ -32,7 +32,7 @@
  * but it's returning an empty map (no output collections)
  */
 
-using mapType = std::map<std::string, std::shared_ptr<edm4hep::MCParticleCollection>>;
+using mapType = std::map<std::string, const edm4hep::MCParticleCollection&>;
 
 struct ExampleFunctionalTransformerRuntimeEmpty final : k4FWCore::Transformer<std::map<std::string, edm4hep::MCParticleCollection>(const mapType& input)> {
   // The pair in KeyValue can be changed from python and it corresponds

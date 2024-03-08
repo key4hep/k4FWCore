@@ -96,7 +96,7 @@ namespace k4FWCore {
             // we have to remove the reference to get the actual type
             using EDM4hepType =
                 std::remove_reference_t<typename std::tuple_element_t<Index, std::tuple<In...>>::mapped_type>;
-            auto map = std::map<std::string, const EDM4hepType&>();
+            auto inputMap = std::map<std::string, const EDM4hepType&>();
 
             // To be locked
             if (!m_inputLocationsMap.contains(std::get<Index>(handles).objKey())) {
@@ -116,9 +116,9 @@ namespace k4FWCore {
               }
               const auto collection = dynamic_cast<AnyDataWrapper<std::shared_ptr<podio::CollectionBase>>*>(p);
               auto       ptr        = std::dynamic_pointer_cast<EDM4hepType>(collection->getData());
-              map.emplace(value, *ptr);
+              inputMap.emplace(value, *ptr);
             }
-            std::get<Index>(handles).put(std::move(map));
+            std::get<Index>(handles).put(std::move(inputMap));
           }
 
           // Recursive call for the next index
