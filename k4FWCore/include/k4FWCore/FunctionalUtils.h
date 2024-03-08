@@ -16,11 +16,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
+#ifndef FWCORE_FUNCTIONALUTILS_H
+#define FWCORE_FUNCTIONALUTILS_H
 
+#include "GaudiKernel/AnyDataWrapper.h"
+#include "GaudiKernel/DataObject.h"
 #include "podio/CollectionBase.h"
 
-#include "GaudiKernel/DataObjectHandle.h"
 #include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 
@@ -117,8 +119,8 @@ namespace k4FWCore {
     };
 
     template <size_t Index, typename... In, typename... Handles>
-    void readMapInputs(const std::tuple<Handles...>& handles, const auto& m_inputLocations,
-                       auto& m_inputLocationsMap, auto thisClass) {
+    void readMapInputs(const std::tuple<Handles...>& handles, const auto& m_inputLocations, auto& m_inputLocationsMap,
+                       auto thisClass) {
       if constexpr (Index < sizeof...(Handles)) {
         if constexpr (is_map_like<std::tuple_element_t<Index, std::tuple<In...>>>::value) {
           // In case of map types like std::map<std::string, edm4hep::MCParticleCollection&>
@@ -157,3 +159,5 @@ namespace k4FWCore {
 
   }  // namespace details
 }  // namespace k4FWCore
+
+#endif  // CORE_FUNCTIONALUTILS_H
