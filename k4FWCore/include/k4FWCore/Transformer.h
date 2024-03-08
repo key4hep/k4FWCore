@@ -117,40 +117,6 @@ namespace k4FWCore {
           : Transformer(std::move(name), locator, inputs, std::index_sequence_for<In...>{}, outputs,
                         std::index_sequence_for<Out>{}) {}
 
-      template <size_t Index, typename... Handles> void putMapInputs(const std::tuple<Handles...>& handles) const {
-        if constexpr (Index < sizeof...(Handles)) {
-          if constexpr (is_map_like<std::tuple_element_t<Index, std::tuple<In...>>>::value) {
-            using EDM4hepType =
-                typename ExtractInnerType<typename std::decay_t<decltype(std::get<Index>(handles))>>::type;
-            auto map = std::map<std::string, std::shared_ptr<EDM4hepType>>();
-
-            // To be locked
-            if (!m_inputLocationsMap.contains(std::get<Index>(handles).objKey())) {
-              auto vec = std::vector<std::string>();
-              vec.reserve(m_inputLocations[Index].value().size());
-              for (auto& val : m_inputLocations[Index].value()) {
-                vec.push_back(val.key());
-              }
-              m_inputLocationsMap[std::get<Index>(handles).objKey()] = vec;
-            }
-
-            for (auto& value : m_inputLocationsMap.at(std::get<Index>(handles).objKey())) {
-              DataObject* p;
-              auto        sc = this->evtSvc()->retrieveObject(value, p);
-              if (!sc.isSuccess()) {
-                throw GaudiException("Failed to retrieve object " + value, "Transformer", StatusCode::FAILURE);
-              }
-              const auto collection = dynamic_cast<AnyDataWrapper<std::shared_ptr<podio::CollectionBase>>*>(p);
-              map[value]            = std::dynamic_pointer_cast<EDM4hepType>(collection->getData());
-            }
-            std::get<Index>(handles).put(std::move(map));
-          }
-
-          // Recursive call for the next index
-          putMapInputs<Index + 1>(handles);
-        }
-      }
-
       // derived classes are NOT allowed to implement execute ...
       StatusCode execute(const EventContext& ctx) const override final {
         try {

@@ -69,17 +69,6 @@ namespace k4FWCore {
       return hash_string(first.first);
     }
 
-    template <typename T> struct ExtractInnerType;
-
-    template <typename Value>
-    struct ExtractInnerType<DataObjectReadHandle<std::map<std::string, std::shared_ptr<Value>>>> {
-      using type = Value;
-    };
-
-    template <typename Value> struct ExtractInnerType<std::map<std::string, std::shared_ptr<Value>>> {
-      using type = Value;
-    };
-
     template <typename T>
     std::enable_if_t<std::is_base_of_v<podio::CollectionBase, T>, std::shared_ptr<podio::CollectionBase>> transformType(
         const T& arg) {
