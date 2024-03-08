@@ -21,20 +21,12 @@
 
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/SimTrackerHitCollection.h"
-#include "edm4hep/TrackCollection.h"
-#if __has_include("edm4hep/TrackerHit3DCollection.h")
 #include "edm4hep/TrackerHit3DCollection.h"
-#else
-#include "edm4hep/TrackerHitCollection.h"
-namespace edm4hep {
-  using TrackerHit3DCollection = edm4hep::TrackerHitCollection;
-}  // namespace edm4hep
-#endif
+#include "edm4hep/TrackCollection.h"
 #include "podio/UserDataCollection.h"
 
 #include "k4FWCore/Transformer.h"
 
-#include <sstream>
 #include <stdexcept>
 #include <string>
 
@@ -45,12 +37,12 @@ using SimTrackerHitColl = std::map<std::string, std::shared_ptr<edm4hep::SimTrac
 using TrackerHitColl    = std::map<std::string, std::shared_ptr<edm4hep::TrackerHit3DCollection>>;
 using TrackColl         = std::map<std::string, std::shared_ptr<edm4hep::TrackCollection>>;
 
-using retType = std::tuple<std::map<std::string, std::shared_ptr<podio::UserDataCollection<float>>>,
-                           std::map<std::string, std::shared_ptr<edm4hep::MCParticleCollection>>,
-                           std::map<std::string, std::shared_ptr<edm4hep::MCParticleCollection>>,
-                           std::map<std::string, std::shared_ptr<edm4hep::SimTrackerHitCollection>>,
-                           std::map<std::string, std::shared_ptr<edm4hep::TrackerHit3DCollection>>,
-                           std::map<std::string, std::shared_ptr<edm4hep::TrackCollection>>>;
+using retType = std::tuple<std::map<std::string, podio::UserDataCollection<float>>,
+                           std::map<std::string, edm4hep::MCParticleCollection>,
+                           std::map<std::string, edm4hep::MCParticleCollection>,
+                           std::map<std::string, edm4hep::SimTrackerHitCollection>,
+                           std::map<std::string, edm4hep::TrackerHit3DCollection>,
+                           std::map<std::string, edm4hep::TrackCollection>>;
 
 struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
     : k4FWCore::MultiTransformer<retType(const FloatColl&, const ParticleColl&, const SimTrackerHitColl&,
@@ -81,12 +73,12 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
   retType operator()(const FloatColl& floatMap, const ParticleColl& particlesMap,
                      const SimTrackerHitColl& simTrackerHitMap, const TrackerHitColl& trackerHitMap,
                      const TrackColl& trackMap) const override {
-    auto floatMapOut         = std::map<std::string, std::shared_ptr<podio::UserDataCollection<float>>>();
-    auto particleMapOut      = std::map<std::string, std::shared_ptr<edm4hep::MCParticleCollection>>();
-    auto particle2MapOut     = std::map<std::string, std::shared_ptr<edm4hep::MCParticleCollection>>();
-    auto simTrackerHitMapOut = std::map<std::string, std::shared_ptr<edm4hep::SimTrackerHitCollection>>();
-    auto trackerHitMapOut    = std::map<std::string, std::shared_ptr<edm4hep::TrackerHit3DCollection>>();
-    auto trackMapOut         = std::map<std::string, std::shared_ptr<edm4hep::TrackCollection>>();
+    auto floatMapOut         = std::map<std::string, podio::UserDataCollection<float>>();
+    auto particleMapOut      = std::map<std::string, edm4hep::MCParticleCollection>();
+    auto particle2MapOut     = std::map<std::string, edm4hep::MCParticleCollection>();
+    auto simTrackerHitMapOut = std::map<std::string, edm4hep::SimTrackerHitCollection>();
+    auto trackerHitMapOut    = std::map<std::string, edm4hep::TrackerHit3DCollection>();
+    auto trackMapOut         = std::map<std::string, edm4hep::TrackCollection>();
 
     if (floatMap.size() != 3) {
       throw std::runtime_error("Wrong size of the floatVector collection map, expected 3, got " +
@@ -103,11 +95,11 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
               << ", " << floatVector->vec()[1] << ", " << floatVector->vec()[2] << "";
         throw std::runtime_error(error.str());
       }
-      auto ptr = std::make_shared<podio::UserDataCollection<float>>();
-      ptr->push_back(floatVector->vec()[0]);
-      ptr->push_back(floatVector->vec()[1]);
-      ptr->push_back(floatVector->vec()[2]);
-      floatMapOut["New" + key] = floatVector;
+      auto coll = podio::UserDataCollection<float>();
+      coll.push_back(floatVector->vec()[0]);
+      coll.push_back(floatVector->vec()[1]);
+      coll.push_back(floatVector->vec()[2]);
+      floatMapOut["New" + key] = std::move(coll);
     }
 
     if (particlesMap.size() != 3) {
@@ -116,7 +108,7 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
     }
 
     for (auto& [key, particles] : particlesMap) {
-      auto ptr = std::make_shared<edm4hep::MCParticleCollection>();
+      auto coll = edm4hep::MCParticleCollection();
       int  i   = 0;
       for (const auto& particle : *particles) {
         if ((particle.getPDG() != 1 + i + m_offset) || (particle.getGeneratorStatus() != 2 + i + m_offset) ||
@@ -129,10 +121,10 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
                 << particle.getSimulatorStatus() << ", " << particle.getCharge() << ", " << particle.getTime() << ", "
                 << particle.getMass() << "";
           throw std::runtime_error(error.str());
-          ptr->push_back(particle.clone());
+          coll.push_back(particle.clone());
         }
         i++;
-        particleMapOut["New" + key] = ptr;
+        particleMapOut["New" + key] = std::move(coll);
       }
     }
 
@@ -142,7 +134,7 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
     }
 
     for (auto& [key, simTrackerHits] : simTrackerHitMap) {
-      auto ptr = std::make_shared<edm4hep::SimTrackerHitCollection>();
+      auto coll = edm4hep::SimTrackerHitCollection();
       if ((simTrackerHits->at(0).getPosition()[0] != 3) || (simTrackerHits->at(0).getPosition()[1] != 4) ||
           (simTrackerHits->at(0).getPosition()[2] != 5)) {
         std::stringstream error;
@@ -151,8 +143,8 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
               << simTrackerHits->at(0).getPosition()[2] << "";
         throw std::runtime_error(error.str());
       }
-      ptr->push_back(simTrackerHits->at(0).clone());
-      simTrackerHitMapOut["New" + key] = ptr;
+      coll.push_back(simTrackerHits->at(0).clone());
+      simTrackerHitMapOut["New" + key] = std::move(coll);
     }
 
     if (trackerHitMap.size() != 3) {
@@ -161,7 +153,7 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
     }
 
     for (auto& [key, trackerHits] : trackerHitMap) {
-      auto ptr = std::make_shared<edm4hep::TrackerHit3DCollection>();
+      auto coll = edm4hep::TrackerHit3DCollection();
       if ((trackerHits->at(0).getPosition()[0] != 3) || (trackerHits->at(0).getPosition()[1] != 4) ||
           (trackerHits->at(0).getPosition()[2] != 5)) {
         std::stringstream error;
@@ -169,8 +161,8 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
               << ", " << trackerHits->at(0).getPosition()[1] << ", " << trackerHits->at(0).getPosition()[2] << "";
         throw std::runtime_error(error.str());
       }
-      ptr->push_back(trackerHits->at(0).clone());
-      trackerHitMapOut["New" + key] = ptr;
+      coll.push_back(trackerHits->at(0).clone());
+      trackerHitMapOut["New" + key] = std::move(coll);
     }
 
     if (trackMap.size() != 3) {
@@ -179,7 +171,7 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
     }
 
     for (auto& [key, tracks] : trackMap) {
-      auto ptr = std::make_shared<edm4hep::TrackCollection>();
+      auto coll = edm4hep::TrackCollection();
       if ((tracks->at(0).getType() != 1) || (std::abs(tracks->at(0).getChi2() - 2.1) > 1e-6) ||
           (tracks->at(0).getNdf() != 3) || (std::abs(tracks->at(0).getDEdx() - 4.1) > 1e-6) ||
           (std::abs(tracks->at(0).getDEdxError() - 5.1) > 1e-6) ||
@@ -190,8 +182,8 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
               << ", " << tracks->at(0).getDEdxError() << ", " << tracks->at(0).getRadiusOfInnermostHit() << "";
         throw std::runtime_error(error.str());
       }
-      ptr->push_back(tracks->at(0).clone());
-      trackMapOut["New" + key] = ptr;
+      coll->push_back(tracks->at(0).clone());
+      trackMapOut["New" + key] = std::move(coll);
     }
 
     return std::make_tuple(std::move(floatMapOut), std::move(particleMapOut), std::move(particle2MapOut),

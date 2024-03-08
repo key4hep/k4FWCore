@@ -190,11 +190,11 @@ namespace k4FWCore {
         try {
           readMapInputs<0>(this->m_inputs);
           if constexpr (is_map_like<Out>::value) {
-            for (auto [key, val] : filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs)) {
-              auto        shared = std::dynamic_pointer_cast<podio::CollectionBase>(val);
-              auto        w      = new AnyDataWrapper<std::shared_ptr<podio::CollectionBase>>(std::move(shared));
-              DataObject* p      = w;
-              auto        sc     = this->evtSvc()->registerObject(key, p);
+            for (auto& [key, val] : filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs)) {
+              auto        shared = std::make_shared<decltype(val)>(std::move(val));
+              auto        w  = new AnyDataWrapper<std::shared_ptr<podio::CollectionBase>>(shared);
+              DataObject* p  = w;
+              auto        sc = this->evtSvc()->registerObject(key, p);
             }
           } else {
             Gaudi::Functional::details::put(
@@ -328,12 +328,9 @@ namespace k4FWCore {
       template <size_t Index, typename... Handles> void putMapOutputs(std::tuple<Handles...>&& handles) const {
         if constexpr (Index < sizeof...(Handles)) {
           if constexpr (is_map_like<std::tuple_element_t<Index, std::tuple<Out...>>>::value) {
-            using EDM4hepType =
-                typename ExtractInnerType<typename std::decay_t<decltype(std::get<Index>(handles))>>::type;
-            auto map = std::map<std::string, std::shared_ptr<EDM4hepType>>();
 
-            for (auto [key, val] : std::get<Index>(handles)) {
-              auto        shared = std::dynamic_pointer_cast<podio::CollectionBase>(val);
+            for (auto& [key, val] : std::get<Index>(handles)) {
+              auto        shared = std::make_shared<decltype(val)>(std::move(val));
               auto        w      = new AnyDataWrapper<std::shared_ptr<podio::CollectionBase>>(std::move(shared));
               DataObject* p      = w;
               auto        sc     = this->evtSvc()->registerObject(key, p);
