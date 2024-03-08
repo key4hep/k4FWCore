@@ -31,11 +31,11 @@
 #include <string>
 
 // Which type of collection we are reading
-using FloatColl         = std::map<std::string, std::shared_ptr<podio::UserDataCollection<float>>>;
-using ParticleColl      = std::map<std::string, std::shared_ptr<edm4hep::MCParticleCollection>>;
-using SimTrackerHitColl = std::map<std::string, std::shared_ptr<edm4hep::SimTrackerHitCollection>>;
-using TrackerHitColl    = std::map<std::string, std::shared_ptr<edm4hep::TrackerHit3DCollection>>;
-using TrackColl         = std::map<std::string, std::shared_ptr<edm4hep::TrackCollection>>;
+using FloatColl         = std::map<std::string, const podio::UserDataCollection<float>&>;
+using ParticleColl      = std::map<std::string, const edm4hep::MCParticleCollection&>;
+using SimTrackerHitColl = std::map<std::string, const edm4hep::SimTrackerHitCollection&>;
+using TrackerHitColl    = std::map<std::string, const edm4hep::TrackerHit3DCollection&>;
+using TrackColl         = std::map<std::string, const edm4hep::TrackCollection&>;
 
 using retType = std::tuple<std::map<std::string, podio::UserDataCollection<float>>,
                            std::map<std::string, edm4hep::MCParticleCollection>,
@@ -85,20 +85,20 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
                                std::to_string(floatMap.size()) + "");
     }
     for (const auto& [key, floatVector] : floatMap) {
-      if (floatVector->size() != 3) {
+      if (floatVector.size() != 3) {
         throw std::runtime_error("Wrong size of floatVector collection, expected 3, got " +
-                                 std::to_string(floatVector->size()) + "");
+                                 std::to_string(floatVector.size()) + "");
       }
-      if ((floatVector->vec()[0] != 125) || (floatVector->vec()[1] != 25) || (floatVector->vec()[2] != 0)) {
+      if ((floatVector.vec()[0] != 125) || (floatVector.vec()[1] != 25) || (floatVector.vec()[2] != 0)) {
         std::stringstream error;
-        error << "Wrong data in floatVector collection, expected 125, 25, " << 0 << " got " << floatVector->vec()[0]
-              << ", " << floatVector->vec()[1] << ", " << floatVector->vec()[2] << "";
+        error << "Wrong data in floatVector collection, expected 125, 25, " << 0 << " got " << floatVector.vec()[0]
+              << ", " << floatVector.vec()[1] << ", " << floatVector.vec()[2] << "";
         throw std::runtime_error(error.str());
       }
       auto coll = podio::UserDataCollection<float>();
-      coll.push_back(floatVector->vec()[0]);
-      coll.push_back(floatVector->vec()[1]);
-      coll.push_back(floatVector->vec()[2]);
+      coll.push_back(floatVector.vec()[0]);
+      coll.push_back(floatVector.vec()[1]);
+      coll.push_back(floatVector.vec()[2]);
       floatMapOut["New" + key] = std::move(coll);
     }
 
@@ -110,7 +110,7 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
     for (auto& [key, particles] : particlesMap) {
       auto coll = edm4hep::MCParticleCollection();
       int  i   = 0;
-      for (const auto& particle : *particles) {
+      for (const auto& particle : particles) {
         if ((particle.getPDG() != 1 + i + m_offset) || (particle.getGeneratorStatus() != 2 + i + m_offset) ||
             (particle.getSimulatorStatus() != 3 + i + m_offset) || (particle.getCharge() != 4 + i + m_offset) ||
             (particle.getTime() != 5 + i + m_offset) || (particle.getMass() != 6 + i + m_offset)) {
@@ -135,15 +135,15 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
 
     for (auto& [key, simTrackerHits] : simTrackerHitMap) {
       auto coll = edm4hep::SimTrackerHitCollection();
-      if ((simTrackerHits->at(0).getPosition()[0] != 3) || (simTrackerHits->at(0).getPosition()[1] != 4) ||
-          (simTrackerHits->at(0).getPosition()[2] != 5)) {
+      if ((simTrackerHits.at(0).getPosition()[0] != 3) || (simTrackerHits.at(0).getPosition()[1] != 4) ||
+          (simTrackerHits.at(0).getPosition()[2] != 5)) {
         std::stringstream error;
         error << "Wrong data in simTrackerHits collection, expected 3, 4, 5 got "
-              << simTrackerHits->at(0).getPosition()[0] << ", " << simTrackerHits->at(0).getPosition()[1] << ", "
-              << simTrackerHits->at(0).getPosition()[2] << "";
+              << simTrackerHits.at(0).getPosition()[0] << ", " << simTrackerHits.at(0).getPosition()[1] << ", "
+              << simTrackerHits.at(0).getPosition()[2] << "";
         throw std::runtime_error(error.str());
       }
-      coll.push_back(simTrackerHits->at(0).clone());
+      coll.push_back(simTrackerHits.at(0).clone());
       simTrackerHitMapOut["New" + key] = std::move(coll);
     }
 
@@ -154,14 +154,14 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
 
     for (auto& [key, trackerHits] : trackerHitMap) {
       auto coll = edm4hep::TrackerHit3DCollection();
-      if ((trackerHits->at(0).getPosition()[0] != 3) || (trackerHits->at(0).getPosition()[1] != 4) ||
-          (trackerHits->at(0).getPosition()[2] != 5)) {
+      if ((trackerHits.at(0).getPosition()[0] != 3) || (trackerHits.at(0).getPosition()[1] != 4) ||
+          (trackerHits.at(0).getPosition()[2] != 5)) {
         std::stringstream error;
-        error << "Wrong data in trackerHits collection, expected 3, 4, 5 got " << trackerHits->at(0).getPosition()[0]
-              << ", " << trackerHits->at(0).getPosition()[1] << ", " << trackerHits->at(0).getPosition()[2] << "";
+        error << "Wrong data in trackerHits collection, expected 3, 4, 5 got " << trackerHits.at(0).getPosition()[0]
+              << ", " << trackerHits.at(0).getPosition()[1] << ", " << trackerHits.at(0).getPosition()[2] << "";
         throw std::runtime_error(error.str());
       }
-      coll.push_back(trackerHits->at(0).clone());
+      coll.push_back(trackerHits.at(0).clone());
       trackerHitMapOut["New" + key] = std::move(coll);
     }
 
@@ -172,17 +172,17 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
 
     for (auto& [key, tracks] : trackMap) {
       auto coll = edm4hep::TrackCollection();
-      if ((tracks->at(0).getType() != 1) || (std::abs(tracks->at(0).getChi2() - 2.1) > 1e-6) ||
-          (tracks->at(0).getNdf() != 3) || (std::abs(tracks->at(0).getDEdx() - 4.1) > 1e-6) ||
-          (std::abs(tracks->at(0).getDEdxError() - 5.1) > 1e-6) ||
-          (std::abs(tracks->at(0).getRadiusOfInnermostHit() - 6.1) > 1e-6)) {
+      if ((tracks.at(0).getType() != 1) || (std::abs(tracks.at(0).getChi2() - 2.1) > 1e-6) ||
+          (tracks.at(0).getNdf() != 3) || (std::abs(tracks.at(0).getDEdx() - 4.1) > 1e-6) ||
+          (std::abs(tracks.at(0).getDEdxError() - 5.1) > 1e-6) ||
+          (std::abs(tracks.at(0).getRadiusOfInnermostHit() - 6.1) > 1e-6)) {
         std::stringstream error;
-        error << "Wrong data in tracks collection, expected 1, 2.1, 3, 4.1, 5.1, 6.1 got " << tracks->at(0).getType()
-              << ", " << tracks->at(0).getChi2() << ", " << tracks->at(0).getNdf() << ", " << tracks->at(0).getDEdx()
-              << ", " << tracks->at(0).getDEdxError() << ", " << tracks->at(0).getRadiusOfInnermostHit() << "";
+        error << "Wrong data in tracks collection, expected 1, 2.1, 3, 4.1, 5.1, 6.1 got " << tracks.at(0).getType()
+              << ", " << tracks.at(0).getChi2() << ", " << tracks.at(0).getNdf() << ", " << tracks.at(0).getDEdx()
+              << ", " << tracks.at(0).getDEdxError() << ", " << tracks.at(0).getRadiusOfInnermostHit() << "";
         throw std::runtime_error(error.str());
       }
-      coll->push_back(tracks->at(0).clone());
+      coll->push_back(tracks.at(0).clone());
       trackMapOut["New" + key] = std::move(coll);
     }
 
