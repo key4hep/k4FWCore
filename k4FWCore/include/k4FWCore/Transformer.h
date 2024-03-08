@@ -51,8 +51,7 @@ namespace k4FWCore {
 
       std::tuple<InputHandle_t<decltype(transformType(std::declval<In>()))>...>                  m_inputs;
       std::tuple<OutputHandle_t<decltype(transformType(std::declval<Out>()))>>                   m_outputs;
-      std::map<std::string, std::vector<InputHandle_t<std::shared_ptr<podio::CollectionBase>>>>  m_extraInputs;
-      std::map<std::string, std::vector<OutputHandle_t<std::shared_ptr<podio::CollectionBase>>>> m_extraOutputs;
+      // std::map<std::string, std::vector<InputHandle_t<std::shared_ptr<podio::CollectionBase>>>>  m_extraInputs;
       std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)>                         m_inputLocations{};
       std::array<Gaudi::Property<DataObjID>, sizeof...(In)>                                      m_inputLocationsPair{};
       mutable std::map<std::string, std::vector<std::string>>                                    m_inputLocationsMap;
@@ -159,7 +158,6 @@ namespace k4FWCore {
       std::tuple<InputHandle_t<decltype(transformType(std::declval<In>()))>...>                  m_inputs;
       std::tuple<OutputHandle_t<decltype(transformType(std::declval<Out>()))>...>                m_outputs;
       std::map<std::string, std::vector<InputHandle_t<std::shared_ptr<podio::CollectionBase>>>>  m_extraInputs;
-      std::map<std::string, std::vector<OutputHandle_t<std::shared_ptr<podio::CollectionBase>>>> m_extraOutputs;
       std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)>                         m_inputLocations{};
       std::array<Gaudi::Property<DataObjID>, sizeof...(In)>                                      m_inputLocationsPair{};
       mutable std::map<std::string, std::vector<std::string>>                                    m_inputLocationsMap;
@@ -246,7 +244,6 @@ namespace k4FWCore {
       StatusCode execute(const EventContext& ctx) const override final {
         try {
           readMapInputs<0, In...>(this->m_inputs, m_inputLocations, m_inputLocationsMap, this);
-
           auto tmp = filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs);
           putMapOutputs<0>(std::move(tmp));
           return Gaudi::Functional::FilterDecision::PASSED;
