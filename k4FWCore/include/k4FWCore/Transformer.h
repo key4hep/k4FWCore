@@ -192,9 +192,9 @@ namespace k4FWCore {
           if constexpr (is_map_like<Out>::value) {
             for (auto& [key, val] : filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs)) {
               auto        shared = std::make_shared<decltype(val)>(std::move(val));
-              auto        w  = new AnyDataWrapper<std::shared_ptr<podio::CollectionBase>>(shared);
-              DataObject* p  = w;
-              auto        sc = this->evtSvc()->registerObject(key, p);
+              auto        w      = new AnyDataWrapper<std::shared_ptr<podio::CollectionBase>>(shared);
+              DataObject* p      = w;
+              auto        sc     = this->evtSvc()->registerObject(key, p);
             }
           } else {
             Gaudi::Functional::details::put(
@@ -328,7 +328,6 @@ namespace k4FWCore {
       template <size_t Index, typename... Handles> void putMapOutputs(std::tuple<Handles...>&& handles) const {
         if constexpr (Index < sizeof...(Handles)) {
           if constexpr (is_map_like<std::tuple_element_t<Index, std::tuple<Out...>>>::value) {
-
             for (auto& [key, val] : std::get<Index>(handles)) {
               auto        shared = std::make_shared<decltype(val)>(std::move(val));
               auto        w      = new AnyDataWrapper<std::shared_ptr<podio::CollectionBase>>(std::move(shared));

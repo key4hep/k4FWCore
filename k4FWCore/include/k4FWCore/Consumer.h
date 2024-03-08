@@ -94,7 +94,8 @@ namespace k4FWCore {
           if constexpr (is_map_like<std::tuple_element_t<Index, std::tuple<In...>>>::value) {
             // In case of map types like std::map<std::string, edm4hep::MCParticleCollection&>
             // we have to remove the reference to get the actual type
-            using EDM4hepType = std::remove_reference_t<typename std::tuple_element_t<Index, std::tuple<In...>>::mapped_type>;
+            using EDM4hepType =
+                std::remove_reference_t<typename std::tuple_element_t<Index, std::tuple<In...>>::mapped_type>;
             auto map = std::map<std::string, EDM4hepType&>();
 
             // To be locked
@@ -114,7 +115,7 @@ namespace k4FWCore {
                 throw GaudiException("Failed to retrieve object " + value, "Consumer", StatusCode::FAILURE);
               }
               const auto collection = dynamic_cast<AnyDataWrapper<std::shared_ptr<podio::CollectionBase>>*>(p);
-              auto ptr = std::dynamic_pointer_cast<EDM4hepType>(collection->getData());
+              auto       ptr        = std::dynamic_pointer_cast<EDM4hepType>(collection->getData());
               map.emplace(value, *ptr);
             }
             std::get<Index>(handles).put(std::move(map));
