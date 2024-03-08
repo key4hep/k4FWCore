@@ -96,7 +96,7 @@ namespace k4FWCore {
             // we have to remove the reference to get the actual type
             using EDM4hepType =
                 std::remove_reference_t<typename std::tuple_element_t<Index, std::tuple<In...>>::mapped_type>;
-            auto map = std::map<std::string, EDM4hepType&>();
+            auto map = std::map<std::string, const EDM4hepType&>();
 
             // To be locked
             if (!m_inputLocationsMap.contains(std::get<Index>(handles).objKey())) {
