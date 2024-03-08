@@ -18,16 +18,16 @@
  */
 #pragma once
 
-#include "Gaudi/Functional/details.h"
-#include "Gaudi/Functional/utilities.h"
-
 #include "podio/CollectionBase.h"
 
+#include "GaudiKernel/DataObjectHandle.h"
+#include "GaudiKernel/EventContext.h"
+#include "GaudiKernel/ThreadLocalContext.h"
+
+#include <map>
 #include <memory>
-#include <stdexcept>
 #include <tuple>
 #include <type_traits>
-#include <unordered_map>
 
 namespace k4FWCore {
 
@@ -39,8 +39,10 @@ namespace k4FWCore {
     template <typename T, typename P> const auto& maybeTransformToEDM4hep(const P& arg) { return arg; }
 
     template <typename T, typename P>
-    requires std::same_as<P, std::shared_ptr<podio::CollectionBase>>
-    const auto& maybeTransformToEDM4hep(const P& arg) { return static_cast<const T&>(*arg); }
+      requires std::same_as<P, std::shared_ptr<podio::CollectionBase>>
+    const auto& maybeTransformToEDM4hep(const P& arg) {
+      return static_cast<const T&>(*arg);
+    }
 
     template <typename T> struct is_map_like : std::false_type {};
 
