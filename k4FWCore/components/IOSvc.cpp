@@ -19,17 +19,16 @@
 
 #include "IOSvc.h"
 
-#include "edm4hep/MCParticleCollection.h"
 #include "podio/Frame.h"
 #include "podio/FrameCategories.h"
 
+#include "k4FWCore/FunctionalUtils.h"
 #include "k4FWCore/KeepDropSwitch.h"
 
 #include "GaudiKernel/AnyDataWrapper.h"
 #include "GaudiKernel/IEventProcessor.h"
 
 #include <mutex>
-#include <thread>
 #include <tuple>
 
 StatusCode IOSvc::initialize() {
@@ -114,12 +113,16 @@ void IOSvc::handle(const Incident& incident) {
     }
   }
   DataObject* p;
-  code = m_dataSvc->retrieveObject("/Event/_Frame", p);
+  code = m_dataSvc->retrieveObject("/Event" + k4FWCore::frameLocation, p);
   if (code.isFailure()) {
     return;
   }
 
   auto frame = dynamic_cast<AnyDataWrapper<podio::Frame>*>(p);
+  if (!frame) {
+    error() << "Expected Frame in " << k4FWCore::frameLocation << " but there was something else" << endmsg;
+    return;
+  }
   for (const auto& coll : frame->getData().getAvailableCollections()) {
     DataObject* collPtr;
     code = m_dataSvc->retrieveObject("/Event/" + coll, collPtr);
