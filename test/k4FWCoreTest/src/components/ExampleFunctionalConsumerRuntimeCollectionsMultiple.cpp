@@ -25,12 +25,11 @@
 
 #include "k4FWCore/Consumer.h"
 
-#include <memory>
 #include <string>
 
 struct ExampleFunctionalConsumerRuntimeCollectionsMultiple final
-    : k4FWCore::Consumer<void(const std::map<std::string, std::shared_ptr<edm4hep::MCParticleCollection>>& particleMap,
-                              const std::map<std::string, std::shared_ptr<podio::CollectionBase>>&         trackMap,
+    : k4FWCore::Consumer<void(const std::map<std::string, edm4hep::MCParticleCollection&>& particleMap,
+                              const std::map<std::string, edm4hep::TrackCollection&>&         trackMap,
                               const edm4hep::SimTrackerHitCollection& simTrackerHits)> {
   // The pair in KeyValue can be changed from python and it corresponds
   // to the name of the output collection
@@ -41,16 +40,15 @@ struct ExampleFunctionalConsumerRuntimeCollectionsMultiple final
   // : Consumer(name, svcLoc, {KeyValue("Particles", ("MCParticles")), KeyValue("Tracks", ("MCParticles")), KeyValue("SimTrackerHits", ("MCParticles"))}) {}
 
   // This is the function that will be called to produce the data
-  void operator()(const std::map<std::string, std::shared_ptr<edm4hep::MCParticleCollection>>& particleMap,
-                  const std::map<std::string, std::shared_ptr<podio::CollectionBase>>&         trackMap,
+  void operator()(const std::map<std::string, edm4hep::MCParticleCollection&>& particleMap,
+                  const std::map<std::string, edm4hep::TrackCollection&>&         trackMap,
                   const edm4hep::SimTrackerHitCollection& simTrackerHits) const override {
     info() << "Received " << particleMap.size() << " particle collections and " << trackMap.size()
            << " track collections" << endmsg;
     if (particleMap.size() != 5) {
       fatal() << "Wrong size of the particleMap map, expected 5, got " << particleMap.size() << endmsg;
     }
-    for (auto& [key, val] : particleMap) {
-      const auto& particles = *std::static_pointer_cast<edm4hep::MCParticleCollection>(val);
+    for (auto& [key, particles] : particleMap) {
       int         i         = 0;
       for (const auto& particle : particles) {
         if ((particle.getPDG() != 1 + i + m_offset) || (particle.getGeneratorStatus() != 2 + i + m_offset) ||
@@ -70,8 +68,7 @@ struct ExampleFunctionalConsumerRuntimeCollectionsMultiple final
     if (trackMap.size() != 3) {
       fatal() << "Wrong size of the tracks map, expected 3, got " << trackMap.size() << endmsg;
     }
-    for (auto& [key, val] : trackMap) {
-      const auto& tracks = *std::static_pointer_cast<edm4hep::TrackCollection>(val);
+    for (auto& [key, tracks] : trackMap) {
       if ((tracks[0].getType() != 1) || (std::abs(tracks[0].getChi2() - 2.1) > 1e-6) || (tracks[0].getNdf() != 3) ||
           (std::abs(tracks[0].getDEdx() - 4.1) > 1e-6) || (std::abs(tracks[0].getDEdxError() - 5.1) > 1e-6) ||
           (std::abs(tracks[0].getRadiusOfInnermostHit() - 6.1) > 1e-6)) {
