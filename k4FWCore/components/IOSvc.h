@@ -28,8 +28,6 @@
 
 #include "podio/ROOTReader.h"
 #include "podio/ROOTWriter.h"
-// #include "podio/RNTupleReader.h"
-// #include "podio/RNTupleWriter.h"
 
 #include "k4FWCore/KeepDropSwitch.h"
 
