@@ -23,24 +23,23 @@
 
 #include "k4FWCore/Consumer.h"
 
-#include <memory>
 #include <string>
 
 struct ExampleFunctionalConsumerRuntimeCollections final
-    : k4FWCore::Consumer<void(const std::map<std::string, std::shared_ptr<edm4hep::MCParticleCollection>>& input)> {
+    : k4FWCore::Consumer<void(const std::map<std::string, edm4hep::MCParticleCollection&>& input)> {
   // The pair in KeyValue can be changed from python and it corresponds
   // to the name of the output collection
   ExampleFunctionalConsumerRuntimeCollections(const std::string& name, ISvcLocator* svcLoc)
       : Consumer(name, svcLoc, KeyValues("InputCollection", {"DefaultValue"})) {}
 
   // This is the function that will be called to produce the data
-  void operator()(const std::map<std::string, std::shared_ptr<edm4hep::MCParticleCollection>>& input) const override {
+  void operator()(const std::map<std::string, edm4hep::MCParticleCollection&>& input) const override {
     if (input.size() != 3) {
       fatal() << "Wrong size of the input map, expected 3, got " << input.size() << endmsg;
     }
     for (auto& [key, val] : input) {
       int i = 0;
-      for (const auto& particle : *val) {
+      for (const auto& particle : val) {
         if ((particle.getPDG() != 1 + i + m_offset) || (particle.getGeneratorStatus() != 2 + i + m_offset) ||
             (particle.getSimulatorStatus() != 3 + i + m_offset) || (particle.getCharge() != 4 + i + m_offset) ||
             (particle.getTime() != 5 + i + m_offset) || (particle.getMass() != 6 + i + m_offset)) {

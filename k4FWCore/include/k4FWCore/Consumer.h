@@ -92,9 +92,10 @@ namespace k4FWCore {
       template <size_t Index, typename... Handles> void readMapInputs(const std::tuple<Handles...>& handles) const {
         if constexpr (Index < sizeof...(Handles)) {
           if constexpr (is_map_like<std::tuple_element_t<Index, std::tuple<In...>>>::value) {
-            using EDM4hepType =
-                typename ExtractInnerType<typename std::decay_t<decltype(std::get<Index>(handles))>>::type;
-            auto map = std::map<std::string, std::shared_ptr<EDM4hepType>>();
+            // In case of map types like std::map<std::string, edm4hep::MCParticleCollection&>
+            // we have to remove the reference to get the actual type
+            using EDM4hepType = std::remove_reference_t<typename std::tuple_element_t<Index, std::tuple<In...>>::mapped_type>;
+            auto map = std::map<std::string, EDM4hepType&>();
 
             // To be locked
             if (!m_inputLocationsMap.contains(std::get<Index>(handles).objKey())) {
@@ -113,7 +114,8 @@ namespace k4FWCore {
                 throw GaudiException("Failed to retrieve object " + value, "Consumer", StatusCode::FAILURE);
               }
               const auto collection = dynamic_cast<AnyDataWrapper<std::shared_ptr<podio::CollectionBase>>*>(p);
-              map[value]            = std::dynamic_pointer_cast<EDM4hepType>(collection->getData());
+              auto ptr = std::dynamic_pointer_cast<EDM4hepType>(collection->getData());
+              map.emplace(value, *ptr);
             }
             std::get<Index>(handles).put(std::move(map));
           }
