@@ -117,43 +117,6 @@ namespace k4FWCore {
           : Transformer(std::move(name), locator, inputs, std::index_sequence_for<In...>{}, outputs,
                         std::index_sequence_for<Out>{}) {}
 
-      template <size_t Index, typename... Handles> void readMapInputs(const std::tuple<Handles...>& handles) const {
-        if constexpr (Index < sizeof...(Handles)) {
-          if constexpr (is_map_like<std::tuple_element_t<Index, std::tuple<In...>>>::value) {
-            // In case of map types like std::map<std::string, edm4hep::MCParticleCollection&>
-            // we have to remove the reference to get the actual type
-            using EDM4hepType =
-                std::remove_reference_t<typename std::tuple_element_t<Index, std::tuple<In...>>::mapped_type>;
-            auto inputMap = std::map<std::string, const EDM4hepType&>();
-
-            // To be locked
-            if (!m_inputLocationsMap.contains(std::get<Index>(handles).objKey())) {
-              auto vec = std::vector<std::string>();
-              vec.reserve(m_inputLocations[Index].value().size());
-              for (auto& val : m_inputLocations[Index].value()) {
-                vec.push_back(val.key());
-              }
-              m_inputLocationsMap[std::get<Index>(handles).objKey()] = vec;
-            }
-
-            for (auto& value : m_inputLocationsMap.at(std::get<Index>(handles).objKey())) {
-              DataObject* p;
-              auto        sc = this->evtSvc()->retrieveObject(value, p);
-              if (!sc.isSuccess()) {
-                throw GaudiException("Failed to retrieve object " + value, "Transformer", StatusCode::FAILURE);
-              }
-              const auto collection = dynamic_cast<AnyDataWrapper<std::shared_ptr<podio::CollectionBase>>*>(p);
-              auto       ptr        = std::dynamic_pointer_cast<EDM4hepType>(collection->getData());
-              inputMap.emplace(value, *ptr);
-            }
-            std::get<Index>(handles).put(std::move(inputMap));
-          }
-
-          // Recursive call for the next index
-          readMapInputs<Index + 1>(handles);
-        }
-      }
-
       template <size_t Index, typename... Handles> void putMapInputs(const std::tuple<Handles...>& handles) const {
         if constexpr (Index < sizeof...(Handles)) {
           if constexpr (is_map_like<std::tuple_element_t<Index, std::tuple<In...>>>::value) {
@@ -184,14 +147,14 @@ namespace k4FWCore {
           }
 
           // Recursive call for the next index
-          readMapInputs<Index + 1>(handles);
+          putMapInputs<Index + 1>(handles);
         }
       }
 
       // derived classes are NOT allowed to implement execute ...
       StatusCode execute(const EventContext& ctx) const override final {
         try {
-          readMapInputs<0>(this->m_inputs);
+          readMapInputs<0, In...>(this->m_inputs, m_inputLocations, m_inputLocationsMap, this);
           if constexpr (is_map_like<Out>::value) {
             for (auto& [key, val] : filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs)) {
               auto        shared = std::make_shared<decltype(val)>(std::move(val));
@@ -294,43 +257,6 @@ namespace k4FWCore {
           : MultiTransformer(std::move(name), locator, inputs, std::index_sequence_for<In...>{}, outputs,
                              std::index_sequence_for<Out...>{}) {}
 
-      template <size_t Index, typename... Handles> void readMapInputs(const std::tuple<Handles...>& handles) const {
-        if constexpr (Index < sizeof...(Handles)) {
-          if constexpr (is_map_like<std::tuple_element_t<Index, std::tuple<In...>>>::value) {
-            // In case of map types like std::map<std::string, edm4hep::MCParticleCollection&>
-            // we have to remove the reference to get the actual type
-            using EDM4hepType =
-                std::remove_reference_t<typename std::tuple_element_t<Index, std::tuple<In...>>::mapped_type>;
-            auto inputMap = std::map<std::string, const EDM4hepType&>();
-
-            // To be locked
-            if (!m_inputLocationsMap.contains(std::get<Index>(handles).objKey())) {
-              auto vec = std::vector<std::string>();
-              vec.reserve(m_inputLocations[Index].value().size());
-              for (auto& val : m_inputLocations[Index].value()) {
-                vec.push_back(val.key());
-              }
-              m_inputLocationsMap[std::get<Index>(handles).objKey()] = vec;
-            }
-
-            for (auto& value : m_inputLocationsMap.at(std::get<Index>(handles).objKey())) {
-              DataObject* p;
-              auto        sc = this->evtSvc()->retrieveObject(value, p);
-              if (!sc.isSuccess()) {
-                throw GaudiException("Failed to retrieve object " + value, "MultiTransformer", StatusCode::FAILURE);
-              }
-              const auto collection = dynamic_cast<AnyDataWrapper<std::shared_ptr<podio::CollectionBase>>*>(p);
-              auto       ptr        = std::dynamic_pointer_cast<EDM4hepType>(collection->getData());
-              inputMap.emplace(value, *ptr);
-            }
-            std::get<Index>(handles).put(std::move(inputMap));
-          }
-
-          // Recursive call for the next index
-          readMapInputs<Index + 1>(handles);
-        }
-      }
-
       template <size_t Index, typename... Handles> void putMapOutputs(std::tuple<Handles...>&& handles) const {
         if constexpr (Index < sizeof...(Handles)) {
           if constexpr (is_map_like<std::tuple_element_t<Index, std::tuple<Out...>>>::value) {
@@ -353,7 +279,7 @@ namespace k4FWCore {
       // derived classes are NOT allowed to implement execute ...
       StatusCode execute(const EventContext& ctx) const override final {
         try {
-          readMapInputs<0>(this->m_inputs);
+          readMapInputs<0, In...>(this->m_inputs, m_inputLocations, m_inputLocationsMap, this);
 
           auto tmp = filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs);
           putMapOutputs<0>(std::move(tmp));
