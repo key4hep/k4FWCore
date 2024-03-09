@@ -24,7 +24,6 @@
 #include "GaudiKernel/SmartDataPtr.h"
 #include "GaudiKernel/StatusCode.h"
 
-#include "edm4hep/MCParticleCollection.h"
 #include "podio/Frame.h"
 
 #include "IIOSvc.h"
@@ -34,7 +33,6 @@
 
 #include <GaudiKernel/IHiveWhiteBoard.h>
 #include <memory>
-#include <thread>
 
 class Writer final : public Gaudi::Functional::Consumer<void(const EventContext&)> {
 public:

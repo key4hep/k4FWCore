@@ -17,10 +17,11 @@
 # limitations under the License.
 #
 import ROOT
+import sys
 
 ROOT.gSystem.Load("libedm4hepDict")
 
-file = ROOT.TFile.Open("output_k4test_exampledata_2.root")
+file = ROOT.TFile.Open(sys.argv[1])
 tree = file.Get("events")
 tree.GetEntry(0)
 
@@ -29,5 +30,5 @@ if ndf == 0:
     raise Exception("podio::CollectionBase read from file did not saved properly")
 
 status = tree.GetBranchStatus("MCParticles")
-if status == True:
+if status:
     raise Exception("KeepDropSwitch did not drop the collection")
