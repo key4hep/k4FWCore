@@ -157,6 +157,24 @@ namespace k4FWCore {
       }
     }
 
+    template <size_t Index, typename... In, typename... Handles>
+    void deleteMapInputs(const std::tuple<Handles...>& handles, auto thisClass) {
+      if constexpr (Index < sizeof...(Handles)) {
+        if constexpr (is_map_like<std::tuple_element_t<Index, std::tuple<In...>>>::value) {
+          // In case of map types like std::map<std::string, edm4hep::MCParticleCollection&>
+          // we have to remove the reference to get the actual type
+          auto sc = thisClass->evtSvc()->unregisterObject(std::get<Index>(handles).objKey());
+          if (!sc.isSuccess()) {
+            throw GaudiException("Failed to retrieve object " + std::get<Index>(handles).objKey(), "Consumer",
+                                 StatusCode::FAILURE);
+          }
+        }
+      // Recursive call for the next index
+      deleteMapInputs<Index + 1, In...>(handles, thisClass);
+      }
+
+    }
+
   }  // namespace details
 }  // namespace k4FWCore
 

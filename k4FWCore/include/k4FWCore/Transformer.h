@@ -132,6 +132,10 @@ namespace k4FWCore {
                 std::get<0>(this->m_outputs),
                 ptrOrCast(std::move(filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs))));
           }
+          // If any input has map type, we remove it from the store since it has been pushed
+          // but we don't want the map to be available as a map for other algorithms and
+          // all the individual collections have alreaody been pushed
+          deleteMapInputs<0, In...>(this->m_inputs, this);
           return Gaudi::Functional::FilterDecision::PASSED;
         } catch (GaudiException& e) {
           (e.code() ? this->warning() : this->error()) << e.tag() << " : " << e.message() << endmsg;
@@ -246,6 +250,10 @@ namespace k4FWCore {
           readMapInputs<0, In...>(this->m_inputs, m_inputLocations, m_inputLocationsMap, this);
           auto tmp = filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs);
           putMapOutputs<0>(std::move(tmp));
+          // If any input has map type, we remove it from the store since it has been pushed
+          // but we don't want the map to be available as a map for other algorithms and
+          // all the individual collections have alreaody been pushed
+          deleteMapInputs<0, In...>(this->m_inputs, this);
           return Gaudi::Functional::FilterDecision::PASSED;
         } catch (GaudiException& e) {
           (e.code() ? this->warning() : this->error()) << e.tag() << " : " << e.message() << endmsg;
