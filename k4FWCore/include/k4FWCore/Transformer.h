@@ -23,13 +23,10 @@
 #include "Gaudi/Functional/details.h"
 #include "Gaudi/Functional/utilities.h"
 
-#include "podio/CollectionBase.h"
-
 #include "k4FWCore/FunctionalUtils.h"
 
 // #include "GaudiKernel/CommonMessaging.h"
 
-#include <memory>
 #include <type_traits>
 #include <utility>
 
@@ -49,14 +46,10 @@ namespace k4FWCore {
       template <typename T>
       using OutputHandle_t = Gaudi::Functional::details::OutputHandle_t<Traits_, std::remove_pointer_t<T>>;
 
-      std::tuple<InputHandle_t<decltype(transformType(std::declval<In>()))>...>                  m_inputs;
-      std::tuple<OutputHandle_t<decltype(transformType(std::declval<Out>()))>>                   m_outputs;
-      // std::map<std::string, std::vector<InputHandle_t<std::shared_ptr<podio::CollectionBase>>>>  m_extraInputs;
-      std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)>                         m_inputLocations{};
-      std::array<Gaudi::Property<DataObjID>, sizeof...(In)>                                      m_inputLocationsPair{};
-      mutable std::map<std::string, std::vector<std::string>>                                    m_inputLocationsMap;
-      std::array<Gaudi::Property<std::vector<DataObjID>>, 1>                                     m_outputLocations{};
-      std::array<Gaudi::Property<DataObjID>, 1> m_outputLocationsPair{};
+      std::tuple<std::vector<InputHandle_t<typename transformType<In>::type>>...> m_inputs;
+      std::tuple<std::vector<OutputHandle_t<typename transformType<Out>::type>>>           m_outputs;
+      std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)>          m_inputLocations{};
+      std::array<Gaudi::Property<std::vector<DataObjID>>, 1>                      m_outputLocations{};
 
       using base_class = Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>;
 
@@ -67,45 +60,32 @@ namespace k4FWCore {
                   const OArgs& outputs, std::index_sequence<J...>)
           : base_class(std::move(name), locator),
             m_inputLocations{Gaudi::Property<std::vector<DataObjID>>{
-                this, getName<In>(std::get<I>(inputs), false), {DataObjID{std::get<I>(inputs).second[0]}}}...},
-            m_inputLocationsPair{Gaudi::Property<DataObjID>{
-                this, getName<In>(std::get<I>(inputs), true), DataObjID{std::get<I>(inputs).second[0]},
+                this, std::get<I>(inputs).first, to_DataObjID(std::get<I>(inputs).second),
                 [this](Gaudi::Details::PropertyBase&) {
-                  if constexpr (!is_map_like<In>::value) {
-                    auto& handle = std::get<I>(m_inputs);
-                    auto& ins    = m_inputLocationsPair[I];
-                    handle       = {ins.value(), this};
+                  std::vector<InputHandle_t<typename transformType<In>::type>> h;
+                  for (auto& value : this->m_inputLocations[I].value()) {
+                    auto handle = InputHandle_t<typename transformType<In>::type>(value, this);
+                    h.push_back(std::move(handle));
                   }
+                  std::get<I>(m_inputs) = std::move(h);
                 },
                 Gaudi::Details::Property::ImmediatelyInvokeHandler{true}}...},
             m_outputLocations{Gaudi::Property<std::vector<DataObjID>>{
-                this, getName<Out>(std::get<J>(outputs), false), {DataObjID{std::get<J>(outputs).second[0]}}}...},
-            m_outputLocationsPair{Gaudi::Property<DataObjID>{
-                this, getName<Out>(std::get<J>(outputs), true), DataObjID{std::get<J>(outputs).second[0]},
+                this, std::get<J>(outputs).first, to_DataObjID(std::get<J>(outputs).second),
                 [this](Gaudi::Details::PropertyBase&) {
-                  if constexpr (!is_map_like<Out>::value) {
-                    auto& handle = std::get<J>(m_outputs);
-                    auto& ins    = m_outputLocationsPair[J];
-                    handle       = {ins.value(), this};
+                  std::vector<OutputHandle_t<typename transformType<Out>::type>> h;
+                  std::sort(this->m_outputLocations[J].value().begin(), this->m_outputLocations[J].value().end(),
+                            [](const DataObjID& a, const DataObjID& b) { return a.key() < b.key(); });
+                  for (auto& inpID : this->m_outputLocations[J].value()) {
+                    if (inpID.key().empty()) {
+                      continue;
+                    }
+                    auto handle = OutputHandle_t<typename transformType<Out>::type>(inpID, this);
+                    h.push_back(std::move(handle));
                   }
+                  std::get<0>(m_outputs) = std::move(h);
                 },
-                Gaudi::Details::Property::ImmediatelyInvokeHandler{true}}...},
-            // m_inputs{std::tuple<InputHandle_t<decltype(transformType<In>...)>>(InputHandle_t<decltype(transformType<In>...)>(std::get<I>(inputs).first, this)...)}
-            m_inputs{InputHandle_t<decltype(transformType(std::declval<In>()))>(std::get<I>(inputs).first, this)...},
-            m_outputs{OutputHandle_t<decltype(transformType(std::declval<Out>()))>(std::get<J>(outputs).first, this)...}
-
-      {
-        // if constexpr (std::is_same_v<In, std::map<std::string, std::shared_ptr<podio::CollectionBase>>>) {
-        //   // for (auto& value : std::get<I...>(inputs).second) {
-        //   //   Gaudi::Algorithm::info() << "Adding extra input " << value << endmsg;
-        //   //   m_extraInputs["InputCollection"].emplace_back(InputHandle_t<std::shared_ptr<podio::CollectionBase>>(value, this));
-        //   // }
-        //   // m_inputs = std::make_tuple( typename maybeVector<In>::type()... );
-        //   // m_inputs = std::make_tuple( DataObjectReadHandle<std::map<std::string, std::shared_ptr<podio::CollectionBase>>>() );
-        //   // auto& handles = std::get<0>(m_inputs);
-        //   // handles.push_back(DataObjectReadHandle<std::map<std::string, std::shared_ptr<podio::CollectionBase>>>(DataObjID{"InputCollection"}, this));
-        // }
-      }
+                Gaudi::Details::Property::ImmediatelyInvokeHandler{true}}...} {}
 
       constexpr static std::size_t N_in  = sizeof...(In);
       constexpr static std::size_t N_out = 1;
@@ -119,23 +99,25 @@ namespace k4FWCore {
       // derived classes are NOT allowed to implement execute ...
       StatusCode execute(const EventContext& ctx) const override final {
         try {
-          readMapInputs<0, In...>(this->m_inputs, m_inputLocations, m_inputLocationsMap, this);
           if constexpr (is_map_like<Out>::value) {
-            for (auto& [key, val] : filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs)) {
-              auto        shared = std::make_shared<decltype(val)>(std::move(val));
-              auto        w      = new AnyDataWrapper<std::shared_ptr<podio::CollectionBase>>(shared);
-              DataObject* p      = w;
-              auto        sc     = this->evtSvc()->registerObject(key, p);
-            }
+            std::tuple<Out> tmp = filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs);
+            // auto tmp = filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs);
+            putMapOutputs<0, Out>(std::move(tmp), m_outputs, this);
+            // int i = 0;
+            // for (auto& [key, val] : filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs)) {
+            //   if (key != m_outputs[i].objKey()) {
+            //     throw GaudiException("Transformer",
+            //                          "Output key does not match the expected key " + m_outputs[i].objKey(),
+            //                          StatusCode::FAILURE);
+            //   }
+            //   Gaudi::Functional::details::put(m_outputs[i], ptrOrCast(std::move(val)));
+            //   i++;
+            // }
           } else {
             Gaudi::Functional::details::put(
-                std::get<0>(this->m_outputs),
+                                            std::get<0>(this->m_outputs)[0],
                 ptrOrCast(std::move(filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs))));
           }
-          // If any input has map type, we remove it from the store since it has been pushed
-          // but we don't want the map to be available as a map for other algorithms and
-          // all the individual collections have alreaody been pushed
-          deleteMapInputs<0, In...>(this->m_inputs, this);
           return Gaudi::Functional::FilterDecision::PASSED;
         } catch (GaudiException& e) {
           (e.code() ? this->warning() : this->error()) << e.tag() << " : " << e.message() << endmsg;
@@ -159,14 +141,10 @@ namespace k4FWCore {
       template <typename T>
       using OutputHandle_t = Gaudi::Functional::details::OutputHandle_t<Traits_, std::remove_pointer_t<T>>;
 
-      std::tuple<InputHandle_t<decltype(transformType(std::declval<In>()))>...>                  m_inputs;
-      std::tuple<OutputHandle_t<decltype(transformType(std::declval<Out>()))>...>                m_outputs;
-      std::map<std::string, std::vector<InputHandle_t<std::shared_ptr<podio::CollectionBase>>>>  m_extraInputs;
-      std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)>                         m_inputLocations{};
-      std::array<Gaudi::Property<DataObjID>, sizeof...(In)>                                      m_inputLocationsPair{};
-      mutable std::map<std::string, std::vector<std::string>>                                    m_inputLocationsMap;
-      std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(Out)>                        m_outputLocations{};
-      std::array<Gaudi::Property<DataObjID>, sizeof...(Out)> m_outputLocationsPair{};
+      std::tuple<std::vector<InputHandle_t<typename transformType<In>::type>>...>   m_inputs;
+      std::tuple<std::vector<OutputHandle_t<typename transformType<Out>::type>>...> m_outputs;
+      std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)>            m_inputLocations{};
+      std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(Out)>           m_outputLocations{};
 
       using base_class = Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>;
 
@@ -177,44 +155,32 @@ namespace k4FWCore {
                        const OArgs& outputs, std::index_sequence<J...>)
           : base_class(std::move(name), locator),
             m_inputLocations{Gaudi::Property<std::vector<DataObjID>>{
-                this, getName<In>(std::get<I>(inputs), false), {DataObjID{std::get<I>(inputs).second[0]}}}...},
-            m_inputLocationsPair{Gaudi::Property<DataObjID>{
-                this, getName<In>(std::get<I>(inputs), true), DataObjID{std::get<I>(inputs).second[0]},
+                this, std::get<I>(inputs).first, to_DataObjID(std::get<I>(inputs).second),
                 [this](Gaudi::Details::PropertyBase&) {
-                  if constexpr (!is_map_like<In>::value) {
-                    auto& handle = std::get<I>(m_inputs);
-                    auto& ins    = m_inputLocationsPair[I];
-                    handle       = {ins.value(), this};
+                  std::vector<InputHandle_t<typename transformType<In>::type>> h;
+                  for (auto& value : this->m_inputLocations[I].value()) {
+                    auto handle = InputHandle_t<typename transformType<In>::type>(value, this);
+                    h.push_back(std::move(handle));
                   }
+                  std::get<I>(m_inputs) = std::move(h);
                 },
                 Gaudi::Details::Property::ImmediatelyInvokeHandler{true}}...},
             m_outputLocations{Gaudi::Property<std::vector<DataObjID>>{
-                this, getName<Out>(std::get<J>(outputs), false), {DataObjID{std::get<J>(outputs).second[0]}}}...},
-            m_outputLocationsPair{Gaudi::Property<DataObjID>{
-                this, getName<Out>(std::get<J>(outputs), true), DataObjID{std::get<J>(outputs).second[0]},
+                this, std::get<J>(outputs).first, to_DataObjID(std::get<J>(outputs).second),
                 [this](Gaudi::Details::PropertyBase&) {
-                  if constexpr (!is_map_like<Out>::value) {
-                    auto& handle = std::get<J>(m_outputs);
-                    auto& ins    = m_outputLocationsPair[J];
-                    handle       = {ins.value(), this};
+                  std::vector<OutputHandle_t<typename transformType<Out>::type>> h;
+                  std::sort(this->m_outputLocations[J].value().begin(), this->m_outputLocations[J].value().end(),
+                            [](const DataObjID& a, const DataObjID& b) { return a.key() < b.key(); });
+                  for (auto& inpID : this->m_outputLocations[J].value()) {
+                    if (inpID.key().empty()) {
+                      continue;
+                    }
+                    auto handle = OutputHandle_t<typename transformType<Out>::type>(inpID, this);
+                    h.push_back(std::move(handle));
                   }
+                  std::get<J>(m_outputs) = std::move(h);
                 },
-                Gaudi::Details::Property::ImmediatelyInvokeHandler{true}}...},
-            m_inputs{InputHandle_t<decltype(transformType(std::declval<In>()))>(std::get<I>(inputs).first, this)...},
-            m_outputs{OutputHandle_t<decltype(transformType(std::declval<Out>()))>(std::get<J>(outputs).first, this)...}
-
-      {
-        // if constexpr (std::is_same_v<In, std::map<std::string, std::shared_ptr<podio::CollectionBase>>>) {
-        //   // for (auto& value : std::get<I...>(inputs).second) {
-        //   //   Gaudi::Algorithm::info() << "Adding extra input " << value << endmsg;
-        //   //   m_extraInputs["InputCollection"].emplace_back(InputHandle_t<std::shared_ptr<podio::CollectionBase>>(value, this));
-        //   // }
-        //   // m_inputs = std::make_tuple( typename maybeVector<In>::type()... );
-        //   // m_inputs = std::make_tuple( DataObjectReadHandle<std::map<std::string, std::shared_ptr<podio::CollectionBase>>>() );
-        //   // auto& handles = std::get<0>(m_inputs);
-        //   // handles.push_back(DataObjectReadHandle<std::map<std::string, std::shared_ptr<podio::CollectionBase>>>(DataObjID{"InputCollection"}, this));
-        // }
-      }
+                Gaudi::Details::Property::ImmediatelyInvokeHandler{true}}...} {}
 
       constexpr static std::size_t N_in  = sizeof...(In);
       constexpr static std::size_t N_out = sizeof...(Out);
@@ -225,35 +191,12 @@ namespace k4FWCore {
           : MultiTransformer(std::move(name), locator, inputs, std::index_sequence_for<In...>{}, outputs,
                              std::index_sequence_for<Out...>{}) {}
 
-      template <size_t Index, typename... Handles> void putMapOutputs(std::tuple<Handles...>&& handles) const {
-        if constexpr (Index < sizeof...(Handles)) {
-          if constexpr (is_map_like<std::tuple_element_t<Index, std::tuple<Out...>>>::value) {
-            for (auto& [key, val] : std::get<Index>(handles)) {
-              auto        shared = std::make_shared<decltype(val)>(std::move(val));
-              auto        w      = new AnyDataWrapper<std::shared_ptr<podio::CollectionBase>>(std::move(shared));
-              DataObject* p      = w;
-              auto        sc     = this->evtSvc()->registerObject(key, p);
-            }
-
-          } else {
-            Gaudi::Functional::details::put(std::get<Index>(m_outputs), ptrOrCast(std::move(std::get<Index>(handles))));
-          }
-
-          // Recursive call for the next index
-          putMapOutputs<Index + 1>(std::move(handles));
-        }
-      }
 
       // derived classes are NOT allowed to implement execute ...
       StatusCode execute(const EventContext& ctx) const override final {
         try {
-          readMapInputs<0, In...>(this->m_inputs, m_inputLocations, m_inputLocationsMap, this);
           auto tmp = filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs);
-          putMapOutputs<0>(std::move(tmp));
-          // If any input has map type, we remove it from the store since it has been pushed
-          // but we don't want the map to be available as a map for other algorithms and
-          // all the individual collections have alreaody been pushed
-          deleteMapInputs<0, In...>(this->m_inputs, this);
+          putMapOutputs<0, Out...>(std::move(tmp), m_outputs, this);
           return Gaudi::Functional::FilterDecision::PASSED;
         } catch (GaudiException& e) {
           (e.code() ? this->warning() : this->error()) << e.tag() << " : " << e.message() << endmsg;
