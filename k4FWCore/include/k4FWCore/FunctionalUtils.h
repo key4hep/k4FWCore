@@ -46,6 +46,41 @@ namespace k4FWCore {
       return static_cast<const T&>(*arg);
     }
 
+    // This function will be used to modify std::shared_ptr<podio::CollectionBase> to the actual collection type
+    template <typename T, typename P> const auto& maybeTransformToEDM4hep2(const P& arg) { return arg; }
+    template <typename T, typename P>
+      requires std::is_base_of_v<podio::CollectionBase, P>
+    const auto& maybeTransformToEDM4hep2(P* arg) {
+      return *arg;
+    }
+
+    template <typename T, typename P>
+      requires std::same_as<P, std::shared_ptr<podio::CollectionBase>>
+    const auto& maybeTransformToEDM4hep2(P arg) {
+      return static_cast<const T&>(*arg);
+    }
+
+    template <typename T, bool addPtr = std::is_base_of_v<podio::CollectionBase, T>>
+    using SelectType = std::conditional_t<addPtr, std::add_pointer_t<T>, T>;
+
+    template <typename Tuple, typename F, std::size_t... I>
+    decltype(auto) apply_helper(F&& f, Tuple&& t, std::index_sequence<I...>) {
+      return (std::forward<F>(f)(std::get<I...>(std::forward<Tuple>(t))), 0);
+    }
+
+    template <typename Tuple, typename F> decltype(auto) apply_index_sequence(F&& f, Tuple&& t) {
+      constexpr std::size_t tuple_size = std::tuple_size<std::remove_reference_t<Tuple>>::value;
+      return apply_helper(std::forward<F>(f), std::forward<Tuple>(t), std::make_index_sequence<tuple_size>{});
+    }
+
+    template <typename Tuple, typename F> decltype(auto) apply(F&& f, auto ctx, Tuple&& t) {
+      return apply_index_sequence(std::forward<F>(f), ctx, std::forward<Tuple>(t));
+    }
+
+    template <typename T> const auto& transformtoEDM4hep(const std::shared_ptr<podio::CollectionBase>& arg) {
+      return static_cast<const T>(*arg);
+    }
+
     template <typename T> struct is_map_like : std::false_type {};
 
     template <typename Value> struct is_map_like<std::map<std::string, Value>> : std::true_type {};
@@ -71,23 +106,20 @@ namespace k4FWCore {
       return hash_string(first.first);
     }
 
-    template <typename T>
-    std::enable_if_t<std::is_base_of_v<podio::CollectionBase, T>, std::shared_ptr<podio::CollectionBase>> transformType(
-        const T& arg) {
-      return std::shared_ptr<podio::CollectionBase>(arg);
-    }
+    // transformType function to transform the types from the ones that the user wants
+    // like edm4hep::MCParticleCollection, to the ones that are actually stored in the
+    // event store, like std::shared_ptr<podio::CollectionBase>
+    // For std::map<std::string, Coll>, th
 
-    // template <typename T>
-    // std::enable_if_t<std::is_base_of_v<podio::CollectionBase, T>, std::map<std::string, std::shared_ptr<T>>>
-    // transformType(const std::map<std::string, std::shared_ptr<T>>& arg) {
-    //   return std::map<std::string, std::shared_ptr<T>>();
-    // }
+    template <typename T> struct transformType {
+      using type = T;
+    };
 
     template <typename T>
-    std::enable_if_t<!std::is_base_of_v<podio::CollectionBase, T>, T> transformType(const T& arg) {
-      // Default: no transformation
-      return arg;
-    }
+      requires std::is_base_of_v<podio::CollectionBase, T> || is_map_like<T>::value
+    struct transformType<T> {
+      using type = std::shared_ptr<podio::CollectionBase>;
+    };
 
     template <typename T, std::enable_if_t<!std::is_same_v<std::shared_ptr<podio::CollectionBase>, T>, int> = 0>
     auto ptrOrCast(T&& arg) {
@@ -149,7 +181,7 @@ namespace k4FWCore {
             auto       ptr        = std::dynamic_pointer_cast<EDM4hepType>(collection->getData());
             inputMap.emplace(value, *ptr);
           }
-          std::get<Index>(handles).put(std::move(inputMap));
+          // std::get<Index>(handles).put(std::move(inputMap));
         }
 
         // Recursive call for the next index
@@ -169,10 +201,9 @@ namespace k4FWCore {
                                  StatusCode::FAILURE);
           }
         }
-      // Recursive call for the next index
-      deleteMapInputs<Index + 1, In...>(handles, thisClass);
+        // Recursive call for the next index
+        deleteMapInputs<Index + 1, In...>(handles, thisClass);
       }
-
     }
 
   }  // namespace details

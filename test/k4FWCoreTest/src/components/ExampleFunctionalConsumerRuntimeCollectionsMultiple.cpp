@@ -46,7 +46,7 @@ struct ExampleFunctionalConsumerRuntimeCollectionsMultiple final
     info() << "Received " << particleMap.size() << " particle collections and " << trackMap.size()
            << " track collections" << endmsg;
     if (particleMap.size() != 5) {
-      fatal() << "Wrong size of the particleMap map, expected 5, got " << particleMap.size() << endmsg;
+      throw std::runtime_error("Wrong size of the particleMap map, expected 5, got " + std::to_string(particleMap.size()));
     }
     for (auto& [key, particles] : particleMap) {
       int         i         = 0;
