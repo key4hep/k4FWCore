@@ -31,32 +31,32 @@ from Configurables import EventDataSvc
 
 producer0 = ExampleFunctionalProducerMultiple(
     "Producer0",
-    OutputCollectionFloat="VectorFloat0",
-    OutputCollectionParticles1="MCParticles0",
-    OutputCollectionParticles2="MCParticles1",
-    OutputCollectionSimTrackerHits="SimTrackerHits0",
-    OutputCollectionTrackerHits="TrackerHits0",
-    OutputCollectionTracks="Tracks0",
+    OutputCollectionFloat=["VectorFloat0"],
+    OutputCollectionParticles1=["MCParticles0"],
+    OutputCollectionParticles2=["MCParticles1"],
+    OutputCollectionSimTrackerHits=["SimTrackerHits0"],
+    OutputCollectionTrackerHits=["TrackerHits0"],
+    OutputCollectionTracks=["Tracks0"],
     ExampleInt=5,
 )
 producer1 = ExampleFunctionalProducerMultiple(
     "Producer1",
-    OutputCollectionFloat="VectorFloat1",
-    OutputCollectionParticles1="MCParticles2",
-    OutputCollectionParticles2="MCParticles3",
-    OutputCollectionSimTrackerHits="SimTrackerHits1",
-    OutputCollectionTrackerHits="TrackerHits1",
-    OutputCollectionTracks="Tracks1",
+    OutputCollectionFloat=["VectorFloat1"],
+    OutputCollectionParticles1=["MCParticles2"],
+    OutputCollectionParticles2=["MCParticles3"],
+    OutputCollectionSimTrackerHits=["SimTrackerHits1"],
+    OutputCollectionTrackerHits=["TrackerHits1"],
+    OutputCollectionTracks=["Tracks1"],
     ExampleInt=5,
 )
 producer2 = ExampleFunctionalProducerMultiple(
     "Producer2",
-    OutputCollectionFloat="VectorFloat2",
-    OutputCollectionParticles1="MCParticles4",
-    OutputCollectionParticles2="MCParticles5",
-    OutputCollectionSimTrackerHits="SimTrackerHits2",
-    OutputCollectionTrackerHits="TrackerHits2",
-    OutputCollectionTracks="Tracks2",
+    OutputCollectionFloat=["VectorFloat2"],
+    OutputCollectionParticles1=["MCParticles4"],
+    OutputCollectionParticles2=["MCParticles5"],
+    OutputCollectionSimTrackerHits=["SimTrackerHits2"],
+    OutputCollectionTrackerHits=["TrackerHits2"],
+    OutputCollectionTracks=["Tracks2"],
     ExampleInt=5,
 )
 
@@ -74,13 +74,11 @@ transformer = ExampleFunctionalTransformerRuntimeCollectionsMultiple(
     OutputCollectionFloat=["NewVectorFloat0", "NewVectorFloat1", "NewVectorFloat2"],
     OutputCollectionParticles1=[
         "NewMCParticles0",
-        "NewMCParticles1",
         "NewMCParticles2",
+        "NewMCParticles4",
     ],
     OutputCollectionParticles2=[
-        "NewMCParticles0",
-        "NewMCParticles1",
-        "NewMCParticles2",
+        "",
     ],
     OutputCollectionSimTrackerHits=[
         "NewSimTrackerHits0",
@@ -98,29 +96,29 @@ transformer = ExampleFunctionalTransformerRuntimeCollectionsMultiple(
 
 consumer0 = ExampleFunctionalConsumerMultiple(
     "Consumer0",
-    InputCollectionFloat="NewVectorFloat0",
-    InputCollectionParticles="NewMCParticles0",
-    InputCollectionSimTrackerHits="NewSimTrackerHits0",
-    InputCollectionTrackerHits="NewTrackerHits0",
-    InputCollectionTracks="NewTracks0",
+    InputCollectionFloat=["NewVectorFloat0"],
+    InputCollectionParticles=["NewMCParticles0"],
+    InputCollectionSimTrackerHits=["NewSimTrackerHits0"],
+    InputCollectionTrackerHits=["NewTrackerHits0"],
+    InputCollectionTracks=["NewTracks0"],
 )
 
 consumer1 = ExampleFunctionalConsumerMultiple(
     "Consumer1",
-    InputCollectionFloat="NewVectorFloat1",
-    InputCollectionParticles="NewMCParticles2",
-    InputCollectionSimTrackerHits="NewSimTrackerHits1",
-    InputCollectionTrackerHits="NewTrackerHits1",
-    InputCollectionTracks="NewTracks1",
+    InputCollectionFloat=["NewVectorFloat1"],
+    InputCollectionParticles=["NewMCParticles2"],
+    InputCollectionSimTrackerHits=["NewSimTrackerHits1"],
+    InputCollectionTrackerHits=["NewTrackerHits1"],
+    InputCollectionTracks=["NewTracks1"],
 )
 
 consumer2 = ExampleFunctionalConsumerMultiple(
     "Consumer2",
-    InputCollectionFloat="NewVectorFloat2",
-    InputCollectionParticles="NewMCParticles4",
-    InputCollectionSimTrackerHits="NewSimTrackerHits2",
-    InputCollectionTrackerHits="NewTrackerHits2",
-    InputCollectionTracks="NewTracks2",
+    InputCollectionFloat=["NewVectorFloat2"],
+    InputCollectionParticles=["NewMCParticles4"],
+    InputCollectionSimTrackerHits=["NewSimTrackerHits2"],
+    InputCollectionTrackerHits=["NewTrackerHits2"],
+    InputCollectionTracks=["NewTracks2"],
 )
 
 

@@ -32,12 +32,12 @@ iosvc.output = "output_k4test_exampledata_producer_multiple.root"
 
 producer = ExampleFunctionalProducerMultiple(
     "ExampleFunctionalProducerMultiple",
-    OutputCollectionFloat="VectorFloat",
-    OutputCollectionParticles1="MCParticles1",
-    OutputCollectionParticles2="MCParticles2",
-    OutputCollectionSimTrackerHits="SimTrackerHits",
-    OutputCollectionTrackerHits="TrackerHits",
-    OutputCollectionTracks="Tracks",
+    OutputCollectionFloat=["VectorFloat"],
+    OutputCollectionParticles1=["MCParticles1"],
+    OutputCollectionParticles2=["MCParticles2"],
+    OutputCollectionSimTrackerHits=["SimTrackerHits"],
+    OutputCollectionTrackerHits=["TrackerHits"],
+    OutputCollectionTracks=["Tracks"],
     ExampleInt=5,
 )
 

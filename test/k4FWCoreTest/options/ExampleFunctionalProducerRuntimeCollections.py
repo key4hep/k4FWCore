@@ -35,17 +35,17 @@ producer = ExampleFunctionalProducerRuntimeCollections(
 
 consumer0 = ExampleFunctionalConsumer(
     "Consumer0",
-    InputCollection="MCParticles0",
+    InputCollection=["MCParticles0"],
     Offset=0,
 )
 consumer1 = ExampleFunctionalConsumer(
     "Consumer1",
-    InputCollection="MCParticles1",
+    InputCollection=["MCParticles1"],
     Offset=0,
 )
 consumer2 = ExampleFunctionalConsumer(
     "Consumer2",
-    InputCollection="MCParticles2",
+    InputCollection=["MCParticles2"],
     Offset=0,
 )
 

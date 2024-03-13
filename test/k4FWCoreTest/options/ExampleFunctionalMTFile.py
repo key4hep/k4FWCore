@@ -46,7 +46,7 @@ svc.output = "functional_transformerMT.root"
 
 
 transformer = ExampleFunctionalTransformer(
-    "Transformer", InputCollection="MCParticles", OutputCollection="NewMCParticles"
+    "Transformer", InputCollection=["MCParticles"], OutputCollection=["NewMCParticles"]
 )
 
 mgr = ApplicationMgr(
