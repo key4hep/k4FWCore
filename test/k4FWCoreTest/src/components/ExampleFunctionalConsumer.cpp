@@ -25,7 +25,6 @@
 
 #include <stdexcept>
 #include <string>
-#include <thread>
 
 struct ExampleFunctionalConsumer final : k4FWCore::Consumer<void(const edm4hep::MCParticleCollection& input)> {
   // The pair in KeyValue can be changed from python and it corresponds

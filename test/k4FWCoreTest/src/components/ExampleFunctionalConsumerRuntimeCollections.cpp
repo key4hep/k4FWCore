@@ -35,7 +35,7 @@ struct ExampleFunctionalConsumerRuntimeCollections final
   // This is the function that will be called to produce the data
   void operator()(const std::map<std::string, const edm4hep::MCParticleCollection&>& input) const override {
     if (input.size() != 3) {
-      fatal() << "Wrong size of the input map, expected 3, got " << input.size() << endmsg;
+      throw std::runtime_error("Wrong size of the input map, expected 3, got " + std::to_string(input.size()));
     }
     for (auto& [key, val] : input) {
       int i = 0;
