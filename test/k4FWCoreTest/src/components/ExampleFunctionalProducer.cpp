@@ -18,7 +18,7 @@
  */
 
 #include "Gaudi/Property.h"
-#include "Gaudi/Functional/Producer.h"
+#include "GaudiAlg/Producer.h"
 #include "k4FWCore/BaseClass.h"
 
 #include "edm4hep/MCParticleCollection.h"

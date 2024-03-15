@@ -18,7 +18,7 @@
  */
 
 #include "Gaudi/Property.h"
-#include "Gaudi/Functional/Consumer.h"
+#include "GaudiAlg/Consumer.h"
 
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/SimTrackerHitCollection.h"
