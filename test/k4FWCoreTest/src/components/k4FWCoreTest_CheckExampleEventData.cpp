@@ -39,6 +39,8 @@ k4FWCoreTest_CheckExampleEventData::k4FWCoreTest_CheckExampleEventData(const std
     : Gaudi::Algorithm(aName, aSvcLoc) {
   declareProperty("mcparticles", m_mcParticleHandle, "Dummy Particle collection (output)");
   declareProperty("vectorfloat", m_vectorFloatHandle, "Dummy collection (output)");
+  // Set Cardinality to 1 because this algorithm is not prepared to run in parallel
+  setProperty("Cardinality", 1).ignore();
 }
 
 StatusCode k4FWCoreTest_CheckExampleEventData::initialize() { return Gaudi::Algorithm::initialize(); }

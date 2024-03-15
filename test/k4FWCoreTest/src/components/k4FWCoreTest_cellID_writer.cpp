@@ -24,6 +24,8 @@ k4FWCoreTest_cellID_writer::k4FWCoreTest_cellID_writer(const std::string& aName,
     : Gaudi::Algorithm(aName, aSvcLoc) {
   ;
   declareProperty("simtrackhits_w", m_simTrackerHitWriterHandle, "Dummy Hit collection Writer");
+  // Set Cardinality to 1 because this algorithm is not prepared to run in parallel
+  setProperty("Cardinality", 1).ignore();
 }
 
 k4FWCoreTest_cellID_writer::~k4FWCoreTest_cellID_writer() {}

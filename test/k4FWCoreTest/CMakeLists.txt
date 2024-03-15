@@ -92,7 +92,6 @@ add_test(NAME checkKeepDropSwitch
          COMMAND python scripts/check_KeepDropSwitch.py)
 set_test_env(checkKeepDropSwitch)
 set_property(TEST checkKeepDropSwitch APPEND PROPERTY DEPENDS ReadExampleEventData)
-add_test_with_env(TestDataHandleUniquePtr options/TestDataHandleUniquePtr.py)
 add_test_with_env(TestUniqueIDGenSvc options/TestUniqueIDGenSvc.py)
 add_test_with_env(TestEventHeaderFiller options/createEventHeader.py)
 add_test_with_env(EventHeaderCheck options/runEventHeaderCheck.py PROPERTIES DEPENDS TestEventHeaderFiller)

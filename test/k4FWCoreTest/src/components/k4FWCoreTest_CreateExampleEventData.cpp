@@ -42,6 +42,8 @@ k4FWCoreTest_CreateExampleEventData::k4FWCoreTest_CreateExampleEventData(const s
   declareProperty("trackhits", m_TrackerHitHandle, "Dummy Hit collection (output)");
   declareProperty("tracks", m_trackHandle, "Dummy track collection (output)");
   declareProperty("vectorfloat", m_vectorFloatHandle, "Dummy collection (output)");
+  // Set Cardinality to 1 because this algorithm is not prepared to run in parallel
+  setProperty("Cardinality", 1).ignore();
 }
 
 k4FWCoreTest_CreateExampleEventData::~k4FWCoreTest_CreateExampleEventData() {}

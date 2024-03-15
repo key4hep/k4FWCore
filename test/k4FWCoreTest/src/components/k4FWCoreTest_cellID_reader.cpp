@@ -25,6 +25,8 @@ k4FWCoreTest_cellID_reader::k4FWCoreTest_cellID_reader(const std::string& aName,
     : Gaudi::Algorithm(aName, aSvcLoc) {
   ;
   declareProperty("simtrackhits_r", m_simTrackerHitReaderHandle, "Dummy Hit collection Reader");
+  // Set Cardinality to 1 because this algorithm is not prepared to run in parallel
+  setProperty("Cardinality", 1).ignore();
 }
 
 k4FWCoreTest_cellID_reader::~k4FWCoreTest_cellID_reader() {}
