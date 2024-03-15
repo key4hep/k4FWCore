@@ -90,7 +90,7 @@ template <typename T>
 DataHandle<T>::DataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode a, IDataHandleHolder* fatherAlg)
     : DataObjectHandle<DataWrapper<T>>(descriptor, a, fatherAlg), m_eds("EventDataSvc", "DataHandle") {
   if (a == Gaudi::DataHandle::Writer) {
-    StatusCode sc            = m_eds.retrieve();
+    m_eds.retrieve().ignore();
     m_dataPtr                = nullptr;
     auto* podio_data_service = dynamic_cast<PodioDataSvc*>(m_eds.get());
     if (nullptr != podio_data_service) {
