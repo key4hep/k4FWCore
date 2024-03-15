@@ -19,8 +19,8 @@
 #ifndef FWCORE_PODIOINPUT_H
 #define FWCORE_PODIOINPUT_H
 // Gaudi
-#include "Gaudi/Property.h"
 #include "Gaudi/Functional/Consumer.h"
+#include "Gaudi/Property.h"
 
 // STL
 #include <string>

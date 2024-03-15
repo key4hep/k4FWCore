@@ -65,13 +65,15 @@ private:
   /// Handle for the genparticles to be written
   mutable DataHandle<edm4hep::MCParticleCollection> m_mcParticleHandle{"MCParticles", Gaudi::DataHandle::Writer, this};
   /// Handle for the genvertices to be written
-  mutable DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitHandle{"SimTrackerHit", Gaudi::DataHandle::Writer, this};
+  mutable DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitHandle{"SimTrackerHit", Gaudi::DataHandle::Writer,
+                                                                             this};
 
-  mutable DataHandle<podio::UserDataCollection<float>> m_vectorFloatHandle{"VectorFloat", Gaudi::DataHandle::Writer, this};
+  mutable DataHandle<podio::UserDataCollection<float>> m_vectorFloatHandle{"VectorFloat", Gaudi::DataHandle::Writer,
+                                                                           this};
 
   /// for testing: write a second TFile by user in an algorithm
   mutable Float_t m_value;
-  TFile*  m_file;
-  TTree*  m_tree;
+  TFile*          m_file;
+  TTree*          m_tree;
 };
 #endif /* K4FWCORE_K4FWCORETEST_ALGORITHMWITHTFILE */

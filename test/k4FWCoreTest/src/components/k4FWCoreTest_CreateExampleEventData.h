@@ -77,13 +77,16 @@ private:
   /// Handle for the MCParticles to be written
   mutable DataHandle<edm4hep::MCParticleCollection> m_mcParticleHandle{"MCParticles", Gaudi::DataHandle::Writer, this};
   /// Handle for the SimTrackerHits to be written
-  mutable DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitHandle{"SimTrackerHits", Gaudi::DataHandle::Writer, this};
-  mutable DataHandle<edm4hep::TrackerHit3DCollection>    m_TrackerHitHandle{"TrackerHits", Gaudi::DataHandle::Writer, this};
+  mutable DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitHandle{"SimTrackerHits",
+                                                                             Gaudi::DataHandle::Writer, this};
+  mutable DataHandle<edm4hep::TrackerHit3DCollection>  m_TrackerHitHandle{"TrackerHits", Gaudi::DataHandle::Writer,
+                                                                         this};
 
   /// Handle for the Tracks to be written
   mutable DataHandle<edm4hep::TrackCollection> m_trackHandle{"Tracks", Gaudi::DataHandle::Writer, this};
 
-  mutable DataHandle<podio::UserDataCollection<float>> m_vectorFloatHandle{"VectorFloat", Gaudi::DataHandle::Writer, this};
+  mutable DataHandle<podio::UserDataCollection<float>> m_vectorFloatHandle{"VectorFloat", Gaudi::DataHandle::Writer,
+                                                                           this};
 
   mutable int m_event{0};
 };

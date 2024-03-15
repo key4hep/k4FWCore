@@ -55,9 +55,9 @@ public:
 
 private:
   /// Handle for the SimTrackerHits to be written
-  mutable DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitWriterHandle{"SimTrackerHits", Gaudi::DataHandle::Writer,
-                                                                           this};
-  MetaDataHandle<std::string>                  m_cellIDHandle{m_simTrackerHitWriterHandle, edm4hep::CellIDEncoding,
+  mutable DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitWriterHandle{"SimTrackerHits",
+                                                                                   Gaudi::DataHandle::Writer, this};
+  MetaDataHandle<std::string> m_cellIDHandle{m_simTrackerHitWriterHandle, edm4hep::CellIDEncoding,
                                              Gaudi::DataHandle::Writer};
 };
 #endif /* K4FWCORE_K4FWCORETEST_CELLID_WRITER */

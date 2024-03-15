@@ -53,9 +53,9 @@ public:
 
 private:
   /// Handle for the SimTrackerHits to be read
-  mutable DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitReaderHandle{"SimTrackerHits", Gaudi::DataHandle::Reader,
-                                                                           this};
-  mutable MetaDataHandle<std::string>                  m_cellIDHandle{m_simTrackerHitReaderHandle, edm4hep::CellIDEncoding,
-                                             Gaudi::DataHandle::Reader};
+  mutable DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitReaderHandle{"SimTrackerHits",
+                                                                                   Gaudi::DataHandle::Reader, this};
+  mutable MetaDataHandle<std::string> m_cellIDHandle{m_simTrackerHitReaderHandle, edm4hep::CellIDEncoding,
+                                                     Gaudi::DataHandle::Reader};
 };
 #endif /* K4FWCORE_K4FWCORETEST_CELLID */

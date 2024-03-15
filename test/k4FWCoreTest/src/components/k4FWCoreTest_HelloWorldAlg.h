@@ -20,8 +20,8 @@
 #define K4FWCORE_K4FWCORETEST_HELLOWORLDALG
 
 // GAUDI
-#include "Gaudi/Property.h"
 #include "Gaudi/Algorithm.h"
+#include "Gaudi/Property.h"
 
 class k4FWCoreTest_HelloWorldAlg : public Gaudi::Algorithm {
 public:
