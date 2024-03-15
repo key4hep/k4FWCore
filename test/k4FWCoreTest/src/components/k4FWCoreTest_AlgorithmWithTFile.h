@@ -20,7 +20,7 @@
 #define K4FWCORE_K4FWCORETEST_ALGORITHMWITHTFILE
 
 // GAUDI
-#include "GaudiAlg/GaudiAlgorithm.h"
+#include "Gaudi/Algorithm.h"
 
 // edm4hep
 #include "TFile.h"
@@ -41,7 +41,7 @@ namespace edm4hep {
  *  a user-declared TFile when using the PodioDataSvc
  *
  */
-class k4FWCoreTest_AlgorithmWithTFile : public GaudiAlgorithm {
+class k4FWCoreTest_AlgorithmWithTFile : public Gaudi::Algorithm {
 public:
   explicit k4FWCoreTest_AlgorithmWithTFile(const std::string&, ISvcLocator*);
   virtual ~k4FWCoreTest_AlgorithmWithTFile();
@@ -52,7 +52,7 @@ public:
   /**  Execute.
    *   @return status code
    */
-  virtual StatusCode execute() final;
+  virtual StatusCode execute(const EventContext&) const final;
   /**  Finalize.
    *   @return status code
    */
@@ -63,14 +63,14 @@ private:
   Gaudi::Property<int> m_magicNumberOffset{this, "magicNumberOffset", 0,
                                            "Integer to add to the dummy values written to the edm"};
   /// Handle for the genparticles to be written
-  DataHandle<edm4hep::MCParticleCollection> m_mcParticleHandle{"MCParticles", Gaudi::DataHandle::Writer, this};
+  mutable DataHandle<edm4hep::MCParticleCollection> m_mcParticleHandle{"MCParticles", Gaudi::DataHandle::Writer, this};
   /// Handle for the genvertices to be written
-  DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitHandle{"SimTrackerHit", Gaudi::DataHandle::Writer, this};
+  mutable DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitHandle{"SimTrackerHit", Gaudi::DataHandle::Writer, this};
 
-  DataHandle<podio::UserDataCollection<float>> m_vectorFloatHandle{"VectorFloat", Gaudi::DataHandle::Writer, this};
+  mutable DataHandle<podio::UserDataCollection<float>> m_vectorFloatHandle{"VectorFloat", Gaudi::DataHandle::Writer, this};
 
   /// for testing: write a second TFile by user in an algorithm
-  Float_t m_value;
+  mutable Float_t m_value;
   TFile*  m_file;
   TTree*  m_tree;
 };

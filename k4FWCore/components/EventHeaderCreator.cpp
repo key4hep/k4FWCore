@@ -21,18 +21,18 @@
 
 DECLARE_COMPONENT(EventHeaderCreator)
 
-EventHeaderCreator::EventHeaderCreator(const std::string& name, ISvcLocator* svcLoc) : GaudiAlgorithm(name, svcLoc) {
+EventHeaderCreator::EventHeaderCreator(const std::string& name, ISvcLocator* svcLoc) : Gaudi::Algorithm(name, svcLoc) {
   declareProperty("EventHeaderCollection", m_headerCol,
                   "Name of the EventHeaderCollection that will be stored in the output root file.");
 }
 
 StatusCode EventHeaderCreator::initialize() {
-  if (GaudiAlgorithm::initialize().isFailure())
+  if (Gaudi::Algorithm::initialize().isFailure())
     return StatusCode::FAILURE;
   return StatusCode::SUCCESS;
 }
 
-StatusCode EventHeaderCreator::execute() {
+StatusCode EventHeaderCreator::execute(const EventContext&) const {
   static int eventNumber = 0;
   debug() << "Filling EventHeader with runNumber " << int(m_runNumber) << " and eventNumber "
           << eventNumber + m_eventNumberOffset << endmsg;
@@ -44,7 +44,7 @@ StatusCode EventHeaderCreator::execute() {
 }
 
 StatusCode EventHeaderCreator::finalize() {
-  if (GaudiAlgorithm::finalize().isFailure())
+  if (Gaudi::Algorithm::finalize().isFailure())
     return StatusCode::FAILURE;
   return StatusCode::SUCCESS;
 }

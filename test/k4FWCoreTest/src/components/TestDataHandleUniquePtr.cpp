@@ -24,20 +24,20 @@
 DECLARE_COMPONENT(TestDataHandleUniquePtr)
 
 TestDataHandleUniquePtr::TestDataHandleUniquePtr(const std::string& aName, ISvcLocator* aSvcLoc)
-    : GaudiAlgorithm(aName, aSvcLoc) {
+    : Gaudi::Algorithm(aName, aSvcLoc) {
   declareProperty("mcparticles", m_mcParticleHandle, "Dummy Particle collection (output)");
 }
 
 TestDataHandleUniquePtr::~TestDataHandleUniquePtr() {}
 
 StatusCode TestDataHandleUniquePtr::initialize() {
-  if (GaudiAlgorithm::initialize().isFailure()) {
+  if (Gaudi::Algorithm::initialize().isFailure()) {
     return StatusCode::FAILURE;
   }
   return StatusCode::SUCCESS;
 }
 
-StatusCode TestDataHandleUniquePtr::execute() {
+StatusCode TestDataHandleUniquePtr::execute(const EventContext&) const {
   auto coll = std::make_unique<edm4hep::MCParticleCollection>();
 
   auto particle = coll->create();
@@ -53,4 +53,4 @@ StatusCode TestDataHandleUniquePtr::execute() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode TestDataHandleUniquePtr::finalize() { return GaudiAlgorithm::finalize(); }
+StatusCode TestDataHandleUniquePtr::finalize() { return Gaudi::Algorithm::finalize(); }

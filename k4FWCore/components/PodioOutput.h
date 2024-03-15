@@ -19,7 +19,7 @@
 #ifndef FWCORE_PODIOOUTPUT_H
 #define FWCORE_PODIOOUTPUT_H
 
-#include "GaudiAlg/GaudiAlgorithm.h"
+#include "Gaudi/Algorithm.h"
 #include "k4FWCore/KeepDropSwitch.h"
 #include "podio/CollectionBase.h"
 #include "podio/podioVersion.h"
@@ -37,22 +37,22 @@ namespace podio {
 // forward declarations
 class PodioDataSvc;
 
-class PodioOutput : public GaudiAlgorithm {
+class PodioOutput : public Gaudi::Algorithm {
 public:
   /// Constructor.
   PodioOutput(const std::string& name, ISvcLocator* svcLoc);
 
   /// Initialization of PodioOutput. Acquires the data service, creates trees and root file.
-  virtual StatusCode initialize();
+  StatusCode initialize();
   /// Execute. For the first event creates branches for all collections known to PodioDataSvc and prepares them for
   /// writing. For the following events it reconnects the branches with collections and prepares them for write.
-  virtual StatusCode execute();
+  StatusCode execute(const EventContext&) const;
   /// Finalize. Writes the meta data tree; writes file and cleans up all ROOT-pointers.
-  virtual StatusCode finalize();
+  StatusCode finalize();
 
 private:
   /// First event or not
-  bool m_firstEvent;
+  mutable bool m_firstEvent;
   /// Root file name the output is written to
   Gaudi::Property<std::string> m_filename{this, "filename", "output.root", "Name of the file to create"};
   /// Commands which output is to be kept
@@ -68,7 +68,7 @@ private:
   /// The stored collections
   std::vector<podio::CollectionBase*> m_storedCollections;
   /// The collections to write out
-  std::vector<std::string> m_collection_names_to_write;
+  mutable std::vector<std::string> m_collection_names_to_write;
 };
 
 #endif

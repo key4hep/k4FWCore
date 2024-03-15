@@ -21,9 +21,9 @@
 
 // GAUDI
 #include "Gaudi/Property.h"
-#include "GaudiAlg/GaudiAlgorithm.h"
+#include "Gaudi/Algorithm.h"
 
-class k4FWCoreTest_HelloWorldAlg : public GaudiAlgorithm {
+class k4FWCoreTest_HelloWorldAlg : public Gaudi::Algorithm {
 public:
   explicit k4FWCoreTest_HelloWorldAlg(const std::string&, ISvcLocator*);
   virtual ~k4FWCoreTest_HelloWorldAlg();
@@ -34,7 +34,7 @@ public:
   /**  Execute.
    *   @return status code
    */
-  virtual StatusCode execute() final;
+  virtual StatusCode execute(const EventContext&) const final;
   /**  Finalize.
    *   @return status code
    */

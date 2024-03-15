@@ -20,11 +20,11 @@
 #define TEST_UNIQUEIDGENSVC_H
 
 // GAUDI
-#include <GaudiAlg/GaudiAlgorithm.h>
+#include <Gaudi/Algorithm.h>
 
 #include "k4Interface/IUniqueIDGenSvc.h"
 
-class TestUniqueIDGenSvc : public GaudiAlgorithm {
+class TestUniqueIDGenSvc : public Gaudi::Algorithm {
 public:
   explicit TestUniqueIDGenSvc(const std::string&, ISvcLocator*);
   virtual ~TestUniqueIDGenSvc();
@@ -35,7 +35,7 @@ public:
   /**  Execute.
    *   @return status code
    */
-  virtual StatusCode execute() final;
+  virtual StatusCode execute(const EventContext&) const final;
   /**  Finalize.
    *   @return status code
    */

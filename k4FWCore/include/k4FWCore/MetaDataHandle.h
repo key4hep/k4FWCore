@@ -20,7 +20,7 @@
 #define K4FWCORE_METADATAHANDLE_H
 
 // GAUDI
-#include "GaudiAlg/GaudiAlgorithm.h"
+#include "Gaudi/Algorithm.h"
 
 #include "k4FWCore/PodioDataSvc.h"
 #include "podio/GenericParameters.h"

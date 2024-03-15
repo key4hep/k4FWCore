@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 #include "PodioInput.h"
-#include "GaudiAlg/Consumer.h"
+#include "Gaudi/Functional/Consumer.h"
 
 #include "k4FWCore/PodioDataSvc.h"
 

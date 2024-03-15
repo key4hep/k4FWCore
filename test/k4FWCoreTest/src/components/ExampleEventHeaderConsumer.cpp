@@ -23,7 +23,7 @@
 #include "k4FWCore/BaseClass.h"
 
 #include <Gaudi/Property.h>
-#include <GaudiAlg/Consumer.h>
+#include <Gaudi/Functional/Consumer.h>
 #include <GaudiKernel/ISvcLocator.h>
 
 #include <fmt/core.h>

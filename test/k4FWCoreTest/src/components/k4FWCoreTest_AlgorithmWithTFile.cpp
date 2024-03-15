@@ -25,7 +25,7 @@
 DECLARE_COMPONENT(k4FWCoreTest_AlgorithmWithTFile)
 
 k4FWCoreTest_AlgorithmWithTFile::k4FWCoreTest_AlgorithmWithTFile(const std::string& aName, ISvcLocator* aSvcLoc)
-    : GaudiAlgorithm(aName, aSvcLoc) {
+    : Gaudi::Algorithm(aName, aSvcLoc) {
   declareProperty("mcparticles", m_mcParticleHandle, "Dummy Particle collection (output)");
   declareProperty("trackhits", m_simTrackerHitHandle, "Dummy Hit collection (output)");
 }
@@ -33,7 +33,7 @@ k4FWCoreTest_AlgorithmWithTFile::k4FWCoreTest_AlgorithmWithTFile(const std::stri
 k4FWCoreTest_AlgorithmWithTFile::~k4FWCoreTest_AlgorithmWithTFile() {}
 
 StatusCode k4FWCoreTest_AlgorithmWithTFile::initialize() {
-  if (GaudiAlgorithm::initialize().isFailure()) {
+  if (Gaudi::Algorithm::initialize().isFailure()) {
     return StatusCode::FAILURE;
   }
 
@@ -47,7 +47,7 @@ StatusCode k4FWCoreTest_AlgorithmWithTFile::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode k4FWCoreTest_AlgorithmWithTFile::execute() {
+StatusCode k4FWCoreTest_AlgorithmWithTFile::execute(const EventContext&) const {
   auto* floatVector = m_vectorFloatHandle.createAndPut();
   floatVector->push_back(125.);
   floatVector->push_back(25.);
@@ -79,5 +79,5 @@ StatusCode k4FWCoreTest_AlgorithmWithTFile::finalize() {
   m_tree->Write();
   m_file->Close();
 
-  return GaudiAlgorithm::finalize();
+  return Gaudi::Algorithm::finalize();
 }

@@ -20,7 +20,7 @@
 #define FWCORE_PODIOINPUT_H
 // Gaudi
 #include "Gaudi/Property.h"
-#include "GaudiAlg/Consumer.h"
+#include "Gaudi/Functional/Consumer.h"
 
 // STL
 #include <string>

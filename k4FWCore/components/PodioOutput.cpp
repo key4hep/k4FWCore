@@ -25,10 +25,10 @@
 DECLARE_COMPONENT(PodioOutput)
 
 PodioOutput::PodioOutput(const std::string& name, ISvcLocator* svcLoc)
-    : GaudiAlgorithm(name, svcLoc), m_firstEvent(true) {}
+    : Gaudi::Algorithm(name, svcLoc), m_firstEvent(true) {}
 
 StatusCode PodioOutput::initialize() {
-  if (GaudiAlgorithm::initialize().isFailure())
+  if (Gaudi::Algorithm::initialize().isFailure())
     return StatusCode::FAILURE;
 
   // check whether we have the PodioEvtSvc active
@@ -44,7 +44,7 @@ StatusCode PodioOutput::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode PodioOutput::execute() {
+StatusCode PodioOutput::execute(const EventContext&) const {
   auto& frame = m_podioDataSvc->getEventFrame();
 
   // register for writing
@@ -89,7 +89,7 @@ StatusCode PodioOutput::execute() {
 *
 */
 StatusCode PodioOutput::finalize() {
-  if (GaudiAlgorithm::finalize().isFailure())
+  if (Gaudi::Algorithm::finalize().isFailure())
     return StatusCode::FAILURE;
   //// prepare job options metadata ///////////////////////
   // retrieve the configuration of the job

@@ -22,18 +22,18 @@
 DECLARE_COMPONENT(k4FWCoreTest_HelloWorldAlg)
 
 k4FWCoreTest_HelloWorldAlg::k4FWCoreTest_HelloWorldAlg(const std::string& aName, ISvcLocator* aSvcLoc)
-    : GaudiAlgorithm(aName, aSvcLoc) {}
+    : Gaudi::Algorithm(aName, aSvcLoc) {}
 
 k4FWCoreTest_HelloWorldAlg::~k4FWCoreTest_HelloWorldAlg() {}
 
 StatusCode k4FWCoreTest_HelloWorldAlg::initialize() {
-  if (GaudiAlgorithm::initialize().isFailure()) {
+  if (Gaudi::Algorithm::initialize().isFailure()) {
     return StatusCode::FAILURE;
   }
   return StatusCode::SUCCESS;
 }
 
-StatusCode k4FWCoreTest_HelloWorldAlg::execute() {
+StatusCode k4FWCoreTest_HelloWorldAlg::execute(const EventContext&) const {
   info() << endmsg;
   info() << endmsg;
   info() << theMessage << endmsg;
@@ -42,4 +42,4 @@ StatusCode k4FWCoreTest_HelloWorldAlg::execute() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode k4FWCoreTest_HelloWorldAlg::finalize() { return GaudiAlgorithm::finalize(); }
+StatusCode k4FWCoreTest_HelloWorldAlg::finalize() { return Gaudi::Algorithm::finalize(); }

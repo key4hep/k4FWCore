@@ -22,7 +22,7 @@
 #include "k4FWCore/DataHandle.h"
 
 // GAUDI
-#include "GaudiAlg/GaudiAlgorithm.h"
+#include "Gaudi/Algorithm.h"
 
 #include "podio/UserDataCollection.h"
 
@@ -31,7 +31,7 @@ namespace edm4hep {
   class MCParticleCollection;
 }  // namespace edm4hep
 
-class k4FWCoreTest_CheckExampleEventData : public GaudiAlgorithm {
+class k4FWCoreTest_CheckExampleEventData : public Gaudi::Algorithm {
 public:
   explicit k4FWCoreTest_CheckExampleEventData(const std::string&, ISvcLocator*);
   ~k4FWCoreTest_CheckExampleEventData() = default;
@@ -42,7 +42,7 @@ public:
   /**  Execute.
    *   @return status code
    */
-  virtual StatusCode execute() final;
+  virtual StatusCode execute(const EventContext&) const final;
   /**  Finalize.
    *   @return status code
    */
@@ -55,10 +55,10 @@ private:
   Gaudi::Property<bool> m_keepEventNumberZero{this, "keepEventNumberZero", false,
                                               "Don't add the event number to the dummy values written"};
   /// Handle for the MCParticles to be written
-  DataHandle<edm4hep::MCParticleCollection>    m_mcParticleHandle{"MCParticles", Gaudi::DataHandle::Reader, this};
-  DataHandle<podio::UserDataCollection<float>> m_vectorFloatHandle{"VectorFloat", Gaudi::DataHandle::Reader, this};
+  mutable DataHandle<edm4hep::MCParticleCollection>    m_mcParticleHandle{"MCParticles", Gaudi::DataHandle::Reader, this};
+  mutable DataHandle<podio::UserDataCollection<float>> m_vectorFloatHandle{"VectorFloat", Gaudi::DataHandle::Reader, this};
 
-  int m_event{0};
+  mutable int m_event{0};
 };
 
 #endif  // K4FWCORE_K4FWCORETEST_CHECKEEXAMPLEEVENTDATA

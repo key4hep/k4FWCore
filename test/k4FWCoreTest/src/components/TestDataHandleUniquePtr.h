@@ -20,7 +20,7 @@
 #define TESTFWCORE_TESTDATAHANDLEUNIQUEPTR
 
 // GAUDI
-#include "GaudiAlg/GaudiAlgorithm.h"
+#include "Gaudi/Algorithm.h"
 
 // edm4hep
 #include "TTree.h"
@@ -31,7 +31,7 @@ namespace edm4hep {
   class MCParticleCollection;
 }
 
-class TestDataHandleUniquePtr : public GaudiAlgorithm {
+class TestDataHandleUniquePtr : public Gaudi::Algorithm {
 public:
   explicit TestDataHandleUniquePtr(const std::string&, ISvcLocator*);
   virtual ~TestDataHandleUniquePtr();
@@ -42,13 +42,13 @@ public:
   /**  Execute.
    *   @return status code
    */
-  virtual StatusCode execute() final;
+  virtual StatusCode execute(const EventContext&) const final;
   /**  Finalize.
    *   @return status code
    */
   virtual StatusCode finalize() final;
 
 private:
-  DataHandle<edm4hep::MCParticleCollection> m_mcParticleHandle{"MCParticles", Gaudi::DataHandle::Writer, this};
+  mutable DataHandle<edm4hep::MCParticleCollection> m_mcParticleHandle{"MCParticles", Gaudi::DataHandle::Writer, this};
 };
 #endif /* TESTFWCORE_TESTDATAHANDLEUNIQUEPTR */
