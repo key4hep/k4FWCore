@@ -28,6 +28,8 @@ k4FWCoreTest_AlgorithmWithTFile::k4FWCoreTest_AlgorithmWithTFile(const std::stri
     : Gaudi::Algorithm(aName, aSvcLoc) {
   declareProperty("mcparticles", m_mcParticleHandle, "Dummy Particle collection (output)");
   declareProperty("trackhits", m_simTrackerHitHandle, "Dummy Hit collection (output)");
+  // Set Cardinality to 1 because this algorithm is not prepared to run in parallel
+  setProperty("Cardinality", 1).ignore();
 }
 
 k4FWCoreTest_AlgorithmWithTFile::~k4FWCoreTest_AlgorithmWithTFile() {}

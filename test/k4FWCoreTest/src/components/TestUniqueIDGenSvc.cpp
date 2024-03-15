@@ -21,7 +21,9 @@
 DECLARE_COMPONENT(TestUniqueIDGenSvc)
 
 TestUniqueIDGenSvc::TestUniqueIDGenSvc(const std::string& aName, ISvcLocator* aSvcLoc)
-    : Gaudi::Algorithm(aName, aSvcLoc) {}
+    : Gaudi::Algorithm(aName, aSvcLoc) {
+  
+}
 
 TestUniqueIDGenSvc::~TestUniqueIDGenSvc() {}
 

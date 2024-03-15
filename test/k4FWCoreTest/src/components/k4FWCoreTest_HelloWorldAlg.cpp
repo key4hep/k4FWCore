@@ -22,7 +22,10 @@
 DECLARE_COMPONENT(k4FWCoreTest_HelloWorldAlg)
 
 k4FWCoreTest_HelloWorldAlg::k4FWCoreTest_HelloWorldAlg(const std::string& aName, ISvcLocator* aSvcLoc)
-    : Gaudi::Algorithm(aName, aSvcLoc) {}
+    : Gaudi::Algorithm(aName, aSvcLoc) {
+  // Set Cardinality to 1 because this algorithm is not prepared to run in parallel
+  setProperty("Cardinality", 1).ignore();
+}
 
 k4FWCoreTest_HelloWorldAlg::~k4FWCoreTest_HelloWorldAlg() {}
 
