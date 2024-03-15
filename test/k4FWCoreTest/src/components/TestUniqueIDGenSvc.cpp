@@ -21,12 +21,12 @@
 DECLARE_COMPONENT(TestUniqueIDGenSvc)
 
 TestUniqueIDGenSvc::TestUniqueIDGenSvc(const std::string& aName, ISvcLocator* aSvcLoc)
-    : GaudiAlgorithm(aName, aSvcLoc) {}
+    : Gaudi::Algorithm(aName, aSvcLoc) {}
 
 TestUniqueIDGenSvc::~TestUniqueIDGenSvc() {}
 
 StatusCode TestUniqueIDGenSvc::initialize() {
-  if (GaudiAlgorithm::initialize().isFailure()) {
+  if (Gaudi::Algorithm::initialize().isFailure()) {
     return StatusCode::FAILURE;
   }
 
@@ -35,7 +35,7 @@ StatusCode TestUniqueIDGenSvc::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode TestUniqueIDGenSvc::execute() {
+StatusCode TestUniqueIDGenSvc::execute(const EventContext&) const {
   uint        evt_num = 4;
   uint        run_num = 3;
   std::string name    = "Some algorithm name";
@@ -50,4 +50,4 @@ StatusCode TestUniqueIDGenSvc::execute() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode TestUniqueIDGenSvc::finalize() { return GaudiAlgorithm::finalize(); }
+StatusCode TestUniqueIDGenSvc::finalize() { return Gaudi::Algorithm::finalize(); }

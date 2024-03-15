@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 #include "k4FWCoreTest_CheckExampleEventData.h"
-#include <GaudiAlg/GaudiAlgorithm.h>
+#include <Gaudi/Algorithm.h>
 
 // datamodel
 #include "edm4hep/MCParticleCollection.h"
@@ -36,14 +36,16 @@ namespace edm4hep {
 DECLARE_COMPONENT(k4FWCoreTest_CheckExampleEventData)
 
 k4FWCoreTest_CheckExampleEventData::k4FWCoreTest_CheckExampleEventData(const std::string& aName, ISvcLocator* aSvcLoc)
-    : GaudiAlgorithm(aName, aSvcLoc) {
+    : Gaudi::Algorithm(aName, aSvcLoc) {
   declareProperty("mcparticles", m_mcParticleHandle, "Dummy Particle collection (output)");
   declareProperty("vectorfloat", m_vectorFloatHandle, "Dummy collection (output)");
+  // Set Cardinality to 1 because this algorithm is not prepared to run in parallel
+  setProperty("Cardinality", 1).ignore();
 }
 
-StatusCode k4FWCoreTest_CheckExampleEventData::initialize() { return GaudiAlgorithm::initialize(); }
+StatusCode k4FWCoreTest_CheckExampleEventData::initialize() { return Gaudi::Algorithm::initialize(); }
 
-StatusCode k4FWCoreTest_CheckExampleEventData::execute() {
+StatusCode k4FWCoreTest_CheckExampleEventData::execute(const EventContext&) const {
   auto floatVector = m_vectorFloatHandle.get();
   if (floatVector->size() != 3 || (*floatVector)[2] != m_event) {
     fatal() << "Contents of vectorfloat collection is not as expected: size = " << floatVector->size()
@@ -67,4 +69,4 @@ StatusCode k4FWCoreTest_CheckExampleEventData::execute() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode k4FWCoreTest_CheckExampleEventData::finalize() { return GaudiAlgorithm::finalize(); }
+StatusCode k4FWCoreTest_CheckExampleEventData::finalize() { return Gaudi::Algorithm::finalize(); }

@@ -20,7 +20,7 @@
 #define K4FWCORE_K4FWCORETEST_CELLID_READER
 
 // GAUDI
-#include "GaudiAlg/GaudiAlgorithm.h"
+#include "Gaudi/Algorithm.h"
 
 // key4hep
 #include "k4FWCore/DataHandle.h"
@@ -34,7 +34,7 @@
 /** @class k4FWCoreTest_cellID
  *  Lightweight reader for edm data to test cellID reading
  */
-class k4FWCoreTest_cellID_reader : public GaudiAlgorithm {
+class k4FWCoreTest_cellID_reader : public Gaudi::Algorithm {
 public:
   explicit k4FWCoreTest_cellID_reader(const std::string&, ISvcLocator*);
   virtual ~k4FWCoreTest_cellID_reader();
@@ -45,7 +45,7 @@ public:
   /**  Execute.
    *   @return status code
    */
-  virtual StatusCode execute() final;
+  virtual StatusCode execute(const EventContext&) const final;
   /**  Finalize.
    *   @return status code
    */
@@ -53,9 +53,9 @@ public:
 
 private:
   /// Handle for the SimTrackerHits to be read
-  DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitReaderHandle{"SimTrackerHits", Gaudi::DataHandle::Reader,
-                                                                           this};
-  MetaDataHandle<std::string>                  m_cellIDHandle{m_simTrackerHitReaderHandle, edm4hep::CellIDEncoding,
-                                             Gaudi::DataHandle::Reader};
+  mutable DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitReaderHandle{"SimTrackerHits",
+                                                                                   Gaudi::DataHandle::Reader, this};
+  mutable MetaDataHandle<std::string> m_cellIDHandle{m_simTrackerHitReaderHandle, edm4hep::CellIDEncoding,
+                                                     Gaudi::DataHandle::Reader};
 };
 #endif /* K4FWCORE_K4FWCORETEST_CELLID */

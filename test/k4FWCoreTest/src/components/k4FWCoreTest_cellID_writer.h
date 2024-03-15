@@ -20,7 +20,7 @@
 #define K4FWCORE_K4FWCORETEST_CELLID_WRITER
 
 // GAUDI
-#include "GaudiAlg/GaudiAlgorithm.h"
+#include "Gaudi/Algorithm.h"
 
 // key4hep
 #include "k4FWCore/DataHandle.h"
@@ -36,7 +36,7 @@ const std::string cellIDtest = "M:3,S-1:3,I:9,J:9,K-1:6";
 /** @class k4FWCoreTest_cellID
  *  Lightweight producer for edm data to test cellID
  */
-class k4FWCoreTest_cellID_writer : public GaudiAlgorithm {
+class k4FWCoreTest_cellID_writer : public Gaudi::Algorithm {
 public:
   explicit k4FWCoreTest_cellID_writer(const std::string&, ISvcLocator*);
   virtual ~k4FWCoreTest_cellID_writer();
@@ -47,7 +47,7 @@ public:
   /**  Execute.
    *   @return status code
    */
-  virtual StatusCode execute() final;
+  virtual StatusCode execute(const EventContext&) const final;
   /**  Finalize.
    *   @return status code
    */
@@ -55,9 +55,9 @@ public:
 
 private:
   /// Handle for the SimTrackerHits to be written
-  DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitWriterHandle{"SimTrackerHits", Gaudi::DataHandle::Writer,
-                                                                           this};
-  MetaDataHandle<std::string>                  m_cellIDHandle{m_simTrackerHitWriterHandle, edm4hep::CellIDEncoding,
+  mutable DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitWriterHandle{"SimTrackerHits",
+                                                                                   Gaudi::DataHandle::Writer, this};
+  MetaDataHandle<std::string> m_cellIDHandle{m_simTrackerHitWriterHandle, edm4hep::CellIDEncoding,
                                              Gaudi::DataHandle::Writer};
 };
 #endif /* K4FWCORE_K4FWCORETEST_CELLID_WRITER */

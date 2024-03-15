@@ -19,7 +19,7 @@
 #ifndef K4FWCORE_EVENTHEADERCREATOR
 #define K4FWCORE_EVENTHEADERCREATOR
 
-#include "GaudiAlg/GaudiAlgorithm.h"
+#include "Gaudi/Algorithm.h"
 #include "k4FWCore/DataHandle.h"
 
 /***
@@ -30,13 +30,13 @@ namespace edm4hep {
   class EventHeaderCollection;
 }
 
-class EventHeaderCreator : public GaudiAlgorithm {
+class EventHeaderCreator : public Gaudi::Algorithm {
 public:
   EventHeaderCreator(const std::string& name, ISvcLocator* svcLoc);
 
-  virtual StatusCode initialize();
-  virtual StatusCode execute();
-  virtual StatusCode finalize();
+  StatusCode initialize();
+  StatusCode execute(const EventContext&) const;
+  StatusCode finalize();
 
 private:
   // Run number value (fixed for the entire job, to be set by the job submitter)
@@ -46,7 +46,7 @@ private:
       this, "eventNumberOffset", 0,
       "Event number offset, eventNumber will be filled with 'event_index + eventNumberOffset'"};
   // datahandle for the EventHeader
-  DataHandle<edm4hep::EventHeaderCollection> m_headerCol{"EventHeader", Gaudi::DataHandle::Writer, this};
+  mutable DataHandle<edm4hep::EventHeaderCollection> m_headerCol{"EventHeader", Gaudi::DataHandle::Writer, this};
 };
 
 #endif

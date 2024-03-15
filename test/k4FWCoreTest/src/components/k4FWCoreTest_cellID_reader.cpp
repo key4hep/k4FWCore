@@ -22,21 +22,23 @@
 DECLARE_COMPONENT(k4FWCoreTest_cellID_reader)
 
 k4FWCoreTest_cellID_reader::k4FWCoreTest_cellID_reader(const std::string& aName, ISvcLocator* aSvcLoc)
-    : GaudiAlgorithm(aName, aSvcLoc) {
+    : Gaudi::Algorithm(aName, aSvcLoc) {
   ;
   declareProperty("simtrackhits_r", m_simTrackerHitReaderHandle, "Dummy Hit collection Reader");
+  // Set Cardinality to 1 because this algorithm is not prepared to run in parallel
+  setProperty("Cardinality", 1).ignore();
 }
 
 k4FWCoreTest_cellID_reader::~k4FWCoreTest_cellID_reader() {}
 
 StatusCode k4FWCoreTest_cellID_reader::initialize() {
-  if (GaudiAlgorithm::initialize().isFailure()) {
+  if (Gaudi::Algorithm::initialize().isFailure()) {
     return StatusCode::FAILURE;
   }
   return StatusCode::SUCCESS;
 }
 
-StatusCode k4FWCoreTest_cellID_reader::execute() {
+StatusCode k4FWCoreTest_cellID_reader::execute(const EventContext&) const {
   const auto simtrackerhits_coll = m_simTrackerHitReaderHandle.get();
 
   auto       collID    = simtrackerhits_coll->getID();
@@ -49,4 +51,4 @@ StatusCode k4FWCoreTest_cellID_reader::execute() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode k4FWCoreTest_cellID_reader::finalize() { return GaudiAlgorithm::finalize(); }
+StatusCode k4FWCoreTest_cellID_reader::finalize() { return Gaudi::Algorithm::finalize(); }

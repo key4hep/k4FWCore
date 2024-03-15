@@ -47,7 +47,7 @@ StatusCode SomeGaudiAlgorithm::initialize() {
 Then use the service during execution:
 
 ```cpp
-StatusCode MarlinProcessorWrapper::execute() {
+StatusCode MarlinProcessorWrapper::execute(const EventContext&) const {
   m_service->getUniqueID(1, 2, name());
 }
 ```

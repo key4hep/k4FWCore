@@ -20,7 +20,7 @@
 #define K4FWCORE_K4FWCORETEST_CREATEEXAMPLEEVENTDATA
 
 // GAUDI
-#include "GaudiAlg/GaudiAlgorithm.h"
+#include "Gaudi/Algorithm.h"
 
 // key4hep
 #include "k4FWCore/DataHandle.h"
@@ -53,7 +53,7 @@ namespace edm4hep {
  *  events can be easily distinguished.
  *
  */
-class k4FWCoreTest_CreateExampleEventData : public GaudiAlgorithm {
+class k4FWCoreTest_CreateExampleEventData : public Gaudi::Algorithm {
 public:
   explicit k4FWCoreTest_CreateExampleEventData(const std::string&, ISvcLocator*);
   virtual ~k4FWCoreTest_CreateExampleEventData();
@@ -64,7 +64,7 @@ public:
   /**  Execute.
    *   @return status code
    */
-  virtual StatusCode execute() final;
+  virtual StatusCode execute(const EventContext&) const final;
   /**  Finalize.
    *   @return status code
    */
@@ -75,16 +75,19 @@ private:
   Gaudi::Property<int> m_magicNumberOffset{this, "magicNumberOffset", 0,
                                            "Integer to add to the dummy values written to the edm"};
   /// Handle for the MCParticles to be written
-  DataHandle<edm4hep::MCParticleCollection> m_mcParticleHandle{"MCParticles", Gaudi::DataHandle::Writer, this};
+  mutable DataHandle<edm4hep::MCParticleCollection> m_mcParticleHandle{"MCParticles", Gaudi::DataHandle::Writer, this};
   /// Handle for the SimTrackerHits to be written
-  DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitHandle{"SimTrackerHits", Gaudi::DataHandle::Writer, this};
-  DataHandle<edm4hep::TrackerHit3DCollection>  m_TrackerHitHandle{"TrackerHits", Gaudi::DataHandle::Writer, this};
+  mutable DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitHandle{"SimTrackerHits",
+                                                                             Gaudi::DataHandle::Writer, this};
+  mutable DataHandle<edm4hep::TrackerHit3DCollection>  m_TrackerHitHandle{"TrackerHits", Gaudi::DataHandle::Writer,
+                                                                         this};
 
   /// Handle for the Tracks to be written
-  DataHandle<edm4hep::TrackCollection> m_trackHandle{"Tracks", Gaudi::DataHandle::Writer, this};
+  mutable DataHandle<edm4hep::TrackCollection> m_trackHandle{"Tracks", Gaudi::DataHandle::Writer, this};
 
-  DataHandle<podio::UserDataCollection<float>> m_vectorFloatHandle{"VectorFloat", Gaudi::DataHandle::Writer, this};
+  mutable DataHandle<podio::UserDataCollection<float>> m_vectorFloatHandle{"VectorFloat", Gaudi::DataHandle::Writer,
+                                                                           this};
 
-  int m_event{0};
+  mutable int m_event{0};
 };
 #endif /* K4FWCORE_K4FWCORETEST_CREATEEXAMPLEEVENTDATA */

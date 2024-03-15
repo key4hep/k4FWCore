@@ -21,15 +21,17 @@
 DECLARE_COMPONENT(k4FWCoreTest_cellID_writer)
 
 k4FWCoreTest_cellID_writer::k4FWCoreTest_cellID_writer(const std::string& aName, ISvcLocator* aSvcLoc)
-    : GaudiAlgorithm(aName, aSvcLoc) {
+    : Gaudi::Algorithm(aName, aSvcLoc) {
   ;
   declareProperty("simtrackhits_w", m_simTrackerHitWriterHandle, "Dummy Hit collection Writer");
+  // Set Cardinality to 1 because this algorithm is not prepared to run in parallel
+  setProperty("Cardinality", 1).ignore();
 }
 
 k4FWCoreTest_cellID_writer::~k4FWCoreTest_cellID_writer() {}
 
 StatusCode k4FWCoreTest_cellID_writer::initialize() {
-  if (GaudiAlgorithm::initialize().isFailure()) {
+  if (Gaudi::Algorithm::initialize().isFailure()) {
     return StatusCode::FAILURE;
   }
   m_cellIDHandle.put(cellIDtest);
@@ -37,7 +39,7 @@ StatusCode k4FWCoreTest_cellID_writer::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode k4FWCoreTest_cellID_writer::execute() {
+StatusCode k4FWCoreTest_cellID_writer::execute(const EventContext&) const {
   edm4hep::SimTrackerHitCollection* simTrackerHits = m_simTrackerHitWriterHandle.createAndPut();
   auto                              hit            = simTrackerHits->create();
   hit.setPosition({3, 4, 5});
@@ -45,4 +47,4 @@ StatusCode k4FWCoreTest_cellID_writer::execute() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode k4FWCoreTest_cellID_writer::finalize() { return GaudiAlgorithm::finalize(); }
+StatusCode k4FWCoreTest_cellID_writer::finalize() { return Gaudi::Algorithm::finalize(); }

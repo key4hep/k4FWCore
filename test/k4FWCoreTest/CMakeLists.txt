@@ -21,7 +21,7 @@ file(GLOB k4fwcoretest_plugin_sources src/components/*.cpp)
 
 gaudi_add_module(k4FWCoreTestPlugins
                  SOURCES ${k4fwcoretest_plugin_sources}
-                 LINK Gaudi::GaudiAlgLib Gaudi::GaudiKernel k4FWCore k4FWCore::k4Interface ROOT::Core ROOT::RIO ROOT::Tree EDM4HEP::edm4hepDict EDM4HEP::edm4hep)
+                 LINK Gaudi::GaudiKernel k4FWCore k4FWCore::k4Interface ROOT::Core ROOT::RIO ROOT::Tree EDM4HEP::edm4hepDict EDM4HEP::edm4hep)
 
 include(CTest)
 
@@ -92,7 +92,6 @@ add_test(NAME checkKeepDropSwitch
          COMMAND python scripts/check_KeepDropSwitch.py)
 set_test_env(checkKeepDropSwitch)
 set_property(TEST checkKeepDropSwitch APPEND PROPERTY DEPENDS ReadExampleEventData)
-add_test_with_env(TestDataHandleUniquePtr options/TestDataHandleUniquePtr.py)
 add_test_with_env(TestUniqueIDGenSvc options/TestUniqueIDGenSvc.py)
 add_test_with_env(TestEventHeaderFiller options/createEventHeader.py)
 add_test_with_env(EventHeaderCheck options/runEventHeaderCheck.py PROPERTIES DEPENDS TestEventHeaderFiller)
