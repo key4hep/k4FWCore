@@ -66,12 +66,9 @@ struct ExampleFunctionalProducerMultiple final
     floatVector.push_back(25.);
     floatVector.push_back(m_event);
 
-    auto  particles = edm4hep::MCParticleCollection();
-    auto  particle  = particles.create();
-    auto& p4        = particle.getMomentum();
-    p4.x            = m_magicNumberOffset + m_event + 5;
-    p4.y            = m_magicNumberOffset + 6;
-    p4.z            = m_magicNumberOffset + 7;
+    auto particles = edm4hep::MCParticleCollection();
+    auto particle  = particles.create();
+    particle.setMomentum({m_magicNumberOffset + m_event + 5.0, m_magicNumberOffset + 6.0, m_magicNumberOffset + 7.0});
     particle.setMass(m_magicNumberOffset + m_event + 8);
 
     auto simTrackerHits = edm4hep::SimTrackerHitCollection();

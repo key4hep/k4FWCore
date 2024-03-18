@@ -57,11 +57,7 @@ StatusCode k4FWCoreTest_AlgorithmWithTFile::execute(const EventContext&) const {
   edm4hep::MCParticleCollection* particles = m_mcParticleHandle.createAndPut();
 
   auto particle = particles->create();
-
-  auto& p4 = particle.getMomentum();
-  p4.x     = m_magicNumberOffset + 5;
-  p4.y     = m_magicNumberOffset + 6;
-  p4.z     = m_magicNumberOffset + 7;
+  particle.setMomentum({m_magicNumberOffset + 5.0, m_magicNumberOffset + 6.0, m_magicNumberOffset + 7.0});
   particle.setMass(m_magicNumberOffset + 8);
 
   auto* hits = m_simTrackerHitHandle.createAndPut();
