@@ -25,6 +25,8 @@
 
 #include "k4FWCore/KeepDropSwitch.h"
 
+#include "GaudiKernel/AnyDataWrapper.h"
+
 #include <mutex>
 #include <thread>
 #include <tuple>
@@ -35,31 +37,58 @@ StatusCode IOSvc::initialize() {
 
   m_switch = KeepDropSwitch(m_outputCommands);
 
+  m_incidentSvc = service("IncidentSvc");
+  m_incidentSvc->addListener(this, IncidentType::EndEvent);
+
+  m_dataSvc = service("EventDataSvc");
+
   return Service::initialize();
 }
 
-StatusCode IOSvc::finalize() {
+StatusCode IOSvc::finalize() { return Service::finalize(); }
 
-  return Service::finalize();
-}
-
-std::vector<std::shared_ptr<podio::CollectionBase>> IOSvc::next() {
+std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, podio::Frame> IOSvc::next() {
   info() << "IOSvc::next()" << endmsg;
-  podio::Frame* frame;
+  podio::Frame frame;
   {
     std::scoped_lock<std::mutex> lock(m_changeBufferLock);
-    frame = new podio::Frame(std::move(m_reader->readNextEntry(podio::Category::Event)));
+    frame = podio::Frame(std::move(m_reader->readNextEntry(podio::Category::Event)));
   }
 
   std::vector<std::shared_ptr<podio::CollectionBase>> collections;
 
   for (const auto& name : m_collectionNames) {
     info() << "Collection name: " << name << endmsg;
-    auto ptr = const_cast<podio::CollectionBase*>(frame->get(name));
+    auto ptr = const_cast<podio::CollectionBase*>(frame.get(name));
     collections.push_back(std::shared_ptr<podio::CollectionBase>(ptr));
   }
 
-  return collections;
+  return std::make_tuple(collections, std::move(frame));
+}
+
+// After every event if there is still a frame in the TES
+// that means it hasn't been written so the collections inside the Frame
+// should be removed so that they are deleted when the Frame is deleted
+void IOSvc::handle( const Incident& incident ) {
+
+  DataObject *p;
+  auto code = m_dataSvc->retrieveObject("/Event/Frame", p);
+  if (code.isFailure()) {
+    return;
+  }
+
+  auto frame = dynamic_cast<AnyDataWrapper<podio::Frame>*>(p);
+  for (const auto& coll : frame->getData().getAvailableCollections()) {
+    DataObject *collPtr;
+    code = m_dataSvc->retrieveObject("/Event/" + coll, collPtr);
+    if (code.isSuccess()) {
+      info() << "Removing collection: " << coll << endmsg;
+      m_dataSvc->unregisterObject(collPtr);
+    }
+  }
+
+  // code = m_dataSvc->unregisterObject(p);
+  
 }
 
 DECLARE_COMPONENT(IOSvc)

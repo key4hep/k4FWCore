@@ -42,10 +42,11 @@ using Particle      = edm4hep::MCParticleCollection;
 using SimTrackerHit = edm4hep::SimTrackerHitCollection;
 using TrackerHit    = edm4hep::TrackerHit3DCollection;
 using Track         = edm4hep::TrackCollection;
+using Ptr = std::shared_ptr<podio::CollectionBase>;
 
 struct ExampleFunctionalProducerMultiple final
-    : Gaudi::Functional::Producer<std::tuple<Float, Particle, Particle, SimTrackerHit, TrackerHit, Track>(),
-                                  BaseClass_t> {
+    // : Gaudi::Functional::Producer<std::tuple<Float, Particle, Particle, SimTrackerHit, TrackerHit, Track>(),
+  : Gaudi::Functional::Producer<std::tuple<Ptr, Ptr, Ptr, Ptr, Ptr, Ptr>()> {
   // The pairs in KeyValue can be changed from python and they correspond
   // to the names of the output collections
   ExampleFunctionalProducerMultiple(const std::string& name, ISvcLocator* svcLoc)
@@ -57,31 +58,34 @@ struct ExampleFunctionalProducerMultiple final
              KeyValue("OutputCollectionTrackerHits", "TrackerHits"), KeyValue("OutputCollectionTracks", "Tracks")}) {}
 
   // This is the function that will be called to produce the data
-  std::tuple<Float, Particle, Particle, SimTrackerHit, TrackerHit, Track> operator()() const override {
+  std::tuple<Ptr, Ptr, Ptr, Ptr, Ptr, Ptr> operator()() const override {
     // The following was copied and adapted from the
     // k4FWCoreTest_CreateExampleEventData test
 
-    auto floatVector = podio::UserDataCollection<float>();
-    floatVector.push_back(125.);
-    floatVector.push_back(25.);
-    floatVector.push_back(m_event);
+    auto floatVector = new podio::UserDataCollection<float>();
+    floatVector->push_back(125.);
+    floatVector->push_back(25.);
+    floatVector->push_back(m_event);
 
     auto particles = edm4hep::MCParticleCollection();
     auto particle  = particles.create();
-    particle.setMomentum({m_magicNumberOffset + m_event + 5.0, m_magicNumberOffset + 6.0, m_magicNumberOffset + 7.0});
+    auto& p4        = particle.getMomentum();
+    p4.x            = m_magicNumberOffset + m_event + 5;
+    p4.y            = m_magicNumberOffset + 6;
+    p4.z            = m_magicNumberOffset + 7;
     particle.setMass(m_magicNumberOffset + m_event + 8);
 
-    auto simTrackerHits = edm4hep::SimTrackerHitCollection();
-    auto hit            = simTrackerHits.create();
+    auto simTrackerHits = new edm4hep::SimTrackerHitCollection();
+    auto hit            = simTrackerHits->create();
     hit.setPosition({3, 4, 5});
 
-    auto trackerHits = edm4hep::TrackerHit3DCollection();
-    auto trackerHit  = trackerHits.create();
+    auto trackerHits = new edm4hep::TrackerHit3DCollection();
+    auto trackerHit  = trackerHits->create();
     trackerHit.setPosition({3, 4, 5});
 
-    auto tracks = edm4hep::TrackCollection();
-    auto track  = tracks.create();
-    auto track2 = tracks.create();
+    auto tracks = new edm4hep::TrackCollection();
+    auto track  = tracks->create();
+    auto track2 = tracks->create();
     // set members
     track.setType(1);
     track.setChi2(2.1);
@@ -96,8 +100,14 @@ struct ExampleFunctionalProducerMultiple final
     track.addToTrackerHits(trackerHit);
     track.addToTracks(track2);
 
-    return std::make_tuple(std::move(floatVector), std::move(particles), Particle(), std::move(simTrackerHits),
-                           std::move(trackerHits), std::move(tracks));
+    // return std::make_tuple(std::move(floatVector), std::move(particles), Particle(), std::move(simTrackerHits),
+    //                        std::move(trackerHits), std::move(tracks));
+    return std::make_tuple(std::shared_ptr<podio::CollectionBase>(floatVector),
+                            std::shared_ptr<podio::CollectionBase>(particles),
+                            std::shared_ptr<podio::CollectionBase>(new Particle()),
+                            std::shared_ptr<podio::CollectionBase>(simTrackerHits),
+                            std::shared_ptr<podio::CollectionBase>(trackerHits),
+                            std::shared_ptr<podio::CollectionBase>(tracks));
   }
 
 private:

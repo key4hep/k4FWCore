@@ -31,6 +31,7 @@
 #include "IIOSvc.h"
 
 #include <memory>
+#include <thread>
 
 class SaveToFile final : public Gaudi::Functional::Consumer<void()> {
 public:
@@ -38,6 +39,7 @@ public:
   }
 
   mutable Gaudi::Property<std::vector<std::string>> m_OutputNames{this, "CollectionNames", {}};
+  mutable std::set<std::string> m_availableCollections;
 
   SmartIF<IIOSvc> iosvc;
   SmartIF<IDataProviderSvc> datasvc;
@@ -85,7 +87,7 @@ public:
       /// We are only interested in leaves with an object
       if (!pReg->address() || !pReg->object())
         continue;
-      m_OutputNames.value().push_back(pReg->name());
+      m_availableCollections.insert(pReg->name());
       const std::string& id = pReg->identifier();
     }
   }
@@ -99,10 +101,17 @@ public:
         return;
       }
       getOutputCollections(root->registry());
+
+      // iosvc->getCollsToWrite(m_availableCollections);
+
       m_first = false;
     }
 
-    podio::Frame frame;
+    DataObject *p;
+    // Get back ownership of the original frame that doesn't have to be deleted manually
+    auto code = datasvc->retrieveObject("/Event/Frame", p);
+    code = datasvc->unregisterObject(p);
+    auto ptr = dynamic_cast<AnyDataWrapper<podio::Frame>*>(p);
     for (auto& coll : m_OutputNames) {
       DataObject* p;
       auto code = datasvc->retrieveObject("/Event/" + coll, p);
@@ -117,11 +126,22 @@ public:
         return;
       }
       const auto collection = dynamic_cast<AnyDataWrapper<std::shared_ptr<podio::CollectionBase>>*>(p);
+      if (!collection) {
+        error() << "Failed to cast collection " << coll << endmsg;
+        return;
+      }
+      else {
+        info() << "collection = " << collection << endmsg;
+        // info() << "Collection " << coll << " has " << collection->getData()->size() << " elements" << endmsg;
+      }
       std::unique_ptr<podio::CollectionBase> uptr(collection->getData().get());
-      frame.put(std::move(uptr), coll);
+      ptr->getData().put(std::move(uptr), "MCParticless");
     }
 
-    iosvc->getWriter()->writeFrame(frame, podio::Category::Event);
+    ptr->addRef();
+    iosvc->getWriter()->writeFrame(ptr->getData(), podio::Category::Event);
+
+
   }
 };
 

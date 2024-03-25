@@ -35,6 +35,7 @@ namespace edm4hep {
 
 // Define BaseClass_t
 #include "k4FWCore/BaseClass.h"
+#include "k4FWCore/Consumer.h"
 
 #include <sstream>
 #include <stdexcept>
@@ -48,13 +49,12 @@ using TrackerHitColl    = edm4hep::TrackerHit3DCollection;
 using TrackColl         = edm4hep::TrackCollection;
 
 struct ExampleFunctionalConsumerMultiple final
-    : Gaudi::Functional::Consumer<void(const FloatColl&, const ParticleColl&, const SimTrackerHitColl&,
-                                       const TrackerHitColl&, const TrackColl&),
-                                  BaseClass_t> {
+    : Gaudi::Functional::CConsumer<void(const FloatColl&, const ParticleColl&, const SimTrackerHitColl&,
+                                       const TrackerHitColl&, const TrackColl&)> {
   // The pairs in KeyValue can be changed from python and they correspond
   // to the names of the input collection
   ExampleFunctionalConsumerMultiple(const std::string& name, ISvcLocator* svcLoc)
-      : Consumer(name, svcLoc,
+      : CConsumer(name, svcLoc,
                  {
                      KeyValue("InputCollectionFloat", "VectorFloat"),
                      KeyValue("InputCollectionParticles", "MCParticles1"),
@@ -68,6 +68,7 @@ struct ExampleFunctionalConsumerMultiple final
   // we get from the input
   void operator()(const FloatColl& floatVector, const ParticleColl& particles, const SimTrackerHitColl& simTrackerHits,
                   const TrackerHitColl& trackerHits, const TrackColl& tracks) const override {
+    info() << "ExampleFunctionalConsumerMultiple called" << endmsg;
     if (floatVector.size() != 3) {
       throw std::runtime_error("Wrong size of floatVector collection, expected 3, got " +
                                std::to_string(floatVector.size()) + "");
@@ -79,6 +80,7 @@ struct ExampleFunctionalConsumerMultiple final
       throw std::runtime_error(error.str());
     }
 
+    info() << "VectorFloat collection is ok" << endmsg;
     auto p4 = particles.momentum()[0];
     if ((p4.x != m_magicNumberOffset + 5) || (p4.y != m_magicNumberOffset + 6) || (p4.z != m_magicNumberOffset + 7) ||
         (particles[0].getMass() != m_magicNumberOffset + 8)) {

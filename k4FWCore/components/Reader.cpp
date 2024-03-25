@@ -23,7 +23,14 @@
 
 #include "IIOSvc.h"
 
+#include "podio/CollectionBase.h"
+#include "podio/Frame.h"
+
+#include <GaudiKernel/AnyDataWrapper.h>
+#include <GaudiKernel/IDataManagerSvc.h>
 #include <memory>
+
+using podio::CollectionBase;
 
 namespace Gaudi::Functional {
 template <typename Container>
@@ -33,11 +40,9 @@ using vector_of_optional_ = std::vector<std::optional<Container>>;
 
 namespace details {
 
-  template <typename Signature, typename Traits_>
-  class MyTransformer;
-
-  template <typename Out, typename Traits_>
-  class MyTransformer<vector_of_<Out>(), Traits_> : public BaseClass_t<Traits_> {
+  class MyTransformer : public BaseClass_t<Gaudi::Functional::Traits::useDefaults> {
+    using Traits_ = Gaudi::Functional::Traits::useDefaults;
+    using Out = std::shared_ptr<podio::CollectionBase>;
     using base_class = BaseClass_t<Traits_>;
     static_assert(std::is_base_of_v<Algorithm, base_class>, "BaseClass must inherit from Algorithm");
 
@@ -50,18 +55,18 @@ namespace details {
             this, outputs.first, details::to_DataObjID(outputs.second),
             [this](Gaudi::Details::PropertyBase&) {
               this->m_outputs = details::make_vector_of_handles<decltype(this->m_outputs)>(this, m_outputLocations);
-              if constexpr (details::is_optional_v<Out>) { // handle constructor does not (yet) allow to
-                                                           // set optional flag... so
-                                                           // do it explicitly here...
-                std::for_each(this->m_outputs.begin(), this->m_outputs.end(), [](auto& h) { h.setOptional(true); });
-              }
+              // if constexpr (details::is_optional_v<Out>) { // handle constructor does not (yet) allow to
+              //                                              // set optional flag... so
+              //                                              // do it explicitly here...
+              //   std::for_each(this->m_outputs.begin(), this->m_outputs.end(), [](auto& h) { h.setOptional(true); });
+              // }
             },
-            Gaudi::Details::Property::ImmediatelyInvokeHandler{true}) {
-    }
+            Gaudi::Details::Property::ImmediatelyInvokeHandler{true})
+    {}
 
     // derived classes can NOT implement execute
     StatusCode execute(const EventContext&) const override final {
-      Gaudi::Algorithm::info() << "MyTransformer::execute()" << endmsg;
+      // Gaudi::Algorithm::info() << "MyTransformer::execute()" << endmsg;
       try {
         // TODO:FIXME: how does operator() know the number and order of expected outputs?
         auto out = (*this)();
@@ -71,9 +76,10 @@ namespace details {
                                this->name(), StatusCode::FAILURE);
         }
         for (unsigned i = 0; i != out.size(); ++i) {
-          Gaudi::Algorithm::info() << "MyTransformer::execute() : putting " << m_outputs[i].fullKey() << endmsg;
+          // Gaudi::Algorithm::info() << "MyTransformer::execute() : putting " << m_outputs[i].fullKey() << endmsg;
           details::put(m_outputs[i], std::move(out[i]));
         }
+        // details::put(m_frame[0], std::move(frame));
         return FilterDecision::PASSED;
       } catch (GaudiException& e) {
         (e.code() ? this->warning() : this->error()) << e.tag() << " : " << e.message() << endmsg;
@@ -88,32 +94,33 @@ namespace details {
 
   private:
     // if In is a pointer, it signals optional (as opposed to mandatory) input
-    template <typename T>
-    using InputHandle_t = InputHandle_t<Traits_, std::remove_pointer_t<T>>;
-    // std::vector<InputHandle_t<In>>          m_inputs;         //   and make the handles properties instead...
-    Gaudi::Property<std::vector<DataObjID>> m_inputLocations; // TODO/FIXME: remove this duplication...
+    // template <typename T>
+    // using InputHandle_t = InputHandle_t<Traits_, std::remove_pointer_t<T>>;
+    // Gaudi::Property<std::vector<DataObjID>> m_inputLocations; // TODO/FIXME: remove this duplication...
     // TODO/FIXME: replace vector of DataObjID property + call-back with a
     //             vector<handle> property ... as soon as declareProperty can deal with that.
     template <typename T>
     using OutputHandle = details::OutputHandle_t<Traits_, details::remove_optional_t<T>>;
     std::vector<OutputHandle<Out>> m_outputs;
-    Gaudi::Property<std::vector<DataObjID>> m_outputLocations; // TODO/FIXME  for now: use a call-back to update the
-                                                               // actual handles!
+    Gaudi::Property<std::vector<DataObjID>> m_outputLocations;
+    // Gaudi::Property<std::vector<DataObjID>> m_outputFrameLocations;
+    // std::vector<OutputHandle<std::shared_ptr<CollectionBase>>> m_frame{};
+
   };
 
 } // namespace details
 
 } // namespace Gaudi::Functional
 
-template <typename Signature, typename Traits_ = Gaudi::Functional::Traits::useDefaults>
-using MyTransformer =
-    Gaudi::Functional::details::MyTransformer<Signature, Traits_>; // details::isLegacy<Traits_>>;
+using Gaudi::Functional::details::MyTransformer;
 
-// class Reader final : public MyTransformer<std::vector<std::shared_ptr<podio::CollectionBase>>()> {
-class Reader final : public MyTransformer<std::vector<std::shared_ptr<podio::CollectionBase>>()> {
+class Reader final : public MyTransformer {
+// class Reader final : public MyTransformer<std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, std::shared_ptr<CollectionBase>>()> {
 public:
   Reader(const std::string& name, ISvcLocator* svcLoc) :
-      MyTransformer(name, svcLoc, {"OutputLocations", {"MCParticles"}}) {
+    MyTransformer(name, svcLoc, {"OutputLocations", {"MCParticles"}}
+                  
+                  ) {
   }
 
   // Gaudi doesn't run the destructor of the Services so we have to
@@ -146,8 +153,16 @@ public:
   std::vector<std::shared_ptr<podio::CollectionBase>> operator()() const override {
     info() << "Reader::operator()" << endmsg;
     auto val = iosvc->next();
-    info() << "Number of collections " << val.size() << endmsg;
-    return val;
+
+    auto eds = eventSvc().as<IDataProviderSvc>();
+    auto frame = std::move(std::get<1>(val));
+
+    // We'll hand the ownership of 
+    auto tmp = new AnyDataWrapper<podio::Frame>(std::move(frame));
+    auto code = eds->registerObject("/Event/Frame", tmp);
+
+
+    return std::get<0>(val);
   }
 };
 

@@ -21,11 +21,16 @@
 
 #include "Gaudi/Property.h"
 #include "GaudiKernel/Service.h"
+#include "GaudiKernel/IIncidentListener.h"
+#include "GaudiKernel/IIncidentSvc.h"
+#include "GaudiKernel/IDataProviderSvc.h"
 
 #include "podio/ROOTFrameReader.h"
 #include "podio/ROOTFrameWriter.h"
-#include "podio/ROOTNTupleReader.h"
-#include "podio/ROOTNTupleWriter.h"
+#include "podio/ROOTRNTupleReader.h"
+#include "podio/ROOTRNTupleWriter.h"
+#include "podio/IROOTFrameReader.h"
+#include "podio/IROOTFrameWriter.h"
 
 #include "k4FWCore/KeepDropSwitch.h"
 
@@ -35,7 +40,7 @@
 #include <type_traits>
 #include <vector>
 
-class IOSvc : public extends<Service, IIOSvc> {
+class IOSvc : public extends<Service, IIOSvc, IIncidentListener> {
   using extends::extends;
 public:
   // Gaudi doesn't run the destructor of the Services so we have to
@@ -45,7 +50,7 @@ public:
   StatusCode initialize() override;
   StatusCode finalize() override;
 
-  std::vector<std::shared_ptr<podio::CollectionBase>> next() override;
+  std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, podio::Frame> next() override;
 
   std::shared_ptr<std::vector<std::string>> getCollectionNames() const override {
     return std::make_shared<std::vector<std::string>>(m_collectionNames);
@@ -68,8 +73,7 @@ protected:
 
   KeepDropSwitch m_switch;
 
-  // To be changed by a base class to allow to use different readers
-  std::unique_ptr<podio::ROOTFrameReader> m_reader{nullptr};
+  std::unique_ptr<podio::IROOTFrameReader> m_reader{nullptr};
   std::shared_ptr<podio::ROOTFrameWriter> m_writer{nullptr};
 
   std::shared_ptr<podio::ROOTFrameWriter> getWriter() override {
@@ -89,6 +93,10 @@ protected:
       m_reader = nullptr;
     }
   }
+
+  SmartIF<IDataProviderSvc> m_dataSvc;
+  SmartIF<IIncidentSvc> m_incidentSvc;
+  void handle(const Incident& incident) override;
 };
 
 #endif
