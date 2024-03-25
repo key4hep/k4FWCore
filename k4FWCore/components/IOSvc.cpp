@@ -32,8 +32,10 @@
 #include <tuple>
 
 StatusCode IOSvc::initialize() {
-  m_reader = std::make_unique<podio::ROOTFrameReader>();
-  m_reader->openFiles(m_fileNames);
+  if (!m_readingFileNames.empty()) {
+    m_reader = std::make_unique<podio::ROOTFrameReader>();
+    m_reader->openFiles(m_readingFileNames);
+  }
 
   m_switch = KeepDropSwitch(m_outputCommands);
 
@@ -53,6 +55,9 @@ std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, podio::Frame> IO
   {
     std::scoped_lock<std::mutex> lock(m_changeBufferLock);
     frame = podio::Frame(std::move(m_reader->readNextEntry(podio::Category::Event)));
+    if (m_collectionNames.empty()) {
+        m_collectionNames = frame.getAvailableCollections();
+    }
   }
 
   std::vector<std::shared_ptr<podio::CollectionBase>> collections;
@@ -70,9 +75,8 @@ std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, podio::Frame> IO
 // that means it hasn't been written so the collections inside the Frame
 // should be removed so that they are deleted when the Frame is deleted
 void IOSvc::handle( const Incident& incident ) {
-
   DataObject *p;
-  auto code = m_dataSvc->retrieveObject("/Event/Frame", p);
+  auto code = m_dataSvc->retrieveObject("/Event/_Frame", p);
   if (code.isFailure()) {
     return;
   }
@@ -82,13 +86,20 @@ void IOSvc::handle( const Incident& incident ) {
     DataObject *collPtr;
     code = m_dataSvc->retrieveObject("/Event/" + coll, collPtr);
     if (code.isSuccess()) {
-      info() << "Removing collection: " << coll << endmsg;
-      m_dataSvc->unregisterObject(collPtr);
+      code = m_dataSvc->unregisterObject(collPtr);
     }
+    // else {
+    //   info() << "Collection not found: " << coll << endmsg;
+    // }
   }
+}
 
-  // code = m_dataSvc->unregisterObject(p);
-  
+void IOSvc::setReadingCollectionNames(const std::vector<std::string>& names) {
+  m_collectionNames = names;
+}
+
+void IOSvc::setReadingFileNames(const std::vector<std::string>& names) {
+  m_readingFileNames = names;
 }
 
 DECLARE_COMPONENT(IOSvc)

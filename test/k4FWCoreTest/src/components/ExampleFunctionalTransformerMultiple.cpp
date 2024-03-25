@@ -18,7 +18,6 @@
  */
 
 #include "Gaudi/Property.h"
-#include "GaudiAlg/Transformer.h"
 
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/SimTrackerHitCollection.h"
@@ -34,8 +33,7 @@ namespace edm4hep {
 #include "edm4hep/TrackerHit3DCollection.h"
 #include "podio/UserDataCollection.h"
 
-// Define BaseClass_t
-#include "k4FWCore/BaseClass.h"
+#include "k4FWCore/Transformer.h"
 
 #include <string>
 
@@ -51,10 +49,9 @@ using Counter  = podio::UserDataCollection<int>;
 using Particle = edm4hep::MCParticleCollection;
 
 struct ExampleFunctionalTransformerMultiple final
-    : Gaudi::Functional::MultiTransformer<std::tuple<Counter, Particle>(const FloatColl&, const ParticleColl&,
+    : k4FWCore::MultiTransformer<std::tuple<Counter, Particle>(const FloatColl&, const ParticleColl&,
                                                                         const SimTrackerHitColl&, const TrackerHitColl&,
-                                                                        const TrackColl&),
-                                          BaseClass_t> {
+                                                                        const TrackColl&)> {
   ExampleFunctionalTransformerMultiple(const std::string& name, ISvcLocator* svcLoc)
       : MultiTransformer(
             name, svcLoc,
@@ -80,23 +77,23 @@ struct ExampleFunctionalTransformerMultiple final
 
       // We could create a new one
       auto newParticle = newParticlesColl->create();
-      newParticle.setPDG(p.getPDG());
-      newParticle.setGeneratorStatus(p.getGeneratorStatus() + 1);
-      newParticle.setSimulatorStatus(p.getSimulatorStatus() + 1);
-      newParticle.setCharge(p.getCharge() + 2);
-      newParticle.setTime(p.getTime() + 3);
-      newParticle.setMass(p.getMass() + 4);
+      newParticle.setPDG(p.getPDG() + m_offset);
+      newParticle.setGeneratorStatus(p.getGeneratorStatus() + m_offset);
+      newParticle.setSimulatorStatus(p.getSimulatorStatus() + m_offset);
+      newParticle.setCharge(p.getCharge() + m_offset);
+      newParticle.setTime(p.getTime() + m_offset);
+      newParticle.setMass(p.getMass() + m_offset);
     }
     counter.push_back(particles.size());
-
     counter.push_back(simTrackerHits.size());
-
     counter.push_back(trackerHits.size());
-
     counter.push_back(tracks.size());
 
     return std::make_tuple(std::move(counter), std::move(newParticlesColl));
   }
+
+  Gaudi::Property<int> m_offset{this, "Offset", 10,
+      "Integer to add to the dummy values written to the edm"};
 };
 
 DECLARE_COMPONENT(ExampleFunctionalTransformerMultiple)

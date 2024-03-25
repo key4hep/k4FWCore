@@ -43,7 +43,7 @@ public:
 
   SmartIF<IIOSvc> iosvc;
   SmartIF<IDataProviderSvc> datasvc;
-  mutable bool m_first = false;
+  mutable bool m_first {true};
 
   StatusCode initialize() override {
     iosvc = service("IOSvc", true);
@@ -71,48 +71,58 @@ public:
     m_mgr = eventSvc();
     info() << "pObj = " << pObj << endmsg;
     if (!pObj) {
+      error() << "Failed to retrieve root object" << endmsg;
       return;
     }
     auto mgr = eventSvc().as<IDataManagerSvc>();
     if (!mgr) {
+      error() << "Failed to retrieve IDataManagerSvc" << endmsg;
       return;
     }
     std::vector<IRegistry*> leaves;
     StatusCode sc = m_mgr->objectLeaves(pObj, leaves);
     if (!sc.isSuccess()) {
+      error() << "Failed to retrieve object leaves" << endmsg;
       return;
     }
     for (auto& pReg : leaves) {
-      info() << "Found leaf: " << pReg->name() << endmsg;
-      /// We are only interested in leaves with an object
-      if (!pReg->address() || !pReg->object())
+      if (pReg->name() == "/_Frame") {
         continue;
-      m_availableCollections.insert(pReg->name());
+      }
+      // info() << "Found leaf: " << pReg->name() << endmsg;
+      /// We are only interested in leaves with an object
+      // if (!pReg->address() || !pReg->object()) {
+      //   info() << "Leaf " << pReg->name() << " has no object" << endmsg;
+      //   continue;
+      // }
+      m_availableCollections.insert(pReg->name().substr(1, pReg->name().size() - 1));
       const std::string& id = pReg->identifier();
     }
   }
 
   void operator()() const override {
-
     if (m_first) {
       SmartDataPtr<DataObject> root(eventSvc(), "/Event");
       if (!root) {
-        error() << "Failed to retrieve root object /Event" << endmsg;
+        info() << "Failed to retrieve root object /Event" << endmsg;
         return;
       }
       getOutputCollections(root->registry());
-
-      // iosvc->getCollsToWrite(m_availableCollections);
 
       m_first = false;
     }
 
     DataObject *p;
-    // Get back ownership of the original frame that doesn't have to be deleted manually
     auto code = datasvc->retrieveObject("/Event/Frame", p);
-    code = datasvc->unregisterObject(p);
-    auto ptr = dynamic_cast<AnyDataWrapper<podio::Frame>*>(p);
-    for (auto& coll : m_OutputNames) {
+    AnyDataWrapper<podio::Frame>* ptr;
+    if (code.isSuccess()) {
+      code = datasvc->unregisterObject(p);
+      ptr = dynamic_cast<AnyDataWrapper<podio::Frame>*>(p);
+    }
+    else {
+      ptr = new AnyDataWrapper<podio::Frame>(podio::Frame());
+    }
+    for (auto& coll : m_availableCollections) {
       DataObject* p;
       auto code = datasvc->retrieveObject("/Event/" + coll, p);
       if (code.isFailure()) {
@@ -131,16 +141,15 @@ public:
         return;
       }
       else {
-        info() << "collection = " << collection << endmsg;
+        // info() << "collection = " << collection << endmsg;
         // info() << "Collection " << coll << " has " << collection->getData()->size() << " elements" << endmsg;
       }
       std::unique_ptr<podio::CollectionBase> uptr(collection->getData().get());
-      ptr->getData().put(std::move(uptr), "MCParticless");
+      ptr->getData().put(std::move(uptr), coll);
     }
 
-    ptr->addRef();
+    // ptr->addRef();
     iosvc->getWriter()->writeFrame(ptr->getData(), podio::Category::Event);
-
 
   }
 };
