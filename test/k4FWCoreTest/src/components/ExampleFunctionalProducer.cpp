@@ -18,7 +18,6 @@
  */
 
 #include "Gaudi/Property.h"
-#include "GaudiAlg/Producer.h"
 
 #include "edm4hep/MCParticleCollection.h"
 
