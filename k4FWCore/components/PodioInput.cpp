@@ -188,6 +188,11 @@ void PodioInput::fillReaders() {
 }
 
 PodioInput::PodioInput(const std::string& name, ISvcLocator* svcLoc) : Consumer(name, svcLoc) {
+  // do not do anything during the genconf step
+  const std::string cmd = System::cmdLineArgs()[0];
+  if (cmd.find("genconf") != std::string::npos)
+    return;
+
   // check whether we have the PodioEvtSvc active
   m_podioDataSvc = dynamic_cast<PodioDataSvc*>(evtSvc().get());
   if (!m_podioDataSvc) {
