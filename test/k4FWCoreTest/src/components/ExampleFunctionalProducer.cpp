@@ -19,13 +19,14 @@
 
 #include "Gaudi/Property.h"
 #include "GaudiAlg/Producer.h"
-#include "k4FWCore/BaseClass.h"
 
 #include "edm4hep/MCParticleCollection.h"
 
+#include "k4FWCore/Producer.h"
+
 #include <string>
 
-struct ExampleFunctionalProducer final : Gaudi::Functional::Producer<edm4hep::MCParticleCollection(), BaseClass_t> {
+struct ExampleFunctionalProducer final : k4FWCore::Producer<edm4hep::MCParticleCollection()> {
   // The pair in KeyValue can be changed from python and it corresponds
   // to the name of the output collection
   ExampleFunctionalProducer(const std::string& name, ISvcLocator* svcLoc)

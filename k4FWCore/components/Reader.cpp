@@ -70,14 +70,14 @@ namespace details {
       try {
         // TODO:FIXME: how does operator() know the number and order of expected outputs?
         auto out = (*this)();
-        if (out.size() != m_outputs.size()) {
-          throw GaudiException("Error during transform: expected " + std::to_string(m_outputs.size()) +
-                                   " containers, got " + std::to_string(out.size()) + " instead",
-                               this->name(), StatusCode::FAILURE);
-        }
+        // if (out.size() != m_outputs.size()) {
+        //   throw GaudiException("Error during transform: expected " + std::to_string(m_outputs.size()) +
+        //                            " containers, got " + std::to_string(out.size()) + " instead",
+        //                        this->name(), StatusCode::FAILURE);
+        // }
         for (unsigned i = 0; i != out.size(); ++i) {
           // Gaudi::Algorithm::info() << "MyTransformer::execute() : putting " << m_outputs[i].fullKey() << endmsg;
-          details::put(m_outputs[i], std::move(out[i]));
+          details::put(m_outputs[0], std::move(out[i]));
         }
         // details::put(m_frame[0], std::move(frame));
         return FilterDecision::PASSED;
@@ -118,7 +118,7 @@ class Reader final : public MyTransformer {
 // class Reader final : public MyTransformer<std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, std::shared_ptr<CollectionBase>>()> {
 public:
   Reader(const std::string& name, ISvcLocator* svcLoc) :
-    MyTransformer(name, svcLoc, {"OutputLocations", {"MCParticles"}}
+    MyTransformer(name, svcLoc, {"OutputLocations", {"MCParticless"}}
                   
                   ) {
   }
@@ -129,8 +129,6 @@ public:
     iosvc->deleteReader();
   }
 
-  std::shared_ptr<std::vector<std::string>> m_collectionNames;
-
   ServiceHandle<IIOSvc> iosvc{this, "IOSvc", "IOSvc"};
 
   StatusCode initialize() override {
@@ -139,7 +137,6 @@ public:
       return StatusCode::FAILURE;
     }
 
-    m_collectionNames = iosvc->getCollectionNames();
     return StatusCode::SUCCESS;
   }
 
@@ -159,11 +156,12 @@ public:
 
     // We'll hand the ownership of 
     auto tmp = new AnyDataWrapper<podio::Frame>(std::move(frame));
-    auto code = eds->registerObject("/Event/Frame", tmp);
+    auto code = eds->registerObject("/Event/_Frame", tmp);
 
 
     return std::get<0>(val);
   }
+
 };
 
 DECLARE_COMPONENT(Reader)

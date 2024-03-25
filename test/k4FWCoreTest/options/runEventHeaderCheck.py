@@ -19,23 +19,22 @@
 #
 
 from Gaudi.Configuration import INFO
-from Configurables import k4DataSvc
-from Configurables import PodioInput
 from Configurables import ExampleEventHeaderConsumer
 from Configurables import ApplicationMgr
+from Configurables import EventDataSvc, IOSvc, Reader
 
-podioevent = k4DataSvc("EventDataSvc")
-podioevent.input = "eventHeader.root"
+svc = IOSvc("IOSvc")
+svc.FileNames = ["eventHeader.root"]
+svc.CollectionNames = ['MCParticles']
 
-inp = PodioInput()
-inp.collections = []
+reader = Reader("Reader")
 
 consumer = ExampleEventHeaderConsumer("EventHeaderCheck", runNumber=42, eventNumberOffset=42)
 
 ApplicationMgr(
-    TopAlg=[inp, consumer],
+    TopAlg=[reader, consumer],
     EvtSel="NONE",
     EvtMax=-1,
-    ExtSvc=[podioevent],
+    ExtSvc=[EventDataSvc("EventDataSvc")],
     OutputLevel=INFO,
 )
