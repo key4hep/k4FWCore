@@ -41,6 +41,9 @@ namespace k4FWCore {
         : Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_> {
       using Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>::DataHandleMixin;
 
+      static_assert(((std::is_base_of_v<podio::CollectionBase, In> || is_map_like<In>::value) && ...),
+                    "Consumer input types must be EDM4hep collections or maps to collections");
+
       template <typename T>
       using InputHandle_t = Gaudi::Functional::details::InputHandle_t<Traits_, std::remove_pointer_t<T>>;
 
@@ -64,8 +67,7 @@ namespace k4FWCore {
                   }
                   std::get<I>(m_inputs) = std::move(h);
                 },
-                Gaudi::Details::Property::ImmediatelyInvokeHandler{true}}...}
-      {}
+                Gaudi::Details::Property::ImmediatelyInvokeHandler{true}}...} {}
 
       Consumer(std::string name, ISvcLocator* locator,
                Gaudi::Functional::details::RepeatValues_<KeyValues, sizeof...(In)> const& inputs)
