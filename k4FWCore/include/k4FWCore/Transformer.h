@@ -41,13 +41,18 @@ namespace k4FWCore {
         : Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_> {
       using Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>::DataHandleMixin;
 
+      static_assert(((std::is_base_of_v<podio::CollectionBase, In> || is_map_like<In>::value) && ...),
+                    "Transformer and Producer input types must be EDM4hep collections or maps to collections");
+      static_assert((std::is_base_of_v<podio::CollectionBase, Out> || is_map_like<Out>::value),
+                    "Transformer and Producer output types must be EDM4hep collections or maps to collections");
+
       template <typename T>
       using InputHandle_t = Gaudi::Functional::details::InputHandle_t<Traits_, std::remove_pointer_t<T>>;
       template <typename T>
       using OutputHandle_t = Gaudi::Functional::details::OutputHandle_t<Traits_, std::remove_pointer_t<T>>;
 
       std::tuple<std::vector<InputHandle_t<typename transformType<In>::type>>...> m_inputs;
-      std::tuple<std::vector<OutputHandle_t<typename transformType<Out>::type>>>           m_outputs;
+      std::tuple<std::vector<OutputHandle_t<typename transformType<Out>::type>>>  m_outputs;
       std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)>          m_inputLocations{};
       std::array<Gaudi::Property<std::vector<DataObjID>>, 1>                      m_outputLocations{};
 
@@ -115,7 +120,7 @@ namespace k4FWCore {
             // }
           } else {
             Gaudi::Functional::details::put(
-                                            std::get<0>(this->m_outputs)[0],
+                std::get<0>(this->m_outputs)[0],
                 ptrOrCast(std::move(filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs))));
           }
           return Gaudi::Functional::FilterDecision::PASSED;
@@ -135,6 +140,11 @@ namespace k4FWCore {
     struct MultiTransformer<std::tuple<Out...>(const In&...), Traits_>
         : Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_> {
       using Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>::DataHandleMixin;
+
+      static_assert(((std::is_base_of_v<podio::CollectionBase, In> || is_map_like<In>::value) && ...),
+                    "Transformer and Producer input types must be EDM4hep collections or maps to collections");
+      static_assert(((std::is_base_of_v<podio::CollectionBase, Out> || is_map_like<Out>::value) && ...),
+                    "Transformer and Producer output types must be EDM4hep collections or maps to collections");
 
       template <typename T>
       using InputHandle_t = Gaudi::Functional::details::InputHandle_t<Traits_, std::remove_pointer_t<T>>;
@@ -190,7 +200,6 @@ namespace k4FWCore {
                        Gaudi::Functional::details::RepeatValues_<KeyValues, N_out> const& outputs)
           : MultiTransformer(std::move(name), locator, inputs, std::index_sequence_for<In...>{}, outputs,
                              std::index_sequence_for<Out...>{}) {}
-
 
       // derived classes are NOT allowed to implement execute ...
       StatusCode execute(const EventContext& ctx) const override final {
