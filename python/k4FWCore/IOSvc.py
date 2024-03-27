@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 #
 # Copyright (c) 2014-2024 Key4hep-Project.
 #
@@ -17,26 +16,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from Configurables import IOSvc as IO
+import os
 
-from Gaudi.Configuration import INFO
-from Configurables import ExampleEventHeaderConsumer
-from Configurables import ApplicationMgr
-from Configurables import EventDataSvc, IOSvc, Reader
+class IOSvc:
 
-svc = IOSvc("IOSvc")
-svc.input = ["eventHeader.root"]
-# svc.CollectionNames = ['MCParticles']
+    def __init__(self, *args, **kwargs):
 
-reader = Reader("Reader")
+        self._svc = IO(**kwargs)
 
-consumer = ExampleEventHeaderConsumer(
-    "EventHeaderCheck", runNumber=42, eventNumberOffset=42
-)
+    def __getattr__(self, attr):
+        return getattr(self._svc, attr)
 
-ApplicationMgr(
-    TopAlg=[reader, consumer],
-    EvtSel="NONE",
-    EvtMax=-1,
-    ExtSvc=[EventDataSvc("EventDataSvc")],
-    OutputLevel=INFO,
-)
+    def __setattr__(self, attr, value):
+        print(f'IOSvc: {attr} {value}')
+        if attr == '_svc':
+            super().__setattr__(attr, value)
+            return
+
+        if attr == 'input':
+            if isinstance(value, str):
+                value = [value]
+        if attr == 'output':
+            if os.path.dirname(value) and not os.path.exists(os.path.dirname(value)):
+                os.makedirs(os.path.dirname(value))
+        setattr(self._svc, attr, value)

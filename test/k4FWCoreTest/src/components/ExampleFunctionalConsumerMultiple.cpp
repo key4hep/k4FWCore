@@ -18,23 +18,14 @@
  */
 
 #include "Gaudi/Property.h"
-#include "GaudiAlg/Consumer.h"
 
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/SimTrackerHitCollection.h"
 #include "edm4hep/TrackCollection.h"
-#if __has_include("edm4hep/TrackerHit3DCollection.h")
 #include "edm4hep/TrackerHit3DCollection.h"
-#else
-#include "edm4hep/TrackerHitCollection.h"
-namespace edm4hep {
-  using TrackerHit3DCollection = edm4hep::TrackerHitCollection;
-}  // namespace edm4hep
-#endif
 #include "podio/UserDataCollection.h"
 
-// Define BaseClass_t
-#include "k4FWCore/BaseClass.h"
+#include "k4FWCore/Consumer.h"
 
 #include <sstream>
 #include <stdexcept>
@@ -48,19 +39,18 @@ using TrackerHitColl    = edm4hep::TrackerHit3DCollection;
 using TrackColl         = edm4hep::TrackCollection;
 
 struct ExampleFunctionalConsumerMultiple final
-    : Gaudi::Functional::Consumer<void(const FloatColl&, const ParticleColl&, const SimTrackerHitColl&,
-                                       const TrackerHitColl&, const TrackColl&),
-                                  BaseClass_t> {
+    : k4FWCore::Consumer<void(const FloatColl&, const ParticleColl&, const SimTrackerHitColl&, const TrackerHitColl&,
+                              const TrackColl&)> {
   // The pairs in KeyValue can be changed from python and they correspond
   // to the names of the input collection
   ExampleFunctionalConsumerMultiple(const std::string& name, ISvcLocator* svcLoc)
       : Consumer(name, svcLoc,
                  {
-                     KeyValue("InputCollectionFloat", "VectorFloat"),
-                     KeyValue("InputCollectionParticles", "MCParticles1"),
-                     KeyValue("InputCollectionSimTrackerHits", "SimTrackerHits"),
-                     KeyValue("InputCollectionTrackerHits", "TrackerHits"),
-                     KeyValue("InputCollectionTracks", "Tracks"),
+                     KeyValues("InputCollectionFloat", {"VectorFloat"}),
+                     KeyValues("InputCollectionParticles", {"MCParticles1"}),
+                     KeyValues("InputCollectionSimTrackerHits", {"SimTrackerHits"}),
+                     KeyValues("InputCollectionTrackerHits", {"TrackerHits"}),
+                     KeyValues("InputCollectionTracks", {"Tracks"}),
                  }) {}
 
   // This is the function that will be called to transform the data
@@ -79,14 +69,20 @@ struct ExampleFunctionalConsumerMultiple final
       throw std::runtime_error(error.str());
     }
 
-    auto p4 = particles.momentum()[0];
-    if ((p4.x != m_magicNumberOffset + 5) || (p4.y != m_magicNumberOffset + 6) || (p4.z != m_magicNumberOffset + 7) ||
-        (particles[0].getMass() != m_magicNumberOffset + 8)) {
-      std::stringstream error;
-      error << "Wrong data in particles collection, expected " << m_magicNumberOffset + 5 << ", "
-            << m_magicNumberOffset + 6 << ", " << m_magicNumberOffset + 7 << ", " << m_magicNumberOffset + 8 << " got "
-            << p4.x << ", " << p4.y << ", " << p4.z << ", " << particles[0].getMass() << "";
-      throw std::runtime_error(error.str());
+    int i = 0;
+    for (const auto& particle : particles) {
+      if ((particle.getPDG() != 1 + i + m_offset) || (particle.getGeneratorStatus() != 2 + i + m_offset) ||
+          (particle.getSimulatorStatus() != 3 + i + m_offset) || (particle.getCharge() != 4 + i + m_offset) ||
+          (particle.getTime() != 5 + i + m_offset) || (particle.getMass() != 6 + i + m_offset)) {
+        std::stringstream error;
+        error << "Wrong data in MCParticle collection, expected " << 1 + i + m_offset << ", " << 2 + i + m_offset
+              << ", " << 3 + i + m_offset << ", " << 4 + i + m_offset << ", " << 5 + i + m_offset << ", "
+              << 6 + i + m_offset << " got " << particle.getPDG() << ", " << particle.getGeneratorStatus() << ", "
+              << particle.getSimulatorStatus() << ", " << particle.getCharge() << ", " << particle.getTime() << ", "
+              << particle.getMass() << "";
+        throw std::runtime_error(error.str());
+      }
+      i++;
     }
 
     if ((simTrackerHits[0].getPosition()[0] != 3) || (simTrackerHits[0].getPosition()[1] != 4) ||
@@ -117,9 +113,7 @@ struct ExampleFunctionalConsumerMultiple final
   }
 
 private:
-  // integer to add to the dummy values written to the edm
-  Gaudi::Property<int> m_magicNumberOffset{this, "magicNumberOffset", 0,
-                                           "Integer to add to the dummy values written to the edm"};
+  Gaudi::Property<int> m_offset{this, "Offset", 10, "Integer to add to the dummy values written to the edm"};
 };
 
 DECLARE_COMPONENT(ExampleFunctionalConsumerMultiple)

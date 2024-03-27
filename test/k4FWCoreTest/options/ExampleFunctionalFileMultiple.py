@@ -17,28 +17,28 @@
 # limitations under the License.
 #
 
-# This is an example using a producer with a single output and saving that to a file
+# This is an example reading from a file and using a consumer with several inputs
+# to check that the contents of the file are the expected ones
 
 from Gaudi.Configuration import INFO
-from Configurables import ExampleFunctionalProducer
-from Configurables import ApplicationMgr
-from Configurables import k4DataSvc
-from Configurables import PodioOutput
+from Configurables import ExampleFunctionalTransformerMultiple
+from Configurables import EventDataSvc
+from k4FWCore import ApplicationMgr, IOSvc
 
-podioevent = k4DataSvc("EventDataSvc")
+svc = IOSvc("IOSvc")
+svc.input = ["output_k4test_exampledata_producer_multiple.root"]
+svc.output = "functional_transformer_multiple.root"
 
-out = PodioOutput("out")
-out.filename = "output_k4test_exampledata_producer.root"
-# Collections can be dropped
-# out.outputCommands = ["drop *"]
+transformer = ExampleFunctionalTransformerMultiple(
+    "Transformer",
+    # InputCollection="MCParticles",
+    # OutputCollection="NewMCParticles")
+)
 
-
-producer = ExampleFunctionalProducer("ExampleFunctionalProducer")
-
-ApplicationMgr(
-    TopAlg=[producer, out],
+mgr = ApplicationMgr(
+    TopAlg=[transformer],
     EvtSel="NONE",
-    EvtMax=10,
-    ExtSvc=[k4DataSvc("EventDataSvc")],
+    EvtMax=-1,
+    ExtSvc=[EventDataSvc("EventDataSvc")],
     OutputLevel=INFO,
 )

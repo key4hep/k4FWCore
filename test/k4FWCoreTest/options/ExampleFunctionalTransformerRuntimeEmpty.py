@@ -21,35 +21,43 @@
 # to check that the contents of the file are the expected ones
 
 from Gaudi.Configuration import INFO
-from Configurables import ExampleFunctionalTransformer
-from Configurables import ApplicationMgr
-from Configurables import k4DataSvc
-from Configurables import PodioOutput
-from Configurables import PodioInput
+from Configurables import (
+    ExampleFunctionalTransformerRuntimeEmpty,
+    ExampleFunctionalProducer,
+)
+from k4FWCore import ApplicationMgr, IOSvc
+from Configurables import EventDataSvc
 
-podioevent = k4DataSvc("EventDataSvc")
-podioevent.input = "output_k4test_exampledata_producer.root"
+iosvc = IOSvc("IOSvc")
+iosvc.output = "functional_transformer_runtime_empty.root"
 
-inp = PodioInput()
-inp.collections = [
-    "MCParticles",
-]
+producer0 = ExampleFunctionalProducer(
+    "Producer0",
+    OutputCollection=["MCParticles0"],
+)
+producer1 = ExampleFunctionalProducer(
+    "Producer1",
+    OutputCollection=["MCParticles1"],
+)
+producer2 = ExampleFunctionalProducer(
+    "Producer2",
+    OutputCollection=["MCParticles2"],
+)
 
-out = PodioOutput("out")
-out.filename = "output_k4test_exampledata_transformer.root"
-# The collections that we don't drop will also be present in the output file
-out.outputCommands = ["drop MCParticles"]
-
-transformer = ExampleFunctionalTransformer(
-    "ExampleFunctionalTransformer",
-    InputCollection="MCParticles",
-    OutputCollection="NewMCParticles",
+transformer = ExampleFunctionalTransformerRuntimeEmpty(
+    InputCollections=["MCParticles0", "MCParticles1", "MCParticles2"],
+    OutputCollections=[""],
 )
 
 ApplicationMgr(
-    TopAlg=[inp, transformer, out],
+    TopAlg=[
+        producer0,
+        producer1,
+        producer2,
+        transformer,
+    ],
     EvtSel="NONE",
     EvtMax=10,
-    ExtSvc=[k4DataSvc("EventDataSvc")],
+    ExtSvc=[EventDataSvc("EventDataSvc")],
     OutputLevel=INFO,
 )

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 #
 # Copyright (c) 2014-2024 Key4hep-Project.
 #
@@ -17,26 +16,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from Configurables import ApplicationMgr as AppMgr
+from Configurables import Reader, Writer, IOSvc
+from Configurables import Gaudi__Sequencer
 
-from Gaudi.Configuration import INFO
-from Configurables import ExampleEventHeaderConsumer
-from Configurables import ApplicationMgr
-from Configurables import EventDataSvc, IOSvc, Reader
+class ApplicationMgr:
 
-svc = IOSvc("IOSvc")
-svc.input = ["eventHeader.root"]
-# svc.CollectionNames = ['MCParticles']
+    def __init__(self, **kwargs):
+        self._mgr = AppMgr(**kwargs)
 
-reader = Reader("Reader")
-
-consumer = ExampleEventHeaderConsumer(
-    "EventHeaderCheck", runNumber=42, eventNumberOffset=42
-)
-
-ApplicationMgr(
-    TopAlg=[reader, consumer],
-    EvtSel="NONE",
-    EvtMax=-1,
-    ExtSvc=[EventDataSvc("EventDataSvc")],
-    OutputLevel=INFO,
-)
+        for conf in frozenset(self._mgr.allConfigurables.values()):
+            if isinstance(conf, IOSvc):
+                props = conf.getPropertiesWithDescription()
+                if 'input' in props:
+                    self._mgr.TopAlg =  [Reader("Reader")] + self._mgr.TopAlg
+                if 'output' in props:
+                    self._mgr.TopAlg = [Gaudi__Sequencer("Sequencer", Members=[*self._mgr.TopAlg, Writer("Writer")], Sequential=True)]

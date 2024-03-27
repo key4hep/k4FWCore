@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 #
 # Copyright (c) 2014-2024 Key4hep-Project.
 #
@@ -18,25 +17,34 @@
 # limitations under the License.
 #
 
+# This is an example using a producer with a multiple outputs and saving that to a file
+
 from Gaudi.Configuration import INFO
-from Configurables import ExampleEventHeaderConsumer
-from Configurables import ApplicationMgr
-from Configurables import EventDataSvc, IOSvc, Reader
+from Configurables import ExampleFunctionalProducerMultiple
+from k4FWCore import ApplicationMgr, IOSvc
+from Configurables import EventDataSvc
 
-svc = IOSvc("IOSvc")
-svc.input = ["eventHeader.root"]
-# svc.CollectionNames = ['MCParticles']
 
-reader = Reader("Reader")
+iosvc = IOSvc("IOSvc")
+iosvc.output = "output_k4test_exampledata_producer_multiple.root"
+# Collections can be dropped
+# out.outputCommands = ["drop *"]
 
-consumer = ExampleEventHeaderConsumer(
-    "EventHeaderCheck", runNumber=42, eventNumberOffset=42
+producer = ExampleFunctionalProducerMultiple(
+    "ExampleFunctionalProducerMultiple",
+    OutputCollectionFloat=["VectorFloat"],
+    OutputCollectionParticles1=["MCParticles1"],
+    OutputCollectionParticles2=["MCParticles2"],
+    OutputCollectionSimTrackerHits=["SimTrackerHits"],
+    OutputCollectionTrackerHits=["TrackerHits"],
+    OutputCollectionTracks=["Tracks"],
+    ExampleInt=5,
 )
 
 ApplicationMgr(
-    TopAlg=[reader, consumer],
+    TopAlg=[producer],
     EvtSel="NONE",
-    EvtMax=-1,
+    EvtMax=10,
     ExtSvc=[EventDataSvc("EventDataSvc")],
     OutputLevel=INFO,
 )

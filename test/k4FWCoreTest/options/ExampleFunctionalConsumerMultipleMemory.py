@@ -17,23 +17,19 @@
 # limitations under the License.
 #
 
-# This is an example using a producer with a multiple outputs and saving that to a file
+# This is an example reading from a file and using a consumer with a single input
+# to check that the contents of the file are the expected ones
 
 from Gaudi.Configuration import INFO
-from Configurables import ExampleFunctionalProducerMultiple
-from Configurables import ApplicationMgr
-from Configurables import k4DataSvc
-from Configurables import PodioOutput
-
-podioevent = k4DataSvc("EventDataSvc")
-
-out = PodioOutput("out")
-out.filename = "output_k4test_exampledata_producer_multiple.root"
-# Collections can be dropped
-# out.outputCommands = ["drop *"]
+from Configurables import (
+    ExampleFunctionalProducerMultiple,
+    ExampleFunctionalConsumerMultiple,
+)
+from Configurables import EventDataSvc
+from k4FWCore import ApplicationMgr
 
 producer = ExampleFunctionalProducerMultiple(
-    "ExampleFunctionalProducerMultiple",
+    "Producer",
     OutputCollectionFloat="VectorFloat",
     OutputCollectionParticles1="MCParticles1",
     OutputCollectionParticles2="MCParticles2",
@@ -43,10 +39,21 @@ producer = ExampleFunctionalProducerMultiple(
     ExampleInt=5,
 )
 
+consumer = ExampleFunctionalConsumerMultiple(
+    "Consumer",
+    InputCollectionFloat="VectorFloat",
+    InputCollectionParticles1="MCParticles1",
+    InputCollectionParticles2="MCParticles2",
+    InputCollectionSimTrackerHits="SimTrackerHits",
+    InputCollectionTrackerHits="TrackerHits",
+    InputCollectionTracks="Tracks",
+    ExampleInt=5,
+)
+
 ApplicationMgr(
-    TopAlg=[producer, out],
+    TopAlg=[producer, consumer],
     EvtSel="NONE",
     EvtMax=10,
-    ExtSvc=[k4DataSvc("EventDataSvc")],
+    ExtSvc=[EventDataSvc("EventDataSvc")],
     OutputLevel=INFO,
 )

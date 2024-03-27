@@ -16,19 +16,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import ROOT
-import sys
 
-ROOT.gSystem.Load("libedm4hepDict")
+# This is an example using a producer with a single output and saving that to a file
 
-file = ROOT.TFile.Open(sys.argv[1])
-tree = file.Get("events")
-tree.GetEntry(0)
+from Gaudi.Configuration import INFO
+from Configurables import EventDataSvc
+from Configurables import ExampleFunctionalProducer
+from k4FWCore import ApplicationMgr, IOSvc
 
-ndf = tree.Tracks.at(0).ndf
-if ndf == 0:
-    raise Exception("podio::CollectionBase read from file did not saved properly")
+io = IOSvc("IOSvc")
+io.output = "/tmp/a/b/c/output_k4test_exampledata_producer.root"
 
-status = tree.GetBranchStatus("MCParticles")
-if status:
-    raise Exception("KeepDropSwitch did not drop the collection")
+producer = ExampleFunctionalProducer("ExampleFunctionalProducer")
+
+ApplicationMgr(
+    TopAlg=[producer],
+    EvtSel="NONE",
+    EvtMax=10,
+    ExtSvc=[EventDataSvc("EventDataSvc")],
+    OutputLevel=INFO,
+)

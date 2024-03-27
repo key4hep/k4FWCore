@@ -21,18 +21,14 @@
 # to check that the contents of the file are the expected ones
 
 from Gaudi.Configuration import INFO
-from Configurables import ExampleFunctionalConsumer
-from Configurables import ApplicationMgr
-from Configurables import k4DataSvc
-from Configurables import PodioInput
+from Configurables import ExampleFunctionalProducer, ExampleFunctionalConsumer
+from Configurables import EventDataSvc
+from k4FWCore import ApplicationMgr
 
-podioevent = k4DataSvc("EventDataSvc")
-podioevent.input = "output_k4test_exampledata_producer.root"
-
-inp = PodioInput()
-inp.collections = [
-    "MCParticles",
-]
+producer = ExampleFunctionalProducer(
+    "ExampleFunctionalProducer",
+    OutputCollection="MCParticles",
+)
 
 consumer = ExampleFunctionalConsumer(
     "ExampleFunctionalConsumer",
@@ -40,9 +36,9 @@ consumer = ExampleFunctionalConsumer(
 )
 
 ApplicationMgr(
-    TopAlg=[inp, consumer],
+    TopAlg=[producer, consumer],
     EvtSel="NONE",
     EvtMax=10,
-    ExtSvc=[podioevent],
+    ExtSvc=[EventDataSvc("EventDataSvc")],
     OutputLevel=INFO,
 )
