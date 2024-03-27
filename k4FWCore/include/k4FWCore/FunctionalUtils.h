@@ -58,9 +58,14 @@ namespace k4FWCore {
       return static_cast<const T>(*arg);
     }
 
+    // Check if the type is a map like type, where map type is the special map
+    // type to have an arbitrary number of collections as input or output:
+    // std::map<std::string, Coll> where Coll is the collection type
     template <typename T> struct is_map_like : std::false_type {};
 
-    template <typename Value> struct is_map_like<std::map<std::string, Value>> : std::true_type {};
+    template <typename Value>
+    requires std::is_base_of_v<podio::CollectionBase, std::remove_cvref_t<Value>>
+    struct is_map_like<std::map<std::string, Value>> : std::true_type {};
 
     // transformType function to transform the types from the ones that the user wants
     // like edm4hep::MCParticleCollection, to the ones that are actually stored in the
