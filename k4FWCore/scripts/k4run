@@ -113,7 +113,17 @@ def add_arguments(parser, app_mgr):
             )
 
 
-if __name__ == "__main__":
+class LoggingHandler(logging.StreamHandler):
+    def handleError(self, record):
+        # Re-raise SIGPIPE generated exception
+        excp = sys.exc_info()[1]  # from Python 3.11 can be replaced with sys.exception()
+        if isinstance(excp, BrokenPipeError):
+            raise excp
+
+        super().handleError(record)
+
+
+def main():
     # ensure that we (and the subprocesses) use the C standard localization
     os.environ["LC_ALL"] = "C"
 
@@ -121,7 +131,7 @@ if __name__ == "__main__":
     logger.setLevel(logging.INFO)
     # formatter = logging.Formatter('[%(asctime)s %(levelname)s] %(message)s', datefmt='%Y-%b-%d %H:%M:%S')
     formatter = logging.Formatter("[k4run] %(message)s")
-    handler = logging.StreamHandler(stream=sys.stdout)
+    handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 
@@ -251,3 +261,14 @@ if __name__ == "__main__":
         if ApplicationMgr().EvtMax == -1 and retcode == 4:
             retcode = 0
         sys.exit(retcode)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except BrokenPipeError:
+        # Handle SIGPIPE generated exception
+        devnull = os.open(os.devnull, os.O_WRONLY)
+        os.dup2(devnull, sys.stdout.fileno())
+        os.dup2(devnull, sys.stderr.fileno())
+        sys.exit(1)
