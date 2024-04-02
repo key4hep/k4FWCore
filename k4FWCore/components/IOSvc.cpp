@@ -46,9 +46,17 @@ StatusCode IOSvc::initialize() {
   m_switch = KeepDropSwitch(m_outputCommands);
 
   m_incidentSvc = service("IncidentSvc");
+  if (!m_incidentSvc) {
+    error() << "Unable to locate IIncidentSvc interface" << endmsg;
+    return StatusCode::FAILURE;
+  }
   m_incidentSvc->addListener(this, IncidentType::EndEvent);
 
   m_dataSvc = service("EventDataSvc");
+  if (!m_dataSvc) {
+    error() << "Unable to locate IDataSvc interface" << endmsg;
+    return StatusCode::FAILURE;
+  }
 
   m_hiveWhiteBoard = service("EventDataSvc");
 
