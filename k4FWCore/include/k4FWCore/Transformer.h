@@ -41,9 +41,9 @@ namespace k4FWCore {
         : Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_> {
       using Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>::DataHandleMixin;
 
-      static_assert(((std::is_base_of_v<podio::CollectionBase, In> || is_map_like<In>::value) && ...),
+      static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isMapToCollLike<In>::value) && ...),
                     "Transformer and Producer input types must be EDM4hep collections or maps to collections");
-      static_assert((std::is_base_of_v<podio::CollectionBase, Out> || is_map_like<Out>::value),
+      static_assert((std::is_base_of_v<podio::CollectionBase, Out> || isMapToCollLike<Out>::value),
                     "Transformer and Producer output types must be EDM4hep collections or maps to collections");
 
       template <typename T>
@@ -104,7 +104,7 @@ namespace k4FWCore {
       // derived classes are NOT allowed to implement execute ...
       StatusCode execute(const EventContext& ctx) const override final {
         try {
-          if constexpr (is_map_like<Out>::value) {
+          if constexpr (isMapToCollLike<Out>::value) {
             std::tuple<Out> tmp = filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs);
             // auto tmp = filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs);
             putMapOutputs<0, Out>(std::move(tmp), m_outputs, this);
@@ -115,13 +115,13 @@ namespace k4FWCore {
             //                          "Output key does not match the expected key " + m_outputs[i].objKey(),
             //                          StatusCode::FAILURE);
             //   }
-            //   Gaudi::Functional::details::put(m_outputs[i], ptrOrCast(std::move(val)));
+            //   Gaudi::Functional::details::put(m_outputs[i], convertToSharedPtr(std::move(val)));
             //   i++;
             // }
           } else {
             Gaudi::Functional::details::put(
                 std::get<0>(this->m_outputs)[0],
-                ptrOrCast(std::move(filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs))));
+                convertToSharedPtr(std::move(filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs))));
           }
           return Gaudi::Functional::FilterDecision::PASSED;
         } catch (GaudiException& e) {
@@ -141,9 +141,9 @@ namespace k4FWCore {
         : Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_> {
       using Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>::DataHandleMixin;
 
-      static_assert(((std::is_base_of_v<podio::CollectionBase, In> || is_map_like<In>::value) && ...),
+      static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isMapToCollLike<In>::value) && ...),
                     "Transformer and Producer input types must be EDM4hep collections or maps to collections");
-      static_assert(((std::is_base_of_v<podio::CollectionBase, Out> || is_map_like<Out>::value) && ...),
+      static_assert(((std::is_base_of_v<podio::CollectionBase, Out> || isMapToCollLike<Out>::value) && ...),
                     "Transformer and Producer output types must be EDM4hep collections or maps to collections");
 
       template <typename T>

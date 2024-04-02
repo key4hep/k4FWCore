@@ -65,7 +65,7 @@ StatusCode IOSvc::initialize() {
 
   m_hiveWhiteBoard = service("EventDataSvc");
 
-  return Service::initialize();
+  return StatusCode::SUCCESS;
 }
 
 StatusCode IOSvc::finalize() { return Service::finalize(); }

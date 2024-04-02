@@ -61,11 +61,11 @@ namespace k4FWCore {
     // Check if the type is a map like type, where map type is the special map
     // type to have an arbitrary number of collections as input or output:
     // std::map<std::string, Coll> where Coll is the collection type
-    template <typename T> struct is_map_like : std::false_type {};
+    template <typename T> struct isMapToCollLike : std::false_type {};
 
     template <typename Value>
-    requires std::is_base_of_v<podio::CollectionBase, std::remove_cvref_t<Value>>
-    struct is_map_like<std::map<std::string, Value>> : std::true_type {};
+      requires std::is_base_of_v<podio::CollectionBase, std::remove_cvref_t<Value>>
+    struct isMapToCollLike<std::map<std::string, Value>> : std::true_type {};
 
     // transformType function to transform the types from the ones that the user wants
     // like edm4hep::MCParticleCollection, to the ones that are actually stored in the
@@ -76,21 +76,13 @@ namespace k4FWCore {
     };
 
     template <typename T>
-      requires std::is_base_of_v<podio::CollectionBase, T> || is_map_like<T>::value
+      requires std::is_base_of_v<podio::CollectionBase, T> || isMapToCollLike<T>::value
     struct transformType<T> {
       using type = std::shared_ptr<podio::CollectionBase>;
     };
 
-    template <typename T, std::enable_if_t<!std::is_same_v<std::shared_ptr<podio::CollectionBase>, T>, int> = 0>
-    auto ptrOrCast(T&& arg) {
-      // return arg;
+    template <typename T> auto convertToSharedPtr(T&& arg) {
       return std::shared_ptr<podio::CollectionBase>(std::make_shared<T>(std::move(arg)));
-    }
-    template <typename T, std::enable_if_t<std::is_same_v<std::shared_ptr<podio::CollectionBase>, T>, int> = 0>
-    auto ptrOrCast(T&& arg) {
-      // return arg;
-      std::cout << "Calling static_cast<const T&>(*arg) (ptrOrCast)" << std::endl;
-      return static_cast<const T&>(*arg);
     }
 
     template <typename... In> struct filter_evtcontext_tt {
@@ -118,7 +110,7 @@ namespace k4FWCore {
     template <size_t Index, typename... In, typename... Handles, typename InputTuple>
     void readMapInputs(const std::tuple<Handles...>& handles, auto thisClass, InputTuple& inputTuple) {
       if constexpr (Index < sizeof...(Handles)) {
-        if constexpr (is_map_like<std::tuple_element_t<Index, std::tuple<In...>>>::value) {
+        if constexpr (isMapToCollLike<std::tuple_element_t<Index, std::tuple<In...>>>::value) {
           // In case of map types like std::map<std::string, edm4hep::MCParticleCollection&>
           // we have to remove the reference to get the actual type
           using EDM4hepType =
@@ -143,7 +135,7 @@ namespace k4FWCore {
     template <size_t Index, typename... Out, typename... Handles>
     void putMapOutputs(std::tuple<Handles...>&& handles, const auto& m_outputs, auto thisClass) {
       if constexpr (Index < sizeof...(Handles)) {
-        if constexpr (is_map_like<std::tuple_element_t<Index, std::tuple<Out...>>>::value) {
+        if constexpr (isMapToCollLike<std::tuple_element_t<Index, std::tuple<Out...>>>::value) {
           int i = 0;
           if (std::get<Index>(handles).size() != std::get<Index>(m_outputs).size()) {
             std::string msg = "Size of the output map " + std::to_string(std::get<Index>(handles).size()) +
@@ -166,12 +158,12 @@ namespace k4FWCore {
                                        std::get<Index>(m_outputs)[i].objKey() + "\"",
                                    StatusCode::FAILURE);
             }
-            Gaudi::Functional::details::put(std::get<Index>(m_outputs)[i], ptrOrCast(std::move(val)));
+            Gaudi::Functional::details::put(std::get<Index>(m_outputs)[i], convertToSharedPtr(std::move(val)));
             i++;
           }
         } else {
           Gaudi::Functional::details::put(std::get<Index>(m_outputs)[0],
-                                          ptrOrCast(std::move(std::get<Index>(handles))));
+                                          convertToSharedPtr(std::move(std::get<Index>(handles))));
         }
 
         // Recursive call for the next index
