@@ -116,10 +116,9 @@ def add_arguments(parser, app_mgr):
 class LoggingHandler(logging.StreamHandler):
     def handleError(self, record):
         # Re-raise SIGPIPE generated exception
-        excp = sys.exc_info()[1]  # from Python 3.11 can be replaced with
-                                  # sys.exception()
+        excp = sys.exc_info()[1]  # from Python 3.11 can be replaced with sys.exception()
         if isinstance(excp, BrokenPipeError):
-            raise(excp)
+            raise excp
 
         super().handleError(record)
 
@@ -132,7 +131,7 @@ def main():
     logger.setLevel(logging.INFO)
     # formatter = logging.Formatter('[%(asctime)s %(levelname)s] %(message)s', datefmt='%Y-%b-%d %H:%M:%S')
     formatter = logging.Formatter("[k4run] %(message)s")
-    handler = LoggingHandler(stream=sys.stdout)
+    handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 
