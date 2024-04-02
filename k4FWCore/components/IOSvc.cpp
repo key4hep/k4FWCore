@@ -32,6 +32,11 @@
 #include <tuple>
 
 StatusCode IOSvc::initialize() {
+  StatusCode sc = Service::initialize();
+  if ( !sc.isSuccess() ) {
+    error() << "Unable to initialize base class Service." << endmsg;
+    return sc;
+  }
   if (!m_readingFileNames.empty()) {
     m_reader = std::make_unique<podio::ROOTReader>();
     try {
