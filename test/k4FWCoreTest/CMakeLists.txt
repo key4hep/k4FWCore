@@ -120,6 +120,7 @@ add_test_with_env(FunctionalFile_toolong options/ExampleFunctionalFile.py -n 999
                   "Application Manager Terminated successfully with a user requested ScheduledStop")
 add_test_with_env(FunctionalMultipleFile options/ExampleFunctionalFileMultiple.py PROPERTIES DEPENDS FunctionalProducerMultiple)
 add_test_with_env(FunctionalMix options/runFunctionalMix.py PROPERTIES DEPENDS FunctionalProducerMultiple)
+add_test_with_env(FunctionalMixIOSvc options/runFunctionalMixIOSvc.py PROPERTIES DEPENDS FunctionalProducerMultiple)
 add_test_with_env(FunctionalOutputCommands options/ExampleFunctionalOutputCommands.py PROPERTIES DEPENDS FunctionalProducerMultiple)
 add_test_with_env(FunctionalConsumerRuntimeCollections options/ExampleFunctionalConsumerRuntimeCollections.py)
 add_test_with_env(FunctionalConsumerRuntimeCollectionsMultiple options/ExampleFunctionalConsumerRuntimeCollectionsMultiple.py)

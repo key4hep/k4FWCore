@@ -48,7 +48,8 @@ inp.collections = [
 ]
 
 consumer_input_functional = ExampleFunctionalConsumerMultiple(
-    "ExampleFunctionalConsumerMultiple"
+    "ExampleFunctionalConsumerMultiple",
+    Offset=0,
 )
 consumer_input_algorithm = k4FWCoreTest_CheckExampleEventData("CheckExampleEventData")
 consumer_input_algorithm.mcparticles = "MCParticles1"
@@ -57,18 +58,19 @@ consumer_input_algorithm.keepEventNumberZero = True
 # We only care about the new FunctionalMCParticles collection in this example
 producer_functional = ExampleFunctionalProducerMultiple(
     "ProducerFunctional",
-    OutputCollectionFloat="VectorFloat_",
-    OutputCollectionParticles1="FunctionalMCParticles",
-    OutputCollectionParticles2="MCParticles2_",
-    OutputCollectionSimTrackerHits="SimTrackerHits_",
-    OutputCollectionTrackerHits="TrackerHits_",
-    OutputCollectionTracks="Tracks_",
+    OutputCollectionFloat=["VectorFloat_"],
+    OutputCollectionParticles1=["FunctionalMCParticles"],
+    OutputCollectionParticles2=["MCParticles2_"],
+    OutputCollectionSimTrackerHits=["SimTrackerHits_"],
+    OutputCollectionTrackerHits=["TrackerHits_"],
+    OutputCollectionTracks=["Tracks_"],
     ExampleInt=5,
 )
 
 consumer_producerfun_functional = ExampleFunctionalConsumerMultiple(
     "FunctionalConsumerFunctional",
-    InputCollectionParticles="FunctionalMCParticles",
+    InputCollectionParticles=["FunctionalMCParticles"],
+    Offset=0,
 )
 consumer_producerfun_algorithm = k4FWCoreTest_CheckExampleEventData("CheckFunctional")
 consumer_producerfun_algorithm.mcparticles = "FunctionalMCParticles"
@@ -83,7 +85,8 @@ producer_algorithm.tracks = "Tracks__"
 producer_algorithm.vectorfloat = "VectorFloat__"
 
 consumer_produceralg_functional = ExampleFunctionalConsumerMultiple(
-    "FunctionalConsumerAlgorithm"
+    "FunctionalConsumerAlgorithm",
+    Offset=0,
 )
 consumer_produceralg_algorithm = k4FWCoreTest_CheckExampleEventData("CheckAlgorithm")
 consumer_produceralg_algorithm.mcparticles = "FunctionalMCParticles"

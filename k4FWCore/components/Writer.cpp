@@ -236,12 +236,12 @@ public:
       const auto collection = dynamic_cast<AnyDataWrapper<std::shared_ptr<podio::CollectionBase>>*>(storeCollection);
       if (!collection) {
         // Check the case when the data has been produced using the old DataHandle
-        const auto old_collection = dynamic_cast<DataWrapper<podio::CollectionBase>*>(storeCollection);
+        const auto old_collection = dynamic_cast<DataWrapperBase*>(storeCollection);
         if (!old_collection) {
           error() << "Failed to cast collection " << coll << endmsg;
           return;
         } else {
-          std::unique_ptr<podio::CollectionBase> uptr(const_cast<podio::CollectionBase*>(old_collection->getData()));
+          std::unique_ptr<podio::CollectionBase> uptr(const_cast<podio::CollectionBase*>(old_collection->collectionBase()));
           ptr->getData().put(std::move(uptr), coll);
         }
 

@@ -19,12 +19,17 @@
 #ifndef FWCORE_FUNCTIONALUTILS_H
 #define FWCORE_FUNCTIONALUTILS_H
 
+#include <GaudiKernel/AnyDataWrapper.h>
+#include <GaudiKernel/IDataProviderSvc.h>
 #include "Gaudi/Functional/details.h"
 #include "GaudiKernel/DataObjID.h"
+#include "k4FWCore/DataWrapper.h"
 #include "podio/CollectionBase.h"
 
 #include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/ThreadLocalContext.h"
+
+// #include "GaudiKernel/CommonMessaging.h"
 
 #include <map>
 #include <memory>
@@ -123,8 +128,30 @@ namespace k4FWCore {
           std::get<Index>(inputTuple) = std::move(inputMap);
 
         } else {
-          auto in                     = get(std::get<Index>(handles)[0], thisClass, Gaudi::Hive::currentContext());
-          std::get<Index>(inputTuple) = static_cast<std::tuple_element_t<Index, std::tuple<In...>>*>(in.get());
+          try {
+            auto in                     = get(std::get<Index>(handles)[0], thisClass, Gaudi::Hive::currentContext());
+            std::get<Index>(inputTuple) = static_cast<std::tuple_element_t<Index, std::tuple<In...>>*>(in.get());
+          } catch (GaudiException& e) {
+            // When the type of the collection is different from the one requested, this can happen because
+            // 1. a mistake was made in the input types of a functional algorithm
+            // 2. the data was produced using the old DataHandle, which is never going to be in the input type
+            if (e.message().find("different from") != std::string::npos) {
+              thisClass->error() << "Trying to cast the collection " << std::get<Index>(handles)[0].objKey()
+                                 << " to the requested type " << thisClass->name() << endmsg;
+              DataObject*       p;
+              IDataProviderSvc* svc = thisClass->serviceLocator()->template service<IDataProviderSvc>("EventDataSvc");
+              svc->retrieveObject("/Event/" + std::get<Index>(handles)[0].objKey(), p).ignore();
+              const auto wrp = dynamic_cast<const DataWrapper<std::tuple_element_t<Index, std::tuple<In...>>>*>(p);
+              if (!wrp) {
+                throw GaudiException(thisClass->name(),
+                                     "Failed to cast collection " + std::get<Index>(handles)[0].objKey(),
+                                     StatusCode::FAILURE);
+              }
+              std::get<Index>(inputTuple) = const_cast<std::tuple_element_t<Index, std::tuple<In...>>*>(wrp->getData());
+            } else {
+              throw e;
+            }
+          }
         }
 
         // Recursive call for the next index
