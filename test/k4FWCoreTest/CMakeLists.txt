@@ -21,7 +21,7 @@ file(GLOB k4fwcoretest_plugin_sources src/components/*.cpp)
 
 gaudi_add_module(k4FWCoreTestPlugins
                  SOURCES ${k4fwcoretest_plugin_sources}
-                 LINK Gaudi::GaudiKernel k4FWCore k4FWCore::k4Interface ROOT::Core ROOT::RIO ROOT::Tree EDM4HEP::edm4hepDict EDM4HEP::edm4hep)
+                 LINK Gaudi::GaudiKernel Gaudi::GaudiAlgLib k4FWCore k4FWCore::k4Interface ROOT::Core ROOT::RIO ROOT::Tree EDM4HEP::edm4hepDict EDM4HEP::edm4hep)
 
 include(CTest)
 
