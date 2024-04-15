@@ -100,7 +100,7 @@ namespace k4FWCore {
       }
 
       template <typename Algorithm, typename Handles>
-      static auto apply(const Algorithm& algo, const EventContext& ctx, Handles& handles) {
+      static auto apply(const Algorithm& algo, const EventContext&, Handles& handles) {
         auto inputTuple = std::tuple<addPtrIfColl<In>...>();
 
         // Build the input tuple by picking up either std::map with an arbitrary
