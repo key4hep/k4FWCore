@@ -69,7 +69,7 @@ private:
 };
 
 template <class T> DataWrapper<T>::~DataWrapper() {
-  if (is_owner && m_data) {
+  if (is_owner) {
     delete m_data;
   }
 }
