@@ -66,7 +66,7 @@ public:
       return StatusCode::FAILURE;
     }
 
-    m_hiveWhiteBoard = service<IHiveWhiteBoard>("EventDataSvc", true);
+    m_hiveWhiteBoard = service("EventDataSvc", true);
     if (!m_hiveWhiteBoard) {
       debug() << "Unable to locate IHiveWhiteBoard interface. This isn't a problem if we are not running in a "
                  "multi-threaded environment"
@@ -162,7 +162,6 @@ public:
     // more than one instance is created
     std::scoped_lock<std::mutex> lock(m_mutex);
 
-
     if (m_hiveWhiteBoard) {
       // It's never set to valid but it has the slot information
       // if (ctx.valid()) {
@@ -176,13 +175,13 @@ public:
       }
     }
 
-    DataObject* p;
-    StatusCode code = m_dataSvc->retrieveObject("/Event" + k4FWCore::frameLocation, p);
+    DataObject*                   p;
+    StatusCode                    code = m_dataSvc->retrieveObject("/Event" + k4FWCore::frameLocation, p);
     AnyDataWrapper<podio::Frame>* ptr;
     // This is the case when we are reading from a file
     if (code.isSuccess()) {
       m_dataSvc->unregisterObject(p).ignore();
-      ptr  = dynamic_cast<AnyDataWrapper<podio::Frame>*>(p);
+      ptr = dynamic_cast<AnyDataWrapper<podio::Frame>*>(p);
     }
     // This is the case when no reading is being done
     // needs to be fixed? (new without delete)
@@ -241,7 +240,8 @@ public:
           error() << "Failed to cast collection " << coll << endmsg;
           return;
         } else {
-          std::unique_ptr<podio::CollectionBase> uptr(const_cast<podio::CollectionBase*>(old_collection->collectionBase()));
+          std::unique_ptr<podio::CollectionBase> uptr(
+              const_cast<podio::CollectionBase*>(old_collection->collectionBase()));
           ptr->getData().put(std::move(uptr), coll);
         }
 

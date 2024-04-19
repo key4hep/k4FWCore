@@ -21,8 +21,8 @@
 
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/SimTrackerHitCollection.h"
-#include "edm4hep/TrackerHit3DCollection.h"
 #include "edm4hep/TrackCollection.h"
+#include "edm4hep/TrackerHit3DCollection.h"
 #include "podio/UserDataCollection.h"
 
 #include "k4FWCore/Transformer.h"
@@ -37,12 +37,10 @@ using SimTrackerHitColl = std::map<std::string, const edm4hep::SimTrackerHitColl
 using TrackerHitColl    = std::map<std::string, const edm4hep::TrackerHit3DCollection&>;
 using TrackColl         = std::map<std::string, const edm4hep::TrackCollection&>;
 
-using retType = std::tuple<std::map<std::string, podio::UserDataCollection<float>>,
-                           std::map<std::string, edm4hep::MCParticleCollection>,
-                           std::map<std::string, edm4hep::MCParticleCollection>,
-                           std::map<std::string, edm4hep::SimTrackerHitCollection>,
-                           std::map<std::string, edm4hep::TrackerHit3DCollection>,
-                           std::map<std::string, edm4hep::TrackCollection>>;
+using retType = std::tuple<
+    std::map<std::string, podio::UserDataCollection<float>>, std::map<std::string, edm4hep::MCParticleCollection>,
+    std::map<std::string, edm4hep::MCParticleCollection>, std::map<std::string, edm4hep::SimTrackerHitCollection>,
+    std::map<std::string, edm4hep::TrackerHit3DCollection>, std::map<std::string, edm4hep::TrackCollection>>;
 
 struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
     : k4FWCore::MultiTransformer<retType(const FloatColl&, const ParticleColl&, const SimTrackerHitColl&,
@@ -109,7 +107,7 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
 
     for (auto& [key, particles] : particlesMap) {
       auto coll = edm4hep::MCParticleCollection();
-      int  i   = 0;
+      int  i    = 0;
       for (const auto& particle : particles) {
         if ((particle.getPDG() != 1 + i + m_offset) || (particle.getGeneratorStatus() != 2 + i + m_offset) ||
             (particle.getSimulatorStatus() != 3 + i + m_offset) || (particle.getCharge() != 4 + i + m_offset) ||

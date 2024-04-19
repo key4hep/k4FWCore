@@ -29,8 +29,8 @@
 
 struct ExampleFunctionalConsumerRuntimeCollectionsMultiple final
     : k4FWCore::Consumer<void(const std::map<std::string, const edm4hep::MCParticleCollection&>& particleMap,
-                              const std::map<std::string, const edm4hep::TrackCollection&>&         trackMap,
-                              const edm4hep::SimTrackerHitCollection& simTrackerHits)> {
+                              const std::map<std::string, const edm4hep::TrackCollection&>&      trackMap,
+                              const edm4hep::SimTrackerHitCollection&                            simTrackerHits)> {
   // The pair in KeyValue can be changed from python and it corresponds
   // to the name of the output collection
   ExampleFunctionalConsumerRuntimeCollectionsMultiple(const std::string& name, ISvcLocator* svcLoc)
@@ -41,15 +41,16 @@ struct ExampleFunctionalConsumerRuntimeCollectionsMultiple final
 
   // This is the function that will be called to produce the data
   void operator()(const std::map<std::string, const edm4hep::MCParticleCollection&>& particleMap,
-                  const std::map<std::string, const edm4hep::TrackCollection&>&         trackMap,
-                  const edm4hep::SimTrackerHitCollection& simTrackerHits) const override {
+                  const std::map<std::string, const edm4hep::TrackCollection&>&      trackMap,
+                  const edm4hep::SimTrackerHitCollection&                            simTrackerHits) const override {
     info() << "Received " << particleMap.size() << " particle collections and " << trackMap.size()
            << " track collections" << endmsg;
     if (particleMap.size() != 5) {
-      throw std::runtime_error("Wrong size of the particleMap map, expected 5, got " + std::to_string(particleMap.size()));
+      throw std::runtime_error("Wrong size of the particleMap map, expected 5, got " +
+                               std::to_string(particleMap.size()));
     }
     for (auto& [key, particles] : particleMap) {
-      int         i         = 0;
+      int i = 0;
       for (const auto& particle : particles) {
         if ((particle.getPDG() != 1 + i + m_offset) || (particle.getGeneratorStatus() != 2 + i + m_offset) ||
             (particle.getSimulatorStatus() != 3 + i + m_offset) || (particle.getCharge() != 4 + i + m_offset) ||

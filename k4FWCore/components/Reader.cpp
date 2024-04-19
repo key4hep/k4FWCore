@@ -62,7 +62,7 @@ public:
           error() << "Failed to register object at " << outputLocations[i] << endmsg;
         }
         // The store has the ownership so we shouldn't delete the object
-        (void) objectp.release();
+        (void)objectp.release();
       }
       return Gaudi::Functional::FilterDecision::PASSED;
     } catch (GaudiException& e) {

@@ -29,8 +29,8 @@
 #include "podio/ROOTReader.h"
 #include "podio/ROOTWriter.h"
 
-#include "k4FWCore/KeepDropSwitch.h"
 #include "IIOSvc.h"
+#include "k4FWCore/KeepDropSwitch.h"
 
 #include <string>
 #include <vector>
@@ -60,7 +60,8 @@ protected:
       "approximate size of the buffer used to prefetch rawbanks in terms of number of events. Default is 20000"};
   Gaudi::Property<unsigned int> m_nbSkippedEvents{this, "NSkip", 0, "First event to process"};
 
-  Gaudi::Property<std::vector<std::string>> m_collectionNames{this, "CollectionNames", {}, "List of collections to read"};
+  Gaudi::Property<std::vector<std::string>> m_collectionNames{
+      this, "CollectionNames", {}, "List of collections to read"};
   Gaudi::Property<std::vector<std::string>> m_readingFileNames{this, "input", {}, "List of files to read"};
   Gaudi::Property<std::string>              m_writingFileName{this, "output", {}, "List of files to write output to"};
   Gaudi::Property<std::vector<std::string>> m_outputCommands{
