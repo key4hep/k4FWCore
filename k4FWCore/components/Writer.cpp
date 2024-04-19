@@ -177,7 +177,7 @@ public:
     }
 
     DataObject* p;
-    SatusCode code = m_dataSvc->retrieveObject("/Event" + k4FWCore::frameLocation, p);
+    StatusCode code = m_dataSvc->retrieveObject("/Event" + k4FWCore::frameLocation, p);
     AnyDataWrapper<podio::Frame>* ptr;
     // This is the case when we are reading from a file
     if (code.isSuccess()) {
