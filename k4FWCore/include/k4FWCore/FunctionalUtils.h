@@ -72,6 +72,8 @@ namespace k4FWCore {
       requires std::is_base_of_v<podio::CollectionBase, std::remove_cvref_t<Value>>
     struct isMapToCollLike<std::map<std::string, Value>> : std::true_type {};
 
+    template <class T> inline constexpr bool isMapToCollLike_v = isMapToCollLike<T>::value;
+
     // transformType function to transform the types from the ones that the user wants
     // like edm4hep::MCParticleCollection, to the ones that are actually stored in the
     // event store, like std::shared_ptr<podio::CollectionBase>
@@ -81,7 +83,7 @@ namespace k4FWCore {
     };
 
     template <typename T>
-      requires std::is_base_of_v<podio::CollectionBase, T> || isMapToCollLike<T>::value
+      requires std::is_base_of_v<podio::CollectionBase, T> || isMapToCollLike_v<T>
     struct transformType<T> {
       using type = std::shared_ptr<podio::CollectionBase>;
     };
@@ -115,7 +117,7 @@ namespace k4FWCore {
     template <size_t Index, typename... In, typename... Handles, typename InputTuple>
     void readMapInputs(const std::tuple<Handles...>& handles, auto thisClass, InputTuple& inputTuple) {
       if constexpr (Index < sizeof...(Handles)) {
-        if constexpr (isMapToCollLike<std::tuple_element_t<Index, std::tuple<In...>>>::value) {
+        if constexpr (isMapToCollLike_v<std::tuple_element_t<Index, std::tuple<In...>>>) {
           // In case of map types like std::map<std::string, edm4hep::MCParticleCollection&>
           // we have to remove the reference to get the actual type
           using EDM4hepType =
@@ -162,7 +164,7 @@ namespace k4FWCore {
     template <size_t Index, typename... Out, typename... Handles>
     void putMapOutputs(std::tuple<Handles...>&& handles, const auto& m_outputs, auto thisClass) {
       if constexpr (Index < sizeof...(Handles)) {
-        if constexpr (isMapToCollLike<std::tuple_element_t<Index, std::tuple<Out...>>>::value) {
+        if constexpr (isMapToCollLike_v<std::tuple_element_t<Index, std::tuple<Out...>>>) {
           int i = 0;
           if (std::get<Index>(handles).size() != std::get<Index>(m_outputs).size()) {
             std::string msg = "Size of the output map " + std::to_string(std::get<Index>(handles).size()) +
