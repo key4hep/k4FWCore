@@ -58,10 +58,11 @@ public:
       // }
       for (unsigned i = 0; i != outColls.size(); ++i) {
         auto objectp = std::make_unique<AnyDataWrapper<Out>>(std::move(outColls[i]));
-        if (auto sc = m_dataSvc->registerObject(outputLocations[i], objectp.get()); sc.isFailure()) {
+        if (m_dataSvc->registerObject(outputLocations[i], objectp.get()).isFailure()) {
+          error() << "Failed to register object at " << outputLocations[i] << endmsg;
         }
         // The store has the ownership so we shouldn't delete the object
-        objectp.release();
+        (void) objectp.release();
       }
       return Gaudi::Functional::FilterDecision::PASSED;
     } catch (GaudiException& e) {
