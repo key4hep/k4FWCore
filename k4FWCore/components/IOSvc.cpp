@@ -33,7 +33,7 @@
 
 StatusCode IOSvc::initialize() {
   StatusCode sc = Service::initialize();
-  if ( !sc.isSuccess() ) {
+  if (sc.isFailure()) {
     error() << "Unable to initialize base class Service." << endmsg;
     return sc;
   }
@@ -59,7 +59,7 @@ StatusCode IOSvc::initialize() {
 
   m_dataSvc = service("EventDataSvc");
   if (!m_dataSvc) {
-    error() << "Unable to locate IDataSvc interface" << endmsg;
+    error() << "Unable to locate the EvtDataSvc" << endmsg;
     return StatusCode::FAILURE;
   }
 

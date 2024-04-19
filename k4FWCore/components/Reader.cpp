@@ -61,7 +61,7 @@ public:
         if (auto sc = m_dataSvc->registerObject(outputLocations[i], objectp.get()); sc.isFailure()) {
         }
         // The store has the ownership so we shouldn't delete the object
-        auto ptr = objectp.release();
+        objectp.release();
       }
       return Gaudi::Functional::FilterDecision::PASSED;
     } catch (GaudiException& e) {

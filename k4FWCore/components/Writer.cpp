@@ -37,7 +37,7 @@
 class Writer final : public Gaudi::Functional::Consumer<void(const EventContext&)> {
 public:
   Writer(const std::string& name, ISvcLocator* svcLoc) : Consumer(name, svcLoc) {
-    // Non-reeentrant algorithms have a cardinality of 1
+    // Non-reentrant algorithms have a cardinality of 1
     setProperty("Cardinality", 1).ignore();
   }
 
@@ -62,7 +62,7 @@ public:
 
     m_dataSvc = service("EventDataSvc", true);
     if (!m_dataSvc) {
-      error() << "Unable to locate IDataSvc interface" << endmsg;
+      error() << "Unable to locate EventDataSvc service" << endmsg;
       return StatusCode::FAILURE;
     }
 
