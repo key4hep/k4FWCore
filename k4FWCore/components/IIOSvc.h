@@ -40,6 +40,10 @@ public:
   /// InterfaceID
   DeclareInterfaceID(IIOSvc, 1, 0);
 
+  /**
+   * @brief Read the next event from the input file
+   * @return A tuple containing the collections read, the collection names and the frame that owns the collections
+   */
   virtual std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, std::vector<std::string>, podio::Frame>
                                                     next()                     = 0;
   virtual std::shared_ptr<std::vector<std::string>> getCollectionNames() const = 0;
@@ -47,7 +51,7 @@ public:
   virtual std::shared_ptr<podio::ROOTWriter> getWriter()                                  = 0;
   virtual void                               deleteWriter()                               = 0;
   virtual void                               deleteReader()                               = 0;
-  virtual bool                               writeCollection(const std::string& collName) = 0;
+  virtual bool                               checkIfWriteCollection(const std::string& collName) = 0;
 };
 
 #endif

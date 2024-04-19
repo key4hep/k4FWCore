@@ -30,7 +30,6 @@
 #include "podio/ROOTWriter.h"
 
 #include "k4FWCore/KeepDropSwitch.h"
-
 #include "IIOSvc.h"
 
 #include <string>
@@ -95,7 +94,7 @@ protected:
   int m_entries{0};
   int m_nextEntry{0};
 
-  bool writeCollection(const std::string& collName) override;
+  bool checkIfWriteCollection(const std::string& collName) override;
 };
 
 #endif

@@ -57,15 +57,19 @@ namespace k4FWCore {
       template <typename IArgs, std::size_t... I>
       Consumer(std::string name, ISvcLocator* locator, const IArgs& inputs, std::index_sequence<I...>)
           : base_class(std::move(name), locator),
+            // The input locations are filled by creating a property with a callback function
+            // that creates the handles because that is when the input locations become available
+            // (from a steering file, for example) and the handles have to be created for
+            // Gaudi to know the data flow
             m_inputLocations{Gaudi::Property<std::vector<DataObjID>>{
                 this, std::get<I>(inputs).first, to_DataObjID(std::get<I>(inputs).second),
                 [this](Gaudi::Details::PropertyBase&) {
-                  std::vector<InputHandle_t<typename transformType<In>::type>> h;
+                  std::vector<InputHandle_t<typename transformType<In>::type>> handles;
                   for (auto& value : this->m_inputLocations[I].value()) {
                     auto handle = InputHandle_t<typename transformType<In>::type>(value, this);
-                    h.push_back(std::move(handle));
+                    handles.push_back(std::move(handle));
                   }
-                  std::get<I>(m_inputs) = std::move(h);
+                  std::get<I>(m_inputs) = std::move(handles);
                 },
                 Gaudi::Details::Property::ImmediatelyInvokeHandler{true}}...} {}
 

@@ -14,7 +14,6 @@ Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
-limitations under the License.
 ]]
 
 file(GLOB k4fwcoretest_plugin_sources src/components/*.cpp)
@@ -116,8 +115,6 @@ add_test_with_env(FunctionalProducerMultiple options/ExampleFunctionalProducerMu
 add_test_with_env(FunctionalProducerAbsolutePath options/ExampleFunctionalProducerAbsolutePath.py)
 add_test_with_env(FunctionalFile options/ExampleFunctionalFile.py PROPERTIES DEPENDS FunctionalProducer)
 add_test_with_env(FunctionalMTFile options/ExampleFunctionalMTFile.py PROPERTIES DEPENDS FunctionalProducer)
-add_test_with_env(FunctionalFile_toolong options/ExampleFunctionalFile.py -n 999 PROPERTIES DEPENDS FunctionalProducer PASS_REGULAR_EXPRESSION
-                  "Application Manager Terminated successfully with a user requested ScheduledStop")
 add_test_with_env(FunctionalMultipleFile options/ExampleFunctionalFileMultiple.py PROPERTIES DEPENDS FunctionalProducerMultiple)
 add_test_with_env(FunctionalMix options/runFunctionalMix.py PROPERTIES DEPENDS FunctionalProducerMultiple)
 add_test_with_env(FunctionalMixIOSvc options/runFunctionalMixIOSvc.py PROPERTIES DEPENDS FunctionalProducerMultiple)
@@ -130,6 +127,9 @@ add_test_with_env(FunctionalTransformerRuntimeEmpty options/ExampleFunctionalTra
 add_test_with_env(FunctionalTransformerRuntimeCollectionsMultiple options/ExampleFunctionalTransformerRuntimeCollectionsMultiple.py)
 
 add_test(NAME FunctionalCheckFiles COMMAND python3 ${CMAKE_CURRENT_LIST_DIR}/options/CheckOutputFiles.py PROPERTIES DEPENDS FunctionalFile FunctionalMultipleFile FunctionalOutputCommands FunctionalProducerAbsolutePath)
+# Do this after checking the files not to overwrite them
+add_test_with_env(FunctionalFile_toolong options/ExampleFunctionalFile.py -n 999 PROPERTIES DEPENDS FunctionalCheckFiles PASS_REGULAR_EXPRESSION
+                  "Application Manager Terminated successfully with a user requested ScheduledStop")
 
 # The following is done to make the tests work without installing the files in
 # the installation directory. The k4FWCore in the build directory is populated by

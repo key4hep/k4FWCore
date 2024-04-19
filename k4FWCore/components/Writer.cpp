@@ -122,13 +122,13 @@ public:
 
     SmartDataPtr<DataObject> root(eventSvc(), "/Event");
     if (!root) {
-      info() << "Failed to retrieve root object /Event" << endmsg;
+      error() << "Failed to retrieve root object /Event" << endmsg;
       return;
     }
 
     auto pObj = root->registry();
     if (!pObj) {
-      error() << "Failed to retrieve root object" << endmsg;
+      error() << "Failed to retrieve the root registry object" << endmsg;
       return;
     }
     auto mgr = eventSvc().as<IDataManagerSvc>();
@@ -195,7 +195,7 @@ public:
       // and cache them
       getOutputCollections();
       for (const auto& coll : m_availableCollections) {
-        if (iosvc->writeCollection(coll)) {
+        if (iosvc->checkIfWriteCollection(coll)) {
           m_collectionsToSave.push_back(coll);
           const auto& frameCollections = ptr->getData().getAvailableCollections();
           if (std::find(frameCollections.begin(), frameCollections.end(), coll) == frameCollections.end()) {

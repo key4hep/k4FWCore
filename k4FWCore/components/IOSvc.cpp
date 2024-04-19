@@ -111,6 +111,7 @@ std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, std::vector<std:
 // After every event if there is still a frame in the TES
 // that means it hasn't been written so the collections inside the Frame
 // should be removed so that they are deleted when the Frame is deleted
+// and not deleted when clearing the store
 void IOSvc::handle(const Incident& incident) {
   StatusCode code;
   if (m_hiveWhiteBoard) {
@@ -153,6 +154,6 @@ void IOSvc::setReadingCollectionNames(const std::vector<std::string>& names) { m
 
 void IOSvc::setReadingFileNames(const std::vector<std::string>& names) { m_readingFileNames = names; }
 
-bool IOSvc::writeCollection(const std::string& collName) { return m_switch.isOn(collName); }
+bool IOSvc::checkIfWriteCollection(const std::string& collName) { return m_switch.isOn(collName); }
 
 DECLARE_COMPONENT(IOSvc)
