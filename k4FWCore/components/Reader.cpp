@@ -119,8 +119,10 @@ public:
     auto eds   = eventSvc().as<IDataProviderSvc>();
     auto frame = std::move(std::get<podio::Frame>(val));
 
-    auto tmp  = new AnyDataWrapper<podio::Frame>(std::move(frame));
-    auto code = eds->registerObject("/Event" + k4FWCore::frameLocation, tmp);
+    auto tmp = new AnyDataWrapper<podio::Frame>(std::move(frame));
+    if (eds->registerObject("/Event" + k4FWCore::frameLocation, tmp).isFailure()) {
+      error() << "Failed to register Frame object" << endmsg;
+    }
 
     return std::make_tuple(std::get<0>(val), std::get<1>(val));
   }
