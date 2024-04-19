@@ -43,7 +43,7 @@ StatusCode IOSvc::initialize() {
       m_reader->openFiles(m_readingFileNames);
     } catch (std::runtime_error& e) {
       error() << "Error when opening files: " << e.what() << endmsg;
-      throw e;
+      return StatusCode::FAILURE;
     }
     m_entries = m_reader->getEntries(podio::Category::Event);
   }
