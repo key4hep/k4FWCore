@@ -162,7 +162,6 @@ public:
     // more than one instance is created
     std::scoped_lock<std::mutex> lock(m_mutex);
 
-    StatusCode code;
 
     if (m_hiveWhiteBoard) {
       // It's never set to valid but it has the slot information
@@ -171,19 +170,18 @@ public:
       //   return;
       // }
       info() << "Setting store to " << ctx.slot() << endmsg;
-      code = m_hiveWhiteBoard->selectStore(ctx.slot());
-      if (code.isFailure()) {
+      if (m_hiveWhiteBoard->selectStore(ctx.slot()).isFailure()) {
         error() << "Error when setting store" << endmsg;
         throw GaudiException("Error when setting store", name(), StatusCode::FAILURE);
       }
     }
 
     DataObject* p;
-    code = m_dataSvc->retrieveObject("/Event" + k4FWCore::frameLocation, p);
+    SatusCode code = m_dataSvc->retrieveObject("/Event" + k4FWCore::frameLocation, p);
     AnyDataWrapper<podio::Frame>* ptr;
     // This is the case when we are reading from a file
     if (code.isSuccess()) {
-      code = m_dataSvc->unregisterObject(p);
+      m_dataSvc->unregisterObject(p).ignore();
       ptr  = dynamic_cast<AnyDataWrapper<podio::Frame>*>(p);
     }
     // This is the case when no reading is being done
@@ -213,14 +211,12 @@ public:
 
     for (auto& coll : ptr->getData().getAvailableCollections()) {
       DataObject* storeCollection;
-      code = m_dataSvc->retrieveObject("/Event/" + coll, storeCollection);
-      if (code.isFailure()) {
+      if (m_dataSvc->retrieveObject("/Event/" + coll, storeCollection).isFailure()) {
         error() << "Failed to retrieve collection " << coll << endmsg;
         return;
       }
       // We take ownership back from the store
-      code = m_dataSvc->unregisterObject(storeCollection);
-      if (code.isFailure()) {
+      if (m_dataSvc->unregisterObject(storeCollection).isFailure()) {
         error() << "Failed to unregister collection " << coll << endmsg;
         return;
       }
@@ -228,14 +224,12 @@ public:
 
     for (auto& coll : m_collectionsToAdd) {
       DataObject* storeCollection;
-      code = m_dataSvc->retrieveObject("/Event/" + coll, storeCollection);
-      if (code.isFailure()) {
+      if (m_dataSvc->retrieveObject("/Event/" + coll, storeCollection).isFailure()) {
         error() << "Failed to retrieve collection " << coll << endmsg;
         return;
       }
       // We take ownership back from the store
-      code = m_dataSvc->unregisterObject(storeCollection);
-      if (code.isFailure()) {
+      if (m_dataSvc->unregisterObject(storeCollection).isFailure()) {
         error() << "Failed to unregister collection " << coll << endmsg;
         return;
       }
