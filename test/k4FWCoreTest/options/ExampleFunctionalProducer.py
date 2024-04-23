@@ -23,6 +23,7 @@ from Gaudi.Configuration import INFO
 from Configurables import ExampleFunctionalProducer
 from Configurables import EventDataSvc
 from k4FWCore import ApplicationMgr, IOSvc
+from Configurables import Writer
 
 
 iosvc = IOSvc("IOSvc")
@@ -33,8 +34,10 @@ iosvc.output = "output_k4test_exampledata_producer.root"
 
 producer = ExampleFunctionalProducer("ExampleFunctionalProducer")
 
+writer = Writer("Writer")
+
 ApplicationMgr(
-    TopAlg=[producer],
+    TopAlg=[producer, writer],
     EvtSel="NONE",
     EvtMax=10,
     ExtSvc=[EventDataSvc("EventDataSvc")],

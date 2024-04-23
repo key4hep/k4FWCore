@@ -20,7 +20,7 @@
 
 from Gaudi.Configuration import INFO
 from Configurables import ExampleEventHeaderConsumer
-from Configurables import ApplicationMgr
+from k4FWCore import ApplicationMgr
 from Configurables import EventDataSvc, IOSvc, Reader
 
 svc = IOSvc("IOSvc")

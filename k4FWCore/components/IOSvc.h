@@ -55,11 +55,6 @@ public:
   void setReadingFileNames(const std::vector<std::string>& names);
 
 protected:
-  Gaudi::Property<unsigned int> m_bufferNbEvents{
-      this, "BufferNbEvents", 20000,
-      "approximate size of the buffer used to prefetch rawbanks in terms of number of events. Default is 20000"};
-  Gaudi::Property<unsigned int> m_nbSkippedEvents{this, "NSkip", 0, "First event to process"};
-
   Gaudi::Property<std::vector<std::string>> m_collectionNames{
       this, "CollectionNames", {}, "List of collections to read"};
   Gaudi::Property<std::vector<std::string>> m_readingFileNames{this, "input", {}, "List of files to read"};

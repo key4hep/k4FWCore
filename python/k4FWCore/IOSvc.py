@@ -19,6 +19,7 @@
 from Configurables import IOSvc as IO
 import os
 
+
 class IOSvc:
 
     def __init__(self, *args, **kwargs):
@@ -29,7 +30,6 @@ class IOSvc:
         return getattr(self._svc, attr)
 
     def __setattr__(self, attr, value):
-        print(f'IOSvc: {attr} {value}')
         if attr == '_svc':
             super().__setattr__(attr, value)
             return
