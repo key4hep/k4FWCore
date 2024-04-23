@@ -57,3 +57,9 @@ add_custom_command(
         COMMAND ${CMAKE_COMMAND} -E copy_directory
                 ${PROJECT_SOURCE_DIR}/k4FWCore/python/k4FWCore
                 ${CMAKE_CURRENT_BINARY_DIR}/genConfDir/k4FWCore)
+
+# This is needed to overwrite the __init__.py, see a long comment in the
+# CMakeLists.txt in the test folder
+add_custom_command(TARGET k4FWCorePlugins POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy
+                   ${PROJECT_SOURCE_DIR}/python/k4FWCore/__init__.py ${PROJECT_BINARY_DIR}/k4FWCore/genConfDir/k4FWCore/__init__.py)

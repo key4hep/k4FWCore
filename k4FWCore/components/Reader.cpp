@@ -48,8 +48,8 @@ public:
     try {
       auto out = (*this)();
 
-      auto outColls        = std::get<0>(out);
-      auto outputLocations = std::get<1>(out);
+      auto outColls        = std::get<std::vector<std::shared_ptr<podio::CollectionBase>>>(out);
+      auto outputLocations = std::get<std::vector<std::string>>(out);
 
       // if (out.size() != m_outputs.size()) {
       //   throw GaudiException("Error during transform: expected " + std::to_string(m_outputs.size()) +
@@ -117,7 +117,7 @@ public:
     auto val = iosvc->next();
 
     auto eds   = eventSvc().as<IDataProviderSvc>();
-    auto frame = std::move(std::get<2>(val));
+    auto frame = std::move(std::get<podio::Frame>(val));
 
     auto tmp  = new AnyDataWrapper<podio::Frame>(std::move(frame));
     auto code = eds->registerObject("/Event" + k4FWCore::frameLocation, tmp);
