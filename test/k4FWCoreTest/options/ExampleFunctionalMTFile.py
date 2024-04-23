@@ -21,12 +21,12 @@
 # to check that the contents of the file are the expected ones
 
 from Gaudi.Configuration import INFO, WARNING
-from Configurables import ExampleFunctionalTransformer
+from Configurables import ExampleFunctionalTransformer, ExampleFunctionalConsumer
 from Configurables import HiveSlimEventLoopMgr, HiveWhiteBoard, AvalancheSchedulerSvc
 from k4FWCore import ApplicationMgr, IOSvc
 
-evtslots = 2
-threads = 2
+evtslots = 3
+threads = 3
 
 whiteboard = HiveWhiteBoard(
     "EventDataSvc",
@@ -38,19 +38,25 @@ slimeventloopmgr = HiveSlimEventLoopMgr(
     "HiveSlimEventLoopMgr", SchedulerName="AvalancheSchedulerSvc", OutputLevel=WARNING
 )
 
-scheduler = AvalancheSchedulerSvc(ThreadPoolSize=threads, OutputLevel=WARNING)
+scheduler = AvalancheSchedulerSvc(ThreadPoolSize=threads, ShowDataFlow=True,
+                                  OutputLevel=WARNING)
 
 svc = IOSvc("IOSvc")
-svc.input = "output_k4test_exampledata_producer.root"
+svc.input = "output_k4test_exampledata_producer_multiple.root"
 svc.output = "functional_transformerMT.root"
 
+consumer1 = ExampleFunctionalConsumer(
+    "Consumer1",
+    InputCollection=["MCParticles1"],
+    Offset=0,
+)
 
 transformer = ExampleFunctionalTransformer(
     "Transformer", InputCollection=["MCParticles"], OutputCollection=["NewMCParticles"]
 )
 
 mgr = ApplicationMgr(
-    TopAlg=[transformer],
+    TopAlg=[consumer1, transformer],
     EvtSel="NONE",
     EvtMax=-1,
     ExtSvc=[whiteboard],
