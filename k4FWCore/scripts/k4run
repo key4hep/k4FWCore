@@ -157,20 +157,6 @@ def main():
     )
     parser.add_argument("--gdb", action="store_true", help="Attach gdb debugger")
 
-    # TODO: Don't want to advertise this until tested.
-    # GaudiPython Parallel Mode Option
-    #   Argument must be an integer in range [ -1, sys_cpus ]
-    #   -1   : All available cpus
-    #    0   : Serial Mode (traditional gaudirun)
-    #    n>0 : parallel with n cpus (n <= sys_cpus)
-    parser.add_argument(
-        "--ncpus",
-        type=int,
-        default=0,
-        help="Start Gaudi in parallel mode using NCPUS processes. "
-        "0 => serial mode (default), -1 => use all CPUs",
-    )
-
     # Once to parse the files and another time below to have the new parameters
     # in the namespace since parsing of the file happens when the namespace
     # has already been filled
@@ -192,7 +178,7 @@ def main():
                     % (item, cfgDb[item]["lib"], path_to_component)
                 )
             else:
-                if not "Gaudi" in cfgDb[item]["lib"]:
+                if "Gaudi" not in cfgDb[item]["lib"]:
                     print("  %s (from %s)" % (item, cfgDb[item]["lib"]))
         sys.exit()
 
@@ -239,22 +225,12 @@ def main():
     # Allow graceful exit with Ctrl + C
     ApplicationMgr().StopOnSignal = True
 
-    # Parallel Option ---------------------------------------------------------
-    if opts.ncpus:
-        sys_cpus = cpu_count()
-        if opts.ncpus > sys_cpus:
-            s = "Invalid value : --ncpus : only %i cpus available" % sys_cpus
-            parser.error(s)
-        elif opts.ncpus < -1:
-            s = "Invalid value : --ncpus must be integer >= -1"
-            parser.error(s)
-
     from Gaudi.Main import gaudimain
 
     c = gaudimain()
     if not opts.dry_run:
         # Do the real processing
-        retcode = c.run(opts.gdb, opts.ncpus)
+        retcode = c.run(opts.gdb)
         # User requested stop returns non-zero exit code see: https://github.com/key4hep/k4FWCore/issues/125
         if ApplicationMgr().EvtMax == -1 and retcode == 4:
             retcode = 0
