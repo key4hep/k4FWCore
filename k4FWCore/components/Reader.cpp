@@ -16,6 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <GaudiKernel/SmartIF.h>
 #include "Gaudi/Functional/details.h"
 #include "Gaudi/Functional/utilities.h"
 #include "GaudiKernel/AnyDataWrapper.h"
@@ -25,6 +26,7 @@
 
 #include "podio/CollectionBase.h"
 #include "podio/Frame.h"
+#include "podio/ROOTReader.h"
 
 #include "IIOSvc.h"
 #include "k4FWCore/FunctionalUtils.h"
@@ -40,8 +42,33 @@ class CollectionPusher : public Gaudi::Functional::details::BaseClass_t<Gaudi::F
   using base_class = Gaudi::Functional::details::BaseClass_t<Traits_>;
   static_assert(std::is_base_of_v<Algorithm, base_class>, "BaseClass must inherit from Algorithm");
 
+  template <typename T>
+  using OutputHandle_t = Gaudi::Functional::details::OutputHandle_t<Traits_, std::remove_pointer_t<T>>;
+  std::vector<OutputHandle_t<std::shared_ptr<podio::CollectionBase>>> m_outputs;
+  Gaudi::Property<std::string>                                        m_input{this, "Input", "Event", "Input file"};
+
 public:
-  CollectionPusher(std::string name, ISvcLocator* locator) : base_class(std::move(name), locator) {}
+  CollectionPusher(std::string name, ISvcLocator* locator)
+      : base_class(std::move(name), locator),
+        m_input{this, "Input", "Event",
+                [this](Gaudi::Details::PropertyBase& b) {
+                  const std::string cmd = System::cmdLineArgs()[0];
+                  if (cmd.find("genconf") != std::string::npos) {
+                    return;
+                  }
+                  if (m_input.value() == "Event") {
+                    return;
+                  }
+                  auto reader = podio::ROOTReader();
+                  reader.openFile(m_input.value());
+                  auto frame = podio::Frame(reader.readNextEntry(podio::Category::Event));
+                  auto colls = frame.getAvailableCollections();
+
+                  for (auto& c : colls) {
+                      m_outputs.push_back(OutputHandle_t<std::shared_ptr<podio::CollectionBase>>(c, this));
+                  }
+                },
+                Gaudi::Details::Property::ImmediatelyInvokeHandler{true}} {}
 
   // derived classes can NOT implement execute
   StatusCode execute(const EventContext&) const override final {
@@ -56,13 +83,8 @@ public:
       //                            " containers, got " + std::to_string(out.size()) + " instead",
       //                        this->name(), StatusCode::FAILURE);
       // }
-      for (unsigned i = 0; i != outColls.size(); ++i) {
-        auto objectp = std::make_unique<AnyDataWrapper<Out>>(std::move(outColls[i]));
-        if (m_dataSvc->registerObject(outputLocations[i], objectp.get()).isFailure()) {
-          error() << "Failed to register object at " << outputLocations[i] << endmsg;
-        }
-        // The store has the ownership so we shouldn't delete the object
-        (void)objectp.release();
+      for (size_t i = 0; i != outColls.size(); ++i) {
+        m_outputs[i].put(std::move(outColls[i]));
       }
       return Gaudi::Functional::FilterDecision::PASSED;
     } catch (GaudiException& e) {
