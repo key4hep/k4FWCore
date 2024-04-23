@@ -18,7 +18,6 @@
  */
 
 #include "Gaudi/Property.h"
-#include "GaudiAlg/Transformer.h"
 
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/MutableMCParticle.h"
