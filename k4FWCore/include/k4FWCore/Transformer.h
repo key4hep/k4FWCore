@@ -64,6 +64,11 @@ namespace k4FWCore {
       Transformer(std::string name, ISvcLocator* locator, const IArgs& inputs, std::index_sequence<I...>,
                   const OArgs& outputs, std::index_sequence<J...>)
           : base_class(std::move(name), locator),
+            // The input locations are filled by creating a property with a
+            // callback function that creates the handles because when the
+            // callback runs is when the input locations become available (from
+            // a steering file, for example) and the handles have to be created
+            // for Gaudi to know the data flow
             m_inputLocations{Gaudi::Property<std::vector<DataObjID>>{
                 this, std::get<I>(inputs).first, to_DataObjID(std::get<I>(inputs).second),
                 [this](Gaudi::Details::PropertyBase&) {
@@ -75,12 +80,14 @@ namespace k4FWCore {
                   std::get<I>(m_inputs) = std::move(h);
                 },
                 Gaudi::Details::Property::ImmediatelyInvokeHandler{true}}...},
+            // Same as above for the output locations
             m_outputLocations{Gaudi::Property<std::vector<DataObjID>>{
                 this, std::get<J>(outputs).first, to_DataObjID(std::get<J>(outputs).second),
                 [this](Gaudi::Details::PropertyBase&) {
                   std::vector<OutputHandle_t<typename transformType<Out>::type>> h;
-                  std::sort(this->m_outputLocations[J].value().begin(), this->m_outputLocations[J].value().end(),
-                            [](const DataObjID& a, const DataObjID& b) { return a.key() < b.key(); });
+                  // Is this needed?
+                  // std::sort(this->m_outputLocations[J].value().begin(), this->m_outputLocations[J].value().end(),
+                  //           [](const DataObjID& a, const DataObjID& b) { return a.key() < b.key(); });
                   for (auto& inpID : this->m_outputLocations[J].value()) {
                     if (inpID.key().empty()) {
                       continue;
@@ -106,18 +113,7 @@ namespace k4FWCore {
         try {
           if constexpr (isMapToCollLike<Out>::value) {
             std::tuple<Out> tmp = filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs);
-            // auto tmp = filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs);
             putMapOutputs<0, Out>(std::move(tmp), m_outputs, this);
-            // int i = 0;
-            // for (auto& [key, val] : filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs)) {
-            //   if (key != m_outputs[i].objKey()) {
-            //     throw GaudiException("Transformer",
-            //                          "Output key does not match the expected key " + m_outputs[i].objKey(),
-            //                          StatusCode::FAILURE);
-            //   }
-            //   Gaudi::Functional::details::put(m_outputs[i], convertToSharedPtr(std::move(val)));
-            //   i++;
-            // }
           } else {
             Gaudi::Functional::details::put(
                 std::get<0>(this->m_outputs)[0],
@@ -179,8 +175,9 @@ namespace k4FWCore {
                 this, std::get<J>(outputs).first, to_DataObjID(std::get<J>(outputs).second),
                 [this](Gaudi::Details::PropertyBase&) {
                   std::vector<OutputHandle_t<typename transformType<Out>::type>> h;
-                  std::sort(this->m_outputLocations[J].value().begin(), this->m_outputLocations[J].value().end(),
-                            [](const DataObjID& a, const DataObjID& b) { return a.key() < b.key(); });
+                  // Is this needed?
+                  // std::sort(this->m_outputLocations[J].value().begin(), this->m_outputLocations[J].value().end(),
+                  //           [](const DataObjID& a, const DataObjID& b) { return a.key() < b.key(); });
                   for (auto& inpID : this->m_outputLocations[J].value()) {
                     if (inpID.key().empty()) {
                       continue;
