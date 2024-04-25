@@ -59,7 +59,7 @@ StatusCode IOSvc::initialize() {
 
   m_dataSvc = service("EventDataSvc");
   if (!m_dataSvc) {
-    error() << "Unable to locate the EvtDataSvc" << endmsg;
+    error() << "Unable to locate the EventDataSvc" << endmsg;
     return StatusCode::FAILURE;
   }
 
