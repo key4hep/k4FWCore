@@ -90,9 +90,7 @@ consumer_produceralg_algorithm.mcparticles = "FunctionalMCParticles"
 consumer_produceralg_algorithm.keepEventNumberZero = True
 
 # Let's also run the transformer, why not
-transformer_functional = ExampleFunctionalTransformerMultiple(
-    "FunctionalTransformerMultiple"
-)
+transformer_functional = ExampleFunctionalTransformerMultiple("FunctionalTransformerMultiple")
 
 iosvc.output = "output_k4test_exampledata_functional_mix_iosvc.root"
 

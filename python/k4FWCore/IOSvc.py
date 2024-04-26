@@ -21,23 +21,21 @@ import os
 
 
 class IOSvc:
-
     def __init__(self, *args, **kwargs):
-
         self._svc = IO(**kwargs)
 
     def __getattr__(self, attr):
         return getattr(self._svc, attr)
 
     def __setattr__(self, attr, value):
-        if attr == '_svc':
+        if attr == "_svc":
             super().__setattr__(attr, value)
             return
 
-        if attr == 'input':
+        if attr == "input":
             if isinstance(value, str):
                 value = [value]
-        if attr == 'output':
+        if attr == "output":
             if os.path.dirname(value) and not os.path.exists(os.path.dirname(value)):
                 os.makedirs(os.path.dirname(value))
         setattr(self._svc, attr, value)

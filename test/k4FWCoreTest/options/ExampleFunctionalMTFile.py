@@ -38,8 +38,7 @@ slimeventloopmgr = HiveSlimEventLoopMgr(
     "HiveSlimEventLoopMgr", SchedulerName="AvalancheSchedulerSvc", OutputLevel=WARNING
 )
 
-scheduler = AvalancheSchedulerSvc(ThreadPoolSize=threads, ShowDataFlow=True,
-                                  OutputLevel=WARNING)
+scheduler = AvalancheSchedulerSvc(ThreadPoolSize=threads, ShowDataFlow=True, OutputLevel=WARNING)
 
 svc = IOSvc("IOSvc")
 svc.input = "output_k4test_exampledata_producer_multiple.root"

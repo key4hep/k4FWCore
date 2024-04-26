@@ -21,7 +21,11 @@
 # to check that the contents of the file are the expected ones
 
 from Gaudi.Configuration import INFO
-from Configurables import ExampleFunctionalTransformer, ExampleFunctionalProducer, ExampleFunctionalConsumer
+from Configurables import (
+    ExampleFunctionalTransformer,
+    ExampleFunctionalProducer,
+    ExampleFunctionalConsumer,
+)
 from k4FWCore import ApplicationMgr
 from Configurables import EventDataSvc
 

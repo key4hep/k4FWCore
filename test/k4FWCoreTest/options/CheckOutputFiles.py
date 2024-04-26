@@ -63,4 +63,6 @@ check_collections(
     ["VectorFloat", "MCParticles1", "MCParticles2", "SimTrackerHits", "TrackerHits"],
 )
 check_collections("/tmp/a/b/c/output_k4test_exampledata_producer.root", ["MCParticles"])
-check_collections("functional_transformer_runtime_empty.root", ["MCParticles0", "MCParticles1", "MCParticles2"])
+check_collections(
+    "functional_transformer_runtime_empty.root", ["MCParticles0", "MCParticles1", "MCParticles2"]
+)
