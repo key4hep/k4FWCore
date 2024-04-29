@@ -24,6 +24,7 @@ from podio.root_io import Reader as PodioReader
 
 class ApplicationMgr:
     """ApplicationMgr is a class that wraps the Gaudi ApplicationMgr class to
+
     - Give the reader the collections it's going to read so that
       the scheduler can know which algorithms can't run until the
       collections are available
