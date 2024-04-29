@@ -44,7 +44,7 @@ public:
   // bool isReEntrant() const override { return false; }
 
   // Many members are mutable because it's assumed that the Writer is called only once
-  mutable std::set<std::string>    m_availableCollections;
+  mutable std::set<std::string> m_availableCollections;
   // These are the collections that are not in the frame and we want to add to the frame
   mutable std::vector<std::string> m_collectionsToAdd;
   // These are the collections we want to save to the frame

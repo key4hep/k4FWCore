@@ -39,7 +39,6 @@ class ApplicationMgr:
         self._mgr = AppMgr(**kwargs)
 
         for conf in frozenset(self._mgr.allConfigurables.values()):
-            # import pdb; pdb.set_trace()
             if not isinstance(conf, IOSvc):
                 continue
             props = conf.getPropertiesWithDescription()
@@ -57,7 +56,6 @@ class ApplicationMgr:
             # while for a list it's an empty list
             if writer is None and props["output"][0] and props["output"][0] != "<no value>":
                 writer = Writer("k4FWCore__Writer")
-                add_writer = True
             # Let's tell the Reader one of the input files so it can
             # know which collections it's going to read
             if reader is not None:
