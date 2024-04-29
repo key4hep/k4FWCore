@@ -23,6 +23,17 @@ from podio.root_io import Reader as PodioReader
 
 
 class ApplicationMgr:
+    """ApplicationMgr is a class that wraps the Gaudi ApplicationMgr class to
+    - Give the reader the collections it's going to read so that
+      the scheduler can know which algorithms can't run until the
+      collections are available
+    - When running multithreaded and EvtMax is -1, set the number of events to
+      be run to the number of events in the file so that no more events than
+      necessary are scheduled
+    - Wrap inside a sequencer the set of algorithms and a Writer (if any) so that
+      when running multithreaded the writer runs after the algorithms
+    """
+
     def __init__(self, **kwargs):
         self._mgr = AppMgr(**kwargs)
 
@@ -49,7 +60,7 @@ class ApplicationMgr:
             # Let's tell the Reader one of the input files so it can
             # know which collections it's going to read
             if reader is not None:
-                # Open the files and get the number of events This is necessary to
+                # Open the files and get the number of events. This is necessary to
                 # avoid errors when running multithreaded since if we have, for
                 # example, 10 events and we are running 9 at the same time, then
                 # (possibly) the first 9 complete and 9 more are scheduled, out of
@@ -68,6 +79,9 @@ class ApplicationMgr:
                     reader.InputCollections = collections
             self._mgr.TopAlg = ([reader] if add_reader else []) + self._mgr.TopAlg
             # Assume the writer is at the end
+            # Algorithms are wrapped with Sequential=False so that they can run in parallel
+            # The algorithms and Writer are wrapped with Sequential=True so that the can not
+            # run in parallel
             if writer:
                 self._mgr.TopAlg = [
                     Gaudi__Sequencer(

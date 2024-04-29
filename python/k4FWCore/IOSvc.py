@@ -32,6 +32,7 @@ class IOSvc:
             super().__setattr__(attr, value)
             return
 
+        # Allow to specify a single string for input when what we want is a list
         if attr == "input":
             if isinstance(value, str):
                 value = [value]
