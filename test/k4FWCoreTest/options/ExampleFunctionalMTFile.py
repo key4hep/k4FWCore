@@ -25,8 +25,8 @@ from Configurables import ExampleFunctionalTransformer, ExampleFunctionalConsume
 from Configurables import HiveSlimEventLoopMgr, HiveWhiteBoard, AvalancheSchedulerSvc
 from k4FWCore import ApplicationMgr, IOSvc
 
-evtslots = 3
-threads = 3
+evtslots = 6
+threads = 6
 
 whiteboard = HiveWhiteBoard(
     "EventDataSvc",
@@ -42,20 +42,20 @@ scheduler = AvalancheSchedulerSvc(ThreadPoolSize=threads, ShowDataFlow=True, Out
 
 svc = IOSvc("IOSvc")
 svc.input = "output_k4test_exampledata_producer_multiple.root"
-svc.output = "functional_transformerMT.root"
+# svc.output = "functional_transformerMT.root"
 
-consumer1 = ExampleFunctionalConsumer(
+consumer = ExampleFunctionalConsumer(
     "Consumer1",
     InputCollection=["MCParticles1"],
     Offset=0,
 )
 
 transformer = ExampleFunctionalTransformer(
-    "Transformer", InputCollection=["MCParticles"], OutputCollection=["NewMCParticles"]
+    "Transformer", InputCollection=["MCParticles1"], OutputCollection=["NewMCParticles"]
 )
 
 mgr = ApplicationMgr(
-    TopAlg=[consumer1, transformer],
+    TopAlg=[consumer, transformer],
     EvtSel="NONE",
     EvtMax=-1,
     ExtSvc=[whiteboard],

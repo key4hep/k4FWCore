@@ -119,7 +119,7 @@ void IOSvc::handle(const Incident& incident) {
       info() << "No context found in IOSvc" << endmsg;
       return;
     }
-    info() << "Setting store to " << incident.context().slot() << endmsg;
+    debug() << "Setting store to " << incident.context().slot() << endmsg;
     code = m_hiveWhiteBoard->selectStore(incident.context().slot());
     if (code.isFailure()) {
       error() << "Error when setting store" << endmsg;
@@ -141,7 +141,7 @@ void IOSvc::handle(const Incident& incident) {
     DataObject* collPtr;
     code = m_dataSvc->retrieveObject("/Event/" + coll, collPtr);
     if (code.isSuccess()) {
-      info() << "Removing collection: " << coll << endmsg;
+      debug() << "Removing the collection: " << coll << " from the store" << endmsg;
       code = m_dataSvc->unregisterObject(collPtr);
     }
     // else {

@@ -21,24 +21,19 @@
 # to check that the contents of the file are the expected ones
 
 from Gaudi.Configuration import INFO
-from Configurables import ExampleFunctionalTransformerMultiple
+from Configurables import ExampleFunctionalConsumer
 from Configurables import EventDataSvc
 from k4FWCore import ApplicationMgr, IOSvc
 
 svc = IOSvc("IOSvc")
-svc.input = "output_k4test_exampledata_producer_multiple.root"
-svc.output = "functional_transformer_multiple.root"
+svc.input = ["output_k4test_exampledata_producer.root", "output_k4test_exampledata_producer2.root"]
 
-transformer = ExampleFunctionalTransformerMultiple(
-    "Transformer",
-    # InputCollection="MCParticles",
-    # OutputCollection="NewMCParticles")
-)
+consumer = ExampleFunctionalConsumer("Consumer", InputCollection=["MCParticles"], Offset=0)
 
 mgr = ApplicationMgr(
-    TopAlg=[transformer],
+    TopAlg=[consumer],
     EvtSel="NONE",
-    EvtMax=-1,
+    EvtMax=30,
     ExtSvc=[EventDataSvc("EventDataSvc")],
     OutputLevel=INFO,
 )

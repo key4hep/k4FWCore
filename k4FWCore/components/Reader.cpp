@@ -33,8 +33,7 @@
 
 #include <memory>
 
-template <typename Container> using vector_of_          = std::vector<Container>;
-template <typename Container> using vector_of_optional_ = std::vector<std::optional<Container>>;
+template <typename Container> using vector_of_ = std::vector<Container>;
 
 class CollectionPusher : public Gaudi::Functional::details::BaseClass_t<Gaudi::Functional::Traits::useDefaults> {
   using Traits_    = Gaudi::Functional::Traits::useDefaults;
@@ -45,30 +44,49 @@ class CollectionPusher : public Gaudi::Functional::details::BaseClass_t<Gaudi::F
   template <typename T>
   using OutputHandle_t = Gaudi::Functional::details::OutputHandle_t<Traits_, std::remove_pointer_t<T>>;
   std::vector<OutputHandle_t<std::shared_ptr<podio::CollectionBase>>> m_outputs;
-  Gaudi::Property<std::string>                                        m_input{this, "Input", "Event", "Input file"};
+  Gaudi::Property<std::vector<std::string>>                           m_inputCollections{
+      this, "InputCollections", {"First collection"}, "List of input collections"};
+  // Gaudi::Property<std::string>                                        m_input{this, "Input", "Event", "Input file"};
 
 public:
   CollectionPusher(std::string name, ISvcLocator* locator)
       : base_class(std::move(name), locator),
-        m_input{this, "Input", "Event",
-                [this](Gaudi::Details::PropertyBase& b) {
-                  const std::string cmd = System::cmdLineArgs()[0];
-                  if (cmd.find("genconf") != std::string::npos) {
-                    return;
-                  }
-                  if (m_input.value() == "Event") {
-                    return;
-                  }
-                  auto reader = podio::ROOTReader();
-                  reader.openFile(m_input.value());
-                  auto frame = podio::Frame(reader.readNextEntry(podio::Category::Event));
-                  auto colls = frame.getAvailableCollections();
+        // m_input{this, "Input", "Event",
+        //         [this](Gaudi::Details::PropertyBase& b) {
+        //           const std::string cmd = System::cmdLineArgs()[0];
+        //           if (cmd.find("genconf") != std::string::npos) {
+        //             return;
+        //           }
+        //           if (m_input.value() == "Event") {
+        //             return;
+        //           }
+        //           auto reader = podio::ROOTReader();
+        //           reader.openFile(m_input.value());
+        //           auto frame = podio::Frame(reader.readNextEntry(podio::Category::Event));
+        //           auto colls = frame.getAvailableCollections();
 
-                  for (auto& c : colls) {
-                      m_outputs.push_back(OutputHandle_t<std::shared_ptr<podio::CollectionBase>>(c, this));
-                  }
-                },
-                Gaudi::Details::Property::ImmediatelyInvokeHandler{true}} {}
+        //           for (auto& c : colls) {
+        //               m_outputs.push_back(OutputHandle_t<std::shared_ptr<podio::CollectionBase>>(c, this));
+        //           }
+        //         },
+        //         Gaudi::Details::Property::ImmediatelyInvokeHandler{true}}
+        m_inputCollections{this,
+                           "InputCollections",
+                           {"Event"},
+                           [this](Gaudi::Details::PropertyBase& b) {
+                             const std::string cmd = System::cmdLineArgs()[0];
+                             if (cmd.find("genconf") != std::string::npos) {
+                               return;
+                             }
+                             if (m_inputCollections.value().size() == 1 && m_inputCollections.value()[0] == "Event") {
+                               return;
+                             }
+
+                             for (auto& c : m_inputCollections.value()) {
+                               m_outputs.push_back(OutputHandle_t<std::shared_ptr<podio::CollectionBase>>(c, this));
+                             }
+                           },
+                           Gaudi::Details::Property::ImmediatelyInvokeHandler{true}} {}
 
   // derived classes can NOT implement execute
   StatusCode execute(const EventContext&) const override final {
@@ -107,7 +125,11 @@ private:
 
 class Reader final : public CollectionPusher {
 public:
-  Reader(const std::string& name, ISvcLocator* svcLoc) : CollectionPusher(name, svcLoc) {}
+  Reader(const std::string& name, ISvcLocator* svcLoc) : CollectionPusher(name, svcLoc) {
+    setProperty("Cardinality", 1).ignore();
+  }
+
+  bool isReEntrant() const override { return false; }
 
   // Gaudi doesn't run the destructor of the Services so we have to
   // manually ask for the reader to be deleted so it will call finish()

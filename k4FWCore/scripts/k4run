@@ -232,7 +232,7 @@ def main():
         # Do the real processing
         retcode = c.run(opts.gdb)
         # User requested stop returns non-zero exit code see: https://github.com/key4hep/k4FWCore/issues/125
-        if ApplicationMgr().EvtMax == -1 and retcode == 4:
+        if retcode == 4:
             retcode = 0
         sys.exit(retcode)
 

@@ -66,3 +66,15 @@ check_collections("/tmp/a/b/c/output_k4test_exampledata_producer.root", ["MCPart
 check_collections(
     "functional_transformer_runtime_empty.root", ["MCParticles0", "MCParticles1", "MCParticles2"]
 )
+check_collections(
+    "functional_transformerMT.root",
+    [
+        "VectorFloat",
+        "MCParticles1",
+        "MCParticles2",
+        "SimTrackerHits",
+        "TrackerHits",
+        "Tracks",
+        "NewMCParticles",
+    ],
+)

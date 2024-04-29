@@ -80,7 +80,6 @@ namespace k4FWCore {
       // derived classes are NOT allowed to implement execute ...
       StatusCode execute(const EventContext& ctx) const override final {
         try {
-          Gaudi::Algorithm::info() << "Executing " << this->name() << endmsg;
           filter_evtcontext_tt<In...>::apply(*this, ctx, m_inputs);
           return Gaudi::Functional::FilterDecision::PASSED;
         } catch (GaudiException& e) {
