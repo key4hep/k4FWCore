@@ -41,13 +41,14 @@ public:
     setProperty("Cardinality", 1).ignore();
   }
 
-  mutable Gaudi::Property<std::vector<std::string>> m_OutputNames{this, "CollectionNames", {}};
-  mutable std::set<std::string>                     m_availableCollections;
-  mutable std::vector<std::string>                  m_collectionsToAdd;
-  mutable std::vector<std::string>                  m_collectionsRemaining;
-  mutable std::vector<std::string>                  m_collectionsToSave;
+  // bool isReEntrant() const override { return false; }
 
-  mutable std::mutex m_mutex;
+  // Many members are mutable because it's assumed that the Writer is called only once
+  mutable std::set<std::string>    m_availableCollections;
+  // These are the collections that are not in the frame and we want to add to the frame
+  mutable std::vector<std::string> m_collectionsToAdd;
+  // These are the collections we want to save to the frame
+  mutable std::vector<std::string> m_collectionsToSave;
 
   ServiceHandle<IIOSvc>     iosvc{this, "IOSvc", "IOSvc"};
   SmartIF<IHiveWhiteBoard>  m_hiveWhiteBoard;
@@ -158,17 +159,13 @@ public:
   }
 
   void operator()(const EventContext& ctx) const override {
-    // It seems that even when setting Cardinality to 1,
-    // more than one instance is created
-    std::scoped_lock<std::mutex> lock(m_mutex);
-
     if (m_hiveWhiteBoard) {
       // It's never set to valid but it has the slot information
       // if (ctx.valid()) {
       //   info() << "No context found in Writer" << endmsg;
       //   return;
       // }
-      info() << "Setting store to " << ctx.slot() << endmsg;
+      debug() << "Setting store to " << ctx.slot() << endmsg;
       if (m_hiveWhiteBoard->selectStore(ctx.slot()).isFailure()) {
         error() << "Error when setting store" << endmsg;
         throw GaudiException("Error when setting store", name(), StatusCode::FAILURE);
@@ -184,11 +181,12 @@ public:
       ptr = dynamic_cast<AnyDataWrapper<podio::Frame>*>(p);
     }
     // This is the case when no reading is being done
-    // needs to be fixed? (new without delete)
+    // Will be deleted by the store
     else {
       ptr = new AnyDataWrapper<podio::Frame>(podio::Frame());
     }
 
+    const auto& frameCollections = ptr->getData().getAvailableCollections();
     if (m_first) {
       // Assume all the output collections are the same for all events
       // and cache them
@@ -196,19 +194,18 @@ public:
       for (const auto& coll : m_availableCollections) {
         if (iosvc->checkIfWriteCollection(coll)) {
           m_collectionsToSave.push_back(coll);
-          const auto& frameCollections = ptr->getData().getAvailableCollections();
           if (std::find(frameCollections.begin(), frameCollections.end(), coll) == frameCollections.end()) {
             m_collectionsToAdd.push_back(coll);
-          } else {
-            m_collectionsRemaining.push_back(coll);
           }
         }
       }
-
       m_first = false;
     }
 
-    for (auto& coll : ptr->getData().getAvailableCollections()) {
+    // Remove the collections owned by a Frame (if any) so that they are not
+    // deleted by the store (and later deleted by the Frame, triggering a double
+    // delete)
+    for (auto& coll : frameCollections) {
       DataObject* storeCollection;
       if (m_dataSvc->retrieveObject("/Event/" + coll, storeCollection).isFailure()) {
         error() << "Failed to retrieve collection " << coll << endmsg;
@@ -251,11 +248,7 @@ public:
       }
     }
 
-    debug() << "Writing frame, with time: "
-            << std::chrono::duration_cast<std::chrono::milliseconds>(
-                   std::chrono::system_clock::now().time_since_epoch())
-                   .count()
-            << endmsg;
+    debug() << "Writing frame" << endmsg;
     iosvc->getWriter()->writeFrame(ptr->getData(), podio::Category::Event, m_collectionsToSave);
   }
 };
