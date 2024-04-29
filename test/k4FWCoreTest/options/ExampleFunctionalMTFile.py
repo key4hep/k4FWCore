@@ -42,7 +42,7 @@ scheduler = AvalancheSchedulerSvc(ThreadPoolSize=threads, ShowDataFlow=True, Out
 
 svc = IOSvc("IOSvc")
 svc.input = "output_k4test_exampledata_producer_multiple.root"
-# svc.output = "functional_transformerMT.root"
+svc.output = "functional_transformerMT.root"
 
 consumer = ExampleFunctionalConsumer(
     "Consumer1",
