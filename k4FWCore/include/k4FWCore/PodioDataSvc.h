@@ -50,6 +50,7 @@ template <typename T> class MetaDataHandle;
 class PodioDataSvc : public DataSvc {
   template <typename T> friend class MetaDataHandle;
   friend class PodioOutput;
+  friend class Lcio2EDM4hepTool;
 
 public:
   typedef std::vector<std::pair<std::string, podio::CollectionBase*>> CollRegistry;
