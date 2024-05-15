@@ -121,7 +121,7 @@ set_tests_properties(FunctionalSeveralInputFiles PROPERTIES DEPENDS "FunctionalP
 add_test_with_env(FunctionalMTFile options/ExampleFunctionalMTFile.py PROPERTIES DEPENDS FunctionalProducer)
 add_test_with_env(FunctionalMultipleFile options/ExampleFunctionalFileMultiple.py PROPERTIES DEPENDS FunctionalProducerMultiple)
 add_test_with_env(FunctionalMix options/runFunctionalMix.py PROPERTIES DEPENDS FunctionalProducerMultiple)
-add_test_with_env(FunctionalMixIOSvc options/runFunctionalMixIOSvc.py PROPERTIES DEPENDS FunctionalProducerMultiple)
+add_test_with_env(FunctionalMixIOSvc options/runFunctionalMix.py --iosvc PROPERTIES DEPENDS FunctionalProducerMultiple)
 add_test_with_env(FunctionalOutputCommands options/ExampleFunctionalOutputCommands.py PROPERTIES DEPENDS FunctionalProducerMultiple)
 add_test_with_env(FunctionalConsumerRuntimeCollections options/ExampleFunctionalConsumerRuntimeCollections.py)
 add_test_with_env(FunctionalConsumerRuntimeCollectionsMultiple options/ExampleFunctionalConsumerRuntimeCollectionsMultiple.py)
@@ -131,7 +131,7 @@ add_test_with_env(FunctionalTransformerRuntimeEmpty options/ExampleFunctionalTra
 add_test_with_env(FunctionalTransformerRuntimeCollectionsMultiple options/ExampleFunctionalTransformerRuntimeCollectionsMultiple.py)
 
 add_test(NAME FunctionalCheckFiles COMMAND python3 ${CMAKE_CURRENT_LIST_DIR}/options/CheckOutputFiles.py)
-set_tests_properties(FunctionalCheckFiles PROPERTIES DEPENDS "FunctionalFile;FunctionalMTFile;FunctionalMultipleFile;FunctionalOutputCommands;FunctionalProducerAbsolutePath;FunctionalTransformerRuntimeEmpty")
+set_tests_properties(FunctionalCheckFiles PROPERTIES DEPENDS "FunctionalFile;FunctionalMTFile;FunctionalMultipleFile;FunctionalOutputCommands;FunctionalProducerAbsolutePath;FunctionalTransformerRuntimeEmpty;FunctionalMix;FunctionalMixIOSvc")
 # Do this after checking the files not to overwrite them
 add_test_with_env(FunctionalFile_toolong options/ExampleFunctionalFile.py -n 999 PROPERTIES DEPENDS FunctionalCheckFiles PASS_REGULAR_EXPRESSION
                   "Application Manager Terminated successfully with a user requested ScheduledStop")

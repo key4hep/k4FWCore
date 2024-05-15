@@ -64,7 +64,8 @@ check_collections(
 )
 check_collections("/tmp/a/b/c/output_k4test_exampledata_producer.root", ["MCParticles"])
 check_collections(
-    "functional_transformer_runtime_empty.root", ["MCParticles0", "MCParticles1", "MCParticles2"]
+    "functional_transformer_runtime_empty.root",
+    ["MCParticles0", "MCParticles1", "MCParticles2"],
 )
 check_collections(
     "functional_transformerMT.root",
@@ -77,4 +78,43 @@ check_collections(
         "Tracks",
         "NewMCParticles",
     ],
+)
+
+
+mix_collections = [
+    # From file
+    "VectorFloat",
+    "MCParticles1",
+    "MCParticles2",
+    "SimTrackerHits",
+    "TrackerHits",
+    "Tracks",
+    # Produced by functional
+    "FunctionalVectorFloat",
+    "FunctionalMCParticles",
+    "FunctionalMCParticles2",
+    "FunctionalSimTrackerHits",
+    "FunctionalTrackerHits",
+    "FunctionalTracks",
+    # Produced by an old algorithm
+    "OldAlgorithmMCParticles",
+    "OldAlgorithmSimTrackerHits",
+    "OldAlgorithmTrackerHits",
+    "OldAlgorithmTracks",
+    "OldAlgorithmVectorFloat",
+    # Produced by the last transformer
+    "Counter",
+    "TransformedFunctionalMCParticles1",
+]
+
+
+# Not working, collections produced by functional algorithms are not being written to the file
+# check_collections(
+#     "output_k4test_exampledata_functional_mix.root",
+#     mix_collections,
+# )
+
+check_collections(
+    "output_k4test_exampledata_functional_mix_iosvc.root",
+    mix_collections,
 )

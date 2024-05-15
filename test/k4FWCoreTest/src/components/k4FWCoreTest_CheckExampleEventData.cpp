@@ -56,11 +56,11 @@ StatusCode k4FWCoreTest_CheckExampleEventData::execute(const EventContext&) cons
   auto particles = m_mcParticleHandle.get();
   auto particle  = (*particles)[0];
   if ((particle.getMomentum().x != m_magicNumberOffset + m_event + 0) ||
-      (particle.getMass() != m_magicNumberOffset + m_event + 6)) {
+      (particle.getMass() != m_magicNumberOffset + 6)) {
     std::stringstream error;
     error << "Contents of mcparticles collection is not as expected: momentum.x = " << particle.getMomentum().x
           << " (expected " << m_magicNumberOffset + m_event + 0 << "), mass = " << particle.getMass() << " (expected "
-          << m_magicNumberOffset + m_event + 6 << ")";
+          << m_magicNumberOffset + 6 << ")";
     throw std::runtime_error(error.str());
   }
 

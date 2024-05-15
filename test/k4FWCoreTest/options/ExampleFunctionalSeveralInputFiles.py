@@ -26,7 +26,10 @@ from Configurables import EventDataSvc
 from k4FWCore import ApplicationMgr, IOSvc
 
 svc = IOSvc("IOSvc")
-svc.input = ["output_k4test_exampledata_producer.root", "output_k4test_exampledata_producer2.root"]
+svc.input = [
+    "output_k4test_exampledata_producer.root",
+    "output_k4test_exampledata_producer2.root",
+]
 
 consumer = ExampleFunctionalConsumer("Consumer", InputCollection=["MCParticles"], Offset=0)
 

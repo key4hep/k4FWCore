@@ -36,6 +36,7 @@ struct ExampleFunctionalConsumer final : k4FWCore::Consumer<void(const edm4hep::
   // Note that the function has to be const, as well as the collections
   // we get from the input
   void operator()(const edm4hep::MCParticleCollection& input) const override {
+    debug() << "Received MCParticle collection with " << input.size() << " elements" << endmsg;
     if (input.size() != 2) {
       fatal() << "Wrong size of MCParticle collection, expected 2 got " << input.size() << endmsg;
       throw std::runtime_error("Wrong size of MCParticle collection");

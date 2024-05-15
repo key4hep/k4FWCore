@@ -20,7 +20,7 @@
 # This is an example mixing functional and non-functional algorithms
 #
 
-from Gaudi.Configuration import INFO
+from Gaudi.Configuration import INFO, DEBUG
 from Configurables import (
     ExampleFunctionalConsumerMultiple,
     ExampleFunctionalTransformerMultiple,
@@ -33,19 +33,44 @@ from Configurables import k4FWCoreTest_CheckExampleEventData
 from Configurables import ApplicationMgr
 from Configurables import k4DataSvc
 from Configurables import PodioInput, PodioOutput
+from k4FWCore.parseArgs import parser
 
-podioevent = k4DataSvc("EventDataSvc")
-podioevent.input = "output_k4test_exampledata_producer_multiple.root"
+parser.add_argument(
+    "--iosvc",
+    help="Use the IOSvc instead of PodioInput and PodioOutput",
+    action="store_true",
+    default=False,
+)
+args = parser.parse_known_args()[0]
 
-inp = PodioInput()
-inp.collections = [
-    "VectorFloat",
-    "MCParticles1",
-    "MCParticles2",
-    "SimTrackerHits",
-    "TrackerHits",
-    "Tracks",
-]
+print(args.iosvc)
+
+if not args.iosvc:
+    podioevent = k4DataSvc("EventDataSvc")
+    podioevent.input = "output_k4test_exampledata_producer_multiple.root"
+
+    inp = PodioInput()
+    inp.collections = [
+        "VectorFloat",
+        "MCParticles1",
+        "MCParticles2",
+        "SimTrackerHits",
+        "TrackerHits",
+        "Tracks",
+    ]
+
+    out = PodioOutput()
+    out.filename = "output_k4test_exampledata_functional_mix.root"
+    out.outputCommands = ["keep *"]
+
+else:
+    from k4FWCore import IOSvc, ApplicationMgr
+
+    iosvc = IOSvc("IOSvc")
+    iosvc.input = "output_k4test_exampledata_producer_multiple.root"
+    iosvc.output = "output_k4test_exampledata_functional_mix_iosvc.root"
+
+# Check input with functional and old algorithms
 
 consumer_input_functional = ExampleFunctionalConsumerMultiple(
     "ExampleFunctionalConsumerMultiple",
@@ -55,20 +80,25 @@ consumer_input_algorithm = k4FWCoreTest_CheckExampleEventData("CheckExampleEvent
 consumer_input_algorithm.mcparticles = "MCParticles1"
 consumer_input_algorithm.keepEventNumberZero = True
 
-# We only care about the new FunctionalMCParticles collection in this example
+###############################
+
 producer_functional = ExampleFunctionalProducerMultiple(
     "ProducerFunctional",
-    OutputCollectionFloat=["VectorFloat_"],
+    OutputCollectionFloat=["FunctionalVectorFloat"],
     OutputCollectionParticles1=["FunctionalMCParticles"],
-    OutputCollectionParticles2=["MCParticles2_"],
-    OutputCollectionSimTrackerHits=["SimTrackerHits_"],
-    OutputCollectionTrackerHits=["TrackerHits_"],
-    OutputCollectionTracks=["Tracks_"],
+    OutputCollectionParticles2=["FunctionalMCParticles2"],
+    OutputCollectionSimTrackerHits=["FunctionalSimTrackerHits"],
+    OutputCollectionTrackerHits=["FunctionalTrackerHits"],
+    OutputCollectionTracks=["FunctionalTracks"],
     ExampleInt=5,
 )
 
+# Check the functional-produced collections with functional and old algorithms
+
+# Here we check the new FunctionalMCParticles and the others that are
+# read from the file
 consumer_producerfun_functional = ExampleFunctionalConsumerMultiple(
-    "FunctionalConsumerFunctional",
+    "FunctionalConsumerFromFunctional",
     InputCollectionParticles=["FunctionalMCParticles"],
     Offset=0,
 )
@@ -76,31 +106,43 @@ consumer_producerfun_algorithm = k4FWCoreTest_CheckExampleEventData("CheckFuncti
 consumer_producerfun_algorithm.mcparticles = "FunctionalMCParticles"
 consumer_producerfun_algorithm.keepEventNumberZero = True
 
+###############################
+
 producer_algorithm = k4FWCoreTest_CreateExampleEventData("CreateExampleEventData")
 # We only care about the MCParticles collection
-producer_algorithm.mcparticles = "AlgorithmMCParticles"
-producer_algorithm.simtrackhits = "SimTrackerHits__"
-producer_algorithm.trackhits = "TrackerHits__"
-producer_algorithm.tracks = "Tracks__"
-producer_algorithm.vectorfloat = "VectorFloat__"
+producer_algorithm.mcparticles = "OldAlgorithmMCParticles"
+producer_algorithm.simtrackhits = "OldAlgorithmSimTrackerHits"
+producer_algorithm.trackhits = "OldAlgorithmTrackerHits"
+producer_algorithm.tracks = "OldAlgorithmTracks"
+producer_algorithm.vectorfloat = "OldAlgorithmVectorFloat"
+
+# Check the functional-produced collections with functional and old algorithms
 
 consumer_produceralg_functional = ExampleFunctionalConsumerMultiple(
-    "FunctionalConsumerAlgorithm",
+    "FunctionalConsumerFromAlgorithm",
+    InputCollectionParticles=["OldAlgorithmMCParticles"],
     Offset=0,
 )
 consumer_produceralg_algorithm = k4FWCoreTest_CheckExampleEventData("CheckAlgorithm")
-consumer_produceralg_algorithm.mcparticles = "FunctionalMCParticles"
-consumer_produceralg_algorithm.keepEventNumberZero = True
+consumer_produceralg_algorithm.mcparticles = "OldAlgorithmMCParticles"
 
-# Let's also run the transformer, why not
-transformer_functional = ExampleFunctionalTransformerMultiple("FunctionalTransformerMultiple")
+###############################
 
-out = PodioOutput("out")
-out.filename = "output_k4test_exampledata_functional_mix.root"
+# Let's also run the transformer on collections that are either read, produced by a functional or an algorithm
+transformer_functional = ExampleFunctionalTransformerMultiple(
+    "FunctionalTransformerMultiple",
+    InputCollectionFloat=["VectorFloat"],
+    InputCollectionParticles=["FunctionalMCParticles"],
+    InputCollectionSimTrackerHits=["OldAlgorithmSimTrackerHits"],
+    InputCollectionTrackerHits=["TrackerHits"],
+    OutputCollectionCounter=["Counter"],
+    OutputCollectionParticles=["TransformedFunctionalMCParticles1"],
+)
+
 
 ApplicationMgr(
-    TopAlg=[
-        inp,
+    TopAlg=([inp] if not args.iosvc else [])
+    + [
         # Check we can read input
         consumer_input_functional,
         consumer_input_algorithm,
@@ -113,10 +155,10 @@ ApplicationMgr(
         consumer_produceralg_functional,
         consumer_produceralg_algorithm,
         transformer_functional,
-        out,
-    ],
+    ]
+    + ([out] if not args.iosvc else []),
     EvtSel="NONE",
     EvtMax=10,
-    ExtSvc=[podioevent],
-    OutputLevel=INFO,
+    ExtSvc=[iosvc if args.iosvc else podioevent],
+    OutputLevel=DEBUG,
 )
