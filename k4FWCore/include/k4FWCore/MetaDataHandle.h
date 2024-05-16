@@ -19,15 +19,7 @@
 #ifndef K4FWCORE_METADATAHANDLE_H
 #define K4FWCORE_METADATAHANDLE_H
 
-// GAUDI
-#include "Gaudi/Algorithm.h"
-
 #include "k4FWCore/PodioDataSvc.h"
-#include "podio/GenericParameters.h"
-
-#include "GaudiKernel/MsgStream.h"
-
-#include <type_traits>
 
 template <typename T> class MetaDataHandle {
 public:
