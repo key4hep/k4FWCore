@@ -28,8 +28,8 @@ public:
   MetaDataHandle(const Gaudi::DataHandle& handle, const std::string& descriptor, Gaudi::DataHandle::Mode a);
   ~MetaDataHandle();
 
-  const T get() const;
-  void    put(T);
+  const auto get() const;
+  void       put(T);
 
 private:
   std::string fullDescriptor() const;
@@ -65,7 +65,7 @@ MetaDataHandle<T>::MetaDataHandle(const Gaudi::DataHandle& handle, const std::st
 }
 
 //---------------------------------------------------------------------------
-template <typename T> const T MetaDataHandle<T>::get() const {
+template <typename T> const auto MetaDataHandle<T>::get() const {
   const auto& frame = m_podio_data_service->getMetaDataFrame();
   return frame.getParameter<T>(fullDescriptor());
 }

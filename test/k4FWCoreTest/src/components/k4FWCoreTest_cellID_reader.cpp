@@ -19,6 +19,8 @@
 #include "k4FWCoreTest_cellID_reader.h"
 #include "k4FWCoreTest_cellID_writer.h"
 
+#include "podio/podioVersion.h"
+
 DECLARE_COMPONENT(k4FWCoreTest_cellID_reader)
 
 k4FWCoreTest_cellID_reader::k4FWCoreTest_cellID_reader(const std::string& aName, ISvcLocator* aSvcLoc)
@@ -41,8 +43,11 @@ StatusCode k4FWCoreTest_cellID_reader::initialize() {
 StatusCode k4FWCoreTest_cellID_reader::execute(const EventContext&) const {
   const auto simtrackerhits_coll = m_simTrackerHitReaderHandle.get();
 
-  auto       collID    = simtrackerhits_coll->getID();
+#if PODIO_BUILD_VERSION > PODIO_VERSION(0, 99, 0)
+  const auto cellIDstr = m_cellIDHandle.get().value_or("");
+#else
   const auto cellIDstr = m_cellIDHandle.get();
+#endif
   if (cellIDstr != cellIDtest) {
     error() << "ERROR cellID is: " << cellIDstr << endmsg;
     return StatusCode::FAILURE;
