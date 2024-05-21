@@ -41,7 +41,7 @@ public:
     setProperty("Cardinality", 1).ignore();
   }
 
-  // bool isReEntrant() const override { return false; }
+  bool isReEntrant() const override { return false; }
 
   // Many members are mutable because it's assumed that the Writer is called only once
   mutable std::set<std::string> m_availableCollections;
