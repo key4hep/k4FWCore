@@ -83,7 +83,7 @@ public:
                              }
 
                              for (auto& c : m_inputCollections.value()) {
-                               m_outputs.push_back(OutputHandle_t<std::shared_ptr<podio::CollectionBase>>(c, this));
+                               m_outputs.emplace_back(c, this);
                              }
                            },
                            Gaudi::Details::Property::ImmediatelyInvokeHandler{true}} {}
