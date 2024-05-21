@@ -51,25 +51,6 @@ class CollectionPusher : public Gaudi::Functional::details::BaseClass_t<Gaudi::F
 public:
   CollectionPusher(std::string name, ISvcLocator* locator)
       : base_class(std::move(name), locator),
-        // m_input{this, "Input", "Event",
-        //         [this](Gaudi::Details::PropertyBase& b) {
-        //           const std::string cmd = System::cmdLineArgs()[0];
-        //           if (cmd.find("genconf") != std::string::npos) {
-        //             return;
-        //           }
-        //           if (m_input.value() == "Event") {
-        //             return;
-        //           }
-        //           auto reader = podio::ROOTReader();
-        //           reader.openFile(m_input.value());
-        //           auto frame = podio::Frame(reader.readNextEntry(podio::Category::Event));
-        //           auto colls = frame.getAvailableCollections();
-
-        //           for (auto& c : colls) {
-        //               m_outputs.push_back(OutputHandle_t<std::shared_ptr<podio::CollectionBase>>(c, this));
-        //           }
-        //         },
-        //         Gaudi::Details::Property::ImmediatelyInvokeHandler{true}}
         m_inputCollections{this,
                            "InputCollections",
                            {"Event"},
@@ -114,12 +95,6 @@ public:
   virtual std::tuple<vector_of_<Out>, std::vector<std::string>> operator()() const = 0;
 
 private:
-  // if In is a pointer, it signals optional (as opposed to mandatory) input
-  // template <typename T>
-  // using InputHandle_t = InputHandle_t<Traits_, std::remove_pointer_t<T>>;
-  // Gaudi::Property<std::vector<DataObjID>> m_inputLocations; // TODO/FIXME: remove this duplication...
-  // TODO/FIXME: replace vector of DataObjID property + call-back with a
-  //             vector<handle> property ... as soon as declareProperty can deal with that.
   ServiceHandle<IDataProviderSvc> m_dataSvc{this, "EventDataSvc", "EventDataSvc"};
 };
 
