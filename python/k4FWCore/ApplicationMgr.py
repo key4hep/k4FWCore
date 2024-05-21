@@ -88,7 +88,7 @@ class ApplicationMgr:
                         Sequential=True,
                         Members=[
                             Gaudi__Sequencer(
-                                "k4FWCore__Algs", Members=self._mgr.TopAlg, Sequential=False
+                                "k4FWCore__Algs", Members=self._mgr.TopAlg, Sequential=False, ShortCircuit=False
                             ),
                             writer,
                         ],
