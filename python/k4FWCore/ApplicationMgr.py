@@ -79,7 +79,7 @@ class ApplicationMgr:
             self._mgr.TopAlg = ([reader] if add_reader else []) + self._mgr.TopAlg
             # Assume the writer is at the end
             # Algorithms are wrapped with Sequential=False so that they can run in parallel
-            # The algorithms and Writer are wrapped with Sequential=True so that the can not
+            # The algorithms and Writer are wrapped with Sequential=True so that they can not
             # run in parallel
             if writer:
                 self._mgr.TopAlg = [
