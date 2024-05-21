@@ -64,8 +64,15 @@ StatusCode k4FWCoreTest_CreateExampleEventData::execute(const EventContext&) con
   edm4hep::MCParticleCollection* particles = m_mcParticleHandle.createAndPut();
 
   auto particle = particles->create();
-  particle.setMomentum({m_magicNumberOffset + m_event + 5.0, m_magicNumberOffset + 6.0, m_magicNumberOffset + 7.0});
-  particle.setMass(m_magicNumberOffset + m_event + 8);
+  particle.setPDG(1);
+  particle.setGeneratorStatus(2);
+  particle.setSimulatorStatus(3);
+  particle.setCharge(4);
+  particle.setTime(5);
+  particle.setMass(m_magicNumberOffset + 6);
+  particle.setMomentum({m_magicNumberOffset + m_event + 0.0, m_magicNumberOffset + 6.0, m_magicNumberOffset + 7.0});
+
+  particles->create(2, 3, 4, 5.f, 6.f, 7.f);
 
   edm4hep::SimTrackerHitCollection* simTrackerHits = m_simTrackerHitHandle.createAndPut();
   auto                              hit            = simTrackerHits->create();

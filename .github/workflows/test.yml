@@ -22,7 +22,7 @@ jobs:
          mkdir -p build install;\
          source /cvmfs/${{ matrix.cvmfs_base }}/${{ matrix.ENVIRONMENT }}/setup.sh;\
          cd build;\
-         cmake -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_CXX_STANDARD=17  -DCMAKE_CXX_FLAGS=" -fdiagnostics-color=always " -G Ninja ..;'
+         cmake -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_CXX_STANDARD=20  -DCMAKE_CXX_FLAGS=" -fdiagnostics-color=always " -G Ninja ..;'
     - name: Compile
       run: |
         docker exec CI_container /bin/bash -c 'cd ./Package;\

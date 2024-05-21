@@ -21,32 +21,43 @@
 # to check that the contents of the file are the expected ones
 
 from Gaudi.Configuration import INFO
-from Configurables import ExampleFunctionalConsumerMultiple
-from Configurables import ApplicationMgr
-from Configurables import k4DataSvc
-from Configurables import PodioInput
+from Configurables import (
+    ExampleFunctionalTransformerRuntimeEmpty,
+    ExampleFunctionalProducer,
+)
+from k4FWCore import ApplicationMgr, IOSvc
+from Configurables import EventDataSvc
 
-podioevent = k4DataSvc("EventDataSvc")
-podioevent.input = "output_k4test_exampledata_producer_multiple.root"
+iosvc = IOSvc("IOSvc")
+iosvc.output = "functional_transformer_runtime_empty.root"
 
-inp = PodioInput()
-inp.collections = [
-    "VectorFloat",
-    "MCParticles1",
-    "MCParticles2",
-    "SimTrackerHits",
-    "TrackerHits",
-    "Tracks",
-]
+producer0 = ExampleFunctionalProducer(
+    "Producer0",
+    OutputCollection=["MCParticles0"],
+)
+producer1 = ExampleFunctionalProducer(
+    "Producer1",
+    OutputCollection=["MCParticles1"],
+)
+producer2 = ExampleFunctionalProducer(
+    "Producer2",
+    OutputCollection=["MCParticles2"],
+)
 
-consumer = ExampleFunctionalConsumerMultiple(
-    "ExampleFunctionalConsumerMultiple",
+transformer = ExampleFunctionalTransformerRuntimeEmpty(
+    InputCollections=["MCParticles0", "MCParticles1", "MCParticles2"],
+    OutputCollections=[""],
 )
 
 ApplicationMgr(
-    TopAlg=[inp, consumer],
+    TopAlg=[
+        producer0,
+        producer1,
+        producer2,
+        transformer,
+    ],
     EvtSel="NONE",
     EvtMax=10,
-    ExtSvc=[podioevent],
+    ExtSvc=[EventDataSvc("EventDataSvc")],
     OutputLevel=INFO,
 )

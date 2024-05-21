@@ -20,7 +20,7 @@
 #include "edm4hep/Constants.h"
 #include "edm4hep/EventHeaderCollection.h"
 
-#include "k4FWCore/BaseClass.h"
+#include "k4FWCore/Consumer.h"
 
 #include <Gaudi/Functional/Consumer.h>
 #include <Gaudi/Property.h>
@@ -33,10 +33,9 @@
 #include <stdexcept>
 #include <string>
 
-struct ExampleEventHeaderConsumer final
-    : Gaudi::Functional::Consumer<void(const edm4hep::EventHeaderCollection&), BaseClass_t> {
+struct ExampleEventHeaderConsumer final : k4FWCore::Consumer<void(const edm4hep::EventHeaderCollection&)> {
   ExampleEventHeaderConsumer(const std::string& name, ISvcLocator* svcLoc)
-      : Consumer(name, svcLoc, {KeyValue("EventHeaderName", edm4hep::EventHeaderName)}) {}
+      : Consumer(name, svcLoc, {KeyValues("EventHeaderName", {edm4hep::EventHeaderName})}) {}
 
   void operator()(const edm4hep::EventHeaderCollection& evtHeaderColl) const {
     if (evtHeaderColl.empty()) {

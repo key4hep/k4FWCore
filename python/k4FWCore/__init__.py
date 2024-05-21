@@ -16,19 +16,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import ROOT
-import sys
-
-ROOT.gSystem.Load("libedm4hepDict")
-
-file = ROOT.TFile.Open(sys.argv[1])
-tree = file.Get("events")
-tree.GetEntry(0)
-
-ndf = tree.Tracks.at(0).ndf
-if ndf == 0:
-    raise Exception("podio::CollectionBase read from file did not saved properly")
-
-status = tree.GetBranchStatus("MCParticles")
-if status:
-    raise Exception("KeepDropSwitch did not drop the collection")
+from .ApplicationMgr import ApplicationMgr
+from .IOSvc import IOSvc

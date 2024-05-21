@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 #
 # Copyright (c) 2014-2024 Key4hep-Project.
 #
@@ -18,23 +17,34 @@
 # limitations under the License.
 #
 
+# This is an example reading from a file and using a consumer with several inputs
+# to check that the contents of the file are the expected ones
+
 from Gaudi.Configuration import INFO
-from Configurables import ExampleEventHeaderConsumer
+from Configurables import (
+    ExampleFunctionalTransformer,
+    ExampleFunctionalProducer,
+    ExampleFunctionalConsumer,
+)
 from k4FWCore import ApplicationMgr
-from Configurables import EventDataSvc, IOSvc, Reader
+from Configurables import EventDataSvc
 
-svc = IOSvc("IOSvc")
-svc.input = ["eventHeader.root"]
-# svc.CollectionNames = ['MCParticles']
+transformer = ExampleFunctionalTransformer(
+    "Transformer", InputCollection=["MCParticles"], OutputCollection=["NewMCParticles"]
+)
 
-reader = Reader("Reader")
+producer = ExampleFunctionalProducer("Producer", OutputCollection=["MCParticles"])
 
-consumer = ExampleEventHeaderConsumer("EventHeaderCheck", runNumber=42, eventNumberOffset=42)
+consumer = ExampleFunctionalConsumer(
+    "Consumer",
+    InputCollection=["NewMCParticles"],
+    Offset=10,
+)
 
 ApplicationMgr(
-    TopAlg=[reader, consumer],
+    TopAlg=[producer, transformer, consumer],
     EvtSel="NONE",
-    EvtMax=-1,
+    EvtMax=10,
     ExtSvc=[EventDataSvc("EventDataSvc")],
     OutputLevel=INFO,
 )

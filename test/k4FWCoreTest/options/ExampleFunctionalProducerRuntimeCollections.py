@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 #
 # Copyright (c) 2014-2024 Key4hep-Project.
 #
@@ -18,23 +17,43 @@
 # limitations under the License.
 #
 
+# This is an example reading from a file and using a consumer with several inputs
+# to check that the contents of the file are the expected ones
+
 from Gaudi.Configuration import INFO
-from Configurables import ExampleEventHeaderConsumer
+from Configurables import (
+    ExampleFunctionalProducerRuntimeCollections,
+    ExampleFunctionalConsumer,
+)
 from k4FWCore import ApplicationMgr
-from Configurables import EventDataSvc, IOSvc, Reader
+from Configurables import EventDataSvc
 
-svc = IOSvc("IOSvc")
-svc.input = ["eventHeader.root"]
-# svc.CollectionNames = ['MCParticles']
+producer = ExampleFunctionalProducerRuntimeCollections(
+    "Producer",
+    OutputCollections=["MCParticles0", "MCParticles1", "MCParticles2"],
+)
 
-reader = Reader("Reader")
+consumer0 = ExampleFunctionalConsumer(
+    "Consumer0",
+    InputCollection=["MCParticles0"],
+    Offset=0,
+)
+consumer1 = ExampleFunctionalConsumer(
+    "Consumer1",
+    InputCollection=["MCParticles1"],
+    Offset=0,
+)
+consumer2 = ExampleFunctionalConsumer(
+    "Consumer2",
+    InputCollection=["MCParticles2"],
+    Offset=0,
+)
 
-consumer = ExampleEventHeaderConsumer("EventHeaderCheck", runNumber=42, eventNumberOffset=42)
 
 ApplicationMgr(
-    TopAlg=[reader, consumer],
+    TopAlg=[producer, consumer0, consumer1, consumer2],
     EvtSel="NONE",
-    EvtMax=-1,
+    EvtMax=10,
     ExtSvc=[EventDataSvc("EventDataSvc")],
     OutputLevel=INFO,
 )

@@ -21,24 +21,33 @@
 
 from Gaudi.Configuration import INFO
 from Configurables import ExampleFunctionalProducer
-from Configurables import ApplicationMgr
-from Configurables import k4DataSvc
-from Configurables import PodioOutput
+from Configurables import EventDataSvc
+from k4FWCore import ApplicationMgr, IOSvc
+from Configurables import Writer
+from k4FWCore.parseArgs import parser
 
-podioevent = k4DataSvc("EventDataSvc")
+parser.add_argument("--second", action="store_true")
+args = parser.parse_known_args()
 
-out = PodioOutput("out")
-out.filename = "output_k4test_exampledata_producer.root"
+iosvc = IOSvc("IOSvc")
+name = (
+    "output_k4test_exampledata_producer.root"
+    if not args[0].second
+    else "output_k4test_exampledata_producer2.root"
+)
+iosvc.output = name
 # Collections can be dropped
 # out.outputCommands = ["drop *"]
 
 
 producer = ExampleFunctionalProducer("ExampleFunctionalProducer")
 
+writer = Writer("Writer")
+
 ApplicationMgr(
-    TopAlg=[producer, out],
+    TopAlg=[producer, writer],
     EvtSel="NONE",
-    EvtMax=10,
-    ExtSvc=[k4DataSvc("EventDataSvc")],
+    EvtMax=10 if not args[0].second else 20,
+    ExtSvc=[EventDataSvc("EventDataSvc")],
     OutputLevel=INFO,
 )

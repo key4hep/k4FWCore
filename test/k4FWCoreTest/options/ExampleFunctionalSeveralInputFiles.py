@@ -16,19 +16,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import ROOT
-import sys
 
-ROOT.gSystem.Load("libedm4hepDict")
+# This is an example reading from a file and using a consumer with several inputs
+# to check that the contents of the file are the expected ones
 
-file = ROOT.TFile.Open(sys.argv[1])
-tree = file.Get("events")
-tree.GetEntry(0)
+from Gaudi.Configuration import INFO
+from Configurables import ExampleFunctionalConsumer
+from Configurables import EventDataSvc
+from k4FWCore import ApplicationMgr, IOSvc
 
-ndf = tree.Tracks.at(0).ndf
-if ndf == 0:
-    raise Exception("podio::CollectionBase read from file did not saved properly")
+svc = IOSvc("IOSvc")
+svc.input = [
+    "output_k4test_exampledata_producer.root",
+    "output_k4test_exampledata_producer2.root",
+]
 
-status = tree.GetBranchStatus("MCParticles")
-if status:
-    raise Exception("KeepDropSwitch did not drop the collection")
+consumer = ExampleFunctionalConsumer("Consumer", InputCollection=["MCParticles"], Offset=0)
+
+mgr = ApplicationMgr(
+    TopAlg=[consumer],
+    EvtSel="NONE",
+    EvtMax=30,
+    ExtSvc=[EventDataSvc("EventDataSvc")],
+    OutputLevel=INFO,
+)

@@ -18,43 +18,42 @@
  */
 
 #include "Gaudi/Property.h"
-#include "GaudiAlg/Transformer.h"
 
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/MutableMCParticle.h"
 
-// Define BaseClass_t
-#include "k4FWCore/BaseClass.h"
+#include "k4FWCore/Transformer.h"
 
 #include <string>
 
-// Which type of collection we are reading and writing
-using colltype_in  = edm4hep::MCParticleCollection;
-using colltype_out = edm4hep::MCParticleCollection;
-
 struct ExampleFunctionalTransformer final
-    : Gaudi::Functional::Transformer<colltype_out(const colltype_in&), BaseClass_t> {
+    : k4FWCore::Transformer<edm4hep::MCParticleCollection(const edm4hep::MCParticleCollection&)> {
   ExampleFunctionalTransformer(const std::string& name, ISvcLocator* svcLoc)
-      : Transformer(name, svcLoc, KeyValue("InputCollection", "MCParticles"),
-                    KeyValue("OutputCollection", "NewMCParticles")) {}
+      : Transformer(name, svcLoc, {KeyValues("InputCollection", {"MCParticles"})},
+                    {KeyValues("OutputCollection", {"NewMCParticles"})}) {}
 
   // This is the function that will be called to transform the data
   // Note that the function has to be const, as well as all pointers to collections
   // we get from the input
-  colltype_out operator()(const colltype_in& input) const override {
+  edm4hep::MCParticleCollection operator()(const edm4hep::MCParticleCollection& input) const override {
+    info() << "Transforming " << input.size() << " particles" << endmsg;
     auto coll_out = edm4hep::MCParticleCollection();
     for (const auto& particle : input) {
       auto new_particle = edm4hep::MutableMCParticle();
-      new_particle.setPDG(particle.getPDG() + 10);
-      new_particle.setGeneratorStatus(particle.getGeneratorStatus() + 10);
-      new_particle.setSimulatorStatus(particle.getSimulatorStatus() + 10);
-      new_particle.setCharge(particle.getCharge() + 10);
-      new_particle.setTime(particle.getTime() + 10);
-      new_particle.setMass(particle.getMass() + 10);
+      new_particle.setPDG(particle.getPDG() + m_offset);
+      new_particle.setGeneratorStatus(particle.getGeneratorStatus() + m_offset);
+      new_particle.setSimulatorStatus(particle.getSimulatorStatus() + m_offset);
+      new_particle.setCharge(particle.getCharge() + m_offset);
+      new_particle.setTime(particle.getTime() + m_offset);
+      new_particle.setMass(particle.getMass() + m_offset);
       coll_out->push_back(new_particle);
     }
     return coll_out;
   }
+
+private:
+  // integer to add to the dummy values written to the edm
+  Gaudi::Property<int> m_offset{this, "Offset", 10, "Integer to add to the dummy values written to the edm"};
 };
 
 DECLARE_COMPONENT(ExampleFunctionalTransformer)

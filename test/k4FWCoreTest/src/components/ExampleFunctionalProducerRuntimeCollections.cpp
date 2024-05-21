@@ -25,26 +25,31 @@
 
 #include <string>
 
-struct ExampleFunctionalProducer final : k4FWCore::Producer<edm4hep::MCParticleCollection()> {
+struct ExampleFunctionalProducerRuntimeCollections final
+    : k4FWCore::Producer<std::map<std::string, edm4hep::MCParticleCollection>()> {
   // The pair in KeyValue can be changed from python and it corresponds
   // to the name of the output collection
-  ExampleFunctionalProducer(const std::string& name, ISvcLocator* svcLoc)
-      : Producer(name, svcLoc, {}, KeyValues("OutputCollection", {"MCParticles"})) {}
+  ExampleFunctionalProducerRuntimeCollections(const std::string& name, ISvcLocator* svcLoc)
+      : Producer(name, svcLoc, {}, {KeyValues("OutputCollections", {"MCParticles"})}) {}
 
   // This is the function that will be called to produce the data
-  edm4hep::MCParticleCollection operator()() const override {
-    auto coll = edm4hep::MCParticleCollection();
-    coll.create(1, 2, 3, 4.f, 5.f, 6.f);
-    coll.create(2, 3, 4, 5.f, 6.f, 7.f);
-    // We have to return whatever collection type we specified in the
-    // template argument
-    return coll;
+  std::map<std::string, edm4hep::MCParticleCollection> operator()() const override {
+    std::map<std::string, edm4hep::MCParticleCollection> m_outputCollections;
+    for (int i = 0; i < m_numberOfCollections; ++i) {
+      std::string name = "MCParticles" + std::to_string(i);
+      auto        coll = edm4hep::MCParticleCollection();
+      coll->create(1, 2, 3, 4.f, 5.f, 6.f);
+      coll->create(2, 3, 4, 5.f, 6.f, 7.f);
+      m_outputCollections[name] = std::move(coll);
+    }
+    return m_outputCollections;
   }
 
 private:
   // We can define any property we want that can be set from python
   // and use it inside operator()
-  Gaudi::Property<int> m_exampleInt{this, "ExampleInt", 3, "Example int that can be used in the algorithm"};
+  Gaudi::Property<int> m_numberOfCollections{this, "NumberOfCollections", 3,
+                                             "Example int that can be used in the algorithm"};
 };
 
-DECLARE_COMPONENT(ExampleFunctionalProducer)
+DECLARE_COMPONENT(ExampleFunctionalProducerRuntimeCollections)

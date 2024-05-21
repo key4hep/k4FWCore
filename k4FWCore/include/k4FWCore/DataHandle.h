@@ -29,6 +29,7 @@
 
 #include "TTree.h"
 
+#include <GaudiKernel/AnyDataWrapper.h>
 #include <type_traits>
 
 /**
@@ -131,6 +132,11 @@ template <typename T> const T* DataHandle<T>::get() {
       DataWrapper<podio::CollectionBase>* tmp = static_cast<DataWrapper<podio::CollectionBase>*>(dataObjectp);
       return reinterpret_cast<const T*>(tmp->collectionBase());
     } else {
+      // When a functional has pushed a std::shared_ptr<podio::CollectionBase> into the store
+      auto ptr = static_cast<AnyDataWrapper<std::shared_ptr<podio::CollectionBase>>*>(dataObjectp)->getData();
+      if (ptr) {
+        return reinterpret_cast<const T*>(ptr.get());
+      }
       std::string errorMsg("The type provided for " + DataObjectHandle<DataWrapper<T>>::pythonRepr() +
                            " is different from the one of the object in the store.");
       throw GaudiException(errorMsg, "wrong product type", StatusCode::FAILURE);

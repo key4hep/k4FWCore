@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 #
 # Copyright (c) 2014-2024 Key4hep-Project.
 #
@@ -18,21 +17,31 @@
 # limitations under the License.
 #
 
+# This is an example reading from a file and using a consumer with several inputs
+# to check that the contents of the file are the expected ones
+
 from Gaudi.Configuration import INFO
-from Configurables import ExampleEventHeaderConsumer
-from k4FWCore import ApplicationMgr
-from Configurables import EventDataSvc, IOSvc, Reader
+from Configurables import ExampleFunctionalTransformerMultiple
+from Configurables import EventDataSvc
+from k4FWCore import ApplicationMgr, IOSvc
 
 svc = IOSvc("IOSvc")
-svc.input = ["eventHeader.root"]
-# svc.CollectionNames = ['MCParticles']
+svc.input = "output_k4test_exampledata_producer_multiple.root"
+svc.output = "functional_transformer_multiple_output_commands.root"
+svc.outputCommands = [
+    "drop Tracks",
+    "drop Counter",
+    "drop NewMCParticles",
+]
 
-reader = Reader("Reader")
+transformer = ExampleFunctionalTransformerMultiple(
+    "Transformer",
+    # InputCollection="MCParticles",
+    # OutputCollection="NewMCParticles")
+)
 
-consumer = ExampleEventHeaderConsumer("EventHeaderCheck", runNumber=42, eventNumberOffset=42)
-
-ApplicationMgr(
-    TopAlg=[reader, consumer],
+mgr = ApplicationMgr(
+    TopAlg=[transformer],
     EvtSel="NONE",
     EvtMax=-1,
     ExtSvc=[EventDataSvc("EventDataSvc")],
