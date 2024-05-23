@@ -23,7 +23,7 @@
 #include "GaudiKernel/MsgStream.h"
 
 #include "PodioOutput.h"
-#include "k4FWCore/PodioDataSvc.h"
+#include "k4FWCore/k4DataSvc.h"
 #include "rootUtils.h"
 
 DECLARE_COMPONENT(PodioOutput)
@@ -36,7 +36,7 @@ StatusCode PodioOutput::initialize() {
     return StatusCode::FAILURE;
 
   // check whether we have the PodioEvtSvc active
-  m_podioDataSvc = dynamic_cast<PodioDataSvc*>(evtSvc().get());
+  m_podioDataSvc = dynamic_cast<k4DataSvc*>(evtSvc().get());
   if (nullptr == m_podioDataSvc) {
     error() << "Could not get DataSvc!" << endmsg;
     return StatusCode::FAILURE;

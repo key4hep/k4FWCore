@@ -19,7 +19,7 @@
 #include "PodioInput.h"
 #include "Gaudi/Functional/Consumer.h"
 
-#include "k4FWCore/PodioDataSvc.h"
+#include "k4FWCore/k4DataSvc.h"
 
 #include "edm4hep/CaloHitContributionCollection.h"
 #include "edm4hep/CalorimeterHitCollection.h"
@@ -194,9 +194,9 @@ PodioInput::PodioInput(const std::string& name, ISvcLocator* svcLoc) : Consumer(
     return;
 
   // check whether we have the PodioEvtSvc active
-  m_podioDataSvc = dynamic_cast<PodioDataSvc*>(evtSvc().get());
+  m_podioDataSvc = dynamic_cast<k4DataSvc*>(evtSvc().get());
   if (!m_podioDataSvc) {
-    error() << "Could not get PodioDataSvc" << endmsg;
+    error() << "Could not get k4DataSvc" << endmsg;
   }
   fillReaders();
 }

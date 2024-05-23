@@ -22,7 +22,7 @@
 // GAUDI
 #include "Gaudi/Algorithm.h"
 
-#include "k4FWCore/PodioDataSvc.h"
+#include "k4FWCore/k4DataSvc.h"
 #include "podio/GenericParameters.h"
 
 #include "GaudiKernel/MsgStream.h"
@@ -41,12 +41,12 @@ public:
 
 private:
   std::string fullDescriptor() const;
-  void        checkPodioDataSvc();
+  void        checkk4DataSvc();
 
 private:
   ServiceHandle<IDataProviderSvc> m_eds;
   std::string                     m_descriptor;
-  PodioDataSvc*                   m_podio_data_service{nullptr};
+  k4DataSvc*                      m_podio_data_service{nullptr};
   const Gaudi::DataHandle*        m_dataHandle{nullptr};  // holds the identifier in case we do collection metadata
   Gaudi::DataHandle::Mode         m_mode;
 };
@@ -58,8 +58,8 @@ template <typename T>
 MetaDataHandle<T>::MetaDataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode a)
     : m_eds("EventDataSvc", "DataHandle"), m_descriptor(descriptor), m_mode(a) {
   m_eds.retrieve().ignore();
-  m_podio_data_service = dynamic_cast<PodioDataSvc*>(m_eds.get());
-  checkPodioDataSvc();
+  m_podio_data_service = dynamic_cast<k4DataSvc*>(m_eds.get());
+  checkk4DataSvc();
 }
 
 //---------------------------------------------------------------------------
@@ -68,8 +68,8 @@ MetaDataHandle<T>::MetaDataHandle(const Gaudi::DataHandle& handle, const std::st
                                   Gaudi::DataHandle::Mode a)
     : m_eds("EventDataSvc", "DataHandle"), m_descriptor(descriptor), m_dataHandle(&handle), m_mode(a) {
   m_eds.retrieve().ignore();
-  m_podio_data_service = dynamic_cast<PodioDataSvc*>(m_eds.get());
-  checkPodioDataSvc();
+  m_podio_data_service = dynamic_cast<k4DataSvc*>(m_eds.get());
+  checkk4DataSvc();
 }
 
 //---------------------------------------------------------------------------
@@ -109,14 +109,14 @@ template <typename T> std::string MetaDataHandle<T>::fullDescriptor() const {
 }
 
 //---------------------------------------------------------------------------
-template <typename T> void MetaDataHandle<T>::checkPodioDataSvc() {
+template <typename T> void MetaDataHandle<T>::checkk4DataSvc() {
   // do not do this check during the genconf step
   const std::string cmd = System::cmdLineArgs()[0];
   if (cmd.find("genconf") != std::string::npos)
     return;
 
   if (nullptr == m_podio_data_service) {
-    std::cout << "ERROR: MetaDataHandles require the PodioDataSvc" << std::endl;
+    std::cout << "ERROR: MetaDataHandles require the k4DataSvc" << std::endl;
   }
 }
 
