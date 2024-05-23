@@ -65,7 +65,7 @@ public:
   k4DataSvc(const std::string& name, ISvcLocator* svc);
 
   /// Standard Destructor
-  virtual ~k4DataSvc();
+  virtual ~k4DataSvc() = default;
 
   // Use DataSvc functionality except where we override
   using DataSvc::registerObject;
