@@ -39,9 +39,8 @@ StatusCode k4FWCoreTest_CheckExampleEventData::execute(const EventContext&) cons
   if (floatVector->size() != 3 || (*floatVector)[2] != m_event) {
     std::stringstream error;
     error << "Contents of vectorfloat collection is not as expected: size = " << floatVector->size()
-           << " (expected 3), contents = " << *floatVector << " (expected [125., 25., " << m_event << "]) ";
+          << " (expected 3), contents = " << *floatVector << " (expected [125., 25., " << m_event << "]) ";
     throw std::runtime_error(error.str());
-
   }
 
   auto particles = m_mcParticleHandle.get();

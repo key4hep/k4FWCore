@@ -141,9 +141,8 @@ void IOSvc::handle(const Incident& incident) {
     if (code.isSuccess()) {
       debug() << "Removing the collection: " << coll << " from the store" << endmsg;
       code = m_dataSvc->unregisterObject(collPtr);
-    }
-    else {
-       error() << "Expected collection " << coll << " in the store but it was not found" << endmsg;
+    } else {
+      error() << "Expected collection " << coll << " in the store but it was not found" << endmsg;
     }
   }
 }

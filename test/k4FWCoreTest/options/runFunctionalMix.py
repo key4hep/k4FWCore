@@ -102,7 +102,9 @@ consumer_producerfun_functional = ExampleFunctionalConsumerMultiple(
     InputCollectionParticles=["FunctionalMCParticles"],
     Offset=0,
 )
-consumer_producerfun_algorithm = k4FWCoreTest_CheckExampleEventData("CheckFunctional", keepEventNumberZero=True)
+consumer_producerfun_algorithm = k4FWCoreTest_CheckExampleEventData(
+    "CheckFunctional", keepEventNumberZero=True
+)
 consumer_producerfun_algorithm.mcparticles = "FunctionalMCParticles"
 consumer_producerfun_algorithm.keepEventNumberZero = True
 
