@@ -68,10 +68,15 @@ struct ExampleFunctionalProducerMultiple final : k4FWCore::Producer<retType()> {
     edm4hep::Vector3d v{0, 0, 0};
     particles.create(1, 2, 3, 4.f, 5.f, 6.f, v, v, v);
     particles.create(2, 3, 4, 5.f, 6.f, 7.f);
+    particles[0].addToParents(particles[0]);
+    particles[0].addToDaughters(particles[1]);
+    particles[0].addToDaughters(particles[0]);
+    particles[1].addToParents(particles[0]);
 
     auto simTrackerHits = edm4hep::SimTrackerHitCollection();
     auto hit            = simTrackerHits.create();
     hit.setPosition({3, 4, 5});
+    hit.setParticle(particles[1]);
 
     auto trackerHits = edm4hep::TrackerHit3DCollection();
     auto trackerHit  = trackerHits.create();

@@ -21,30 +21,40 @@
 # to check that the contents of the file are the expected ones
 
 from Gaudi.Configuration import INFO
-from Configurables import (
-    ExampleFunctionalTransformer,
-    ExampleFunctionalProducer,
-    ExampleFunctionalConsumer,
-)
-from k4FWCore import ApplicationMgr
+from Configurables import CollConcat
 from Configurables import EventDataSvc
+from k4FWCore import ApplicationMgr, IOSvc
 
-producer = ExampleFunctionalProducer("Producer", OutputCollection=["MCParticles"])
+from Configurables import ExampleFunctionalProducer, ExampleFunctionalConsumerCollConcat
 
-transformer = ExampleFunctionalTransformer(
-    "Transformer", InputCollection=["MCParticles"], OutputCollection=["NewMCParticles"]
+svc = IOSvc("IOSvc")
+svc.input = "output_k4test_exampledata_producer_multiple.root"
+svc.output = "concatenated_collections.root"
+svc.outputCommands = ["drop *", "keep NewMCParticles", "keep SimTrackerHits"]
+
+
+particle_producer = ExampleFunctionalProducer(
+    OutputCollection=["MCParticles3"],
+    )
+
+
+collconcat = CollConcat(
+    "CollectionConcatenator",
+    # List of collections to concatenate
+    InputCollections=["MCParticles2", "MCParticles1", "MCParticles3"],
+    # Name of the single output collection
+    OutputCollection=["NewMCParticles"],
 )
 
-consumer = ExampleFunctionalConsumer(
-    "Consumer",
-    InputCollection=["NewMCParticles"],
-    Offset=10,
+relation_consumer = ExampleFunctionalConsumerCollConcat(
+    InputCollectionParticles=["NewMCParticles"],
+    InputCollectionSimTrackerHits=["SimTrackerHits"],
 )
 
-ApplicationMgr(
-    TopAlg=[producer, transformer, consumer],
+mgr = ApplicationMgr(
+    TopAlg=[particle_producer, collconcat],
     EvtSel="NONE",
-    EvtMax=10,
+    EvtMax=-1,
     ExtSvc=[EventDataSvc("EventDataSvc")],
     OutputLevel=INFO,
 )

@@ -43,7 +43,8 @@ namespace k4FWCore {
 
       static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isMapToCollLike<In>::value) && ...),
                     "Transformer and Producer input types must be EDM4hep collections or maps to collections");
-      static_assert((std::is_base_of_v<podio::CollectionBase, Out> || isMapToCollLike<Out>::value),
+      static_assert((std::is_base_of_v<podio::CollectionBase, Out> || isMapToCollLike<Out>::value ||
+                     std::is_same_v<std::shared_ptr<podio::CollectionBase>, Out>),
                     "Transformer and Producer output types must be EDM4hep collections or maps to collections");
 
       template <typename T>

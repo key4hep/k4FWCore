@@ -118,3 +118,8 @@ check_collections(
     "output_k4test_exampledata_functional_mix_iosvc.root",
     mix_collections,
 )
+
+check_collections(
+    "concatenated_collections.root",
+    ["NewMCParticles", "SimTrackerHits"],
+)

@@ -56,6 +56,13 @@ struct ExampleFunctionalConsumer final : k4FWCore::Consumer<void(const edm4hep::
       }
       i++;
     }
+    if (input[0].getDaughters().size() != 2 || input[0].getDaughters()[0] != input[1] ||
+        input[0].getDaughters()[1] != input[0]) {
+      throw std::runtime_error("Wrong daughters for particle 0");
+    }
+    if (input[1].getParents().size() != 1 || input[1].getParents()[0] != input[0] || !input[1].getDaughters().empty()) {
+      throw std::runtime_error("Wrong parents for particle 1");
+    }
   }
 
   Gaudi::Property<int> m_offset{this, "Offset", 10, "Integer to add to the dummy values written to the edm"};

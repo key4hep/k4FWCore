@@ -48,6 +48,10 @@ struct ExampleFunctionalTransformer final
       new_particle.setMass(particle.getMass() + m_offset);
       coll_out->push_back(new_particle);
     }
+    coll_out[0].addToParents(coll_out[0]);
+    coll_out[0].addToDaughters(coll_out[1]);
+    coll_out[0].addToDaughters(coll_out[0]);
+    coll_out[1].addToParents(coll_out[0]);
     return coll_out;
   }
 

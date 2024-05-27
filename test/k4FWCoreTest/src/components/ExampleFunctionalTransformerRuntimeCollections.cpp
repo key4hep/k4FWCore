@@ -17,12 +17,11 @@
  * limitations under the License.
  */
 
-#include "Gaudi/Property.h"
-
 #include "edm4hep/MCParticleCollection.h"
 
 #include "k4FWCore/Transformer.h"
 
+#include <map>
 #include <string>
 
 /* ExampleFunctionalTransformerRuntimeCollections
@@ -55,12 +54,6 @@ struct ExampleFunctionalTransformerRuntimeCollections final
     }
     return outputCollections;
   }
-
-private:
-  // We can define any property we want that can be set from python
-  // and use it inside operator()
-  Gaudi::Property<int> m_numberOfCollections{this, "NumberOfCollections", 3,
-                                             "Example int that can be used in the algorithm"};
 };
 
 DECLARE_COMPONENT(ExampleFunctionalTransformerRuntimeCollections)
