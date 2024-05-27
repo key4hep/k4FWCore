@@ -20,7 +20,7 @@
 # This is an example mixing functional and non-functional algorithms
 #
 
-from Gaudi.Configuration import INFO, DEBUG
+from Gaudi.Configuration import INFO
 from Configurables import (
     ExampleFunctionalConsumerMultiple,
     ExampleFunctionalTransformerMultiple,
@@ -102,7 +102,7 @@ consumer_producerfun_functional = ExampleFunctionalConsumerMultiple(
     InputCollectionParticles=["FunctionalMCParticles"],
     Offset=0,
 )
-consumer_producerfun_algorithm = k4FWCoreTest_CheckExampleEventData("CheckFunctional")
+consumer_producerfun_algorithm = k4FWCoreTest_CheckExampleEventData("CheckFunctional", keepEventNumberZero=True)
 consumer_producerfun_algorithm.mcparticles = "FunctionalMCParticles"
 consumer_producerfun_algorithm.keepEventNumberZero = True
 
@@ -125,6 +125,7 @@ consumer_produceralg_functional = ExampleFunctionalConsumerMultiple(
 )
 consumer_produceralg_algorithm = k4FWCoreTest_CheckExampleEventData("CheckAlgorithm")
 consumer_produceralg_algorithm.mcparticles = "OldAlgorithmMCParticles"
+consumer_produceralg_algorithm.vectorfloat = "OldAlgorithmVectorFloat"
 
 ###############################
 
@@ -160,5 +161,5 @@ ApplicationMgr(
     EvtSel="NONE",
     EvtMax=10,
     ExtSvc=[iosvc if args.iosvc else podioevent],
-    OutputLevel=DEBUG,
+    OutputLevel=INFO,
 )

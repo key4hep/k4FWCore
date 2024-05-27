@@ -74,7 +74,6 @@ std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, std::vector<std:
   podio::Frame frame;
   {
     std::scoped_lock<std::mutex> lock(m_changeBufferLock);
-    info() << "m_nextEntry = " << m_nextEntry << " m_entries = " << m_entries << endmsg;
     if (m_nextEntry < m_entries) {
       frame = podio::Frame(std::move(m_reader->readEntry(podio::Category::Event, m_nextEntry)));
     } else {
@@ -88,7 +87,6 @@ std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, std::vector<std:
   }
 
   if (m_nextEntry >= m_entries) {
-    // if (true) {
     auto       ep = serviceLocator()->as<IEventProcessor>();
     StatusCode sc = ep->stopRun();
     if (sc.isFailure()) {
@@ -144,9 +142,9 @@ void IOSvc::handle(const Incident& incident) {
       debug() << "Removing the collection: " << coll << " from the store" << endmsg;
       code = m_dataSvc->unregisterObject(collPtr);
     }
-    // else {
-    //   info() << "Collection not found: " << coll << endmsg;
-    // }
+    else {
+       error() << "Expected collection " << coll << " in the store but it was not found" << endmsg;
+    }
   }
 }
 
