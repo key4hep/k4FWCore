@@ -28,12 +28,22 @@ public:
   MetaDataHandle(const Gaudi::DataHandle& handle, const std::string& descriptor, Gaudi::DataHandle::Mode a);
   ~MetaDataHandle();
 
+  /// Get the (optional) value that is stored in this MetaDataHandle
+  ///
+  /// @returns A std::optional that is engaged if the value was available as
+  ///          metadata
   const auto get() const;
-  void       put(T);
+
+  /// Set the value for this MetaDataHandle
+  ///
+  /// @note This can only be called during initalize and/or finalize but not
+  /// during execute for algorithms that use it
+  void put(T);
 
 private:
   std::string fullDescriptor() const;
-  void        checkPodioDataSvc();
+
+  void checkPodioDataSvc();
 
 private:
   ServiceHandle<IDataProviderSvc> m_eds;
