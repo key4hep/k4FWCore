@@ -30,8 +30,14 @@ public:
 
   /// Get the (optional) value that is stored in this MetaDataHandle
   ///
-  /// @returns A std::optional that is engaged if the value was available as
-  ///          metadata
+  /// @note The return type of this changes depending on the podio version that
+  /// has been used to build k4FWCore. For pre 1.0 versions of podio this will
+  /// return a default initialized (empty) value in case the underlying
+  /// parameter could not obtained be. For later podio versions this will return
+  /// a std::optional.
+  ///
+  /// @returns Either the (potentially default initialized) value or a
+  /// std::optional that is engaged in case the value is available as metadata
   const auto get() const;
 
   /// Set the value for this MetaDataHandle
