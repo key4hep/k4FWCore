@@ -71,12 +71,11 @@ struct ExampleFunctionalConsumerRuntimeCollectionsMultiple final
     }
     for (auto& [key, tracks] : trackMap) {
       if ((tracks[0].getType() != 1) || (std::abs(tracks[0].getChi2() - 2.1) > 1e-6) || (tracks[0].getNdf() != 3) ||
-          (std::abs(tracks[0].getDEdx() - 4.1) > 1e-6) || (std::abs(tracks[0].getDEdxError() - 5.1) > 1e-6) ||
           (std::abs(tracks[0].getRadiusOfInnermostHit() - 6.1) > 1e-6)) {
         std::stringstream error;
         error << "Wrong data in tracks collection, expected 1, 2.1, 3, 4.1, 5.1, 6.1 got " << tracks[0].getType()
-              << ", " << tracks[0].getChi2() << ", " << tracks[0].getNdf() << ", " << tracks[0].getDEdx() << ", "
-              << tracks[0].getDEdxError() << ", " << tracks[0].getRadiusOfInnermostHit() << "";
+              << ", " << tracks[0].getChi2() << ", " << tracks[0].getNdf() << ", "
+              << tracks[0].getRadiusOfInnermostHit() << "";
         throw std::runtime_error(error.str());
       }
     }

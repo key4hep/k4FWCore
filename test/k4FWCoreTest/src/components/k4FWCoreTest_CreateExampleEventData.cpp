@@ -89,8 +89,6 @@ StatusCode k4FWCoreTest_CreateExampleEventData::execute(const EventContext&) con
   track.setType(1);
   track.setChi2(2.1);
   track.setNdf(3);
-  track.setDEdx(4.1);
-  track.setDEdxError(5.1);
   track.setRadiusOfInnermostHit(6.1);
   // set vectormembers
 #if EDM4HEP_BUILD_VERSION > EDM4HEP_VERSION(0, 9, 0)
