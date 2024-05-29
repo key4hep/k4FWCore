@@ -16,20 +16,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "k4FWCore/PodioDataSvc.h"
-#include <GaudiKernel/StatusCode.h>
-#include "GaudiKernel/IConversionSvc.h"
-#include "GaudiKernel/IEventProcessor.h"
-#include "GaudiKernel/IProperty.h"
-#include "GaudiKernel/ISvcLocator.h"
+
+#include "k4FWCore/k4DataSvc.h"
 #include "k4FWCore/DataWrapper.h"
 
-#include "podio/CollectionBase.h"
+#include <GaudiKernel/IConversionSvc.h>
+#include <GaudiKernel/IEventProcessor.h>
+#include <GaudiKernel/IProperty.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/StatusCode.h>
 
-#include "TTree.h"
+/// Standard Constructor
+k4DataSvc::k4DataSvc(const std::string& name, ISvcLocator* svc) : DataSvc(name, svc) {
+  declareProperty("inputs", m_filenames = {}, "Names of the files to read");
+  declareProperty("input", m_filename = "", "Name of the file to read");
+  declareProperty("FirstEventEntry", m_1stEvtEntry = 0, "First event to read");
+}
 
 /// Service initialisation
-StatusCode PodioDataSvc::initialize() {
+StatusCode k4DataSvc::initialize() {
   // Nothing to do: just call base class initialisation
   StatusCode   status  = DataSvc::initialize();
   ISvcLocator* svc_loc = serviceLocator();
@@ -80,19 +85,21 @@ StatusCode PodioDataSvc::initialize() {
 
   return status;
 }
+
 /// Service reinitialisation
-StatusCode PodioDataSvc::reinitialize() {
+StatusCode k4DataSvc::reinitialize() {
   // Do nothing for this service
   return StatusCode::SUCCESS;
 }
+
 /// Service finalization
-StatusCode PodioDataSvc::finalize() {
+StatusCode k4DataSvc::finalize() {
   m_cnvSvc = 0;  // release
   DataSvc::finalize().ignore();
   return StatusCode::SUCCESS;
 }
 
-StatusCode PodioDataSvc::clearStore() {
+StatusCode k4DataSvc::clearStore() {
   // as the frame takes care of the ownership of the podio::Collections,
   // make sure the DataWrappers don't cause a double delete
   for (auto wrapper : m_podio_datawrappers) {
@@ -104,7 +111,7 @@ StatusCode PodioDataSvc::clearStore() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode PodioDataSvc::i_setRoot(std::string root_path, IOpaqueAddress* pRootAddr) {
+StatusCode k4DataSvc::i_setRoot(std::string root_path, IOpaqueAddress* pRootAddr) {
   // create a new frame
   if (m_reading_from_file) {
     m_eventframe = podio::Frame(m_reader.readEntry("events", m_eventNum + m_1stEvtEntry));
@@ -114,7 +121,7 @@ StatusCode PodioDataSvc::i_setRoot(std::string root_path, IOpaqueAddress* pRootA
   return DataSvc::i_setRoot(root_path, pRootAddr);
 }
 
-StatusCode PodioDataSvc::i_setRoot(std::string root_path, DataObject* pRootObj) {
+StatusCode k4DataSvc::i_setRoot(std::string root_path, DataObject* pRootObj) {
   // create a new frame
   if (m_reading_from_file) {
     m_eventframe = podio::Frame(m_reader.readEntry("events", m_eventNum + m_1stEvtEntry));
@@ -124,7 +131,7 @@ StatusCode PodioDataSvc::i_setRoot(std::string root_path, DataObject* pRootObj) 
   return DataSvc::i_setRoot(root_path, pRootObj);
 }
 
-void PodioDataSvc::endOfRead() {
+void k4DataSvc::endOfRead() {
   m_eventNum++;
 
   if (!m_bounds_check_needed) {
@@ -143,13 +150,7 @@ void PodioDataSvc::endOfRead() {
   // todo: figure out sthg to do with sc (added to silence -Wunused-result)
 }
 
-/// Standard Constructor
-PodioDataSvc::PodioDataSvc(const std::string& name, ISvcLocator* svc) : DataSvc(name, svc) {}
-
-/// Standard Destructor
-PodioDataSvc::~PodioDataSvc() {}
-
-const std::string_view PodioDataSvc::getCollectionType(const std::string& collName) {
+const std::string_view k4DataSvc::getCollectionType(const std::string& collName) {
   const auto coll = m_eventframe.get(collName);
   if (coll == nullptr) {
     error() << "Collection " << collName << " does not exist." << endmsg;
@@ -158,7 +159,7 @@ const std::string_view PodioDataSvc::getCollectionType(const std::string& collNa
   return coll->getTypeName();
 }
 
-StatusCode PodioDataSvc::registerObject(std::string_view parentPath, std::string_view fullPath, DataObject* pObject) {
+StatusCode k4DataSvc::registerObject(std::string_view parentPath, std::string_view fullPath, DataObject* pObject) {
   DataWrapperBase* wrapper = dynamic_cast<DataWrapperBase*>(pObject);
   if (wrapper != nullptr) {
     podio::CollectionBase* coll = wrapper->collectionBase();

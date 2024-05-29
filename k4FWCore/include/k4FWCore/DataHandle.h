@@ -20,7 +20,7 @@
 #define K4FWCORE_DATAHANDLE_H
 
 #include "k4FWCore/DataWrapper.h"
-#include "k4FWCore/PodioDataSvc.h"
+#include "k4FWCore/k4DataSvc.h"
 
 #include "Gaudi/Algorithm.h"
 #include "GaudiKernel/DataObjectHandle.h"
@@ -93,7 +93,7 @@ DataHandle<T>::DataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode
   if (a == Gaudi::DataHandle::Writer) {
     m_eds.retrieve().ignore();
     m_dataPtr                = nullptr;
-    auto* podio_data_service = dynamic_cast<PodioDataSvc*>(m_eds.get());
+    auto* podio_data_service = dynamic_cast<k4DataSvc*>(m_eds.get());
     if (nullptr != podio_data_service) {
       if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
         m_dataPtr = new T();

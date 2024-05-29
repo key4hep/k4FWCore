@@ -35,7 +35,7 @@ namespace podio {
 #include <vector>
 
 // forward declarations
-class PodioDataSvc;
+class k4DataSvc;
 
 class PodioOutput : public Gaudi::Algorithm {
 public:
@@ -44,7 +44,7 @@ public:
 
   /// Initialization of PodioOutput. Acquires the data service, creates trees and root file.
   StatusCode initialize();
-  /// Execute. For the first event creates branches for all collections known to PodioDataSvc and prepares them for
+  /// Execute. For the first event creates branches for all collections known to k4DataSvc and prepares them for
   /// writing. For the following events it reconnects the branches with collections and prepares them for write.
   StatusCode execute(const EventContext&) const;
   /// Finalize. Writes the meta data tree; writes file and cleans up all ROOT-pointers.
@@ -62,7 +62,7 @@ private:
                                                 "An optional file path to copy the outputfile to."};
   /// Switch for keeping or dropping outputs
   KeepDropSwitch m_switch;
-  PodioDataSvc*  m_podioDataSvc;
+  k4DataSvc*     m_podioDataSvc;
   /// The actual ROOT frame writer
   std::unique_ptr<podio::ROOTWriter> m_framewriter;
   /// The stored collections
