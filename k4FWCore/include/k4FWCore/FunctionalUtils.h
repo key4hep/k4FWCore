@@ -138,15 +138,17 @@ namespace k4FWCore {
             // 1. a mistake was made in the input types of a functional algorithm
             // 2. the data was produced using the old DataHandle, which is never going to be in the input type
             if (e.message().find("different from") != std::string::npos) {
-              thisClass->error() << "Trying to cast the collection " << std::get<Index>(handles)[0].objKey()
-                                 << " to the requested type " << thisClass->name() << endmsg;
+              thisClass->debug() << "Trying to cast the collection " << std::get<Index>(handles)[0].objKey()
+                                 << " to the requested type didn't work " << endmsg;
               DataObject*       p;
               IDataProviderSvc* svc = thisClass->serviceLocator()->template service<IDataProviderSvc>("EventDataSvc");
               svc->retrieveObject("/Event/" + std::get<Index>(handles)[0].objKey(), p).ignore();
               const auto wrp = dynamic_cast<const DataWrapper<std::tuple_element_t<Index, std::tuple<In...>>>*>(p);
               if (!wrp) {
                 throw GaudiException(thisClass->name(),
-                                     "Failed to cast collection " + std::get<Index>(handles)[0].objKey(),
+                                     "Failed to cast collection " + std::get<Index>(handles)[0].objKey() +
+                                         " to the requested type " +
+                                         typeid(std::tuple_element_t<Index, std::tuple<In...>>).name(),
                                      StatusCode::FAILURE);
               }
               std::get<Index>(inputTuple) = const_cast<std::tuple_element_t<Index, std::tuple<In...>>*>(wrp->getData());
