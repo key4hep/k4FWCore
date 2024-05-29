@@ -28,17 +28,18 @@ public:
   MetaDataHandle(const Gaudi::DataHandle& handle, const std::string& descriptor, Gaudi::DataHandle::Mode a);
   ~MetaDataHandle();
 
-  /// Get the (optional) value that is stored in this MetaDataHandle
+  /// Get the value that is stored in this MetaDataHandle
   ///
-  /// @note The return type of this changes depending on the podio version that
-  /// has been used to build k4FWCore. For pre 1.0 versions of podio this will
-  /// return a default initialized (empty) value in case the underlying
-  /// parameter could not obtained be. For later podio versions this will return
-  /// a std::optional.
+  /// @returns The value for this MetaDataHandle
   ///
-  /// @returns Either the (potentially default initialized) value or a
-  /// std::optional that is engaged in case the value is available as metadata
-  const auto get() const;
+  /// @throws GaudiException in case the value is not (yet) available
+  const T get() const;
+
+  /// Get the value that is stored in the MetaDataHandle or the provided default
+  /// value in case that is not available
+  ///
+  /// @returns The value stored in the Handle or the default value
+  const T get(const T& defaultValue) const;
 
   /// Set the value for this MetaDataHandle
   ///
@@ -81,9 +82,19 @@ MetaDataHandle<T>::MetaDataHandle(const Gaudi::DataHandle& handle, const std::st
 }
 
 //---------------------------------------------------------------------------
-template <typename T> const auto MetaDataHandle<T>::get() const {
+template <typename T> const T MetaDataHandle<T>::get() const {
+  const auto& frame    = m_podio_data_service->getMetaDataFrame();
+  const auto  maybeVal = frame.getParameter<T>(fullDescriptor());
+  if (!maybeVal.has_value()) {
+    throw GaudiException("MetaDataHandle " + fullDescriptor() + " not (yet?) available", StatusCode::FAILURE);
+  }
+  return maybeVal.value();
+}
+
+//---------------------------------------------------------------------------
+template <typename T> const T MetaDataHandle<T>::get(const T& defaultValue) const {
   const auto& frame = m_podio_data_service->getMetaDataFrame();
-  return frame.getParameter<T>(fullDescriptor());
+  return frame.getParameter<T>(fullDescriptor()).value_or(defaultValue);
 }
 
 //---------------------------------------------------------------------------
