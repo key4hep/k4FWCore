@@ -93,7 +93,6 @@ std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, std::vector<std:
       error() << "Error when stopping run" << endmsg;
       throw GaudiException("Error when stopping run", name(), StatusCode::FAILURE);
     }
-    info() << "m_nextEntry = " << m_nextEntry << " m_entries = " << m_entries << endmsg;
   }
 
   std::vector<std::shared_ptr<podio::CollectionBase>> collections;
