@@ -171,13 +171,11 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
     for (auto& [key, tracks] : trackMap) {
       auto coll = edm4hep::TrackCollection();
       if ((tracks.at(0).getType() != 1) || (std::abs(tracks.at(0).getChi2() - 2.1) > 1e-6) ||
-          (tracks.at(0).getNdf() != 3) || (std::abs(tracks.at(0).getDEdx() - 4.1) > 1e-6) ||
-          (std::abs(tracks.at(0).getDEdxError() - 5.1) > 1e-6) ||
-          (std::abs(tracks.at(0).getRadiusOfInnermostHit() - 6.1) > 1e-6)) {
+          (tracks.at(0).getNdf() != 3) || (std::abs(tracks.at(0).getRadiusOfInnermostHit() - 6.1) > 1e-6)) {
         std::stringstream error;
         error << "Wrong data in tracks collection, expected 1, 2.1, 3, 4.1, 5.1, 6.1 got " << tracks.at(0).getType()
-              << ", " << tracks.at(0).getChi2() << ", " << tracks.at(0).getNdf() << ", " << tracks.at(0).getDEdx()
-              << ", " << tracks.at(0).getDEdxError() << ", " << tracks.at(0).getRadiusOfInnermostHit() << "";
+              << ", " << tracks.at(0).getChi2() << ", " << tracks.at(0).getNdf() << ", "
+              << tracks.at(0).getRadiusOfInnermostHit() << "";
         throw std::runtime_error(error.str());
       }
       coll->push_back(tracks.at(0).clone());

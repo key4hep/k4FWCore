@@ -84,8 +84,6 @@ struct ExampleFunctionalProducerMultiple final : k4FWCore::Producer<retType()> {
     track.setType(1);
     track.setChi2(2.1);
     track.setNdf(3);
-    track.setDEdx(4.1);
-    track.setDEdxError(5.1);
     track.setRadiusOfInnermostHit(6.1);
     track.addToSubdetectorHitNumbers(1);
     track.addToSubdetectorHitNumbers(4);
