@@ -43,13 +43,10 @@ StatusCode k4FWCoreTest_cellID_reader::initialize() {
 StatusCode k4FWCoreTest_cellID_reader::execute(const EventContext&) const {
   const auto simtrackerhits_coll = m_simTrackerHitReaderHandle.get();
 
-#if PODIO_BUILD_VERSION > PODIO_VERSION(0, 99, 0)
-  const auto cellIDstr = m_cellIDHandle.get().value_or("");
-#else
-  const auto cellIDstr = m_cellIDHandle.get();
-#endif
+  const auto cellIDstr = m_cellIDHandle.get("");
+
   if (cellIDstr != cellIDtest) {
-    error() << "ERROR cellID is: " << cellIDstr << endmsg;
+    error() << "ERROR cellID is: " << cellIDstr << "expected (" << cellIDtest << ")" << endmsg;
     return StatusCode::FAILURE;
   }
 

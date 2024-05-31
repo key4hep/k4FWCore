@@ -21,6 +21,8 @@
 
 #include "k4FWCore/PodioDataSvc.h"
 
+#include "podio/podioVersion.h"
+
 template <typename T> class MetaDataHandle {
 public:
   MetaDataHandle();
@@ -34,6 +36,12 @@ public:
   ///
   /// @throws GaudiException in case the value is not (yet) available
   const T get() const;
+
+  /// Get the (optional) value that is stored in this MetaDataHandle
+  ///
+  /// @returns An optional that contains the value if it was available from the
+  ///          data store and is not engaged otherwise
+  std::optional<T> get_optional() const;
 
   /// Get the value that is stored in the MetaDataHandle or the provided default
   /// value in case that is not available
@@ -82,19 +90,36 @@ MetaDataHandle<T>::MetaDataHandle(const Gaudi::DataHandle& handle, const std::st
 }
 
 //---------------------------------------------------------------------------
+template <typename T> std::optional<T> MetaDataHandle<T>::get_optional() const {
+  const auto& frame = m_podio_data_service->getMetaDataFrame();
+#if PODIO_BUILD_VERSION > PODIO_VERSION(0, 99, 0)
+  return frame.getParameter<T>(fullDescriptor());
+#else
+  // explicitly make a copy here and move it into the optional below
+  auto val = frame.getParameter<T>(fullDescriptor());
+  // This is what happens if we have a non-present key, so we can use it as a
+  // way to determine if the parameter was (likely) unset. For more details see
+  // https://github.com/AIDASoft/podio/issues/576
+  if (val == T{}) {
+    return std::nullopt;
+  }
+  return std::optional<T>(std::move(val));
+#endif
+}
+
+//---------------------------------------------------------------------------
 template <typename T> const T MetaDataHandle<T>::get() const {
-  const auto& frame    = m_podio_data_service->getMetaDataFrame();
-  const auto  maybeVal = frame.getParameter<T>(fullDescriptor());
+  const auto maybeVal = get_optional();
   if (!maybeVal.has_value()) {
-    throw GaudiException("MetaDataHandle " + fullDescriptor() + " not (yet?) available", StatusCode::FAILURE);
+    throw GaudiException("MetaDataHandle empty handle access",
+                         "MetaDataHandle " + fullDescriptor() + " not (yet?) available", StatusCode::FAILURE);
   }
   return maybeVal.value();
 }
 
 //---------------------------------------------------------------------------
 template <typename T> const T MetaDataHandle<T>::get(const T& defaultValue) const {
-  const auto& frame = m_podio_data_service->getMetaDataFrame();
-  return frame.getParameter<T>(fullDescriptor()).value_or(defaultValue);
+  return get_optional().value_or(defaultValue);
 }
 
 //---------------------------------------------------------------------------
