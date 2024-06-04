@@ -19,8 +19,6 @@
 #include "k4FWCoreTest_cellID_reader.h"
 #include "k4FWCoreTest_cellID_writer.h"
 
-#include "podio/podioVersion.h"
-
 DECLARE_COMPONENT(k4FWCoreTest_cellID_reader)
 
 k4FWCoreTest_cellID_reader::k4FWCoreTest_cellID_reader(const std::string& aName, ISvcLocator* aSvcLoc)
