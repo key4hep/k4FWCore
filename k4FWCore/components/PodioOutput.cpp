@@ -24,7 +24,6 @@
 
 #include "PodioOutput.h"
 #include "k4FWCore/PodioDataSvc.h"
-#include "rootUtils.h"
 
 DECLARE_COMPONENT(PodioOutput)
 
