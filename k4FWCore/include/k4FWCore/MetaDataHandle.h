@@ -19,15 +19,9 @@
 #ifndef K4FWCORE_METADATAHANDLE_H
 #define K4FWCORE_METADATAHANDLE_H
 
-// GAUDI
-#include "Gaudi/Algorithm.h"
-
 #include "k4FWCore/PodioDataSvc.h"
-#include "podio/GenericParameters.h"
 
-#include "GaudiKernel/MsgStream.h"
-
-#include <type_traits>
+#include "podio/podioVersion.h"
 
 template <typename T> class MetaDataHandle {
 public:
@@ -36,12 +30,35 @@ public:
   MetaDataHandle(const Gaudi::DataHandle& handle, const std::string& descriptor, Gaudi::DataHandle::Mode a);
   ~MetaDataHandle();
 
+  /// Get the value that is stored in this MetaDataHandle
+  ///
+  /// @returns The value for this MetaDataHandle
+  ///
+  /// @throws GaudiException in case the value is not (yet) available
   const T get() const;
-  void    put(T);
+
+  /// Get the (optional) value that is stored in this MetaDataHandle
+  ///
+  /// @returns An optional that contains the value if it was available from the
+  ///          data store and is not engaged otherwise
+  std::optional<T> get_optional() const;
+
+  /// Get the value that is stored in the MetaDataHandle or the provided default
+  /// value in case that is not available
+  ///
+  /// @returns The value stored in the Handle or the default value
+  const T get(const T& defaultValue) const;
+
+  /// Set the value for this MetaDataHandle
+  ///
+  /// @note This can only be called during initalize and/or finalize but not
+  /// during execute for algorithms that use it
+  void put(T);
 
 private:
   std::string fullDescriptor() const;
-  void        checkPodioDataSvc();
+
+  void checkPodioDataSvc();
 
 private:
   ServiceHandle<IDataProviderSvc> m_eds;
@@ -73,9 +90,36 @@ MetaDataHandle<T>::MetaDataHandle(const Gaudi::DataHandle& handle, const std::st
 }
 
 //---------------------------------------------------------------------------
-template <typename T> const T MetaDataHandle<T>::get() const {
+template <typename T> std::optional<T> MetaDataHandle<T>::get_optional() const {
   const auto& frame = m_podio_data_service->getMetaDataFrame();
+#if PODIO_BUILD_VERSION > PODIO_VERSION(0, 99, 0)
   return frame.getParameter<T>(fullDescriptor());
+#else
+  // explicitly make a copy here and move it into the optional below
+  auto val = frame.getParameter<T>(fullDescriptor());
+  // This is what happens if we have a non-present key, so we can use it as a
+  // way to determine if the parameter was (likely) unset. For more details see
+  // https://github.com/AIDASoft/podio/issues/576
+  if (val == T{}) {
+    return std::nullopt;
+  }
+  return std::optional<T>(std::move(val));
+#endif
+}
+
+//---------------------------------------------------------------------------
+template <typename T> const T MetaDataHandle<T>::get() const {
+  const auto maybeVal = get_optional();
+  if (!maybeVal.has_value()) {
+    throw GaudiException("MetaDataHandle empty handle access",
+                         "MetaDataHandle " + fullDescriptor() + " not (yet?) available", StatusCode::FAILURE);
+  }
+  return maybeVal.value();
+}
+
+//---------------------------------------------------------------------------
+template <typename T> const T MetaDataHandle<T>::get(const T& defaultValue) const {
+  return get_optional().value_or(defaultValue);
 }
 
 //---------------------------------------------------------------------------
