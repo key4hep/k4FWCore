@@ -26,7 +26,7 @@
 #include <string>
 
 struct ExampleFunctionalConsumerRuntimeCollections final
-  : k4FWCore::Consumer<void(const std::vector<const edm4hep::MCParticleCollection*>& input)> {
+    : k4FWCore::Consumer<void(const std::vector<const edm4hep::MCParticleCollection*>& input)> {
   // The pair in KeyValue can be changed from python and it corresponds
   // to the name of the output collection
   ExampleFunctionalConsumerRuntimeCollections(const std::string& name, ISvcLocator* svcLoc)

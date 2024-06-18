@@ -26,7 +26,7 @@
 #include <string>
 
 struct ExampleFunctionalProducerRuntimeCollections final
-  : k4FWCore::Producer<std::vector<edm4hep::MCParticleCollection>()> {
+    : k4FWCore::Producer<std::vector<edm4hep::MCParticleCollection>()> {
   // The pair in KeyValue can be changed from python and it corresponds
   // to the name of the output collection
   ExampleFunctionalProducerRuntimeCollections(const std::string& name, ISvcLocator* svcLoc)
