@@ -34,15 +34,15 @@ struct ExampleFunctionalProducerRuntimeCollections final
 
   // This is the function that will be called to produce the data
   std::map<std::string, edm4hep::MCParticleCollection> operator()() const override {
-    std::map<std::string, edm4hep::MCParticleCollection> m_outputCollections;
+    std::map<std::string, edm4hep::MCParticleCollection> outputCollections;
     for (int i = 0; i < m_numberOfCollections; ++i) {
       std::string name = "MCParticles" + std::to_string(i);
       auto        coll = edm4hep::MCParticleCollection();
       coll->create(1, 2, 3, 4.f, 5.f, 6.f);
       coll->create(2, 3, 4, 5.f, 6.f, 7.f);
-      m_outputCollections[name] = std::move(coll);
+      outputCollections[name] = std::move(coll);
     }
-    return m_outputCollections;
+    return outputCollections;
   }
 
 private:

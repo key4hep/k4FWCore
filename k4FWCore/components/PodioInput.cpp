@@ -213,8 +213,8 @@ StatusCode PodioInput::initialize() {
 }
 
 void PodioInput::operator()() const {
-  if (m_podioDataSvc->getEventFrame().get(edm4hep::EventHeaderName)) {
-    m_readers[edm4hep::EventHeaderCollection::typeName](edm4hep::EventHeaderName);
+  if (m_podioDataSvc->getEventFrame().get(edm4hep::labels::EventHeader)) {
+    m_readers[edm4hep::EventHeaderCollection::typeName](edm4hep::labels::EventHeader);
   } else {
     info() << "No EventHeader collection found in the event. Not reading it" << endmsg;
   }
