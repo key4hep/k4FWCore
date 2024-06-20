@@ -43,9 +43,9 @@ namespace k4FWCore {
 
       static_assert(
           ((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike_v<In>)&&...),
-          "Transformer and Producer input types must be EDM4hep collections or vectors to collection pointers");
+          "Transformer and Producer input types must be EDM4hep collections or vectors of collection pointers");
       static_assert((std::is_base_of_v<podio::CollectionBase, Out> || isVectorLike_v<Out>),
-                    "Transformer and Producer output types must be EDM4hep collections or vectors to collections");
+                    "Transformer and Producer output types must be EDM4hep collections or vectors of collections");
 
       template <typename T>
       using InputHandle_t = Gaudi::Functional::details::InputHandle_t<Traits_, std::remove_pointer_t<T>>;
@@ -111,7 +111,7 @@ namespace k4FWCore {
         try {
           if constexpr (isVectorLike<Out>::value) {
             std::tuple<Out> tmp = filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs);
-            putMapOutputs<0, Out>(std::move(tmp), m_outputs, this);
+            putVectorOutputs<0, Out>(std::move(tmp), m_outputs, this);
           } else {
             Gaudi::Functional::details::put(
                 std::get<0>(this->m_outputs)[0],
@@ -200,7 +200,7 @@ namespace k4FWCore {
       StatusCode execute(const EventContext& ctx) const override final {
         try {
           auto tmp = filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs);
-          putMapOutputs<0, Out...>(std::move(tmp), m_outputs, this);
+          putVectorOutputs<0, Out...>(std::move(tmp), m_outputs, this);
           return Gaudi::Functional::FilterDecision::PASSED;
         } catch (GaudiException& e) {
           (e.code() ? this->warning() : this->error()) << e.tag() << " : " << e.message() << endmsg;
