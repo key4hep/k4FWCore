@@ -42,7 +42,7 @@ namespace k4FWCore {
       using Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>::DataHandleMixin;
 
       static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike_v<In>)&&...),
-                    "Consumer input types must be EDM4hep collections or vectors to collection pointers");
+                    "Consumer input types must be EDM4hep collections or vectors of collection pointers");
 
       template <typename T>
       using InputHandle_t = Gaudi::Functional::details::InputHandle_t<Traits_, std::remove_pointer_t<T>>;

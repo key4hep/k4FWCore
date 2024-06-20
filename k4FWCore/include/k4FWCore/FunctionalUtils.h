@@ -62,9 +62,10 @@ namespace k4FWCore {
       return static_cast<const T>(*arg);
     }
 
-    // Check if the type is a map like type, where map type is the special map
+    // Check if the type is a vector like type, where vector is the special
     // type to have an arbitrary number of collections as input or output:
-    // std::map<std::string, Coll> where Coll is the collection type
+    // std::vector<Coll> where Coll is the collection type for output
+    // and const std::vector<const Coll*>& for input
     template <typename T> struct isVectorLike : std::false_type {};
 
     template <typename Value>
@@ -110,7 +111,7 @@ namespace k4FWCore {
 
         // Build the input tuple by picking up either std::vector with an arbitrary
         // number of collections or single collections
-        readMapInputs<0, In...>(handles, &algo, inputTuple);
+        readVectorInputs<0, In...>(handles, &algo, inputTuple);
 
         return std::apply(
             [&](const auto&... input) { return algo(maybeTransformToEDM4hep<decltype(input)>(input)...); }, inputTuple);
@@ -118,7 +119,7 @@ namespace k4FWCore {
     };
 
     template <size_t Index, typename... In, typename... Handles, typename InputTuple>
-    void readMapInputs(const std::tuple<Handles...>& handles, auto thisClass, InputTuple& inputTuple) {
+    void readVectorInputs(const std::tuple<Handles...>& handles, auto thisClass, InputTuple& inputTuple) {
       if constexpr (Index < sizeof...(Handles)) {
         if constexpr (isVectorLike_v<std::tuple_element_t<Index, std::tuple<In...>>>) {
           // Bare EDM4hep type, without pointers
@@ -161,12 +162,12 @@ namespace k4FWCore {
         }
 
         // Recursive call for the next index
-        readMapInputs<Index + 1, In...>(handles, thisClass, inputTuple);
+        readVectorInputs<Index + 1, In...>(handles, thisClass, inputTuple);
       }
     }
 
     template <size_t Index, typename... Out, typename... Handles>
-    void putMapOutputs(std::tuple<Handles...>&& handles, const auto& m_outputs, auto thisClass) {
+    void putVectorOutputs(std::tuple<Handles...>&& handles, const auto& m_outputs, auto thisClass) {
       if constexpr (Index < sizeof...(Handles)) {
         if constexpr (isVectorLike_v<std::tuple_element_t<Index, std::tuple<Out...>>>) {
           int i = 0;
@@ -187,7 +188,7 @@ namespace k4FWCore {
         }
 
         // Recursive call for the next index
-        putMapOutputs<Index + 1, Out...>(std::move(handles), m_outputs, thisClass);
+        putVectorOutputs<Index + 1, Out...>(std::move(handles), m_outputs, thisClass);
       }
     }
 
