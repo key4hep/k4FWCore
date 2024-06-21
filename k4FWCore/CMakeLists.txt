@@ -21,7 +21,7 @@ limitations under the License.
 # Package: k4FWCore
 ################################################################################
 
-find_package(podio 0.16.3 REQUIRED)
+find_package(podio REQUIRED)
 find_package(EDM4HEP)
 
 gaudi_install(SCRIPTS)
