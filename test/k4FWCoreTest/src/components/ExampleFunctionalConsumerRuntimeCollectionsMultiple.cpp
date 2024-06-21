@@ -60,7 +60,7 @@ struct ExampleFunctionalConsumerRuntimeCollectionsMultiple final
                 << ", " << 3 + i + m_offset << ", " << 4 + i + m_offset << ", " << 5 + i + m_offset << ", "
                 << 6 + i + m_offset << " got " << particle.getPDG() << ", " << particle.getGeneratorStatus() << ", "
                 << particle.getSimulatorStatus() << ", " << particle.getCharge() << ", " << particle.getTime() << ", "
-                << particle.getMass() << "";
+                << particle.getMass();
           throw std::runtime_error(error.str());
         }
         i++;
@@ -73,7 +73,7 @@ struct ExampleFunctionalConsumerRuntimeCollectionsMultiple final
       if ((tracks[0].getType() != 1) || (std::abs(tracks[0].getChi2() - 2.1) > 1e-6) || (tracks[0].getNdf() != 3)) {
         std::stringstream error;
         error << "Wrong data in tracks collection, expected 1, 2.1, 3, 4.1, 5.1, 6.1 got " << tracks[0].getType()
-              << ", " << tracks[0].getChi2() << ", " << tracks[0].getNdf() << "";
+              << ", " << tracks[0].getChi2() << ", " << tracks[0].getNdf();
         throw std::runtime_error(error.str());
       }
     }
