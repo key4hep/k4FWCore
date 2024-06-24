@@ -173,8 +173,7 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
           (tracks->at(0).getNdf() != 3)) {
         std::stringstream error;
         error << "Wrong data in tracks collection, expected 1, 2.1, 3, 4.1, 5.1, 6.1 got " << tracks->at(0).getType()
-              << ", " << tracks->at(0).getChi2() << ", " << tracks->at(0).getNdf() << ", "
-              << tracks->at(0).getRadiusOfInnermostHit() << "";
+              << ", " << tracks->at(0).getChi2() << ", " << tracks->at(0).getNdf();
         throw std::runtime_error(error.str());
       }
       coll->push_back(tracks->at(0).clone());
