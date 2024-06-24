@@ -31,7 +31,6 @@
 
 // #include "GaudiKernel/CommonMessaging.h"
 
-#include <map>
 #include <memory>
 #include <tuple>
 #include <type_traits>
@@ -66,13 +65,17 @@ namespace k4FWCore {
     // Check if the type is a map like type, where map type is the special map
     // type to have an arbitrary number of collections as input or output:
     // std::map<std::string, Coll> where Coll is the collection type
-    template <typename T> struct isMapToCollLike : std::false_type {};
+    template <typename T> struct isVectorLike : std::false_type {};
 
     template <typename Value>
       requires std::is_base_of_v<podio::CollectionBase, std::remove_cvref_t<Value>>
-    struct isMapToCollLike<std::map<std::string, Value>> : std::true_type {};
+    struct isVectorLike<std::vector<Value*>> : std::true_type {};
 
-    template <class T> inline constexpr bool isMapToCollLike_v = isMapToCollLike<T>::value;
+    template <typename Value>
+      requires std::is_base_of_v<podio::CollectionBase, std::remove_cvref_t<Value>>
+    struct isVectorLike<std::vector<Value>> : std::true_type {};
+
+    template <class T> inline constexpr bool isVectorLike_v = isVectorLike<T>::value;
 
     // transformType function to transform the types from the ones that the user wants
     // like edm4hep::MCParticleCollection, to the ones that are actually stored in the
@@ -83,7 +86,7 @@ namespace k4FWCore {
     };
 
     template <typename T>
-      requires std::is_base_of_v<podio::CollectionBase, T> || isMapToCollLike_v<T>
+      requires std::is_base_of_v<podio::CollectionBase, T> || isVectorLike_v<T>
     struct transformType<T> {
       using type = std::shared_ptr<podio::CollectionBase>;
     };
@@ -105,7 +108,7 @@ namespace k4FWCore {
       static auto apply(const Algorithm& algo, const EventContext&, Handles& handles) {
         auto inputTuple = std::tuple<addPtrIfColl<In>...>();
 
-        // Build the input tuple by picking up either std::map with an arbitrary
+        // Build the input tuple by picking up either std::vector with an arbitrary
         // number of collections or single collections
         readMapInputs<0, In...>(handles, &algo, inputTuple);
 
@@ -117,15 +120,14 @@ namespace k4FWCore {
     template <size_t Index, typename... In, typename... Handles, typename InputTuple>
     void readMapInputs(const std::tuple<Handles...>& handles, auto thisClass, InputTuple& inputTuple) {
       if constexpr (Index < sizeof...(Handles)) {
-        if constexpr (isMapToCollLike_v<std::tuple_element_t<Index, std::tuple<In...>>>) {
-          // In case of map types like std::map<std::string, edm4hep::MCParticleCollection&>
-          // we have to remove the reference to get the actual type
+        if constexpr (isVectorLike_v<std::tuple_element_t<Index, std::tuple<In...>>>) {
+          // Bare EDM4hep type, without pointers
           using EDM4hepType =
-              std::remove_reference_t<typename std::tuple_element_t<Index, std::tuple<In...>>::mapped_type>;
-          auto inputMap = std::map<std::string, const EDM4hepType&>();
+            std::remove_pointer_t<typename std::tuple_element_t<Index, std::tuple<In...>>::value_type>;
+          auto inputMap = std::vector<const EDM4hepType*>();
           for (auto& handle : std::get<Index>(handles)) {
             auto in = get(handle, thisClass, Gaudi::Hive::currentContext());
-            inputMap.emplace(handle.objKey(), *static_cast<EDM4hepType*>(in.get()));
+            inputMap.push_back(static_cast<EDM4hepType*>(in.get()));
           }
           std::get<Index>(inputTuple) = std::move(inputMap);
 
@@ -166,29 +168,16 @@ namespace k4FWCore {
     template <size_t Index, typename... Out, typename... Handles>
     void putMapOutputs(std::tuple<Handles...>&& handles, const auto& m_outputs, auto thisClass) {
       if constexpr (Index < sizeof...(Handles)) {
-        if constexpr (isMapToCollLike_v<std::tuple_element_t<Index, std::tuple<Out...>>>) {
+        if constexpr (isVectorLike_v<std::tuple_element_t<Index, std::tuple<Out...>>>) {
           int i = 0;
           if (std::get<Index>(handles).size() != std::get<Index>(m_outputs).size()) {
-            std::string msg = "Size of the output map " + std::to_string(std::get<Index>(handles).size()) +
+            std::string msg = "Size of the output vector " + std::to_string(std::get<Index>(handles).size()) +
+                              " with type " + typeid(std::get<Index>(handles)).name() +
                               " does not match the expected size from the steering file " +
-                              std::to_string(std::get<Index>(m_outputs).size()) + ". Expected the collections: ";
-            for (auto& out : std::get<Index>(m_outputs)) {
-              msg += out.objKey() + " ";
-            }
-            msg += " but got the collections: ";
-            for (auto& out : std::get<Index>(handles)) {
-              msg += out.first + " ";
-            }
+                              std::to_string(std::get<Index>(m_outputs).size());
             throw GaudiException(thisClass->name(), msg, StatusCode::FAILURE);
           }
-          for (auto& [key, val] : std::get<Index>(handles)) {
-            if (key != std::get<Index>(m_outputs)[i].objKey()) {
-              throw GaudiException(thisClass->name(),
-                                   "Output key in the map \"" + key +
-                                       "\" does not match the expected key from the steering file \"" +
-                                       std::get<Index>(m_outputs)[i].objKey() + "\"",
-                                   StatusCode::FAILURE);
-            }
+          for (auto& val : std::get<Index>(handles)) {
             Gaudi::Functional::details::put(std::get<Index>(m_outputs)[i], convertToSharedPtr(std::move(val)));
             i++;
           }
