@@ -48,7 +48,7 @@ struct ExampleFunctionalConsumerRuntimeCollections final
                 << ", " << 3 + i + m_offset << ", " << 4 + i + m_offset << ", " << 5 + i + m_offset << ", "
                 << 6 + i + m_offset << " got " << particle.getPDG() << ", " << particle.getGeneratorStatus() << ", "
                 << particle.getSimulatorStatus() << ", " << particle.getCharge() << ", " << particle.getTime() << ", "
-                << particle.getMass() << "";
+                << particle.getMass();
           throw std::runtime_error(error.str());
         }
         i++;

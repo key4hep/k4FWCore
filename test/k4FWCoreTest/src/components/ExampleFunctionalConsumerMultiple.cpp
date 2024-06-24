@@ -65,7 +65,7 @@ struct ExampleFunctionalConsumerMultiple final
     if ((floatVector[0] != 125) || (floatVector[1] != 25) || (floatVector[2] != 0)) {
       std::stringstream error;
       error << "Wrong data in floatVector collection, expected 125, 25, " << 0 << " got " << floatVector[0] << ", "
-            << floatVector[1] << ", " << floatVector[2] << "";
+            << floatVector[1] << ", " << floatVector[2];
       throw std::runtime_error(error.str());
     }
 
@@ -79,7 +79,7 @@ struct ExampleFunctionalConsumerMultiple final
               << ", " << 3 + i + m_offset << ", " << 4 + i + m_offset << ", " << 5 + i + m_offset << ", "
               << 6 + i + m_offset << " got " << particle.getPDG() << ", " << particle.getGeneratorStatus() << ", "
               << particle.getSimulatorStatus() << ", " << particle.getCharge() << ", " << particle.getTime() << ", "
-              << particle.getMass() << "";
+              << particle.getMass();
         throw std::runtime_error(error.str());
       }
       i++;
@@ -89,7 +89,7 @@ struct ExampleFunctionalConsumerMultiple final
         (simTrackerHits[0].getPosition()[2] != 5)) {
       std::stringstream error;
       error << "Wrong data in simTrackerHits collection, expected 3, 4, 5 got " << simTrackerHits[0].getPosition()[0]
-            << ", " << simTrackerHits[0].getPosition()[1] << ", " << simTrackerHits[0].getPosition()[2] << "";
+            << ", " << simTrackerHits[0].getPosition()[1] << ", " << simTrackerHits[0].getPosition()[2];
       throw std::runtime_error(error.str());
     }
 
@@ -97,15 +97,14 @@ struct ExampleFunctionalConsumerMultiple final
         (trackerHits[0].getPosition()[2] != 5)) {
       std::stringstream error;
       error << "Wrong data in trackerHits collection, expected 3, 4, 5 got " << trackerHits[0].getPosition()[0] << ", "
-            << trackerHits[0].getPosition()[1] << ", " << trackerHits[0].getPosition()[2] << "";
+            << trackerHits[0].getPosition()[1] << ", " << trackerHits[0].getPosition()[2];
       throw std::runtime_error(error.str());
     }
 
-    if ((tracks[0].getType() != 1) || (std::abs(tracks[0].getChi2() - 2.1) > 1e-6) || (tracks[0].getNdf() != 3) ||
-        (std::abs(tracks[0].getRadiusOfInnermostHit() - 6.1) > 1e-6)) {
+    if ((tracks[0].getType() != 1) || (std::abs(tracks[0].getChi2() - 2.1) > 1e-6) || (tracks[0].getNdf() != 3)) {
       std::stringstream error;
       error << "Wrong data in tracks collection, expected 1, 2.1, 3, 4.1, 5.1, 6.1 got " << tracks[0].getType() << ", "
-            << tracks[0].getChi2() << ", " << tracks[0].getNdf() << ", " << tracks[0].getRadiusOfInnermostHit() << "";
+            << tracks[0].getChi2() << ", " << tracks[0].getNdf();
       throw std::runtime_error(error.str());
     }
   }
