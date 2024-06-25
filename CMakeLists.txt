@@ -22,7 +22,11 @@ project(k4FWCore)
 
 find_package(ROOT COMPONENTS RIO Tree REQUIRED)
 find_package(Gaudi REQUIRED)
-find_package(podio REQUIRED)
+  find_package(podio 0.16.3)  # this will not find 1.0 and newer
+  if(NOT podio_FOUND)
+    # we try to find a newer version now
+    find_package(podio 1.0 REQUIRED)
+  endif()
 find_package(EDM4HEP REQUIRED)
 
 include(GNUInstallDirs)
