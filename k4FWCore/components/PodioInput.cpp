@@ -32,7 +32,6 @@
 #include "edm4hep/MCRecoParticleAssociationCollection.h"
 #include "edm4hep/MCRecoTrackParticleAssociationCollection.h"
 #include "edm4hep/MCRecoTrackerAssociationCollection.h"
-#include "edm4hep/MCRecoTrackerHitPlaneAssociationCollection.h"
 #include "edm4hep/ParticleIDCollection.h"
 #include "edm4hep/RawCalorimeterHitCollection.h"
 #include "edm4hep/RawTimeSeriesCollection.h"
@@ -121,9 +120,6 @@ void PodioInput::fillReaders() {
   };
   m_readers["edm4hep::MCRecoTrackerAssociationCollection"] = [&](std::string_view collName) {
     maybeRead<edm4hep::MCRecoTrackerAssociationCollection>(collName);
-  };
-  m_readers["edm4hep::MCRecoTrackerHitPlaneAssociationCollection"] = [&](std::string_view collName) {
-    maybeRead<edm4hep::MCRecoTrackerHitPlaneAssociationCollection>(collName);
   };
   m_readers["edm4hep::MCRecoClusterParticleAssociationCollection"] = [&](std::string_view collName) {
     maybeRead<edm4hep::MCRecoClusterParticleAssociationCollection>(collName);
