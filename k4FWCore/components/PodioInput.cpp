@@ -36,11 +36,9 @@
 #include "edm4hep/RawCalorimeterHitCollection.h"
 #include "edm4hep/RawTimeSeriesCollection.h"
 #include "edm4hep/RecDqdxCollection.h"
-#include "edm4hep/RecIonizationClusterCollection.h"
 #include "edm4hep/RecoParticleVertexAssociationCollection.h"
 #include "edm4hep/ReconstructedParticleCollection.h"
 #include "edm4hep/SimCalorimeterHitCollection.h"
-#include "edm4hep/SimPrimaryIonizationClusterCollection.h"
 #include "edm4hep/SimTrackerHitCollection.h"
 #include "edm4hep/TimeSeriesCollection.h"
 #include "edm4hep/TrackCollection.h"
@@ -53,7 +51,6 @@ namespace edm4hep {
 }  // namespace edm4hep
 #endif
 #include "edm4hep/TrackerHitPlaneCollection.h"
-#include "edm4hep/TrackerPulseCollection.h"
 #include "edm4hep/VertexCollection.h"
 
 #include "podio/UserDataCollection.h"
@@ -129,15 +126,6 @@ void PodioInput::fillReaders() {
   };
   m_readers["edm4hep::RecoParticleVertexAssociationCollection"] = [&](std::string_view collName) {
     maybeRead<edm4hep::RecoParticleVertexAssociationCollection>(collName);
-  };
-  m_readers["edm4hep::SimPrimaryIonizationClusterCollection"] = [&](std::string_view collName) {
-    maybeRead<edm4hep::SimPrimaryIonizationClusterCollection>(collName);
-  };
-  m_readers["edm4hep::TrackerPulseCollection"] = [&](std::string_view collName) {
-    maybeRead<edm4hep::TrackerPulseCollection>(collName);
-  };
-  m_readers["edm4hep::RecIonizationClusterCollection"] = [&](std::string_view collName) {
-    maybeRead<edm4hep::RecIonizationClusterCollection>(collName);
   };
   m_readers["edm4hep::TimeSeriesCollection"] = [&](std::string_view collName) {
     maybeRead<edm4hep::TimeSeriesCollection>(collName);
