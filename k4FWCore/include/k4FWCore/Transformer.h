@@ -27,6 +27,7 @@
 
 // #include "GaudiKernel/CommonMessaging.h"
 
+#include <ranges>
 #include <type_traits>
 #include <utility>
 
@@ -55,7 +56,7 @@ namespace k4FWCore {
       std::tuple<std::vector<InputHandle_t<typename transformType<In>::type>>...> m_inputs;
       std::tuple<std::vector<OutputHandle_t<typename transformType<Out>::type>>>  m_outputs;
       std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)>          m_inputLocations{};
-      std::array<Gaudi::Property<std::vector<DataObjID>>, 1>                      m_outputLocations{};
+      Gaudi::Property<std::vector<DataObjID>>                                     m_outputLocations{};
 
       using base_class = Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>;
 
@@ -86,7 +87,7 @@ namespace k4FWCore {
                 this, std::get<J>(outputs).first, to_DataObjID(std::get<J>(outputs).second),
                 [this](Gaudi::Details::PropertyBase&) {
                   std::vector<OutputHandle_t<typename transformType<Out>::type>> h;
-                  for (auto& inpID : this->m_outputLocations[J].value()) {
+                  for (auto& inpID : this->m_outputLocations.value()) {
                     if (inpID.key().empty()) {
                       continue;
                     }
@@ -122,6 +123,17 @@ namespace k4FWCore {
           (e.code() ? this->warning() : this->error()) << e.tag() << " : " << e.message() << endmsg;
           return e.code();
         }
+      }
+
+      const auto inputLocations(int i) const {
+        if (i >= sizeof...(In)) {
+          throw GaudiException("Called inputLocations with an index out of range", "Consumer", StatusCode::FAILURE);
+        }
+        return m_inputLocations[i] | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
+      }
+
+      const auto outputLocations() const {
+        return m_outputLocations | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
       }
 
       // ... instead, they must implement the following operator
@@ -206,6 +218,21 @@ namespace k4FWCore {
           (e.code() ? this->warning() : this->error()) << e.tag() << " : " << e.message() << endmsg;
           return e.code();
         }
+      }
+
+      const auto inputLocations(int i) const {
+        if (i >= sizeof...(In)) {
+          throw GaudiException("Called inputLocations with an index out of range", "Consumer", StatusCode::FAILURE);
+        }
+        return m_inputLocations[i] | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
+      }
+
+      const auto outputLocations(int i) const {
+        if (i >= sizeof...(Out)) {
+          throw GaudiException("Called outputLocations with an index out of range", "Consumer", StatusCode::FAILURE);
+        }
+        return m_outputLocations[i] |
+               std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
       }
 
       // ... instead, they must implement the following operator

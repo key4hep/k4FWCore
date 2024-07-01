@@ -27,6 +27,7 @@
 
 #include "k4FWCore/FunctionalUtils.h"
 
+#include <ranges>
 #include <type_traits>
 #include <utility>
 
@@ -90,6 +91,13 @@ namespace k4FWCore {
 
       // ... instead, they must implement the following operator
       virtual void operator()(const In&...) const = 0;
+
+      const auto inputLocations(int i) const {
+        if (i >= sizeof...(In)) {
+          throw GaudiException("Called inputLocations with an index out of range", "Consumer", StatusCode::FAILURE);
+        }
+        return m_inputLocations[i] | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
+      }
     };
 
   }  // namespace details

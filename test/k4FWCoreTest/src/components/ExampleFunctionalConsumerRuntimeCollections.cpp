@@ -37,7 +37,12 @@ struct ExampleFunctionalConsumerRuntimeCollections final
     if (input.size() != 3) {
       throw std::runtime_error("Wrong size of the input vector, expected 3, got " + std::to_string(input.size()));
     }
-    auto test = edm4hep::MCParticleCollection();
+    for (int i = 0; i < 3; i++) {
+      if (inputLocations(0)[i] != "MCParticles" + std::to_string(i)) {
+        throw std::runtime_error("Wrong name of the input collection, expected MCParticles" + std::to_string(i) +
+                                 ", got " + std::string(inputLocations(0)[i]));
+      }
+    }
     for (auto& coll : input) {
       int i = 0;
       for (const auto&& particle : *coll) {
