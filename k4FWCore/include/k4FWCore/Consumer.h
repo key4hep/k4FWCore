@@ -27,6 +27,7 @@
 
 #include "k4FWCore/FunctionalUtils.h"
 
+#include <ranges>
 #include <type_traits>
 #include <utility>
 
@@ -41,8 +42,8 @@ namespace k4FWCore {
         : Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_> {
       using Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>::DataHandleMixin;
 
-      static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isMapToCollLike<In>::value) && ...),
-                    "Consumer input types must be EDM4hep collections or maps to collections");
+      static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike_v<In>)&&...),
+                    "Consumer input types must be EDM4hep collections or vectors of collection pointers");
 
       template <typename T>
       using InputHandle_t = Gaudi::Functional::details::InputHandle_t<Traits_, std::remove_pointer_t<T>>;
@@ -90,6 +91,13 @@ namespace k4FWCore {
 
       // ... instead, they must implement the following operator
       virtual void operator()(const In&...) const = 0;
+
+      const auto inputLocations(int i) const {
+        if (i >= sizeof...(In)) {
+          throw GaudiException("Called inputLocations with an index out of range", "Consumer", StatusCode::FAILURE);
+        }
+        return m_inputLocations[i] | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
+      }
     };
 
   }  // namespace details
