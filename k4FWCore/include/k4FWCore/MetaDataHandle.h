@@ -21,8 +21,6 @@
 
 #include "k4FWCore/PodioDataSvc.h"
 
-#include "podio/podioVersion.h"
-
 template <typename T> class MetaDataHandle {
 public:
   MetaDataHandle();
@@ -92,19 +90,7 @@ MetaDataHandle<T>::MetaDataHandle(const Gaudi::DataHandle& handle, const std::st
 //---------------------------------------------------------------------------
 template <typename T> std::optional<T> MetaDataHandle<T>::get_optional() const {
   const auto& frame = m_podio_data_service->getMetaDataFrame();
-#if PODIO_BUILD_VERSION > PODIO_VERSION(0, 99, 0)
   return frame.getParameter<T>(fullDescriptor());
-#else
-  // explicitly make a copy here and move it into the optional below
-  auto val = frame.getParameter<T>(fullDescriptor());
-  // This is what happens if we have a non-present key, so we can use it as a
-  // way to determine if the parameter was (likely) unset. For more details see
-  // https://github.com/AIDASoft/podio/issues/576
-  if (val == T{}) {
-    return std::nullopt;
-  }
-  return std::optional<T>(std::move(val));
-#endif
 }
 
 //---------------------------------------------------------------------------
