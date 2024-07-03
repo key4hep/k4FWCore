@@ -125,14 +125,14 @@ namespace k4FWCore {
         }
       }
 
-      const auto inputLocations(int i) const {
+      auto inputLocations(int i) const {
         if (i >= sizeof...(In)) {
           throw GaudiException("Called inputLocations with an index out of range", "Consumer", StatusCode::FAILURE);
         }
         return m_inputLocations[i] | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
       }
 
-      const auto outputLocations() const {
+      auto outputLocations() const {
         return m_outputLocations | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
       }
 
@@ -220,14 +220,14 @@ namespace k4FWCore {
         }
       }
 
-      const auto inputLocations(int i) const {
+      auto inputLocations(int i) const {
         if (i >= sizeof...(In)) {
           throw GaudiException("Called inputLocations with an index out of range", "Consumer", StatusCode::FAILURE);
         }
         return m_inputLocations[i] | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
       }
 
-      const auto outputLocations(int i) const {
+      auto outputLocations(int i) const {
         if (i >= sizeof...(Out)) {
           throw GaudiException("Called outputLocations with an index out of range", "Consumer", StatusCode::FAILURE);
         }
