@@ -6,6 +6,7 @@ import argparse
 import logging
 
 from k4FWCore.utils import load_file
+from ROOT import gROOT
 
 # these default properties are filtered as otherwise they will clutter the argument list
 FILTER_GAUDI_PROPS = [
@@ -229,6 +230,9 @@ def main():
 
     c = gaudimain()
     if not opts.dry_run:
+        # ensure ROOT runs in batch mode
+        gROOT.SetBatch(True)
+
         # Do the real processing
         retcode = c.run(opts.gdb)
         # User requested stop returns non-zero exit code see: https://github.com/key4hep/k4FWCore/issues/125
