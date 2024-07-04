@@ -6,7 +6,6 @@ import argparse
 import logging
 
 from k4FWCore.utils import load_file
-from ROOT import gROOT
 
 # these default properties are filtered as otherwise they will clutter the argument list
 FILTER_GAUDI_PROPS = [
@@ -149,6 +148,12 @@ def main():
         help="Print all the configurable components available in the framework and exit",
     )
     parser.add_argument("--gdb", action="store_true", help="Attach gdb debugger")
+    parser.add_argument(
+        "--disableROOTBatchMode",
+        action="store_true",
+        help="Do not enforce ROOT batch mode",
+        default=False,
+    )
 
     # Once to parse the files and another time below to have the new parameters
     # in the namespace since parsing of the file happens when the namespace
@@ -230,8 +235,11 @@ def main():
 
     c = gaudimain()
     if not opts.dry_run:
-        # ensure ROOT runs in batch mode
-        gROOT.SetBatch(True)
+        if not opts.disableROOTBatchMode:
+            # ensure ROOT runs in batch mode
+            from ROOT import gROOT
+
+            gROOT.SetBatch(True)
 
         # Do the real processing
         retcode = c.run(opts.gdb)
