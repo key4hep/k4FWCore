@@ -27,7 +27,7 @@
 #include <string>
 
 struct ExampleFunctionalConsumer final : k4FWCore::Consumer<void(const edm4hep::MCParticleCollection& input)> {
-  // The pair in KeyValue can be changed from python and it corresponds
+  // The pair in KeyValues can be changed from python and it corresponds
   // to the name of the input collection
   ExampleFunctionalConsumer(const std::string& name, ISvcLocator* svcLoc)
       : Consumer(name, svcLoc, KeyValues("InputCollection", {"MCParticles"})) {}

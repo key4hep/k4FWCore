@@ -17,8 +17,7 @@
 # limitations under the License.
 #
 
-# This is an example reading from a file and using a consumer with several inputs
-# to check that the contents of the file are the expected ones
+# This is an example reading from multiple files, which for Gaudi will look like a single file
 
 from Gaudi.Configuration import INFO
 from Configurables import ExampleFunctionalConsumer

@@ -17,8 +17,7 @@
 # limitations under the License.
 #
 
-# This is an example reading from a file and using a producer with several inputs
-# to check that the contents of the file are the expected ones
+# This is an example using a consumer that takes any number of collections
 
 from Gaudi.Configuration import INFO
 from Configurables import (
@@ -42,7 +41,6 @@ producer2 = ExampleFunctionalProducer(
 )
 consumer = ExampleFunctionalConsumerRuntimeCollections(
     "Consumer",
-    # InputCollection="MCParticles0 MCParticles1 MCParticles2",
     InputCollection=["MCParticles0", "MCParticles1", "MCParticles2"],
     Offset=0,
 )

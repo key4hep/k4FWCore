@@ -26,7 +26,7 @@
 #include <string>
 
 struct ExampleFunctionalProducer final : k4FWCore::Producer<edm4hep::MCParticleCollection()> {
-  // The pair in KeyValue can be changed from python and it corresponds
+  // The pair in KeyValues can be changed from python and it corresponds
   // to the name of the output collection
   ExampleFunctionalProducer(const std::string& name, ISvcLocator* svcLoc)
       : Producer(name, svcLoc, {}, KeyValues("OutputCollection", {"MCParticles"})) {}

@@ -23,7 +23,6 @@ from Gaudi.Configuration import INFO
 from Configurables import ExampleFunctionalProducer
 from Configurables import EventDataSvc
 from k4FWCore import ApplicationMgr, IOSvc
-from Configurables import Writer
 from k4FWCore.parseArgs import parser
 
 parser.add_argument("--second", action="store_true")
@@ -42,10 +41,8 @@ iosvc.output = name
 
 producer = ExampleFunctionalProducer("ExampleFunctionalProducer")
 
-writer = Writer("Writer")
-
 ApplicationMgr(
-    TopAlg=[producer, writer],
+    TopAlg=[producer],
     EvtSel="NONE",
     EvtMax=10 if not args[0].second else 20,
     ExtSvc=[EventDataSvc("EventDataSvc")],

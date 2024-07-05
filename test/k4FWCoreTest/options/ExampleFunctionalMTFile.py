@@ -17,8 +17,8 @@
 # limitations under the License.
 #
 
-# This is an example reading from a file and using a consumer with several inputs
-# to check that the contents of the file are the expected ones
+# This is an example of reading data from a file, transforming it and writing to
+# an output file in a multithreaded environment
 
 from Gaudi.Configuration import INFO, WARNING
 from Configurables import ExampleFunctionalTransformer, ExampleFunctionalConsumer

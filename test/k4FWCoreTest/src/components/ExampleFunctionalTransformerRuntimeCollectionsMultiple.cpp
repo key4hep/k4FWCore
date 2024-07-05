@@ -46,7 +46,7 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
     : k4FWCore::MultiTransformer<retType(const FloatColl&, const ParticleColl&, const SimTrackerHitColl&,
                                          const TrackerHitColl&, const TrackColl&)> {
   // The pairs in KeyValue can be changed from python and they correspond
-  // to the names of the input collection
+  // to the names of the input collections
   ExampleFunctionalTransformerRuntimeCollectionsMultiple(const std::string& name, ISvcLocator* svcLoc)
       : MultiTransformer(name, svcLoc,
                          {

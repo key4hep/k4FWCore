@@ -17,8 +17,8 @@
 # limitations under the License.
 #
 
-# This is an example reading from a file and using a consumer with several inputs
-# to check that the contents of the file are the expected ones
+# This is an example reading from a file and transforming multiple collections
+# and then writing to a file
 
 from Gaudi.Configuration import INFO
 from Configurables import ExampleFunctionalTransformerMultiple
@@ -31,8 +31,6 @@ svc.output = "functional_transformer_multiple.root"
 
 transformer = ExampleFunctionalTransformerMultiple(
     "Transformer",
-    # InputCollection="MCParticles",
-    # OutputCollection="NewMCParticles")
 )
 
 mgr = ApplicationMgr(

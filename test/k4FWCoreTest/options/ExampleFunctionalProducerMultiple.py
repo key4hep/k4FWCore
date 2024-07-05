@@ -17,7 +17,8 @@
 # limitations under the License.
 #
 
-# This is an example using a producer with a multiple outputs and saving that to a file
+# This is an example using a producer with multiple outputs and saving the new
+# collections to a file
 
 from Gaudi.Configuration import INFO
 from Configurables import ExampleFunctionalProducerMultiple
