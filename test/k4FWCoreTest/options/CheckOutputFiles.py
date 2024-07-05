@@ -23,6 +23,7 @@ except ImportError:
 
     print(f'PYTHONPATH={os.environ["PYTHONPATH"]}')
     raise
+import ROOT
 
 
 def check_collections(filename, names):
@@ -118,3 +119,13 @@ check_collections(
     "output_k4test_exampledata_functional_mix_iosvc.root",
     mix_collections,
 )
+
+f = ROOT.TFile.Open("functional_producer_hist.root")
+for i in range(2):
+    if (
+        str(f.GetListOfKeys()[i])
+        != f"Name: ExampleFunctionalProducer{i+1} Title: ExampleFunctionalProducer{i+1}"
+    ):
+        raise RuntimeError(
+            "Directory structure does not match expected for functional_producer_hist.root"
+        )
