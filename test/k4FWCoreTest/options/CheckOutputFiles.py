@@ -120,12 +120,12 @@ check_collections(
     mix_collections,
 )
 
-f = ROOT.TFile.Open("functional_producer_hist.root")
+f = ROOT.TFile.Open("functional_transformer_hist.root")
 for i in range(2):
     if (
         str(f.GetListOfKeys()[i])
-        != f"Name: ExampleFunctionalProducer{i+1} Title: ExampleFunctionalProducer{i+1}"
+        != f"Name: ExampleFunctionalTransformerHist{i+1} Title: ExampleFunctionalTransformerHist{i+1}"
     ):
         raise RuntimeError(
-            "Directory structure does not match expected for functional_producer_hist.root"
+            "Directory structure does not match expected for functional_transformer_hist.root"
         )

@@ -20,14 +20,14 @@
 # This is an example using two producers that create histograms and persist them to a ROOT file
 
 from Gaudi.Configuration import INFO
-from Configurables import ExampleFunctionalProducerHist
+from Configurables import ExampleFunctionalProducer, ExampleFunctionalTransformerHist
 from k4FWCore import ApplicationMgr
 from Configurables import RootHistSvc
 from Configurables import Gaudi__Histograming__Sink__Root as RootHistoSink
 from Configurables import HiveWhiteBoard, HiveSlimEventLoopMgr, AvalancheSchedulerSvc
 
 # Multithreaded also works fine with histograms
-multithreaded = True
+multithreaded = False
 threads = 2
 slots = 3
 if multithreaded:
@@ -46,20 +46,33 @@ if multithreaded:
     scheduler.ShowControlFlow = True
 
 
-producer1 = ExampleFunctionalProducerHist(
-    "ExampleFunctionalProducer1", OutputCollection=["dummy1"]
+producer1 = ExampleFunctionalProducer(
+    "ExampleFunctionalProducer1", OutputCollection=["MCParticles1"]
 )
-producer2 = ExampleFunctionalProducerHist(
-    "ExampleFunctionalProducer2", OutputCollection=["dummy2"]
+producer2 = ExampleFunctionalProducer(
+    "ExampleFunctionalProducer2", OutputCollection=["MCParticles2"]
+)
+
+transformer1 = ExampleFunctionalTransformerHist(
+    "ExampleFunctionalTransformerHist1",
+    InputCollection=["MCParticles1"],
+    OutputCollection=["dummy1"],
+)
+
+transformer2 = ExampleFunctionalTransformerHist(
+    "ExampleFunctionalTransformerHist2",
+    InputCollection=["MCParticles2"],
+    OutputCollection=["dummy2"],
+    FirstParticle=False,
 )
 
 hist = RootHistSvc("HistogramPersistencySvc")
 root_hist_svc = RootHistoSink("RootHistoSink")
-root_hist_svc.FileName = "functional_producer_hist.root"
+root_hist_svc.FileName = "functional_transformer_hist.root"
 
 
 app = ApplicationMgr(
-    TopAlg=[producer1, producer2],
+    TopAlg=[producer1, producer2, transformer1, transformer2],
     EvtSel="NONE",
     EvtMax=10,
     ExtSvc=[root_hist_svc] + ([whiteboard] if multithreaded else []),
