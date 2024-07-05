@@ -58,22 +58,12 @@ root_hist_svc = RootHistoSink("RootHistoSink")
 root_hist_svc.FileName = "functional_producer_hist.root"
 
 
-if not multithreaded:
-    app = ApplicationMgr(
-        TopAlg=[producer1, producer2],
-        EvtSel="NONE",
-        EvtMax=10,
-        ExtSvc=[root_hist_svc] + ([whiteboard] if multithreaded else []),
-        OutputLevel=INFO,
-        HistogramPersistency="ROOT",
-    )
-else:
-    app = ApplicationMgr(
-        TopAlg=[producer1, producer2],
-        EvtSel="NONE",
-        EvtMax=10,
-        ExtSvc=[root_hist_svc] + ([whiteboard] if multithreaded else []),
-        OutputLevel=INFO,
-        HistogramPersistency="ROOT",
-        EventLoop=slimeventloopmgr,
-    )
+app = ApplicationMgr(
+    TopAlg=[producer1, producer2],
+    EvtSel="NONE",
+    EvtMax=10,
+    ExtSvc=[root_hist_svc] + ([whiteboard] if multithreaded else []),
+    OutputLevel=INFO,
+    HistogramPersistency="ROOT",
+    EventLoop="EventLoopMgr" if not multithreaded else slimeventloopmgr,
+)

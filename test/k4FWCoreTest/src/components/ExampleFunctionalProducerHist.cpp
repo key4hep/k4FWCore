@@ -37,7 +37,7 @@ struct ExampleFunctionalProducerHist final : k4FWCore::Producer<edm4hep::MCParti
     // Not thread-safe!
     Rndm::Numbers rndu(randSvc(), Rndm::Flat(0, 1));
     ++m_histograms[rndu()];
-    // Return an empty collection since we don't care about the collection
+    // Return an empty collection since we don't care about the collection for this example
     return {};
   }
 
