@@ -26,7 +26,7 @@ from Configurables import EventDataSvc
 from k4FWCore import ApplicationMgr, IOSvc
 
 svc = IOSvc("IOSvc")
-svc.input = "output_k4test_exampledata_producer_multiple.root"
+svc.input = "functional_producer_multiple.root"
 svc.output = "functional_transformer_multiple.root"
 
 transformer = ExampleFunctionalTransformerMultiple(

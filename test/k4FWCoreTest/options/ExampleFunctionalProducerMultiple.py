@@ -27,7 +27,7 @@ from Configurables import EventDataSvc
 
 
 iosvc = IOSvc("IOSvc")
-iosvc.output = "output_k4test_exampledata_producer_multiple.root"
+iosvc.output = "functional_producer_multiple.root"
 # Collections can be dropped
 # out.outputCommands = ["drop *"]
 

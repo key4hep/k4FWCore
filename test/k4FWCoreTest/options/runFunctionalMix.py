@@ -47,7 +47,7 @@ print(args.iosvc)
 
 if not args.iosvc:
     podioevent = k4DataSvc("EventDataSvc")
-    podioevent.input = "output_k4test_exampledata_producer_multiple.root"
+    podioevent.input = "functional_producer_multiple.root"
 
     inp = PodioInput()
     inp.collections = [
@@ -60,15 +60,15 @@ if not args.iosvc:
     ]
 
     out = PodioOutput()
-    out.filename = "output_k4test_exampledata_functional_mix.root"
+    out.filename = "functional_mix.root"
     out.outputCommands = ["keep *"]
 
 else:
     from k4FWCore import IOSvc, ApplicationMgr
 
     iosvc = IOSvc("IOSvc")
-    iosvc.input = "output_k4test_exampledata_producer_multiple.root"
-    iosvc.output = "output_k4test_exampledata_functional_mix_iosvc.root"
+    iosvc.input = "functional_producer_multiple.root"
+    iosvc.output = "functional_mix_iosvc.root"
 
 # Check input with functional and old algorithms
 

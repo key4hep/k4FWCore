@@ -30,9 +30,9 @@ args = parser.parse_known_args()
 
 iosvc = IOSvc("IOSvc")
 name = (
-    "output_k4test_exampledata_producer.root"
+    "functional_producer.root"
     if not args[0].second
-    else "output_k4test_exampledata_producer2.root"
+    else "functional_producer2.root"
 )
 iosvc.output = name
 # Collections can be dropped
