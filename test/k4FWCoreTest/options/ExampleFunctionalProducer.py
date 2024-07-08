@@ -29,11 +29,7 @@ parser.add_argument("--second", action="store_true")
 args = parser.parse_known_args()
 
 iosvc = IOSvc("IOSvc")
-name = (
-    "functional_producer.root"
-    if not args[0].second
-    else "functional_producer2.root"
-)
+name = "functional_producer.root" if not args[0].second else "functional_producer2.root"
 iosvc.output = name
 # Collections can be dropped
 # out.outputCommands = ["drop *"]

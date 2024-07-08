@@ -66,7 +66,7 @@ transformer2 = ExampleFunctionalTransformerHist(
     FirstParticle=False,
 )
 
-hist = RootHistSvc("HistogramPersistencySvc")
+hps = RootHistSvc("HistogramPersistencySvc")
 root_hist_svc = RootHistoSink("RootHistoSink")
 root_hist_svc.FileName = "functional_transformer_hist.root"
 
