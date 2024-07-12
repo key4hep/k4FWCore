@@ -28,6 +28,7 @@
 // #include "GaudiKernel/CommonMessaging.h"
 
 #include <ranges>
+#include <stdexcept>
 #include <type_traits>
 #include <utility>
 
@@ -43,7 +44,7 @@ namespace k4FWCore {
       using Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>::DataHandleMixin;
 
       static_assert(
-          ((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike_v<In>)&&...),
+          ((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike_v<In>) && ...),
           "Transformer and Producer input types must be EDM4hep collections or vectors of collection pointers");
       static_assert((std::is_base_of_v<podio::CollectionBase, Out> || isVectorLike_v<Out>),
                     "Transformer and Producer output types must be EDM4hep collections or vectors of collections");
@@ -125,14 +126,48 @@ namespace k4FWCore {
         }
       }
 
+      /**
+       * @brief    Get the input locations for a given input index
+       * @param i  The index of the input
+       * @return   A range of the input locations
+       */
       auto inputLocations(int i) const {
         if (i >= sizeof...(In)) {
-          throw GaudiException("Called inputLocations with an index out of range", "Consumer", StatusCode::FAILURE);
+          throw std::out_of_range("Called inputLocations with an index out of range");
         }
         return m_inputLocations[i] | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
       }
+      /**
+       * @brief       Get the input locations for a given input name
+       * @param name  The name of the input
+       * @return      A range of the input locations
+       */
+      const auto inputLocations(std::string_view name) const {
+        auto it = std::find_if(m_inputLocations.begin(), m_inputLocations.end(),
+                               [&name](const auto& prop) { return prop.name() == name; });
+        if (it == m_inputLocations.end()) {
+          throw std::runtime_error("Called inputLocations with an unknown name");
+        }
+        return it->value() | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
+      }
 
+      /**
+       * @brief    Get the output locations for a given output index
+       * @param i  The index of the output
+       * @return   A range of the output locations
+       */
       auto outputLocations() const {
+        return m_outputLocations | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
+      }
+      /**
+       * @brief       Get the output locations for a given output name
+       * @param name  The name of the output
+       * @return      A range of the output locations
+       */
+      const auto outputLocations(std::string_view name) const {
+        if (name != m_outputLocations.name()) {
+          throw std::runtime_error("Called outputLocations with an unknown name");
+        }
         return m_outputLocations | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
       }
 
@@ -220,19 +255,55 @@ namespace k4FWCore {
         }
       }
 
-      auto inputLocations(int i) const {
+      /**
+       * @brief    Get the input locations for a given input index
+       * @param i  The index of the input
+       * @return   A range of the input locations
+       */
+      const auto inputLocations(int i) const {
         if (i >= sizeof...(In)) {
-          throw GaudiException("Called inputLocations with an index out of range", "Consumer", StatusCode::FAILURE);
+          throw std::out_of_range("Called inputLocations with an index out of range");
         }
         return m_inputLocations[i] | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
       }
+      /**
+       * @brief       Get the input locations for a given input name
+       * @param name  The name of the input
+       * @return      A range of the input locations
+       */
+      const auto inputLocations(std::string_view name) const {
+        auto it = std::find_if(m_inputLocations.begin(), m_inputLocations.end(),
+                               [&name](const auto& prop) { return prop.name() == name; });
+        if (it == m_inputLocations.end()) {
+          throw std::runtime_error("Called inputLocations with an unknown name");
+        }
+        return it->value() | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
+      }
 
+      /**
+       * @brief    Get the output locations for a given output index
+       * @param i  The index of the output
+       * @return   A range of the output locations
+       */
       auto outputLocations(int i) const {
         if (i >= sizeof...(Out)) {
-          throw GaudiException("Called outputLocations with an index out of range", "Consumer", StatusCode::FAILURE);
+          throw std::out_of_range("Called outputLocations with an index out of range");
         }
         return m_outputLocations[i] |
                std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
+      }
+      /**
+       * @brief       Get the output locations for a given output name
+       * @param name  The name of the output
+       * @return      A range of the output locations
+       */
+      const auto outputLocations(std::string_view name) const {
+        auto it = std::find_if(m_outputLocations.begin(), m_outputLocations.end(),
+                               [&name](const auto& prop) { return prop.name() == name; });
+        if (it == m_outputLocations.end()) {
+          throw std::runtime_error("Called outputLocations with an unknown name");
+        }
+        return it->value() | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
       }
 
       // ... instead, they must implement the following operator

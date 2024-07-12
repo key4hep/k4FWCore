@@ -42,6 +42,12 @@ struct ExampleFunctionalConsumerRuntimeCollections final
         throw std::runtime_error("Wrong name of the input collection, expected MCParticles" + std::to_string(i) +
                                  ", got " + std::string(inputLocations(0)[i]));
       }
+      // Add another redundant check to show that the inputLocations() function
+      // can be called with a name instead of an index
+      if (inputLocations("InputCollection")[i] != "MCParticles" + std::to_string(i)) {
+        throw std::runtime_error("Wrong name of the input collection, expected MCParticles" + std::to_string(i) +
+                                 ", got " + std::string(inputLocations(0)[i]));
+      }
     }
     for (auto& coll : input) {
       int i = 0;

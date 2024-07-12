@@ -28,6 +28,7 @@
 #include "k4FWCore/FunctionalUtils.h"
 
 #include <ranges>
+#include <stdexcept>
 #include <type_traits>
 #include <utility>
 
@@ -42,7 +43,7 @@ namespace k4FWCore {
         : Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_> {
       using Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>::DataHandleMixin;
 
-      static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike_v<In>)&&...),
+      static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike_v<In>) && ...),
                     "Consumer input types must be EDM4hep collections or vectors of collection pointers");
 
       template <typename T>
@@ -92,11 +93,29 @@ namespace k4FWCore {
       // ... instead, they must implement the following operator
       virtual void operator()(const In&...) const = 0;
 
-      auto inputLocations(int i) const {
+      /**
+       * @brief    Get the input locations for a given input index
+       * @param i  The index of the input
+       * @return   A range of the input locations
+       */
+      const auto inputLocations(int i) const {
         if (i >= sizeof...(In)) {
-          throw GaudiException("Called inputLocations with an index out of range", "Consumer", StatusCode::FAILURE);
+          throw std::out_of_range("Called inputLocations with an index out of range");
         }
         return m_inputLocations[i] | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
+      }
+      /**
+       * @brief       Get the input locations for a given input name
+       * @param name  The name of the input
+       * @return      A range of the input locations
+       */
+      const auto inputLocations(std::string_view name) const {
+        auto it = std::find_if(m_inputLocations.begin(), m_inputLocations.end(),
+                               [&name](const auto& prop) { return prop.name() == name; });
+        if (it == m_inputLocations.end()) {
+          throw std::runtime_error("Called inputLocations with an unknown name");
+        }
+        return it->value() | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
       }
     };
 

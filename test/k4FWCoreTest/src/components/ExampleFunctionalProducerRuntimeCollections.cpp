@@ -38,6 +38,11 @@ struct ExampleFunctionalProducerRuntimeCollections final
       if (locs[i] != "MCParticles" + std::to_string(i)) {
         throw GaudiException("Output collection name does not match the expected one", name(), StatusCode::FAILURE);
       }
+      // Add another redundant check to show that the outputLocations() function
+      // can be called with a name instead of an index
+      if (outputLocations("OutputCollections")[i] != "MCParticles" + std::to_string(i)) {
+        throw GaudiException("Output collection name does not match the expected one", name(), StatusCode::FAILURE);
+      }
       info() << "Creating collection " << i << endmsg;
       auto coll = edm4hep::MCParticleCollection();
       coll->create(1, 2, 3, 4.f, 5.f, 6.f);
