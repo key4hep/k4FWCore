@@ -44,7 +44,7 @@ namespace k4FWCore {
       using Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>::DataHandleMixin;
 
       static_assert(
-          ((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike_v<In>) && ...),
+          ((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike_v<In>)&& ...),
           "Transformer and Producer input types must be EDM4hep collections or vectors of collection pointers");
       static_assert((std::is_base_of_v<podio::CollectionBase, Out> || isVectorLike_v<Out>),
                     "Transformer and Producer output types must be EDM4hep collections or vectors of collections");
