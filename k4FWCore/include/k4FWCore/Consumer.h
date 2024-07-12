@@ -43,7 +43,7 @@ namespace k4FWCore {
         : Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_> {
       using Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>::DataHandleMixin;
 
-      static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike_v<In>)&& ...),
+      static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike_v<In>)&&...),
                     "Consumer input types must be EDM4hep collections or vectors of collection pointers");
 
       template <typename T>
@@ -100,7 +100,8 @@ namespace k4FWCore {
        */
       const auto inputLocations(int i) const {
         if (i >= sizeof...(In)) {
-          throw std::out_of_range("Called inputLocations with an index out of range");
+          throw std::out_of_range("Called inputLocations with an index out of range, index: " + std::to_string(i) +
+                                  ", number of inputs: " + std::to_string(sizeof...(In)));
         }
         return m_inputLocations[i] | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
       }
@@ -110,8 +111,7 @@ namespace k4FWCore {
        * @return      A range of the input locations
        */
       const auto inputLocations(std::string_view name) const {
-        auto it = std::find_if(m_inputLocations.begin(), m_inputLocations.end(),
-                               [&name](const auto& prop) { return prop.name() == name; });
+        auto it = std::ranges::find_if(m_inputLocations, [&name](const auto& prop) { return prop.name() == name; });
         if (it == m_inputLocations.end()) {
           throw std::runtime_error("Called inputLocations with an unknown name");
         }
