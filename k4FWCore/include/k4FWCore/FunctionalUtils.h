@@ -45,7 +45,7 @@ namespace k4FWCore {
     template <typename T, typename P> auto maybeTransformToEDM4hep(P& arg) { return arg; }
 
     template <typename T, typename P>
-      requires std::same_as<P, std::map<std::string, std::shared_ptr<podio::CollectionBase>>>
+      requires std::same_as<P, std::vector<std::string, std::shared_ptr<podio::CollectionBase>>>
     auto maybeTransformToEDM4hep(P& arg) {
       return arg;
     }
@@ -142,10 +142,10 @@ namespace k4FWCore {
           auto inputMap = std::vector<const EDM4hepType*>();
           for (auto& handle : std::get<Index>(handles)) {
             if constexpr (std::is_same_v<EDM4hepType, const std::shared_ptr<podio::CollectionBase>>) {
-              inputMap.emplace(handle.objKey(), get(handle, thisClass, Gaudi::Hive::currentContext()));
+              inputMap.push_back(&get(handle, thisClass, Gaudi::Hive::currentContext()));
             } else {
               auto in = get(handle, thisClass, Gaudi::Hive::currentContext());
-              inputMap.emplace(handle.objKey(), *static_cast<EDM4hepType*>(in.get()));
+              inputMap.push_back(static_cast<EDM4hepType*>(in.get()));
             }
           }
           std::get<Index>(inputTuple) = std::move(inputMap);

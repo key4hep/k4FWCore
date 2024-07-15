@@ -28,7 +28,7 @@ from k4FWCore import ApplicationMgr, IOSvc
 from Configurables import ExampleFunctionalProducer
 
 svc = IOSvc("IOSvc")
-svc.input = "output_k4test_exampledata_producer_multiple.root"
+svc.input = "functional_producer_multiple.root"
 svc.output = "functional_merged_collections.root"
 svc.outputCommands = [
     "drop *",

@@ -27,7 +27,7 @@
 #include <string_view>
 
 struct CollectionMerger final : k4FWCore::Transformer<std::shared_ptr<podio::CollectionBase>(
-                                    const std::map<std::string, const std::shared_ptr<podio::CollectionBase>&>&)> {
+                                    const std::vector<const std::shared_ptr<podio::CollectionBase>*>&)> {
   CollectionMerger(const std::string& name, ISvcLocator* svcLoc)
       : Transformer(name, svcLoc, {KeyValues("InputCollections", {"MCParticles"})},
                     {KeyValues("OutputCollection", {"NewMCParticles"})}) {
@@ -76,20 +76,20 @@ struct CollectionMerger final : k4FWCore::Transformer<std::shared_ptr<podio::Col
   }
 
   std::shared_ptr<podio::CollectionBase> operator()(
-      const std::map<std::string, const std::shared_ptr<podio::CollectionBase>&>& input) const override {
+      const std::vector<const std::shared_ptr<podio::CollectionBase>*>& input) const override {
     std::shared_ptr<podio::CollectionBase> ret;
     debug() << "Merging " << input.size() << " collections" << endmsg;
     std::string_view type = "";
-    for (const auto& [name, coll] : input) {
-      debug() << "Merging collection " << name << " of type " << coll->getTypeName() << " with " << coll->size()
-              << " elements" << endmsg;
+    for (const auto& coll : input) {
+      debug() << "Merging collection of type " << (*coll)->getTypeName() << " with " << (*coll)->size() << " elements"
+              << endmsg;
       if (type.empty()) {
-        type = coll->getTypeName();
-      } else if (type != coll->getTypeName()) {
+        type = (*coll)->getTypeName();
+      } else if (type != (*coll)->getTypeName()) {
         throw std::runtime_error("Different collection types are not supported");
         return ret;
       }
-      (this->*m_map.at(coll->getTypeName()))(coll, ret);
+      (this->*m_map.at((*coll)->getTypeName()))(*coll, ret);
     }
     return ret;
   }
