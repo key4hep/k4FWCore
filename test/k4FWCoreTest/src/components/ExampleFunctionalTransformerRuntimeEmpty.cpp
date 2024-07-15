@@ -33,7 +33,8 @@
  */
 
 struct ExampleFunctionalTransformerRuntimeEmpty final
-    : k4FWCore::Transformer<std::vector<edm4hep::MCParticleCollection>(const std::vector<const edm4hep::MCParticleCollection*>& input)> {
+    : k4FWCore::Transformer<std::vector<edm4hep::MCParticleCollection>(
+          const std::vector<const edm4hep::MCParticleCollection*>& input)> {
   // The pair in KeyValues can be changed from python and it corresponds
   // to the name of the output collections
   ExampleFunctionalTransformerRuntimeEmpty(const std::string& name, ISvcLocator* svcLoc)
@@ -41,7 +42,8 @@ struct ExampleFunctionalTransformerRuntimeEmpty final
                     {KeyValues("OutputCollections", {"MCParticles"})}) {}
 
   // This is the function that will be called to produce the data
-   std::vector<edm4hep::MCParticleCollection> operator()(const std::vector<const edm4hep::MCParticleCollection*>& input) const override {
+  std::vector<edm4hep::MCParticleCollection> operator()(
+      const std::vector<const edm4hep::MCParticleCollection*>& input) const override {
     // Return an empty vector to make sure that also works
     std::vector<edm4hep::MCParticleCollection> outputCollections;
     return outputCollections;

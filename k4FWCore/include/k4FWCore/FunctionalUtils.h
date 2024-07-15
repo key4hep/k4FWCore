@@ -123,7 +123,7 @@ namespace k4FWCore {
         if constexpr (isVectorLike_v<std::tuple_element_t<Index, std::tuple<In...>>>) {
           // Bare EDM4hep type, without pointers
           using EDM4hepType =
-            std::remove_pointer_t<typename std::tuple_element_t<Index, std::tuple<In...>>::value_type>;
+              std::remove_pointer_t<typename std::tuple_element_t<Index, std::tuple<In...>>::value_type>;
           auto inputMap = std::vector<const EDM4hepType*>();
           for (auto& handle : std::get<Index>(handles)) {
             auto in = get(handle, thisClass, Gaudi::Hive::currentContext());

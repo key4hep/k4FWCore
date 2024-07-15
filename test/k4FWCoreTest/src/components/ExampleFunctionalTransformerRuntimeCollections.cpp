@@ -35,7 +35,7 @@
 struct ExampleFunctionalTransformerRuntimeCollections final
     : k4FWCore::Transformer<std::vector<edm4hep::MCParticleCollection>(
           const std::vector<const edm4hep::MCParticleCollection*>& input)> {
-  // The pair in KeyValues can be changed from python and it corresponds
+  // The pair in KeyValue can be changed from python and it corresponds
   // to the name of the output collection
   ExampleFunctionalTransformerRuntimeCollections(const std::string& name, ISvcLocator* svcLoc)
       : Transformer(name, svcLoc, {KeyValues("InputCollections", {"MCParticles"})},
