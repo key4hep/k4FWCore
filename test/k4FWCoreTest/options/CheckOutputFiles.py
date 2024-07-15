@@ -134,3 +134,10 @@ check_collections(
     "functional_merged_collections.root",
     ["MCParticles1", "MCParticles2", "MCParticles3", "NewMCParticles", "SimTrackerHits"],
 )
+
+podio_reader = podio.root_io.Reader("functional_merged_collections.root")
+frames = podio_reader.get("events")
+ev = frames[0]
+if len(ev.get("NewMCParticles")) != 4:
+    raise RuntimeError(f"Expected 4 NewMCParticles but got {len(ev.get('NewMCParticles'))}")
+
