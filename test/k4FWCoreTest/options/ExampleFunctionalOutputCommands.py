@@ -17,8 +17,7 @@
 # limitations under the License.
 #
 
-# This is an example reading from a file and using a consumer with several inputs
-# to check that the contents of the file are the expected ones
+# This is an example using the outputCommands to drop collections from the output file
 
 from Gaudi.Configuration import INFO
 from Configurables import ExampleFunctionalTransformerMultiple
@@ -26,7 +25,7 @@ from Configurables import EventDataSvc
 from k4FWCore import ApplicationMgr, IOSvc
 
 svc = IOSvc("IOSvc")
-svc.input = "output_k4test_exampledata_producer_multiple.root"
+svc.input = "functional_producer_multiple.root"
 svc.output = "functional_transformer_multiple_output_commands.root"
 svc.outputCommands = [
     "drop Tracks",

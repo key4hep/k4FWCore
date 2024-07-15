@@ -17,8 +17,8 @@
 # limitations under the License.
 #
 
-# This is an example reading from a file and using a consumer with several inputs
-# to check that the contents of the file are the expected ones
+# This is an example reading from a file and using a transformer to create new
+# data
 
 from Gaudi.Configuration import INFO
 from Configurables import ExampleFunctionalTransformer
@@ -26,7 +26,7 @@ from Configurables import EventDataSvc
 from k4FWCore import ApplicationMgr, IOSvc
 
 svc = IOSvc("IOSvc")
-svc.input = "output_k4test_exampledata_producer.root"
+svc.input = "functional_producer.root"
 svc.output = "functional_transformer.root"
 
 transformer = ExampleFunctionalTransformer(

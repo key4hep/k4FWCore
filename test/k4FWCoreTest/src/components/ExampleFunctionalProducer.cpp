@@ -26,7 +26,7 @@
 #include <string>
 
 struct ExampleFunctionalProducer final : k4FWCore::Producer<edm4hep::MCParticleCollection()> {
-  // The pair in KeyValue can be changed from python and it corresponds
+  // The pair in KeyValues can be changed from python and it corresponds
   // to the name of the output collection
   ExampleFunctionalProducer(const std::string& name, ISvcLocator* svcLoc)
       : Producer(name, svcLoc, {}, KeyValues("OutputCollection", {"MCParticles"})) {}
@@ -34,8 +34,17 @@ struct ExampleFunctionalProducer final : k4FWCore::Producer<edm4hep::MCParticleC
   // This is the function that will be called to produce the data
   edm4hep::MCParticleCollection operator()() const override {
     auto coll = edm4hep::MCParticleCollection();
+    // This will create a particle and set PDG, generatorStatus, simulatorStatus
+    // ... (the fields of a MCParticle) to 1, 2, 3...
     coll.create(1, 2, 3, 4.f, 5.f, 6.f);
-    coll.create(2, 3, 4, 5.f, 6.f, 7.f);
+    // We can also set the fields of the particle manually
+    auto particle = coll.create(2, 3, 4, 5.f, 6.f, 7.f);
+    particle.setPDG(2);
+    particle.setGeneratorStatus(3);
+    particle.setSimulatorStatus(4);
+    particle.setCharge(5.f);
+    particle.setTime(6.f);
+    particle.setMass(7.f);
     // We have to return whatever collection type we specified in the
     // template argument
     return coll;

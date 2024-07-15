@@ -23,6 +23,7 @@ except ImportError:
 
     print(f'PYTHONPATH={os.environ["PYTHONPATH"]}')
     raise
+import ROOT
 
 
 def check_collections(filename, names):
@@ -62,7 +63,7 @@ check_collections(
     "functional_transformer_multiple_output_commands.root",
     ["VectorFloat", "MCParticles1", "MCParticles2", "SimTrackerHits", "TrackerHits"],
 )
-check_collections("/tmp/a/b/c/output_k4test_exampledata_producer.root", ["MCParticles"])
+check_collections("/tmp/a/b/c/functional_producer.root", ["MCParticles"])
 check_collections(
     "functional_transformer_runtime_empty.root",
     ["MCParticles0", "MCParticles1", "MCParticles2"],
@@ -110,11 +111,21 @@ mix_collections = [
 
 # Not working, collections produced by functional algorithms are not being written to the file
 # check_collections(
-#     "output_k4test_exampledata_functional_mix.root",
+#     "functional_mix.root",
 #     mix_collections,
 # )
 
 check_collections(
-    "output_k4test_exampledata_functional_mix_iosvc.root",
+    "functional_mix_iosvc.root",
     mix_collections,
 )
+
+f = ROOT.TFile.Open("functional_transformer_hist.root")
+for i in range(2):
+    if (
+        str(f.GetListOfKeys()[i])
+        != f"Name: ExampleFunctionalTransformerHist{i+1} Title: ExampleFunctionalTransformerHist{i+1}"
+    ):
+        raise RuntimeError(
+            "Directory structure does not match expected for functional_transformer_hist.root"
+        )

@@ -129,9 +129,10 @@ add_test_with_env(FunctionalProducerRuntimeCollections options/ExampleFunctional
 add_test_with_env(FunctionalTransformerRuntimeCollections options/ExampleFunctionalTransformerRuntimeCollections.py)
 add_test_with_env(FunctionalTransformerRuntimeEmpty options/ExampleFunctionalTransformerRuntimeEmpty.py)
 add_test_with_env(FunctionalTransformerRuntimeCollectionsMultiple options/ExampleFunctionalTransformerRuntimeCollectionsMultiple.py)
+add_test_with_env(FunctionalTransformerHist options/ExampleFunctionalTransformerHist.py)
 
 add_test(NAME FunctionalCheckFiles COMMAND python3 ${CMAKE_CURRENT_LIST_DIR}/options/CheckOutputFiles.py)
-set_tests_properties(FunctionalCheckFiles PROPERTIES DEPENDS "FunctionalFile;FunctionalMTFile;FunctionalMultipleFile;FunctionalOutputCommands;FunctionalProducerAbsolutePath;FunctionalTransformerRuntimeEmpty;FunctionalMix;FunctionalMixIOSvc")
+set_tests_properties(FunctionalCheckFiles PROPERTIES DEPENDS "FunctionalFile;FunctionalMTFile;FunctionalMultipleFile;FunctionalOutputCommands;FunctionalProducerAbsolutePath;FunctionalTransformerRuntimeEmpty;FunctionalMix;FunctionalMixIOSvc;FunctionalTransformerHist")
 # Do this after checking the files not to overwrite them
 add_test_with_env(FunctionalFile_toolong options/ExampleFunctionalFile.py -n 999 PROPERTIES DEPENDS FunctionalCheckFiles PASS_REGULAR_EXPRESSION
                   "Application Manager Terminated successfully with a user requested ScheduledStop")

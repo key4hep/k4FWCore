@@ -42,7 +42,7 @@ struct ExampleFunctionalConsumerMultiple final
     : k4FWCore::Consumer<void(const FloatColl&, const ParticleColl&, const SimTrackerHitColl&, const TrackerHitColl&,
                               const TrackColl&)> {
   // The pairs in KeyValue can be changed from python and they correspond
-  // to the names of the input collection
+  // to the names of the input collections
   ExampleFunctionalConsumerMultiple(const std::string& name, ISvcLocator* svcLoc)
       : Consumer(name, svcLoc,
                  {

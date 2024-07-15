@@ -17,8 +17,7 @@
 # limitations under the License.
 #
 
-# This is an example reading from a file and using a consumer with several inputs
-# to check that the contents of the file are the expected ones
+# This is an example reading from multiple files, which for Gaudi will look like a single file
 
 from Gaudi.Configuration import INFO
 from Configurables import ExampleFunctionalConsumer
@@ -27,8 +26,8 @@ from k4FWCore import ApplicationMgr, IOSvc
 
 svc = IOSvc("IOSvc")
 svc.input = [
-    "output_k4test_exampledata_producer.root",
-    "output_k4test_exampledata_producer2.root",
+    "functional_producer.root",
+    "functional_producer2.root",
 ]
 
 consumer = ExampleFunctionalConsumer("Consumer", InputCollection=["MCParticles"], Offset=0)
