@@ -27,6 +27,8 @@
 
 // #include "GaudiKernel/CommonMessaging.h"
 
+#include <ranges>
+#include <stdexcept>
 #include <type_traits>
 #include <utility>
 
@@ -41,10 +43,11 @@ namespace k4FWCore {
         : Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_> {
       using Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>::DataHandleMixin;
 
-      static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isMapToCollLike<In>::value) && ...),
-                    "Transformer and Producer input types must be EDM4hep collections or maps to collections");
-      static_assert((std::is_base_of_v<podio::CollectionBase, Out> || isMapToCollLike<Out>::value),
-                    "Transformer and Producer output types must be EDM4hep collections or maps to collections");
+      static_assert(
+          ((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike_v<In>)&&...),
+          "Transformer and Producer input types must be EDM4hep collections or vectors of collection pointers");
+      static_assert((std::is_base_of_v<podio::CollectionBase, Out> || isVectorLike_v<Out>),
+                    "Transformer and Producer output types must be EDM4hep collections or vectors of collections");
 
       template <typename T>
       using InputHandle_t = Gaudi::Functional::details::InputHandle_t<Traits_, std::remove_pointer_t<T>>;
@@ -54,7 +57,7 @@ namespace k4FWCore {
       std::tuple<std::vector<InputHandle_t<typename transformType<In>::type>>...> m_inputs;
       std::tuple<std::vector<OutputHandle_t<typename transformType<Out>::type>>>  m_outputs;
       std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)>          m_inputLocations{};
-      std::array<Gaudi::Property<std::vector<DataObjID>>, 1>                      m_outputLocations{};
+      Gaudi::Property<std::vector<DataObjID>>                                     m_outputLocations{};
 
       using base_class = Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>;
 
@@ -85,10 +88,7 @@ namespace k4FWCore {
                 this, std::get<J>(outputs).first, to_DataObjID(std::get<J>(outputs).second),
                 [this](Gaudi::Details::PropertyBase&) {
                   std::vector<OutputHandle_t<typename transformType<Out>::type>> h;
-                  // Is this needed?
-                  // std::sort(this->m_outputLocations[J].value().begin(), this->m_outputLocations[J].value().end(),
-                  //           [](const DataObjID& a, const DataObjID& b) { return a.key() < b.key(); });
-                  for (auto& inpID : this->m_outputLocations[J].value()) {
+                  for (auto& inpID : this->m_outputLocations.value()) {
                     if (inpID.key().empty()) {
                       continue;
                     }
@@ -111,9 +111,9 @@ namespace k4FWCore {
       // derived classes are NOT allowed to implement execute ...
       StatusCode execute(const EventContext& ctx) const override final {
         try {
-          if constexpr (isMapToCollLike<Out>::value) {
+          if constexpr (isVectorLike<Out>::value) {
             std::tuple<Out> tmp = filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs);
-            putMapOutputs<0, Out>(std::move(tmp), m_outputs, this);
+            putVectorOutputs<0, Out>(std::move(tmp), m_outputs, this);
           } else {
             Gaudi::Functional::details::put(
                 std::get<0>(this->m_outputs)[0],
@@ -126,6 +126,52 @@ namespace k4FWCore {
         }
       }
 
+      /**
+       * @brief    Get the input locations for a given input index
+       * @param i  The index of the input
+       * @return   A range of the input locations
+       */
+      auto inputLocations(int i) const {
+        if (i >= sizeof...(In)) {
+          throw std::out_of_range("Called inputLocations with an index out of range, index: " + std::to_string(i) +
+                                  ", number of inputs: " + std::to_string(sizeof...(In)));
+        }
+        return m_inputLocations[i] | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
+      }
+      /**
+       * @brief       Get the input locations for a given input name
+       * @param name  The name of the input
+       * @return      A range of the input locations
+       */
+      const auto inputLocations(std::string_view name) const {
+        auto it = std::ranges::find_if(m_inputLocations, [&name](const auto& prop) { return prop.name() == name; });
+        if (it == m_inputLocations.end()) {
+          throw std::runtime_error("Called inputLocations with an unknown name");
+        }
+        return it->value() | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
+      }
+
+      /**
+       * @brief    Get the output locations for a given output index
+       * @param i  The index of the output
+       * @return   A range of the output locations
+       */
+      auto outputLocations() const {
+        return m_outputLocations | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
+      }
+      /**
+       * @brief       Get the output locations for a given output name
+       * @param name  The name of the output
+       * @return      A range of the output locations
+       */
+      const auto outputLocations(std::string_view name) const {
+        if (name != m_outputLocations.name()) {
+          throw std::runtime_error("Called outputLocations with an unknown name");
+        }
+        return m_outputLocations | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
+      }
+      static constexpr std::size_t inputLocationsSize() { return sizeof...(In); }
+
       // ... instead, they must implement the following operator
       virtual Out operator()(const In&...) const = 0;
     };
@@ -137,9 +183,9 @@ namespace k4FWCore {
         : Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_> {
       using Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>::DataHandleMixin;
 
-      static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isMapToCollLike<In>::value) && ...),
+      static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike<In>::value) && ...),
                     "Transformer and Producer input types must be EDM4hep collections or maps to collections");
-      static_assert(((std::is_base_of_v<podio::CollectionBase, Out> || isMapToCollLike<Out>::value) && ...),
+      static_assert(((std::is_base_of_v<podio::CollectionBase, Out> || isVectorLike<Out>::value) && ...),
                     "Transformer and Producer output types must be EDM4hep collections or maps to collections");
 
       template <typename T>
@@ -202,13 +248,66 @@ namespace k4FWCore {
       StatusCode execute(const EventContext& ctx) const override final {
         try {
           auto tmp = filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs);
-          putMapOutputs<0, Out...>(std::move(tmp), m_outputs, this);
+          putVectorOutputs<0, Out...>(std::move(tmp), m_outputs, this);
           return Gaudi::Functional::FilterDecision::PASSED;
         } catch (GaudiException& e) {
           (e.code() ? this->warning() : this->error()) << e.tag() << " : " << e.message() << endmsg;
           return e.code();
         }
       }
+
+      /**
+       * @brief    Get the input locations for a given input index
+       * @param i  The index of the input
+       * @return   A range of the input locations
+       */
+      const auto inputLocations(int i) const {
+        if (i >= sizeof...(In)) {
+          throw std::out_of_range("Called inputLocations with an index out of range, index: " + std::to_string(i) +
+                                  ", number of inputs: " + std::to_string(sizeof...(In)));
+        }
+        return m_inputLocations[i] | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
+      }
+      /**
+       * @brief       Get the input locations for a given input name
+       * @param name  The name of the input
+       * @return      A range of the input locations
+       */
+      const auto inputLocations(std::string_view name) const {
+        auto it = std::ranges::find_if(m_inputLocations, [&name](const auto& prop) { return prop.name() == name; });
+        if (it == m_inputLocations.end()) {
+          throw std::runtime_error("Called inputLocations with an unknown name");
+        }
+        return it->value() | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
+      }
+
+      /**
+       * @brief    Get the output locations for a given output index
+       * @param i  The index of the output
+       * @return   A range of the output locations
+       */
+      auto outputLocations(int i) const {
+        if (i >= sizeof...(Out)) {
+          throw std::out_of_range("Called outputLocations with an index out of range");
+        }
+        return m_outputLocations[i] |
+               std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
+      }
+      /**
+       * @brief       Get the output locations for a given output name
+       * @param name  The name of the output
+       * @return      A range of the output locations
+       */
+      const auto outputLocations(std::string_view name) const {
+        auto it = std::ranges::find_if(m_outputLocations.begin(), m_outputLocations.end(),
+                                       [&name](const auto& prop) { return prop.name() == name; });
+        if (it == m_outputLocations.end()) {
+          throw std::runtime_error("Called outputLocations with an unknown name");
+        }
+        return it->value() | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
+      }
+      static constexpr std::size_t inputLocationsSize() { return sizeof...(In); }
+      static constexpr std::size_t outputLocationsSize() { return sizeof...(Out); }
 
       // ... instead, they must implement the following operator
       virtual std::tuple<Out...> operator()(const In&...) const = 0;

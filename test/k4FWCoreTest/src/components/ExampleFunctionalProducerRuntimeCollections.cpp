@@ -17,8 +17,6 @@
  * limitations under the License.
  */
 
-#include "Gaudi/Property.h"
-
 #include "edm4hep/MCParticleCollection.h"
 
 #include "k4FWCore/Producer.h"
@@ -26,30 +24,33 @@
 #include <string>
 
 struct ExampleFunctionalProducerRuntimeCollections final
-    : k4FWCore::Producer<std::map<std::string, edm4hep::MCParticleCollection>()> {
-  // The pair in KeyValues can be changed from python and it corresponds
+    : k4FWCore::Producer<std::vector<edm4hep::MCParticleCollection>()> {
+  // The pair in KeyValue can be changed from python and it corresponds
   // to the name of the output collection
   ExampleFunctionalProducerRuntimeCollections(const std::string& name, ISvcLocator* svcLoc)
       : Producer(name, svcLoc, {}, {KeyValues("OutputCollections", {"MCParticles"})}) {}
 
   // This is the function that will be called to produce the data
-  std::map<std::string, edm4hep::MCParticleCollection> operator()() const override {
-    std::map<std::string, edm4hep::MCParticleCollection> outputCollections;
-    for (int i = 0; i < m_numberOfCollections; ++i) {
-      std::string name = "MCParticles" + std::to_string(i);
-      auto        coll = edm4hep::MCParticleCollection();
+  std::vector<edm4hep::MCParticleCollection> operator()() const override {
+    const auto                                 locs = outputLocations();
+    std::vector<edm4hep::MCParticleCollection> outputCollections;
+    for (size_t i = 0; i < locs.size(); ++i) {
+      if (locs[i] != "MCParticles" + std::to_string(i)) {
+        throw GaudiException("Output collection name does not match the expected one", name(), StatusCode::FAILURE);
+      }
+      // Add another redundant check to show that the outputLocations() function
+      // can be called with a name instead of an index
+      if (outputLocations("OutputCollections")[i] != "MCParticles" + std::to_string(i)) {
+        throw GaudiException("Output collection name does not match the expected one", name(), StatusCode::FAILURE);
+      }
+      info() << "Creating collection " << i << endmsg;
+      auto coll = edm4hep::MCParticleCollection();
       coll->create(1, 2, 3, 4.f, 5.f, 6.f);
       coll->create(2, 3, 4, 5.f, 6.f, 7.f);
-      outputCollections[name] = std::move(coll);
+      outputCollections.emplace_back(std::move(coll));
     }
     return outputCollections;
   }
-
-private:
-  // We can define any property we want that can be set from python
-  // and use it inside operator()
-  Gaudi::Property<int> m_numberOfCollections{this, "NumberOfCollections", 3,
-                                             "Example int that can be used in the algorithm"};
 };
 
 DECLARE_COMPONENT(ExampleFunctionalProducerRuntimeCollections)
