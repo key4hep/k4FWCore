@@ -42,7 +42,14 @@ namespace k4FWCore {
   namespace details {
 
     // This function will be used to modify std::shared_ptr<podio::CollectionBase> to the actual collection type
-    template <typename T, typename P> const auto& maybeTransformToEDM4hep(const P& arg) { return arg; }
+    template <typename T, typename P> auto maybeTransformToEDM4hep(P& arg) { return arg; }
+
+    template <typename T, typename P>
+      requires std::same_as<P, std::map<std::string, std::shared_ptr<podio::CollectionBase>>>
+    auto maybeTransformToEDM4hep(P& arg) {
+      return arg;
+    }
+
     template <typename T, typename P>
       requires std::is_base_of_v<podio::CollectionBase, P>
     const auto& maybeTransformToEDM4hep(P* arg) {
@@ -69,7 +76,8 @@ namespace k4FWCore {
     template <typename T> struct isVectorLike : std::false_type {};
 
     template <typename Value>
-      requires std::is_base_of_v<podio::CollectionBase, std::remove_cvref_t<Value>>
+      requires std::is_base_of_v<podio::CollectionBase, std::remove_cvref_t<Value>> ||
+               std::is_same_v<std::shared_ptr<podio::CollectionBase>, std::remove_cvref_t<Value>>
     struct isVectorLike<std::vector<Value*>> : std::true_type {};
 
     template <typename Value>
@@ -94,6 +102,12 @@ namespace k4FWCore {
 
     template <typename T> auto convertToSharedPtr(T&& arg) {
       return std::shared_ptr<podio::CollectionBase>(std::make_shared<T>(std::move(arg)));
+    }
+
+    template <typename T>
+      requires std::is_same_v<T, std::shared_ptr<podio::CollectionBase>>
+    auto convertToSharedPtr(T&& arg) {
+      return std::move(arg);
     }
 
     template <typename... In> struct filter_evtcontext_tt {
@@ -127,11 +141,14 @@ namespace k4FWCore {
               std::remove_pointer_t<typename std::tuple_element_t<Index, std::tuple<In...>>::value_type>;
           auto inputMap = std::vector<const EDM4hepType*>();
           for (auto& handle : std::get<Index>(handles)) {
-            auto in = get(handle, thisClass, Gaudi::Hive::currentContext());
-            inputMap.push_back(static_cast<EDM4hepType*>(in.get()));
+            if constexpr (std::is_same_v<EDM4hepType, const std::shared_ptr<podio::CollectionBase>>) {
+              inputMap.emplace(handle.objKey(), get(handle, thisClass, Gaudi::Hive::currentContext()));
+            } else {
+              auto in = get(handle, thisClass, Gaudi::Hive::currentContext());
+              inputMap.emplace(handle.objKey(), *static_cast<EDM4hepType*>(in.get()));
+            }
           }
           std::get<Index>(inputTuple) = std::move(inputMap);
-
         } else {
           try {
             auto in                     = get(std::get<Index>(handles)[0], thisClass, Gaudi::Hive::currentContext());

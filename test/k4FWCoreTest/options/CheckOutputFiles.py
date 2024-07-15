@@ -129,3 +129,8 @@ for i in range(2):
         raise RuntimeError(
             "Directory structure does not match expected for functional_transformer_hist.root"
         )
+
+check_collections(
+    "functional_merged_collections.root",
+    ["NewMCParticles", "SimTrackerHits"],
+)
