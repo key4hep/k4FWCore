@@ -25,4 +25,3 @@ namespace k4FWCore {
   template <typename Signature>
   using FilterPredicate = Gaudi::Functional::FilterPredicate<Signature, details::BaseClass_t>;
 }
-
