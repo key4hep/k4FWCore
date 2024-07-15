@@ -69,6 +69,10 @@ struct CollectionMerger final : k4FWCore::Transformer<std::shared_ptr<podio::Col
         &CollectionMerger::mergeCollections<edm4hep::RecoParticleVertexAssociationCollection>;
     m_map["edm4hep::TimeSeriesCollection"] = &CollectionMerger::mergeCollections<edm4hep::TimeSeriesCollection>;
     m_map["edm4hep::RecDqdxCollection"]    = &CollectionMerger::mergeCollections<edm4hep::RecDqdxCollection>;
+    m_map["edm4hep::GeneratorEventParametersCollection"] =
+        &CollectionMerger::mergeCollections<edm4hep::GeneratorEventParametersCollection>;
+    m_map["edm4hep::GeneratorPdfInfoCollection"] =
+        &CollectionMerger::mergeCollections<edm4hep::GeneratorPdfInfoCollection>;
   }
 
   std::shared_ptr<podio::CollectionBase> operator()(
