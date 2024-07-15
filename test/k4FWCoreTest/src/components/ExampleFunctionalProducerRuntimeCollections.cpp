@@ -26,21 +26,21 @@
 #include <string>
 
 struct ExampleFunctionalProducerRuntimeCollections final
-    : k4FWCore::Producer<std::map<std::string, edm4hep::MCParticleCollection>()> {
+    : k4FWCore::Producer<std::vector<edm4hep::MCParticleCollection>()> {
   // The pair in KeyValues can be changed from python and it corresponds
   // to the name of the output collection
   ExampleFunctionalProducerRuntimeCollections(const std::string& name, ISvcLocator* svcLoc)
       : Producer(name, svcLoc, {}, {KeyValues("OutputCollections", {"MCParticles"})}) {}
 
   // This is the function that will be called to produce the data
-  std::map<std::string, edm4hep::MCParticleCollection> operator()() const override {
-    std::map<std::string, edm4hep::MCParticleCollection> outputCollections;
+  std::vector<edm4hep::MCParticleCollection> operator()() const override {
+    std::vector<edm4hep::MCParticleCollection> outputCollections;
     for (int i = 0; i < m_numberOfCollections; ++i) {
       std::string name = "MCParticles" + std::to_string(i);
       auto        coll = edm4hep::MCParticleCollection();
       coll->create(1, 2, 3, 4.f, 5.f, 6.f);
       coll->create(2, 3, 4, 5.f, 6.f, 7.f);
-      outputCollections[name] = std::move(coll);
+      outputCollections.emplace_back(std::move(coll));
     }
     return outputCollections;
   }

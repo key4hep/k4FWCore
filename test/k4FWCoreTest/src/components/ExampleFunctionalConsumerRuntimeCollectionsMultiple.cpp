@@ -28,9 +28,9 @@
 #include <string>
 
 struct ExampleFunctionalConsumerRuntimeCollectionsMultiple final
-    : k4FWCore::Consumer<void(const std::map<std::string, const edm4hep::MCParticleCollection&>& particleMap,
-                              const std::map<std::string, const edm4hep::TrackCollection&>&      trackMap,
-                              const edm4hep::SimTrackerHitCollection&                            simTrackerHits)> {
+    : k4FWCore::Consumer<void(const std::vector<const edm4hep::MCParticleCollection*>& particleVec,
+                              const std::vector<const edm4hep::TrackCollection*>&      trackVec,
+                              const edm4hep::SimTrackerHitCollection&                  simTrackerHits)> {
   // The pair in KeyValues can be changed from python and it corresponds
   // to the name of the input collections
   ExampleFunctionalConsumerRuntimeCollectionsMultiple(const std::string& name, ISvcLocator* svcLoc)
@@ -39,18 +39,18 @@ struct ExampleFunctionalConsumerRuntimeCollectionsMultiple final
                   KeyValues("SimTrackerHits", {"MCParticles"})}) {}
 
   // This is the function that will be called to produce the data
-  void operator()(const std::map<std::string, const edm4hep::MCParticleCollection&>& particleMap,
-                  const std::map<std::string, const edm4hep::TrackCollection&>&      trackMap,
-                  const edm4hep::SimTrackerHitCollection&                            simTrackerHits) const override {
-    info() << "Received " << particleMap.size() << " particle collections and " << trackMap.size()
+  void operator()(const std::vector<const edm4hep::MCParticleCollection*>& particleVec,
+                  const std::vector<const edm4hep::TrackCollection*>&      trackVec,
+                  const edm4hep::SimTrackerHitCollection&                  simTrackerHits) const override {
+    info() << "Received " << particleVec.size() << " particle collections and " << trackVec.size()
            << " track collections" << endmsg;
-    if (particleMap.size() != 5) {
-      throw std::runtime_error("Wrong size of the particleMap map, expected 5, got " +
-                               std::to_string(particleMap.size()));
+    if (particleVec.size() != 5) {
+      throw std::runtime_error("Wrong size of the particle vector, expected 5, got " +
+                               std::to_string(particleVec.size()));
     }
-    for (auto& [key, particles] : particleMap) {
+    for (auto& particles : particleVec) {
       int i = 0;
-      for (const auto& particle : particles) {
+      for (const auto& particle : *particles) {
         if ((particle.getPDG() != 1 + i + m_offset) || (particle.getGeneratorStatus() != 2 + i + m_offset) ||
             (particle.getSimulatorStatus() != 3 + i + m_offset) || (particle.getCharge() != 4 + i + m_offset) ||
             (particle.getTime() != 5 + i + m_offset) || (particle.getMass() != 6 + i + m_offset)) {
@@ -65,14 +65,15 @@ struct ExampleFunctionalConsumerRuntimeCollectionsMultiple final
         i++;
       }
     }
-    if (trackMap.size() != 3) {
-      fatal() << "Wrong size of the tracks map, expected 3, got " << trackMap.size() << endmsg;
+    if (trackVec.size() != 3) {
+      fatal() << "Wrong size of the tracks vector, expected 3, got " << trackVec.size() << endmsg;
     }
-    for (auto& [key, tracks] : trackMap) {
-      if ((tracks[0].getType() != 1) || (std::abs(tracks[0].getChi2() - 2.1) > 1e-6) || (tracks[0].getNdf() != 3)) {
+    for (const auto& tracks : trackVec) {
+      if (((*tracks)[0].getType() != 1) || (std::abs((*tracks)[0].getChi2() - 2.1) > 1e-6) ||
+          ((*tracks)[0].getNdf() != 3)) {
         std::stringstream error;
-        error << "Wrong data in tracks collection, expected 1, 2.1, 3, 4.1, 5.1, 6.1 got " << tracks[0].getType()
-              << ", " << tracks[0].getChi2() << ", " << tracks[0].getNdf();
+        error << "Wrong data in tracks collection, expected 1, 2.1, 3, 4.1, 5.1, 6.1 got " << (*tracks)[0].getType()
+              << ", " << (*tracks)[0].getChi2() << ", " << (*tracks)[0].getNdf();
         throw std::runtime_error(error.str());
       }
     }

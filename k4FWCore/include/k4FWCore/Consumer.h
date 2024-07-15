@@ -41,8 +41,8 @@ namespace k4FWCore {
         : Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_> {
       using Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>::DataHandleMixin;
 
-      static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isMapToCollLike<In>::value) && ...),
-                    "Consumer input types must be EDM4hep collections or maps to collections");
+      static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike_v<In>) && ...),
+                    "Consumer input types must be EDM4hep collections or vectors to collection pointers");
 
       template <typename T>
       using InputHandle_t = Gaudi::Functional::details::InputHandle_t<Traits_, std::remove_pointer_t<T>>;
@@ -56,7 +56,7 @@ namespace k4FWCore {
 
       template <typename IArgs, std::size_t... I>
       Consumer(std::string name, ISvcLocator* locator, const IArgs& inputs, std::index_sequence<I...>)
-          : base_class(std::move(name), locator),
+        : base_class(std::move(name), locator),
             // The input locations are filled by creating a property with a callback function
             // that creates the handles because that is when the input locations become available
             // (from a steering file, for example) and the handles have to be created for
@@ -71,7 +71,8 @@ namespace k4FWCore {
                   }
                   std::get<I>(m_inputs) = std::move(handles);
                 },
-                Gaudi::Details::Property::ImmediatelyInvokeHandler{true}}...} {}
+                Gaudi::Details::Property::ImmediatelyInvokeHandler{true}}...}
+      {}
 
       Consumer(std::string name, ISvcLocator* locator,
                Gaudi::Functional::details::RepeatValues_<KeyValues, sizeof...(In)> const& inputs)

@@ -32,10 +32,9 @@
  * (in this example the same number of input collections but it can be different)
  */
 
-using mapType = std::map<std::string, edm4hep::MCParticleCollection>;
-
 struct ExampleFunctionalTransformerRuntimeCollections final
-    : k4FWCore::Transformer<mapType(const std::map<std::string, const edm4hep::MCParticleCollection&>& input)> {
+    : k4FWCore::Transformer<std::vector<edm4hep::MCParticleCollection>(
+          const std::vector<const edm4hep::MCParticleCollection*>& input)> {
   // The pair in KeyValues can be changed from python and it corresponds
   // to the name of the output collection
   ExampleFunctionalTransformerRuntimeCollections(const std::string& name, ISvcLocator* svcLoc)
@@ -43,15 +42,16 @@ struct ExampleFunctionalTransformerRuntimeCollections final
                     {KeyValues("OutputCollections", {"MCParticles"})}) {}
 
   // This is the function that will be called to produce the data
-  mapType operator()(const std::map<std::string, const edm4hep::MCParticleCollection&>& input) const override {
-    std::map<std::string, edm4hep::MCParticleCollection> outputCollections;
+  std::vector<edm4hep::MCParticleCollection> operator()(
+      const std::vector<const edm4hep::MCParticleCollection*>& input) const override {
+    std::vector<edm4hep::MCParticleCollection> outputCollections;
     for (int i = 0; i < input.size(); ++i) {
       std::string name     = "NewMCParticles" + std::to_string(i);
-      auto&       old_coll = input.at("MCParticles" + std::to_string(i));
+      auto&       old_coll = input.at(i);
       auto        coll     = edm4hep::MCParticleCollection();
-      coll->push_back(old_coll.at(0).clone());
-      coll->push_back(old_coll.at(1).clone());
-      outputCollections[name] = std::move(coll);
+      coll->push_back(old_coll->at(0).clone());
+      coll->push_back(old_coll->at(1).clone());
+      outputCollections.emplace_back(std::move(coll));
     }
     return outputCollections;
   }
