@@ -298,7 +298,7 @@ namespace k4FWCore {
        * @return      A range of the output locations
        */
       const auto outputLocations(std::string_view name) const {
-        auto it = std::find_if(m_outputLocations.begin(), m_outputLocations.end(),
+        auto it = std::ranges::find_if(m_outputLocations.begin(), m_outputLocations.end(),
                                [&name](const auto& prop) { return prop.name() == name; });
         if (it == m_outputLocations.end()) {
           throw std::runtime_error("Called outputLocations with an unknown name");
