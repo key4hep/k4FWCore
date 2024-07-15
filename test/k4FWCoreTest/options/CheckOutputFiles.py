@@ -132,5 +132,5 @@ for i in range(2):
 
 check_collections(
     "functional_merged_collections.root",
-    ["NewMCParticles", "SimTrackerHits"],
+    ["MCParticles1", "MCParticles2", "MCParticles3", "NewMCParticles", "SimTrackerHits"],
 )
