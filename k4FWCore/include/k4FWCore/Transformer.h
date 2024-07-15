@@ -44,7 +44,7 @@ namespace k4FWCore {
       using Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>::DataHandleMixin;
 
       static_assert(
-          ((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike_v<In>)&&...),
+          ((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike_v<In>) && ...),
           "Transformer and Producer input types must be EDM4hep collections or vectors of collection pointers");
       static_assert((std::is_base_of_v<podio::CollectionBase, Out> || isVectorLike_v<Out>),
                     "Transformer and Producer output types must be EDM4hep collections or vectors of collections");
@@ -182,9 +182,9 @@ namespace k4FWCore {
         : Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_> {
       using Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>::DataHandleMixin;
 
-      static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike<In>::value)&&...),
+      static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike<In>::value) && ...),
                     "Transformer and Producer input types must be EDM4hep collections or maps to collections");
-      static_assert(((std::is_base_of_v<podio::CollectionBase, Out> || isVectorLike<Out>::value)&&...),
+      static_assert(((std::is_base_of_v<podio::CollectionBase, Out> || isVectorLike<Out>::value) && ...),
                     "Transformer and Producer output types must be EDM4hep collections or maps to collections");
 
       template <typename T>
@@ -299,7 +299,7 @@ namespace k4FWCore {
        */
       const auto outputLocations(std::string_view name) const {
         auto it = std::ranges::find_if(m_outputLocations.begin(), m_outputLocations.end(),
-                               [&name](const auto& prop) { return prop.name() == name; });
+                                       [&name](const auto& prop) { return prop.name() == name; });
         if (it == m_outputLocations.end()) {
           throw std::runtime_error("Called outputLocations with an unknown name");
         }
