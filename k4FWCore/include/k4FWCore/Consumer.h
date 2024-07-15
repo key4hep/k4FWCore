@@ -117,6 +117,7 @@ namespace k4FWCore {
         }
         return it->value() | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
       }
+      static constexpr std::size_t inputLocationsSize() { return sizeof...(In); }
     };
 
   }  // namespace details

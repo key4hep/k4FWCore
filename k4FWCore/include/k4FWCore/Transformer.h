@@ -170,6 +170,7 @@ namespace k4FWCore {
         }
         return m_outputLocations | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
       }
+      static constexpr std::size_t inputLocationsSize() { return sizeof...(In); }
 
       // ... instead, they must implement the following operator
       virtual Out operator()(const In&...) const = 0;
@@ -305,6 +306,8 @@ namespace k4FWCore {
         }
         return it->value() | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
       }
+      static constexpr std::size_t inputLocationsSize() { return sizeof...(In); }
+      static constexpr std::size_t outputLocationsSize() { return sizeof...(Out); }
 
       // ... instead, they must implement the following operator
       virtual std::tuple<Out...> operator()(const In&...) const = 0;
