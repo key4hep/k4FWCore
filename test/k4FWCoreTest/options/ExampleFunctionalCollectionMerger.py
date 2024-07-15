@@ -30,18 +30,19 @@ from Configurables import ExampleFunctionalProducer
 svc = IOSvc("IOSvc")
 svc.input = "output_k4test_exampledata_producer_multiple.root"
 svc.output = "functional_merged_collections.root"
-svc.outputCommands = ["drop *",
-                      "keep MCParticles1",
-                      "keep MCParticles2",
-                      "keep MCParticles3",
-                      "keep NewMCParticles",
-                      "keep SimTrackerHits",
-                      ]
+svc.outputCommands = [
+    "drop *",
+    "keep MCParticles1",
+    "keep MCParticles2",
+    "keep MCParticles3",
+    "keep NewMCParticles",
+    "keep SimTrackerHits",
+]
 
 
 particle_producer = ExampleFunctionalProducer(
     OutputCollection=["MCParticles3"],
-    )
+)
 
 
 merger = CollectionMerger(
