@@ -17,6 +17,22 @@
  * limitations under the License.
  */
 
+/** @class CollectionMerger
+ *
+ *  Merges collections of the same type into a single collection.
+ *  The output collection is created as a subset collection if the Copy property is set to false (default).
+ *  The collections are merged by copying the elements of the input collections into the output collection.
+ *
+ *  In both cases, the relations in the new objects point to the original objects. This means that collections
+ *  having relations to objects in different collections will need these collections to be present to fully
+ *  work. If the collections are not present (for example, after dropping them with the output commands)
+ *  and this relations are used, that will almost certainly crash. An example of an usage of this algorithm
+ *  is to merge several collections to give to an algorithm so that it can use all of them at the same time.
+ *
+ *  The collections to be merged are specified in the InputCollections property, which is a list of collection names.
+ *  The output collection is specified in the OutputCollection property.
+ */
+
 #include "edm4hep/edm4hep.h"
 
 #include "k4FWCore/Transformer.h"
