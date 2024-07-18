@@ -27,9 +27,9 @@ from Configurables import EventDataSvc
 
 
 iosvc = IOSvc("IOSvc")
-iosvc.output = "functional_producer_multiple.root"
+iosvc.Output = "functional_producer_multiple.root"
 # Collections can be dropped
-# out.outputCommands = ["drop *"]
+# out.OutputCommands = ["drop *"]
 
 producer = ExampleFunctionalProducerMultiple(
     "ExampleFunctionalProducerMultiple",

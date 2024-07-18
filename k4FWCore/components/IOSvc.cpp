@@ -45,7 +45,14 @@ StatusCode IOSvc::initialize() {
     return StatusCode::FAILURE;
   }
 
+  if (!m_readingFileNamesDeprecated.empty()) {
+    warning() << ".input is deprecated, use .Input instead in the steering file" << endmsg;
+    m_readingFileNames = m_readingFileNamesDeprecated;
+  }
+  info() << m_readingFileNamesDeprecated.size() << " files to be read" << endmsg;
+  info() << m_readingFileNames.size() << " files to be read" << endmsg;
   if (!m_readingFileNames.empty()) {
+    info() << m_readingFileNames.size() << " files to be read" << endmsg;
     m_reader = std::make_unique<podio::ROOTReader>();
     try {
       m_reader->openFiles(m_readingFileNames);
@@ -54,6 +61,11 @@ StatusCode IOSvc::initialize() {
       return StatusCode::FAILURE;
     }
     m_entries = m_reader->getEntries(podio::Category::Event);
+  }
+
+  if (!m_writingFileNameDeprecated.empty()) {
+    warning() << ".output is deprecated, use .Output instead in the steering file" << endmsg;
+    m_writingFileName = m_writingFileNameDeprecated;
   }
 
   m_switch = KeepDropSwitch(m_outputCommands);

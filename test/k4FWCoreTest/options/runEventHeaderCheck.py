@@ -24,7 +24,7 @@ from k4FWCore import ApplicationMgr, IOSvc
 from Configurables import EventDataSvc
 
 svc = IOSvc("IOSvc")
-svc.input = ["eventHeader.root"]
+svc.Input = ["eventHeader.root"]
 # svc.CollectionNames = ['MCParticles']
 
 consumer = ExampleEventHeaderConsumer("EventHeaderCheck", runNumber=42, eventNumberOffset=42)
