@@ -26,7 +26,7 @@ from Configurables import ExampleFunctionalProducer
 from k4FWCore import ApplicationMgr, IOSvc
 
 io = IOSvc("IOSvc")
-io.output = "/tmp/a/b/c/functional_producer.root"
+io.Output = "/tmp/a/b/c/functional_producer.root"
 
 producer = ExampleFunctionalProducer("ExampleFunctionalProducer")
 

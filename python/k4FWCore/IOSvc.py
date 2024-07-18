@@ -34,10 +34,10 @@ class IOSvc:
             return
 
         # Allow to specify a single string for input when what we want is a list
-        if attr == "input":
+        if attr == "input" or attr == "Input":
             if isinstance(value, str):
                 value = [value]
-        if attr == "output":
+        elif attr == "output" or attr == "Output":
             if os.path.dirname(value) and not os.path.exists(os.path.dirname(value)):
                 os.makedirs(os.path.dirname(value))
         setattr(self._svc, attr, value)

@@ -25,7 +25,7 @@ from Configurables import EventDataSvc
 from k4FWCore import ApplicationMgr, IOSvc
 
 svc = IOSvc("IOSvc")
-svc.input = [
+svc.Input = [
     "functional_producer.root",
     "functional_producer2.root",
 ]

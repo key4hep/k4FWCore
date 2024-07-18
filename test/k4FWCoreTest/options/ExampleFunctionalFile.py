@@ -26,8 +26,8 @@ from Configurables import EventDataSvc
 from k4FWCore import ApplicationMgr, IOSvc
 
 svc = IOSvc("IOSvc")
-svc.input = "functional_producer.root"
-svc.output = "functional_transformer.root"
+svc.Input = "functional_producer.root"
+svc.Output = "functional_transformer.root"
 
 transformer = ExampleFunctionalTransformer(
     "Transformer", InputCollection=["MCParticles"], OutputCollection=["NewMCParticles"]
