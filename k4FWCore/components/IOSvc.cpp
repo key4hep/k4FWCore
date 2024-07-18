@@ -49,8 +49,6 @@ StatusCode IOSvc::initialize() {
     warning() << ".input is deprecated, use .Input instead in the steering file" << endmsg;
     m_readingFileNames = m_readingFileNamesDeprecated;
   }
-  info() << m_readingFileNamesDeprecated.size() << " files to be read" << endmsg;
-  info() << m_readingFileNames.size() << " files to be read" << endmsg;
   if (!m_readingFileNames.empty()) {
     info() << m_readingFileNames.size() << " files to be read" << endmsg;
     m_reader = std::make_unique<podio::ROOTReader>();
