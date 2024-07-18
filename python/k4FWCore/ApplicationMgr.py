@@ -45,7 +45,7 @@ class ApplicationMgr:
                 continue
             props = conf.getPropertiesWithDescription()
             reader = writer = None
-            add_reader = add_writer = False
+            add_reader = False
             for alg in self._mgr.TopAlg:
                 if isinstance(alg, Reader):
                     reader = alg
@@ -75,7 +75,11 @@ class ApplicationMgr:
                     podio_reader = PodioReader(path)
                     if self._mgr.EvtMax == -1:
                         self._mgr.EvtMax = podio_reader._reader.getEntries("events")
-                    frame = podio_reader.get("events")[0]
+                    try:
+                        frame = podio_reader.get("events")[0]
+                    except IndexError:
+                        print("Warning, the events category wasn't found in the input file")
+                        raise
                     collections = list(frame.getAvailableCollections())
                     reader.InputCollections = collections
             self._mgr.TopAlg = ([reader] if add_reader else []) + self._mgr.TopAlg
