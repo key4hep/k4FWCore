@@ -58,8 +58,8 @@ protected:
       this, "CollectionNames", {}, "List of collections to read"};
   Gaudi::Property<std::vector<std::string>> m_readingFileNamesDeprecated{this, "input", {}, "List of files to read"};
   Gaudi::Property<std::vector<std::string>> m_readingFileNames{this, "Input", {}, "List of files to read"};
-  Gaudi::Property<std::string>              m_writingFileNameDeprecated{this, "output", {}, "List of files to write output to"};
-  Gaudi::Property<std::string>              m_writingFileName{this, "Output", {}, "List of files to write output to"};
+  Gaudi::Property<std::string> m_writingFileNameDeprecated{this, "output", {}, "List of files to write output to"};
+  Gaudi::Property<std::string> m_writingFileName{this, "Output", {}, "List of files to write output to"};
   Gaudi::Property<std::vector<std::string>> m_outputCommands{
       this, "outputCommands", {"keep *"}, "A set of commands to declare which collections to keep or drop."};
   Gaudi::Property<std::string> m_inputType{this, "IOType", "ROOT", "Type of input file (ROOT, RNTuple)"};
