@@ -55,7 +55,7 @@ merger = CollectionMerger(
 )
 
 # If we want to copy instead of creating a subset collection
-merger.Copy = True
+# merger.Copy = True
 
 mgr = ApplicationMgr(
     TopAlg=[particle_producer, merger],
