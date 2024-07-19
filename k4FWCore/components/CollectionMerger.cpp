@@ -126,8 +126,8 @@ private:
         ret->setSubsetCollection();
       }
     }
-    const auto ptr        = std::dynamic_pointer_cast<T>(ret);
-    const auto sourceColl = std::dynamic_pointer_cast<T>(source);
+    const auto ptr        = std::static_pointer_cast<T>(ret);
+    const auto sourceColl = std::static_pointer_cast<T>(source);
     if (m_copy) {
       for (const auto& elem : *sourceColl) {
         ptr->push_back(elem.clone());
