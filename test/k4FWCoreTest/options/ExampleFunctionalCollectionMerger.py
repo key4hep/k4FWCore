@@ -46,7 +46,7 @@ particle_producer = ExampleFunctionalProducer(
 
 
 merger = CollectionMerger(
-    "CollectionConcatenator",
+    "CollectionMerger",
     # List of collections to concatenate
     InputCollections=["MCParticles2", "MCParticles1", "MCParticles3"],
     # Name of the single output collection
