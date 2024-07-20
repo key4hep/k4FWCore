@@ -50,8 +50,10 @@ namespace k4FWCore {
     }
 
     template <typename T, typename P>
-    requires (!std::is_same_v<P, std::shared_ptr<podio::CollectionBase>>)
-    const auto& maybeTransformToEDM4hep(const P& arg) { return arg; }
+      requires(!std::is_same_v<P, std::shared_ptr<podio::CollectionBase>>)
+    const auto& maybeTransformToEDM4hep(const P& arg) {
+      return arg;
+    }
 
     template <typename T, typename P>
       requires std::is_base_of_v<podio::CollectionBase, P>
