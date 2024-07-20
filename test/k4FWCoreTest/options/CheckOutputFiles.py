@@ -44,6 +44,7 @@ def check_collections(filename, names):
             )
             raise RuntimeError("Collections in frame do not match expected collections")
 
+
 def check_events(filename, number):
     print(f'Checking file "{filename}" for {number} events')
     podio_reader = podio.root_io.Reader(filename)

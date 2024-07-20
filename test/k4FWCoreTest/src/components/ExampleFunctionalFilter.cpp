@@ -47,7 +47,6 @@ struct ExampleFunctionalFilter final : k4FWCore::FilterPredicate<bool(const edm4
 
   // Thread-safe counter
   mutable Gaudi::Accumulators::Counter<> m_counter{this, "Counter"};
-
 };
 
 DECLARE_COMPONENT(ExampleFunctionalFilter)
