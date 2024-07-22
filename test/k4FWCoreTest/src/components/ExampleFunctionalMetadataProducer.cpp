@@ -50,9 +50,9 @@ struct ExampleFunctionalMetadataProducer final : k4FWCore::Producer<edm4hep::MCP
   }
 
 private:
-  Gaudi::Property<int>              m_particleNum{this, "NumberOfParticles", 3, "How many particles will be produced"};
-  Gaudi::Property<float>            m_particleTime{this, "ParticleTime", 1.5, "Which time will be set for the particles"};
-  Gaudi::Property<std::string>      m_metadataString{this, "MetadataString", "hello", "Example of a string"};
+  Gaudi::Property<int>         m_particleNum{this, "NumberOfParticles", 3, "How many particles will be produced"};
+  Gaudi::Property<float>       m_particleTime{this, "ParticleTime", 1.5, "Which time will be set for the particles"};
+  Gaudi::Property<std::string> m_metadataString{this, "MetadataString", "hello", "Example of a string"};
   Gaudi::Property<std::vector<int>> m_PDGValues{
       this, "PDGValues", {1, 2, 3, 4}, "Values of the PDG used for the particles"};
 };
