@@ -36,7 +36,6 @@ public:
   StatusCode finalize() override;
 
 protected:
-
   SmartIF<IDataProviderSvc> m_dataSvc;
 
   std::unique_ptr<podio::Frame> m_frame;

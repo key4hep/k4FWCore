@@ -28,24 +28,22 @@
 
 namespace k4FWCore {
 
-    template <typename T>
-    void putParameter(const std::string& name, const T& value, const Gaudi::Algorithm* alg) {
-      auto metadataSvc = alg->service<IMetadataSvc>("MetadataSvc", false);
-      if (!metadataSvc) {
-        alg->error() << "MetadataSvc not found" << endmsg;
-        return;
-      }
-      metadataSvc->put<T>(name, value);
+  template <typename T> void putParameter(const std::string& name, const T& value, const Gaudi::Algorithm* alg) {
+    auto metadataSvc = alg->service<IMetadataSvc>("MetadataSvc", false);
+    if (!metadataSvc) {
+      alg->error() << "MetadataSvc not found" << endmsg;
+      return;
     }
-    template <typename T>
-    std::optional<T> getParameter(const std::string& name, const Gaudi::Algorithm* alg) {
-      auto metadataSvc = alg->service<IMetadataSvc>("MetadataSvc", false);
-      if (!metadataSvc) {
-        alg->error() << "MetadataSvc not found" << endmsg;
-        return std::nullopt;
-      }
-      return metadataSvc->get<T>(name);
+    metadataSvc->put<T>(name, value);
+  }
+  template <typename T> std::optional<T> getParameter(const std::string& name, const Gaudi::Algorithm* alg) {
+    auto metadataSvc = alg->service<IMetadataSvc>("MetadataSvc", false);
+    if (!metadataSvc) {
+      alg->error() << "MetadataSvc not found" << endmsg;
+      return std::nullopt;
     }
+    return metadataSvc->get<T>(name);
+  }
 }  // namespace k4FWCore
 
 #endif  // CORE_FUNCTIONALUTILS_H

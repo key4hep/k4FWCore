@@ -30,8 +30,8 @@
 #include "podio/ROOTWriter.h"
 
 #include "IIOSvc.h"
-#include "k4FWCore/KeepDropSwitch.h"
 #include "k4FWCore/IMetadataSvc.h"
+#include "k4FWCore/KeepDropSwitch.h"
 
 #include <string>
 #include <vector>
