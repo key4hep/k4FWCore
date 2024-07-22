@@ -27,7 +27,6 @@
  * The interface implemented by any class making IO and reading RawEvent Data
  */
 class IMetadataSvc : virtual public IInterface {
-
 public:
   /// InterfaceID
   DeclareInterfaceID(IMetadataSvc, 1, 0);
@@ -39,18 +38,14 @@ public:
 
   std::unique_ptr<podio::Frame> m_frame;
 
-  virtual void setFrame(podio::Frame&& fr) = 0;
-  template <typename T>
-  void put(const std::string& name, const T& obj) {
+  virtual void               setFrame(podio::Frame&& fr) = 0;
+  template <typename T> void put(const std::string& name, const T& obj) {
     if (!m_frame) {
       m_frame.reset(new podio::Frame());
     }
     m_frame->putParameter(name, obj);
   }
-  template <typename T>
-  std::optional<T> get(const std::string& name) {
-    return m_frame->getParameter<T>(name);
-  }
+  template <typename T> std::optional<T> get(const std::string& name) { return m_frame->getParameter<T>(name); }
 };
 
 #endif

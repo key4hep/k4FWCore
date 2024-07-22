@@ -121,7 +121,6 @@ public:
     }
     iosvc->getWriter()->writeFrame(config_metadata_frame, "configuration_metadata");
 
-
     if (m_metadataSvc->m_frame) {
       iosvc->getWriter()->writeFrame(*std::move(m_metadataSvc->m_frame), podio::Category::Metadata);
     }

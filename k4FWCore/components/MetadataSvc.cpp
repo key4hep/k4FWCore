@@ -46,8 +46,6 @@ StatusCode MetadataSvc::initialize() {
 
 StatusCode MetadataSvc::finalize() { return Service::finalize(); }
 
-void MetadataSvc::setFrame(podio::Frame&& fr) {
-  m_frame.reset(new podio::Frame(std::move(fr)));
-}
+void MetadataSvc::setFrame(podio::Frame&& fr) { m_frame.reset(new podio::Frame(std::move(fr))); }
 
 DECLARE_COMPONENT(MetadataSvc)
