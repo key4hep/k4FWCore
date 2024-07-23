@@ -23,18 +23,10 @@
 
 #include "podio/Frame.h"
 
-/**
- * The interface implemented by any class making IO and reading RawEvent Data
- */
 class IMetadataSvc : virtual public IInterface {
 public:
   /// InterfaceID
   DeclareInterfaceID(IMetadataSvc, 1, 0);
-
-  /**
-   * @brief Read the next event from the input file
-   * @return A tuple containing the collections read, the collection names and the frame that owns the collections
-   */
 
   std::unique_ptr<podio::Frame> m_frame;
 
