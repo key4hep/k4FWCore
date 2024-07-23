@@ -55,8 +55,10 @@ struct ExampleFunctionalMetadataConsumer final : k4FWCore::Consumer<void(const e
   }
 
   void operator()(const edm4hep::MCParticleCollection& input) const override {
-    if (input.size() != m_particleNum) {
-      error() << "Input MCParticleCollection size is not " << m_particleNum << endmsg;
+    // Check that it's possible to get metadata parameters from the main loop
+    auto particleNum = k4FWCore::getParameter<int>("NumberOfParticles", this).value_or(-1);
+    if (input.size() != particleNum) {
+      error() << "Input MCParticleCollection size is not " << particleNum << endmsg;
       return;
     }
     int i = 0;
@@ -71,6 +73,15 @@ struct ExampleFunctionalMetadataConsumer final : k4FWCore::Consumer<void(const e
       }
       ++i;
     }
+  }
+
+  StatusCode finalize() override {
+    auto particleNum = k4FWCore::getParameter<int>("NumberOfParticles", this).value_or(-1);
+    if (particleNum != 3) {
+      error() << "Metadata parameter NumberOfParticles is not 3" << endmsg;
+      return StatusCode::FAILURE;
+    }
+    return StatusCode::SUCCESS;
   }
 
 private:
