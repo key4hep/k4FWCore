@@ -164,8 +164,8 @@ check_collections("functional_metadata.root", ["MCParticles"])
 reader = podio.root_io.Reader("functional_metadata.root")
 metadata = reader.get("metadata")[0]
 for key, value in zip(
-    ["NumberOfParticles", "ParticleTime", "PDGValues", "MetadataString"],
-    [3, 1.5, [1, 2, 3, 4], "hello"],
+    ["NumberOfParticles", "ParticleTime", "PDGValues", "MetadataString", "EventMetadataInt", "FinalizeMetadataInt"],
+    [3, 1.5, [1, 2, 3, 4], "hello", 5, 10],
 ):
     if metadata.get_parameter(key) != value:
         raise RuntimeError(f"Metadata parameter {key} does not match expected value")

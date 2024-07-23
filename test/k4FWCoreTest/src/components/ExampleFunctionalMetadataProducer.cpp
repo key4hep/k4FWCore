@@ -40,6 +40,7 @@ struct ExampleFunctionalMetadataProducer final : k4FWCore::Producer<edm4hep::MCP
   }
 
   edm4hep::MCParticleCollection operator()() const override {
+    k4FWCore::putParameter("EventMetadataInt", 5, this);
     auto coll = edm4hep::MCParticleCollection();
     for (int i = 0; i < m_particleNum.value(); ++i) {
       auto particle = coll.create();
@@ -47,6 +48,11 @@ struct ExampleFunctionalMetadataProducer final : k4FWCore::Producer<edm4hep::MCP
       particle.setTime(m_particleTime.value());
     }
     return coll;
+  }
+
+  StatusCode finalize() override {
+    k4FWCore::putParameter("FinalizeMetadataInt", 10, this);
+    return StatusCode::SUCCESS;
   }
 
 private:
