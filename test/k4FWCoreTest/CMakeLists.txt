@@ -108,6 +108,9 @@ add_test_with_env(Testk4runVerboseOutput options/TestArgs.py --verbose PROPERTIE
 add_test_with_env(Testk4runHelpOnly options/TestArgs.py --help PROPERTIES PASS_REGULAR_EXPRESSION "show this help message and exit")
 
 
+# WARNING: If test names are changed, they also need to be changed below for the dependencies of
+# the FunctionalCheckFiles test
+
 add_test_with_env(FunctionalMemory options/ExampleFunctionalMemory.py)
 add_test_with_env(FunctionalMTMemory options/ExampleFunctionalMTMemory.py)
 add_test_with_env(FunctionalMultipleMemory options/ExampleFunctionalMultipleMemory.py)
@@ -131,9 +134,10 @@ add_test_with_env(FunctionalTransformerRuntimeEmpty options/ExampleFunctionalTra
 add_test_with_env(FunctionalTransformerRuntimeCollectionsMultiple options/ExampleFunctionalTransformerRuntimeCollectionsMultiple.py)
 add_test_with_env(FunctionalTransformerHist options/ExampleFunctionalTransformerHist.py)
 add_test_with_env(FunctionalCollectionMerger options/ExampleFunctionalCollectionMerger.py)
+add_test_with_env(FunctionalFilterFile options/ExampleFunctionalFilterFile.py)
 
 add_test(NAME FunctionalCheckFiles COMMAND python3 ${CMAKE_CURRENT_LIST_DIR}/options/CheckOutputFiles.py)
-set_tests_properties(FunctionalCheckFiles PROPERTIES DEPENDS "FunctionalFile;FunctionalMTFile;FunctionalMultipleFile;FunctionalOutputCommands;FunctionalProducerAbsolutePath;FunctionalTransformerRuntimeEmpty;FunctionalMix;FunctionalMixIOSvc;FunctionalTransformerHist;FunctionalCollectionMerger")
+set_tests_properties(FunctionalCheckFiles PROPERTIES DEPENDS "FunctionalFile;FunctionalMTFile;FunctionalMultipleFile;FunctionalOutputCommands;FunctionalProducerAbsolutePath;FunctionalTransformerRuntimeEmpty;FunctionalMix;FunctionalMixIOSvc;FunctionalTransformerHist;FunctionalCollectionMerger;FunctionalFilterFile")
 
 # Do this after checking the files not to overwrite them
 add_test_with_env(FunctionalFile_toolong options/ExampleFunctionalFile.py -n 999 PROPERTIES DEPENDS FunctionalCheckFiles PASS_REGULAR_EXPRESSION

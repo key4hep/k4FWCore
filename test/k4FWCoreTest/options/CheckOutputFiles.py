@@ -45,6 +45,15 @@ def check_collections(filename, names):
             raise RuntimeError("Collections in frame do not match expected collections")
 
 
+def check_events(filename, number):
+    print(f'Checking file "{filename}" for {number} events')
+    podio_reader = podio.root_io.Reader(filename)
+    frames = podio_reader.get("events")
+    if len(frames) != number:
+        print(f"File {filename} has {len(frames)} events but {number} are expected")
+        raise RuntimeError("Number of events does not match expected number")
+
+
 check_collections("functional_transformer.root", ["MCParticles", "NewMCParticles"])
 check_collections(
     "functional_transformer_multiple.root",
@@ -140,3 +149,8 @@ frames = podio_reader.get("events")
 ev = frames[0]
 if len(ev.get("NewMCParticles")) != 4:
     raise RuntimeError(f"Expected 4 NewMCParticles but got {len(ev.get('NewMCParticles'))}")
+
+check_events(
+    "functional_filter.root",
+    5,
+)

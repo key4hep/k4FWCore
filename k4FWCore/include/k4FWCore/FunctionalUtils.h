@@ -26,6 +26,7 @@
 #include "k4FWCore/DataWrapper.h"
 #include "podio/CollectionBase.h"
 
+#include "GaudiKernel/DataObjectHandle.h"
 #include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 
@@ -42,11 +43,15 @@ namespace k4FWCore {
   namespace details {
 
     // This function will be used to modify std::shared_ptr<podio::CollectionBase> to the actual collection type
-    template <typename T, typename P> auto maybeTransformToEDM4hep(P& arg) { return arg; }
-
     template <typename T, typename P>
       requires std::same_as<P, std::vector<std::string, std::shared_ptr<podio::CollectionBase>>>
     auto maybeTransformToEDM4hep(P& arg) {
+      return arg;
+    }
+
+    template <typename T, typename P>
+      requires(!std::is_same_v<P, std::shared_ptr<podio::CollectionBase>>)
+    const auto& maybeTransformToEDM4hep(const P& arg) {
       return arg;
     }
 
@@ -215,6 +220,44 @@ namespace k4FWCore {
       std::transform(in.begin(), in.end(), std::back_inserter(out), [](const std::string& i) { return DataObjID{i}; });
       return out;
     }
+
+    // Functional handles
+    template <typename T> class FunctionalDataObjectReadHandle : public ::details::ReadHandle<T> {
+      template <typename... Args, std::size_t... Is>
+      FunctionalDataObjectReadHandle(std::tuple<Args...>&& args, std::index_sequence<Is...>)
+          : FunctionalDataObjectReadHandle(std::get<Is>(std::move(args))...) {}
+
+    public:
+      /// Autodeclaring constructor with property name, mode, key and documentation.
+      /// @note the use std::enable_if is required to avoid ambiguities
+      template <typename OWNER, typename K, typename = std::enable_if_t<std::is_base_of_v<IProperty, OWNER>>>
+      FunctionalDataObjectReadHandle(OWNER* owner, std::string propertyName, K key = {}, std::string doc = "")
+          : ::details::ReadHandle<T>(owner, Gaudi::DataHandle::Reader, std::move(propertyName), std::move(key),
+                                     std::move(doc)) {}
+
+      template <typename... Args>
+      FunctionalDataObjectReadHandle(std::tuple<Args...>&& args)
+          : FunctionalDataObjectReadHandle(std::move(args), std::index_sequence_for<Args...>{}) {}
+
+      const T& get() const;
+    };
+
+    template <typename T> const T& FunctionalDataObjectReadHandle<T>::get() const {
+      auto dataObj = this->fetch();
+      if (!dataObj) {
+        throw GaudiException("Cannot retrieve \'" + this->objKey() + "\' from transient store.",
+                             this->m_owner ? this->owner()->name() : "no owner", StatusCode::FAILURE);
+      }
+      auto ptr = dynamic_cast<AnyDataWrapper<std::shared_ptr<podio::CollectionBase>>*>(dataObj);
+      return maybeTransformToEDM4hep<T>(ptr->getData());
+    }
+
+    struct BaseClass_t {
+      template <typename T> using InputHandle = FunctionalDataObjectReadHandle<T>;
+      // template <typename T> using OutputHandle = DataObjectWriteHandle<T>;
+
+      using BaseClass = Gaudi::Algorithm;
+    };
 
   }  // namespace details
 }  // namespace k4FWCore
