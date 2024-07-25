@@ -24,7 +24,7 @@
 
 /** @class INoiseCaloCellsTool
  *
- *  Abstract interface to calorimeter noise tool
+ *  Abstract interface for tools that add or filter noise to calorimeter cells
  *
  *  @author Jana Faltova
  *  @date   2016-09
