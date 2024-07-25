@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 from Configurables import ApplicationMgr as AppMgr
-from Configurables import Reader, Writer, IOSvc, Gaudi__Sequencer
+from Configurables import Reader, Writer, IOSvc, MetadataSvc, Gaudi__Sequencer
 import os
 from podio.root_io import Reader as PodioReader
 
@@ -39,6 +39,8 @@ class ApplicationMgr:
         self._mgr = AppMgr(**kwargs)
 
         for conf in frozenset(self._mgr.allConfigurables.values()):
+            if isinstance(conf, MetadataSvc):
+                self._mgr.ExtSvc.append(conf)
             if not isinstance(conf, IOSvc):
                 continue
             props = conf.getPropertiesWithDescription()

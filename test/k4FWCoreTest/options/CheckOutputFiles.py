@@ -154,3 +154,12 @@ check_events(
     "functional_filter.root",
     5,
 )
+
+reader = podio.root_io.Reader("functional_metadata.root")
+metadata = reader.get("metadata")[0]
+for key, value in zip(
+    ["NumberOfParticles", "ParticleTime", "PDGValues", "MetadataString"],
+    [3, 1.5, [1, 2, 3, 4], "hello"],
+):
+    if metadata.get_parameter(key) != value:
+        raise RuntimeError(f"Metadata parameter {key} does not match expected value")

@@ -28,6 +28,7 @@
 #include "GaudiKernel/AnyDataWrapper.h"
 #include "GaudiKernel/IEventProcessor.h"
 
+#include <algorithm>
 #include <mutex>
 #include <tuple>
 
@@ -61,6 +62,23 @@ StatusCode IOSvc::initialize() {
   if (!m_dataSvc) {
     error() << "Unable to locate the EventDataSvc" << endmsg;
     return StatusCode::FAILURE;
+  }
+
+  m_metadataSvc = service("MetadataSvc");
+  if (!m_metadataSvc) {
+    error() << "Unable to locate the MetadataSvc" << endmsg;
+    return StatusCode::FAILURE;
+  }
+  if (m_reader) {
+    auto categories = m_reader->getAvailableCategories();
+    if (
+        // std::find(m_reader->getAvailableCategories().begin(), m_reader->getAvailableCategories().end(),
+        //           podio::Category::Metadata) != m_reader->getAvailableCategories().end() &&
+        std::find(categories.begin(), categories.end(), podio::Category::Metadata) != categories.end() &&
+        m_reader->getEntries(podio::Category::Metadata) > 0) {
+      info() << "Setting metadata frame" << endmsg;
+      m_metadataSvc->setFrame(m_reader->readEntry(podio::Category::Metadata, 0));
+    }
   }
 
   m_hiveWhiteBoard = service("EventDataSvc");
