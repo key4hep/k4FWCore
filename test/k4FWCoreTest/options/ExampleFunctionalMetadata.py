@@ -35,7 +35,7 @@ consumer = ExampleFunctionalMetadataConsumer("Consumer", InputCollection=["MCPar
 
 ApplicationMgr(
     TopAlg=[producer, consumer],
-    
+    EvtSel="NONE",
     EvtMax=10,
     ExtSvc=[EventDataSvc("EventDataSvc")],
     OutputLevel=INFO,

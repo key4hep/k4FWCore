@@ -29,9 +29,13 @@ import ROOT
 def check_collections(filename, names):
     print(f'Checking file "{filename}" for collections {names}')
     podio_reader = podio.root_io.Reader(filename)
+    if 'events' not in podio_reader.categories:
+        raise RuntimeError(f"File {filename} has no events")
     frames = podio_reader.get("events")
     if not len(frames) and len(names):
         print(f"File {filename} is empty but {names} are expected")
+        # Prevent a possible crash
+        del podio_reader
         raise RuntimeError("File is empty but should not be")
     for frame in frames:
         available = set(frame.getAvailableCollections())
@@ -155,6 +159,8 @@ check_events(
     5,
 )
 
+check_collections("functional_metadata.root", ["MCParticles"])
+
 reader = podio.root_io.Reader("functional_metadata.root")
 metadata = reader.get("metadata")[0]
 for key, value in zip(
@@ -163,3 +169,4 @@ for key, value in zip(
 ):
     if metadata.get_parameter(key) != value:
         raise RuntimeError(f"Metadata parameter {key} does not match expected value")
+
