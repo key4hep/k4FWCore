@@ -24,7 +24,7 @@
 
 /** @class INoiseConstTool
  *
- *  Abstract interface to get calorimeter noise constants (RMS and offset) per cell tool
+ *  Abstract interface for tools that return noise values (RMS and offset) per calorimeter cell
  *  @author Coralie Neubueser
  *  @date   2018-01
  */

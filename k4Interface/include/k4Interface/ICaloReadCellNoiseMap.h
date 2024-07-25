@@ -24,7 +24,7 @@
 
 /** @class ICaloReadCellNoiseMap RecInterface/RecInterface/ICaloReadCellNoiseMap.h ICaloReadCellNoiseMap.h
  *
- *  Abstarct Interface to noise per Calorimeter cell.
+ *  Abstract interface for tools that read noise values (RMS and offset) per calorimeter cell
  *
  *  @author Coralie Neubueser
  */
@@ -36,4 +36,4 @@ public:
   virtual double noiseRMS(uint64_t aCellId)    = 0;
   virtual double noiseOffset(uint64_t aCellId) = 0;
 };
-#endif /* RECINTERFACE_ICALOREADNEIGHBOURSMAP_H */
+#endif /* RECINTERFACE_ICALOREADCELLNOISEMAP_H */
