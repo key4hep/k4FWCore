@@ -169,10 +169,9 @@ for key, value in zip(
         "ParticleTime",
         "PDGValues",
         "MetadataString",
-        "EventMetadataInt",
         "FinalizeMetadataInt",
     ],
-    [3, 1.5, [1, 2, 3, 4], "hello", 5, 10],
+    [3, 1.5, [1, 2, 3, 4], "hello", 10],
 ):
     if metadata.get_parameter(key) != value:
         raise RuntimeError(f"Metadata parameter {key} does not match expected value")

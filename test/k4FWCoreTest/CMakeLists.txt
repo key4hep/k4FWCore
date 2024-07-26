@@ -136,6 +136,8 @@ add_test_with_env(FunctionalTransformerHist options/ExampleFunctionalTransformer
 add_test_with_env(FunctionalCollectionMerger options/ExampleFunctionalCollectionMerger.py)
 add_test_with_env(FunctionalFilterFile options/ExampleFunctionalFilterFile.py)
 add_test_with_env(FunctionalMetadata options/ExampleFunctionalMetadata.py)
+
+add_test(NAME FunctionalCheckFiles COMMAND python3 ${CMAKE_CURRENT_LIST_DIR}/options/CheckOutputFiles.py)
 set_tests_properties(FunctionalCheckFiles PROPERTIES DEPENDS "FunctionalFile;FunctionalMTFile;FunctionalMultipleFile;FunctionalOutputCommands;FunctionalProducerAbsolutePath;FunctionalTransformerRuntimeEmpty;FunctionalMix;FunctionalMixIOSvc;FunctionalTransformerHist;FunctionalCollectionMerger;FunctionalFilterFile;FunctionalMetadata")
 
 # Do this after checking the files not to overwrite them

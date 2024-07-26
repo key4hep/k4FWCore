@@ -25,7 +25,6 @@
 
 class IMetadataSvc : virtual public IInterface {
 public:
-  /// InterfaceID
   DeclareInterfaceID(IMetadataSvc, 1, 0);
 
   std::unique_ptr<podio::Frame> m_frame;

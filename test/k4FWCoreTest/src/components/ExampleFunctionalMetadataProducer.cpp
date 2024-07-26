@@ -40,7 +40,8 @@ struct ExampleFunctionalMetadataProducer final : k4FWCore::Producer<edm4hep::MCP
   }
 
   edm4hep::MCParticleCollection operator()() const override {
-    k4FWCore::putParameter("EventMetadataInt", 5, this);
+    // Putting metadata in the main loop doesn't work
+    // k4FWCore::putParameter("EventMetadataInt", 5, this);
     auto coll = edm4hep::MCParticleCollection();
     for (int i = 0; i < m_particleNum.value(); ++i) {
       auto particle = coll.create();

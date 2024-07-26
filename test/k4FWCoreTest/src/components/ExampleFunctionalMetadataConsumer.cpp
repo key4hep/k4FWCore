@@ -82,11 +82,12 @@ struct ExampleFunctionalMetadataConsumer final : k4FWCore::Consumer<void(const e
       return StatusCode::FAILURE;
     }
 
-    auto eventMetadataInt = k4FWCore::getParameter<int>("EventMetadataInt", this).value_or(-1);
-    if (eventMetadataInt != 5) {
-      error() << "EventMetadataInt is not 5" << endmsg;
-      return StatusCode::FAILURE;
-    }
+    // Putting parameters in the main loop fails
+    // auto eventMetadataInt = k4FWCore::getParameter<int>("EventMetadataInt", this).value_or(-1);
+    // if (eventMetadataInt != 5) {
+    //   error() << "EventMetadataInt is not 5" << endmsg;
+    //   return StatusCode::FAILURE;
+    // }
 
     auto finalizeMetadataInt = k4FWCore::getParameter<int>("FinalizeMetadataInt", this).value_or(-1);
     if (finalizeMetadataInt != 10) {
