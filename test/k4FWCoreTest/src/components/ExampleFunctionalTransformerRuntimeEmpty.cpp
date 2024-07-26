@@ -29,23 +29,23 @@
  *
  * This is an example of a functional transformer that takes an arbitrary number
  * of input collections and produces an arbitrary number of output collections
- * but it's returning an empty map (no output collections)
+ * but it's returning an empty vector (no output collections)
  */
 
-using mapType = std::map<std::string, const edm4hep::MCParticleCollection&>;
-
 struct ExampleFunctionalTransformerRuntimeEmpty final
-    : k4FWCore::Transformer<std::map<std::string, edm4hep::MCParticleCollection>(const mapType& input)> {
-  // The pair in KeyValue can be changed from python and it corresponds
-  // to the name of the output collection
+    : k4FWCore::Transformer<std::vector<edm4hep::MCParticleCollection>(
+          const std::vector<const edm4hep::MCParticleCollection*>& input)> {
+  // The pair in KeyValues can be changed from python and it corresponds
+  // to the name of the output collections
   ExampleFunctionalTransformerRuntimeEmpty(const std::string& name, ISvcLocator* svcLoc)
       : Transformer(name, svcLoc, {KeyValues("InputCollections", {"MCParticles"})},
                     {KeyValues("OutputCollections", {"MCParticles"})}) {}
 
   // This is the function that will be called to produce the data
-  std::map<std::string, edm4hep::MCParticleCollection> operator()(const mapType& input) const override {
-    // We just return an empty map to make sure it works fine
-    std::map<std::string, edm4hep::MCParticleCollection> outputCollections;
+  std::vector<edm4hep::MCParticleCollection> operator()(
+      const std::vector<const edm4hep::MCParticleCollection*>& input) const override {
+    // Return an empty vector to make sure that also works
+    std::vector<edm4hep::MCParticleCollection> outputCollections;
     return outputCollections;
   }
 

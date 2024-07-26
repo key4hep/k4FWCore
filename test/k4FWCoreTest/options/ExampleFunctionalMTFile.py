@@ -17,8 +17,8 @@
 # limitations under the License.
 #
 
-# This is an example reading from a file and using a consumer with several inputs
-# to check that the contents of the file are the expected ones
+# This is an example of reading data from a file, transforming it and writing to
+# an output file in a multithreaded environment
 
 from Gaudi.Configuration import INFO, WARNING
 from Configurables import ExampleFunctionalTransformer, ExampleFunctionalConsumer
@@ -41,7 +41,7 @@ slimeventloopmgr = HiveSlimEventLoopMgr(
 scheduler = AvalancheSchedulerSvc(ThreadPoolSize=threads, ShowDataFlow=True, OutputLevel=WARNING)
 
 svc = IOSvc("IOSvc")
-svc.input = "output_k4test_exampledata_producer_multiple.root"
+svc.input = "functional_producer_multiple.root"
 svc.output = "functional_transformerMT.root"
 
 consumer = ExampleFunctionalConsumer(

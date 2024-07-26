@@ -17,37 +17,34 @@
 # limitations under the License.
 #
 
-# This is an example using a consumer that takes any number of collections
+# This is an creating some collections and filtering after
+# to check that the contents of the file are the expected ones
 
 from Gaudi.Configuration import INFO
 from Configurables import (
+    ExampleFunctionalTransformer,
     ExampleFunctionalProducer,
-    ExampleFunctionalConsumerRuntimeCollections,
+    ExampleFunctionalFilter,
 )
-from k4FWCore import ApplicationMgr
+from k4FWCore import ApplicationMgr, IOSvc
 from Configurables import EventDataSvc
 
-producer0 = ExampleFunctionalProducer(
-    "Producer0",
-    OutputCollection=["MCParticles0"],
-)
-producer1 = ExampleFunctionalProducer(
-    "Producer1",
-    OutputCollection=["MCParticles1"],
-)
-producer2 = ExampleFunctionalProducer(
-    "Producer2",
-    OutputCollection=["MCParticles2"],
-)
-consumer = ExampleFunctionalConsumerRuntimeCollections(
-    "Consumer",
-    InputCollection=["MCParticles0", "MCParticles1", "MCParticles2"],
-    Offset=0,
+iosvc = IOSvc("IOSvc")
+iosvc.output = "functional_filter.root"
+
+transformer = ExampleFunctionalTransformer(
+    "Transformer", InputCollection=["MCParticles"], OutputCollection=["NewMCParticles"]
 )
 
+producer = ExampleFunctionalProducer("Producer", OutputCollection=["MCParticles"])
+
+filt = ExampleFunctionalFilter(
+    "Filter",
+    InputCollection="NewMCParticles",
+)
 
 ApplicationMgr(
-    TopAlg=[producer0, producer1, producer2, consumer],
+    TopAlg=[producer, transformer, filt],
     EvtSel="NONE",
     EvtMax=10,
     ExtSvc=[EventDataSvc("EventDataSvc")],

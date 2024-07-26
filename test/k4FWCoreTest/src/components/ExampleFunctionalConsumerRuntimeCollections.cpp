@@ -26,20 +26,32 @@
 #include <string>
 
 struct ExampleFunctionalConsumerRuntimeCollections final
-    : k4FWCore::Consumer<void(const std::map<std::string, const edm4hep::MCParticleCollection&>& input)> {
+    : k4FWCore::Consumer<void(const std::vector<const edm4hep::MCParticleCollection*>& input)> {
   // The pair in KeyValue can be changed from python and it corresponds
   // to the name of the output collection
   ExampleFunctionalConsumerRuntimeCollections(const std::string& name, ISvcLocator* svcLoc)
       : Consumer(name, svcLoc, KeyValues("InputCollection", {"DefaultValue"})) {}
 
   // This is the function that will be called to produce the data
-  void operator()(const std::map<std::string, const edm4hep::MCParticleCollection&>& input) const override {
+  void operator()(const std::vector<const edm4hep::MCParticleCollection*>& input) const override {
     if (input.size() != 3) {
-      throw std::runtime_error("Wrong size of the input map, expected 3, got " + std::to_string(input.size()));
+      throw std::runtime_error("Wrong size of the input vector, expected 3, got " + std::to_string(input.size()));
     }
-    for (auto& [key, val] : input) {
+    for (int i = 0; i < 3; i++) {
+      if (inputLocations(0)[i] != "MCParticles" + std::to_string(i)) {
+        throw std::runtime_error("Wrong name of the input collection, expected MCParticles" + std::to_string(i) +
+                                 ", got " + std::string(inputLocations(0)[i]));
+      }
+      // Add another redundant check to show that the inputLocations() function
+      // can be called with a name instead of an index
+      if (inputLocations("InputCollection")[i] != "MCParticles" + std::to_string(i)) {
+        throw std::runtime_error("Wrong name of the input collection, expected MCParticles" + std::to_string(i) +
+                                 ", got " + std::string(inputLocations(0)[i]));
+      }
+    }
+    for (auto& coll : input) {
       int i = 0;
-      for (const auto& particle : val) {
+      for (const auto&& particle : *coll) {
         if ((particle.getPDG() != 1 + i + m_offset) || (particle.getGeneratorStatus() != 2 + i + m_offset) ||
             (particle.getSimulatorStatus() != 3 + i + m_offset) || (particle.getCharge() != 4 + i + m_offset) ||
             (particle.getTime() != 5 + i + m_offset) || (particle.getMass() != 6 + i + m_offset)) {

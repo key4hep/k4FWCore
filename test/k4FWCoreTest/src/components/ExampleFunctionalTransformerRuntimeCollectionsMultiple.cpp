@@ -31,22 +31,21 @@
 #include <string>
 
 // Which type of collection we are reading
-using FloatColl         = std::map<std::string, const podio::UserDataCollection<float>&>;
-using ParticleColl      = std::map<std::string, const edm4hep::MCParticleCollection&>;
-using SimTrackerHitColl = std::map<std::string, const edm4hep::SimTrackerHitCollection&>;
-using TrackerHitColl    = std::map<std::string, const edm4hep::TrackerHit3DCollection&>;
-using TrackColl         = std::map<std::string, const edm4hep::TrackCollection&>;
+using FloatColl         = std::vector<const podio::UserDataCollection<float>*>;
+using ParticleColl      = std::vector<const edm4hep::MCParticleCollection*>;
+using SimTrackerHitColl = std::vector<const edm4hep::SimTrackerHitCollection*>;
+using TrackerHitColl    = std::vector<const edm4hep::TrackerHit3DCollection*>;
+using TrackColl         = std::vector<const edm4hep::TrackCollection*>;
 
-using retType = std::tuple<
-    std::map<std::string, podio::UserDataCollection<float>>, std::map<std::string, edm4hep::MCParticleCollection>,
-    std::map<std::string, edm4hep::MCParticleCollection>, std::map<std::string, edm4hep::SimTrackerHitCollection>,
-    std::map<std::string, edm4hep::TrackerHit3DCollection>, std::map<std::string, edm4hep::TrackCollection>>;
+using retType = std::tuple<std::vector<podio::UserDataCollection<float>>, std::vector<edm4hep::MCParticleCollection>,
+                           std::vector<edm4hep::MCParticleCollection>, std::vector<edm4hep::SimTrackerHitCollection>,
+                           std::vector<edm4hep::TrackerHit3DCollection>, std::vector<edm4hep::TrackCollection>>;
 
 struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
     : k4FWCore::MultiTransformer<retType(const FloatColl&, const ParticleColl&, const SimTrackerHitColl&,
                                          const TrackerHitColl&, const TrackColl&)> {
   // The pairs in KeyValue can be changed from python and they correspond
-  // to the names of the input collection
+  // to the names of the input collections
   ExampleFunctionalTransformerRuntimeCollectionsMultiple(const std::string& name, ISvcLocator* svcLoc)
       : MultiTransformer(name, svcLoc,
                          {
@@ -68,47 +67,47 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
   // This is the function that will be called to transform the data
   // Note that the function has to be const, as well as the collections
   // we get from the input
-  retType operator()(const FloatColl& floatMap, const ParticleColl& particlesMap,
-                     const SimTrackerHitColl& simTrackerHitMap, const TrackerHitColl& trackerHitMap,
-                     const TrackColl& trackMap) const override {
-    auto floatMapOut         = std::map<std::string, podio::UserDataCollection<float>>();
-    auto particleMapOut      = std::map<std::string, edm4hep::MCParticleCollection>();
-    auto particle2MapOut     = std::map<std::string, edm4hep::MCParticleCollection>();
-    auto simTrackerHitMapOut = std::map<std::string, edm4hep::SimTrackerHitCollection>();
-    auto trackerHitMapOut    = std::map<std::string, edm4hep::TrackerHit3DCollection>();
-    auto trackMapOut         = std::map<std::string, edm4hep::TrackCollection>();
+  retType operator()(const FloatColl& floatVec, const ParticleColl& particlesVec,
+                     const SimTrackerHitColl& simTrackerHitVec, const TrackerHitColl& trackerHitVec,
+                     const TrackColl& trackVec) const override {
+    auto floatVecOut         = std::vector<podio::UserDataCollection<float>>();
+    auto particleVecOut      = std::vector<edm4hep::MCParticleCollection>();
+    auto particle2VecOut     = std::vector<edm4hep::MCParticleCollection>();
+    auto simTrackerHitVecOut = std::vector<edm4hep::SimTrackerHitCollection>();
+    auto trackerHitVecOut    = std::vector<edm4hep::TrackerHit3DCollection>();
+    auto trackVecOut         = std::vector<edm4hep::TrackCollection>();
 
-    if (floatMap.size() != 3) {
-      throw std::runtime_error("Wrong size of the floatVector collection map, expected 3, got " +
-                               std::to_string(floatMap.size()) + "");
+    if (floatVec.size() != 3) {
+      throw std::runtime_error("Wrong size of the float vector, expected 3, got " + std::to_string(floatVec.size()) +
+                               "");
     }
-    for (const auto& [key, floatVector] : floatMap) {
-      if (floatVector.size() != 3) {
+    for (const auto& floatVector : floatVec) {
+      if (floatVector->size() != 3) {
         throw std::runtime_error("Wrong size of floatVector collection, expected 3, got " +
-                                 std::to_string(floatVector.size()) + "");
+                                 std::to_string(floatVector->size()) + "");
       }
-      if ((floatVector.vec()[0] != 125) || (floatVector.vec()[1] != 25) || (floatVector.vec()[2] != 0)) {
+      if ((floatVector->vec()[0] != 125) || (floatVector->vec()[1] != 25) || (floatVector->vec()[2] != 0)) {
         std::stringstream error;
-        error << "Wrong data in floatVector collection, expected 125, 25, " << 0 << " got " << floatVector.vec()[0]
-              << ", " << floatVector.vec()[1] << ", " << floatVector.vec()[2];
+        error << "Wrong data in floatVector collection, expected 125, 25, " << 0 << " got " << floatVector->vec()[0]
+              << ", " << floatVector->vec()[1] << ", " << floatVector->vec()[2] << "";
         throw std::runtime_error(error.str());
       }
       auto coll = podio::UserDataCollection<float>();
-      coll.push_back(floatVector.vec()[0]);
-      coll.push_back(floatVector.vec()[1]);
-      coll.push_back(floatVector.vec()[2]);
-      floatMapOut["New" + key] = std::move(coll);
+      coll.push_back(floatVector->vec()[0]);
+      coll.push_back(floatVector->vec()[1]);
+      coll.push_back(floatVector->vec()[2]);
+      floatVecOut.emplace_back(std::move(coll));
     }
 
-    if (particlesMap.size() != 3) {
-      throw std::runtime_error("Wrong size of the particleMap map, expected 3, got " +
-                               std::to_string(particleMapOut.size()) + "");
+    if (particlesVec.size() != 3) {
+      throw std::runtime_error("Wrong size of the particle vector, expected 3, got " +
+                               std::to_string(particleVecOut.size()) + "");
     }
 
-    for (auto& [key, particles] : particlesMap) {
+    for (auto& particles : particlesVec) {
       auto coll = edm4hep::MCParticleCollection();
       int  i    = 0;
-      for (const auto& particle : particles) {
+      for (const auto& particle : *particles) {
         if ((particle.getPDG() != 1 + i + m_offset) || (particle.getGeneratorStatus() != 2 + i + m_offset) ||
             (particle.getSimulatorStatus() != 3 + i + m_offset) || (particle.getCharge() != 4 + i + m_offset) ||
             (particle.getTime() != 5 + i + m_offset) || (particle.getMass() != 6 + i + m_offset)) {
@@ -122,67 +121,67 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
           coll.push_back(particle.clone());
         }
         i++;
-        particleMapOut["New" + key] = std::move(coll);
       }
+      particleVecOut.emplace_back(std::move(coll));
     }
 
-    if (simTrackerHitMap.size() != 3) {
-      throw std::runtime_error("Wrong size of the simTrackerHitMap map, expected 3, got " +
-                               std::to_string(simTrackerHitMapOut.size()) + "");
+    if (simTrackerHitVec.size() != 3) {
+      throw std::runtime_error("Wrong size of the simTrackerHit vector, expected 3, got " +
+                               std::to_string(simTrackerHitVecOut.size()) + "");
     }
 
-    for (auto& [key, simTrackerHits] : simTrackerHitMap) {
+    for (auto& simTrackerHits : simTrackerHitVec) {
       auto coll = edm4hep::SimTrackerHitCollection();
-      if ((simTrackerHits.at(0).getPosition()[0] != 3) || (simTrackerHits.at(0).getPosition()[1] != 4) ||
-          (simTrackerHits.at(0).getPosition()[2] != 5)) {
+      if ((simTrackerHits->at(0).getPosition()[0] != 3) || (simTrackerHits->at(0).getPosition()[1] != 4) ||
+          (simTrackerHits->at(0).getPosition()[2] != 5)) {
         std::stringstream error;
         error << "Wrong data in simTrackerHits collection, expected 3, 4, 5 got "
-              << simTrackerHits.at(0).getPosition()[0] << ", " << simTrackerHits.at(0).getPosition()[1] << ", "
-              << simTrackerHits.at(0).getPosition()[2];
+              << simTrackerHits->at(0).getPosition()[0] << ", " << simTrackerHits->at(0).getPosition()[1] << ", "
+              << simTrackerHits->at(0).getPosition()[2];
         throw std::runtime_error(error.str());
       }
-      coll.push_back(simTrackerHits.at(0).clone());
-      simTrackerHitMapOut["New" + key] = std::move(coll);
+      coll.push_back(simTrackerHits->at(0).clone());
+      simTrackerHitVecOut.emplace_back(std::move(coll));
     }
 
-    if (trackerHitMap.size() != 3) {
-      throw std::runtime_error("Wrong size of the trackerHitMap map, expected 3, got " +
-                               std::to_string(trackerHitMapOut.size()) + "");
+    if (trackerHitVec.size() != 3) {
+      throw std::runtime_error("Wrong size of the trackerHit vector, expected 3, got " +
+                               std::to_string(trackerHitVecOut.size()) + "");
     }
 
-    for (auto& [key, trackerHits] : trackerHitMap) {
+    for (auto& trackerHits : trackerHitVec) {
       auto coll = edm4hep::TrackerHit3DCollection();
-      if ((trackerHits.at(0).getPosition()[0] != 3) || (trackerHits.at(0).getPosition()[1] != 4) ||
-          (trackerHits.at(0).getPosition()[2] != 5)) {
+      if ((trackerHits->at(0).getPosition()[0] != 3) || (trackerHits->at(0).getPosition()[1] != 4) ||
+          (trackerHits->at(0).getPosition()[2] != 5)) {
         std::stringstream error;
-        error << "Wrong data in trackerHits collection, expected 3, 4, 5 got " << trackerHits.at(0).getPosition()[0]
-              << ", " << trackerHits.at(0).getPosition()[1] << ", " << trackerHits.at(0).getPosition()[2];
+        error << "Wrong data in trackerHits collection, expected 3, 4, 5 got " << trackerHits->at(0).getPosition()[0]
+              << ", " << trackerHits->at(0).getPosition()[1] << ", " << trackerHits->at(0).getPosition()[2] << "";
         throw std::runtime_error(error.str());
       }
-      coll.push_back(trackerHits.at(0).clone());
-      trackerHitMapOut["New" + key] = std::move(coll);
+      coll.push_back(trackerHits->at(0).clone());
+      trackerHitVecOut.emplace_back(std::move(coll));
     }
 
-    if (trackMap.size() != 3) {
-      throw std::runtime_error("Wrong size of the trackMap map, expected 3, got " + std::to_string(trackMapOut.size()) +
+    if (trackVec.size() != 3) {
+      throw std::runtime_error("Wrong size of the track vector, expected 3, got " + std::to_string(trackVecOut.size()) +
                                "");
     }
 
-    for (auto& [key, tracks] : trackMap) {
+    for (auto& tracks : trackVec) {
       auto coll = edm4hep::TrackCollection();
-      if ((tracks.at(0).getType() != 1) || (std::abs(tracks.at(0).getChi2() - 2.1) > 1e-6) ||
-          (tracks.at(0).getNdf() != 3)) {
+      if ((tracks->at(0).getType() != 1) || (std::abs(tracks->at(0).getChi2() - 2.1) > 1e-6) ||
+          (tracks->at(0).getNdf() != 3)) {
         std::stringstream error;
-        error << "Wrong data in tracks collection, expected 1, 2.1, 3, 4.1, 5.1, 6.1 got " << tracks.at(0).getType()
-              << ", " << tracks.at(0).getChi2() << ", " << tracks.at(0).getNdf();
+        error << "Wrong data in tracks collection, expected 1, 2.1, 3, 4.1, 5.1, 6.1 got " << tracks->at(0).getType()
+              << ", " << tracks->at(0).getChi2() << ", " << tracks->at(0).getNdf();
         throw std::runtime_error(error.str());
       }
-      coll->push_back(tracks.at(0).clone());
-      trackMapOut["New" + key] = std::move(coll);
+      coll->push_back(tracks->at(0).clone());
+      trackVecOut.emplace_back(std::move(coll));
     }
 
-    return std::make_tuple(std::move(floatMapOut), std::move(particleMapOut), std::move(particle2MapOut),
-                           std::move(simTrackerHitMapOut), std::move(trackerHitMapOut), std::move(trackMapOut));
+    return std::make_tuple(std::move(floatVecOut), std::move(particleVecOut), std::move(particle2VecOut),
+                           std::move(simTrackerHitVecOut), std::move(trackerHitVecOut), std::move(trackVecOut));
   }
 
 private:

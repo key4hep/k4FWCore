@@ -27,6 +27,8 @@
 
 #include "k4FWCore/FunctionalUtils.h"
 
+#include <ranges>
+#include <stdexcept>
 #include <type_traits>
 #include <utility>
 
@@ -41,8 +43,8 @@ namespace k4FWCore {
         : Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_> {
       using Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>::DataHandleMixin;
 
-      static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isMapToCollLike<In>::value) && ...),
-                    "Consumer input types must be EDM4hep collections or maps to collections");
+      static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike_v<In>)&&...),
+                    "Consumer input types must be EDM4hep collections or vectors of collection pointers");
 
       template <typename T>
       using InputHandle_t = Gaudi::Functional::details::InputHandle_t<Traits_, std::remove_pointer_t<T>>;
@@ -90,6 +92,32 @@ namespace k4FWCore {
 
       // ... instead, they must implement the following operator
       virtual void operator()(const In&...) const = 0;
+
+      /**
+       * @brief    Get the input locations for a given input index
+       * @param i  The index of the input
+       * @return   A range of the input locations
+       */
+      const auto inputLocations(int i) const {
+        if (i >= sizeof...(In)) {
+          throw std::out_of_range("Called inputLocations with an index out of range, index: " + std::to_string(i) +
+                                  ", number of inputs: " + std::to_string(sizeof...(In)));
+        }
+        return m_inputLocations[i] | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
+      }
+      /**
+       * @brief       Get the input locations for a given input name
+       * @param name  The name of the input
+       * @return      A range of the input locations
+       */
+      const auto inputLocations(std::string_view name) const {
+        auto it = std::ranges::find_if(m_inputLocations, [&name](const auto& prop) { return prop.name() == name; });
+        if (it == m_inputLocations.end()) {
+          throw std::runtime_error("Called inputLocations with an unknown name");
+        }
+        return it->value() | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
+      }
+      static constexpr std::size_t inputLocationsSize() { return sizeof...(In); }
     };
 
   }  // namespace details

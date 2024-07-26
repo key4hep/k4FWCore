@@ -39,14 +39,13 @@ struct ExampleFunctionalTransformer final
     info() << "Transforming " << input.size() << " particles" << endmsg;
     auto coll_out = edm4hep::MCParticleCollection();
     for (const auto& particle : input) {
-      auto new_particle = edm4hep::MutableMCParticle();
+      auto new_particle = coll_out.create();
       new_particle.setPDG(particle.getPDG() + m_offset);
       new_particle.setGeneratorStatus(particle.getGeneratorStatus() + m_offset);
       new_particle.setSimulatorStatus(particle.getSimulatorStatus() + m_offset);
       new_particle.setCharge(particle.getCharge() + m_offset);
       new_particle.setTime(particle.getTime() + m_offset);
       new_particle.setMass(particle.getMass() + m_offset);
-      coll_out->push_back(new_particle);
     }
     return coll_out;
   }

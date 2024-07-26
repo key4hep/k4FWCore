@@ -17,7 +17,8 @@
 # limitations under the License.
 #
 
-# This is an example using a producer with a single output and saving that to a file
+# This is an example writing to a file with an absolute path to check that
+# the file is created in the expected location
 
 from Gaudi.Configuration import INFO
 from Configurables import EventDataSvc
@@ -25,7 +26,7 @@ from Configurables import ExampleFunctionalProducer
 from k4FWCore import ApplicationMgr, IOSvc
 
 io = IOSvc("IOSvc")
-io.output = "/tmp/a/b/c/output_k4test_exampledata_producer.root"
+io.output = "/tmp/a/b/c/functional_producer.root"
 
 producer = ExampleFunctionalProducer("ExampleFunctionalProducer")
 

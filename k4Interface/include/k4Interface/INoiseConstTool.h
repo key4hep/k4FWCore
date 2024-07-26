@@ -24,7 +24,7 @@
 
 /** @class INoiseConstTool
  *
- *  Abstract interface to get calorimeter noise per cell tool
+ *  Abstract interface for tools that return noise values (RMS and offset) per calorimeter cell
  *  @author Coralie Neubueser
  *  @date   2018-01
  */
@@ -33,8 +33,8 @@ class INoiseConstTool : virtual public IAlgTool {
 public:
   DeclareInterfaceID(INoiseConstTool, 1, 0);
 
-  virtual double getNoiseConstantPerCell(uint64_t aCellID) = 0;
-  virtual double getNoiseOffsetPerCell(uint64_t aCellID)   = 0;
+  virtual double getNoiseRMSPerCell(uint64_t aCellID)    = 0;
+  virtual double getNoiseOffsetPerCell(uint64_t aCellID) = 0;
 };
 
 #endif /* RECINTERFACE_INOISECONSTTOOL_H */

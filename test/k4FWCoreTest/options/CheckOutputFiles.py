@@ -23,6 +23,7 @@ except ImportError:
 
     print(f'PYTHONPATH={os.environ["PYTHONPATH"]}')
     raise
+import ROOT
 
 
 def check_collections(filename, names):
@@ -44,6 +45,15 @@ def check_collections(filename, names):
             raise RuntimeError("Collections in frame do not match expected collections")
 
 
+def check_events(filename, number):
+    print(f'Checking file "{filename}" for {number} events')
+    podio_reader = podio.root_io.Reader(filename)
+    frames = podio_reader.get("events")
+    if len(frames) != number:
+        print(f"File {filename} has {len(frames)} events but {number} are expected")
+        raise RuntimeError("Number of events does not match expected number")
+
+
 check_collections("functional_transformer.root", ["MCParticles", "NewMCParticles"])
 check_collections(
     "functional_transformer_multiple.root",
@@ -62,7 +72,7 @@ check_collections(
     "functional_transformer_multiple_output_commands.root",
     ["VectorFloat", "MCParticles1", "MCParticles2", "SimTrackerHits", "TrackerHits"],
 )
-check_collections("/tmp/a/b/c/output_k4test_exampledata_producer.root", ["MCParticles"])
+check_collections("/tmp/a/b/c/functional_producer.root", ["MCParticles"])
 check_collections(
     "functional_transformer_runtime_empty.root",
     ["MCParticles0", "MCParticles1", "MCParticles2"],
@@ -110,11 +120,37 @@ mix_collections = [
 
 # Not working, collections produced by functional algorithms are not being written to the file
 # check_collections(
-#     "output_k4test_exampledata_functional_mix.root",
+#     "functional_mix.root",
 #     mix_collections,
 # )
 
 check_collections(
-    "output_k4test_exampledata_functional_mix_iosvc.root",
+    "functional_mix_iosvc.root",
     mix_collections,
+)
+
+f = ROOT.TFile.Open("functional_transformer_hist.root")
+for i in range(2):
+    if (
+        str(f.GetListOfKeys()[i])
+        != f"Name: ExampleFunctionalTransformerHist{i+1} Title: ExampleFunctionalTransformerHist{i+1}"
+    ):
+        raise RuntimeError(
+            "Directory structure does not match expected for functional_transformer_hist.root"
+        )
+
+check_collections(
+    "functional_merged_collections.root",
+    ["MCParticles1", "MCParticles2", "MCParticles3", "NewMCParticles", "SimTrackerHits"],
+)
+
+podio_reader = podio.root_io.Reader("functional_merged_collections.root")
+frames = podio_reader.get("events")
+ev = frames[0]
+if len(ev.get("NewMCParticles")) != 4:
+    raise RuntimeError(f"Expected 4 NewMCParticles but got {len(ev.get('NewMCParticles'))}")
+
+check_events(
+    "functional_filter.root",
+    5,
 )

@@ -17,30 +17,48 @@
 # limitations under the License.
 #
 
-# This is an example using the outputCommands to drop collections from the output file
+# This is an example reading from a file and using a consumer with several inputs
+# to check that the contents of the file are the expected ones
 
-from Gaudi.Configuration import INFO
-from Configurables import ExampleFunctionalTransformerMultiple
+from Gaudi.Configuration import INFO, DEBUG
+from Configurables import CollectionMerger
 from Configurables import EventDataSvc
 from k4FWCore import ApplicationMgr, IOSvc
 
+from Configurables import ExampleFunctionalProducer
+
 svc = IOSvc("IOSvc")
 svc.input = "functional_producer_multiple.root"
-svc.output = "functional_transformer_multiple_output_commands.root"
+svc.output = "functional_merged_collections.root"
 svc.outputCommands = [
-    "drop Tracks",
-    "drop Counter",
-    "drop NewMCParticles",
+    "drop *",
+    "keep MCParticles1",
+    "keep MCParticles2",
+    "keep MCParticles3",
+    "keep NewMCParticles",
+    "keep SimTrackerHits",
 ]
 
-transformer = ExampleFunctionalTransformerMultiple(
-    "Transformer",
-    # InputCollection="MCParticles",
-    # OutputCollection="NewMCParticles")
+
+particle_producer = ExampleFunctionalProducer(
+    OutputCollection=["MCParticles3"],
 )
 
+
+merger = CollectionMerger(
+    "CollectionMerger",
+    # List of collections to concatenate
+    InputCollections=["MCParticles2", "MCParticles1", "MCParticles3"],
+    # Name of the single output collection
+    OutputCollection=["NewMCParticles"],
+    OutputLevel=DEBUG,
+)
+
+# If we want to copy instead of creating a subset collection
+# merger.Copy = True
+
 mgr = ApplicationMgr(
-    TopAlg=[transformer],
+    TopAlg=[particle_producer, merger],
     EvtSel="NONE",
     EvtMax=-1,
     ExtSvc=[EventDataSvc("EventDataSvc")],

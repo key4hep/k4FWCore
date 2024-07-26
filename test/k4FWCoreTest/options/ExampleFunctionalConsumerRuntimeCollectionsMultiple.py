@@ -17,8 +17,9 @@
 # limitations under the License.
 #
 
-# This is an example reading from a file and using a producer with several inputs
-# to check that the contents of the file are the expected ones
+# This is an example using several producer of multiple collections and a
+# consumer with multiple inputs that can read any number of MCParticle
+# collections
 
 from Gaudi.Configuration import INFO
 from Configurables import (

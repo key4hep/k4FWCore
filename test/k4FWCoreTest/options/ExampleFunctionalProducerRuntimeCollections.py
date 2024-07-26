@@ -17,8 +17,8 @@
 # limitations under the License.
 #
 
-# This is an example reading from a file and using a consumer with several inputs
-# to check that the contents of the file are the expected ones
+# This is an example using a producer that creates any number of collections and
+# then reading those with consumers
 
 from Gaudi.Configuration import INFO
 from Configurables import (
