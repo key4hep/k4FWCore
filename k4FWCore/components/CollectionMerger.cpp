@@ -35,14 +35,6 @@
 
 #include "edm4hep/edm4hep.h"
 
-#include "edm4hep/MCRecoCaloAssociationCollection.h"
-#include "edm4hep/MCRecoCaloParticleAssociationCollection.h"
-#include "edm4hep/MCRecoClusterParticleAssociationCollection.h"
-#include "edm4hep/MCRecoParticleAssociationCollection.h"
-#include "edm4hep/MCRecoTrackParticleAssociationCollection.h"
-#include "edm4hep/MCRecoTrackerAssociationCollection.h"
-#include "edm4hep/RecoParticleVertexAssociationCollection.h"
-
 #include "k4FWCore/Transformer.h"
 
 #include <map>
@@ -77,20 +69,20 @@ struct CollectionMerger final : k4FWCore::Transformer<std::shared_ptr<podio::Col
     m_map["edm4hep::VertexCollection"]        = &CollectionMerger::mergeCollections<edm4hep::VertexCollection>;
     m_map["edm4hep::ReconstructedParticleCollection"] =
         &CollectionMerger::mergeCollections<edm4hep::ReconstructedParticleCollection>;
-    m_map["edm4hep::MCRecoParticleAssociationCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::MCRecoParticleAssociationCollection>;
-    m_map["edm4hep::MCRecoCaloAssociationCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::MCRecoCaloAssociationCollection>;
-    m_map["edm4hep::MCRecoTrackerAssociationCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::MCRecoTrackerAssociationCollection>;
-    m_map["edm4hep::MCRecoCaloParticleAssociationCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::MCRecoCaloParticleAssociationCollection>;
-    m_map["edm4hep::MCRecoClusterParticleAssociationCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::MCRecoClusterParticleAssociationCollection>;
-    m_map["edm4hep::MCRecoTrackParticleAssociationCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::MCRecoTrackParticleAssociationCollection>;
-    m_map["edm4hep::RecoParticleVertexAssociationCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::RecoParticleVertexAssociationCollection>;
+    m_map["edm4hep::RecoMCParticleLinkCollection"] =
+        &CollectionMerger::mergeCollections<edm4hep::RecoMCParticleLinkCollection>;
+    m_map["edm4hep::CaloHitSimCaloHitLinkCollection"] =
+        &CollectionMerger::mergeCollections<edm4hep::CaloHitSimCaloHitLinkCollection>;
+    m_map["edm4hep::TrackerHitSimTrackerHitLinkCollection"] =
+        &CollectionMerger::mergeCollections<edm4hep::TrackerHitSimTrackerHitLinkCollection>;
+    m_map["edm4hep::CaloHitMCParticleLinkCollection"] =
+        &CollectionMerger::mergeCollections<edm4hep::CaloHitMCParticleLinkCollection>;
+    m_map["edm4hep::ClusterMCParticleLinkCollection"] =
+        &CollectionMerger::mergeCollections<edm4hep::ClusterMCParticleLinkCollection>;
+    m_map["edm4hep::TrackMCParticleLinkCollection"] =
+        &CollectionMerger::mergeCollections<edm4hep::TrackMCParticleLinkCollection>;
+    m_map["edm4hep::VertexRecoParticleLinkCollection"] =
+        &CollectionMerger::mergeCollections<edm4hep::VertexRecoParticleLinkCollection>;
     m_map["edm4hep::TimeSeriesCollection"] = &CollectionMerger::mergeCollections<edm4hep::TimeSeriesCollection>;
     m_map["edm4hep::RecDqdxCollection"]    = &CollectionMerger::mergeCollections<edm4hep::RecDqdxCollection>;
     m_map["edm4hep::GeneratorEventParametersCollection"] =
