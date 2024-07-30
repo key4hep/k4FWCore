@@ -37,7 +37,9 @@ def check_wrong_imports(code: str) -> None:
         R
 
     """
-    regex = re.compile(r"^\s*from\s+Configurables\s+import\s+\(?.*(ApplicationMgr|IOSvc).*\)?", re.MULTILINE)
+    regex = re.compile(
+        r"^\s*from\s+Configurables\s+import\s+\(?.*(ApplicationMgr|IOSvc).*\)?", re.MULTILINE
+    )
     if regex.search(code):
         raise ImportError("Importing ApplicationMgr or IOSvc from Configurables is not allowed.")
 

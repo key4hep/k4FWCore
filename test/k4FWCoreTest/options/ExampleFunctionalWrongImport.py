@@ -21,6 +21,7 @@
 # data
 
 
+# fmt: off
 from Configurables import ApplicationMgr
 from Configurables import IOSvc
 from Configurables import IOSvc, ApplicationMgr
@@ -33,4 +34,3 @@ from Configurables import (IOSvc, ApplicationMgr)
 from Configurables import (IOSvc, ApplicationMgr, ExampleFunctionalTransformer)
 from Configurables import (ApplicationMgr, IOSvc, ExampleFunctionalTransformer)
 from Configurables import (ExampleFunctionalTransformer, IOSvc, ApplicationMgr)
-
