@@ -35,6 +35,14 @@
 
 #include "edm4hep/edm4hep.h"
 
+#include "edm4hep/MCRecoCaloAssociationCollection.h"
+#include "edm4hep/MCRecoCaloParticleAssociationCollection.h"
+#include "edm4hep/MCRecoClusterParticleAssociationCollection.h"
+#include "edm4hep/MCRecoParticleAssociationCollection.h"
+#include "edm4hep/MCRecoTrackParticleAssociationCollection.h"
+#include "edm4hep/MCRecoTrackerAssociationCollection.h"
+#include "edm4hep/RecoParticleVertexAssociationCollection.h"
+
 #include "k4FWCore/Transformer.h"
 
 #include <map>
