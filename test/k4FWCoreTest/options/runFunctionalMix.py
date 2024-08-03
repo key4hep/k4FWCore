@@ -149,12 +149,10 @@ ApplicationMgr(
         # Check we can read input
         consumer_input_functional,
         consumer_input_algorithm,
-
         # Check we can read what's produced by a functional
         producer_functional,
         consumer_producerfun_functional,
         consumer_producerfun_algorithm,
-
         # Check we can read what's produced by an algorithm
         producer_algorithm,
         consumer_produceralg_functional,
