@@ -20,7 +20,7 @@
 # This is an example mixing functional and non-functional algorithms
 #
 
-from Gaudi.Configuration import DEBUG
+from Gaudi.Configuration import INFO
 from Configurables import (
     ExampleFunctionalConsumerMultiple,
     ExampleFunctionalTransformerMultiple,
