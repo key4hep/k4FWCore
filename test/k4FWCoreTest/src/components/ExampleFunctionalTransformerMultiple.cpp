@@ -26,11 +26,11 @@
 #include "edm4hep/TrackerHit3DCollection.h"
 #else
 #include "edm4hep/TrackerHitCollection.h"
+
 namespace edm4hep {
   using TrackerHit3DCollection = edm4hep::TrackerHitCollection;
 }  // namespace edm4hep
 #endif
-#include "edm4hep/TrackerHit3DCollection.h"
 #include "podio/UserDataCollection.h"
 
 #include "k4FWCore/Transformer.h"

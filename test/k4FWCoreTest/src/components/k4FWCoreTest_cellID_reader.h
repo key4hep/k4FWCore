@@ -28,7 +28,6 @@
 
 #include "edm4hep/Constants.h"
 
-// datamodel
 #include "edm4hep/SimTrackerHitCollection.h"
 
 /** @class k4FWCoreTest_cellID

@@ -21,7 +21,6 @@
 
 #include "Gaudi/Algorithm.h"
 #include "k4FWCore/KeepDropSwitch.h"
-#include "podio/CollectionBase.h"
 #include "podio/ROOTWriter.h"
 
 #include <vector>

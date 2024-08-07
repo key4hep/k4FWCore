@@ -26,7 +26,6 @@
 
 #include "podio/CollectionBase.h"
 #include "podio/Frame.h"
-#include "podio/ROOTReader.h"
 
 #include "IIOSvc.h"
 #include "k4FWCore/FunctionalUtils.h"
