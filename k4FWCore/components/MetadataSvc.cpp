@@ -25,8 +25,6 @@
 #include <GaudiKernel/IDataProviderSvc.h>
 #include <GaudiKernel/Service.h>
 
-#include "podio/Frame.h"
-
 StatusCode MetadataSvc::initialize() {
   StatusCode sc = Service::initialize();
   if (sc.isFailure()) {

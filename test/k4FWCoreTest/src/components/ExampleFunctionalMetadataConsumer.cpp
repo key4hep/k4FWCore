@@ -32,23 +32,27 @@ struct ExampleFunctionalMetadataConsumer final : k4FWCore::Consumer<void(const e
   StatusCode initialize() override {
     m_particleNum = k4FWCore::getParameter<int>("NumberOfParticles", this).value_or(0);
     if (m_particleNum != 3) {
-      error() << "ExampleInt is not 3" << endmsg;
+      error() << "NumberOfParticles expected to be 3 but is " << m_particleNum << endmsg;
       return StatusCode::FAILURE;
     }
 
     m_particleTime = k4FWCore::getParameter<float>("ParticleTime", this).value_or(0);
     if (m_particleTime != 1.5) {
-      error() << "ExampleFloat is not 1.5" << endmsg;
+      error() << "ParticleTime expected to be 1.5 but is " << m_particleTime << endmsg;
       return StatusCode::FAILURE;
     }
     m_PDGValues = k4FWCore::getParameter<std::vector<int>>("PDGValues", this).value_or(std::vector<int>{});
     if (m_PDGValues != std::vector<int>{1, 2, 3, 4}) {
-      error() << "ExampleVector is not {1, 2, 3, 4}" << endmsg;
+      error() << "PDGValues expected to be {1, 2, 3, 4} but is {";
+      for (const auto& pdg : m_PDGValues) {
+        error() << pdg << ", ";
+      }
+      error() << "}" << endmsg;
       return StatusCode::FAILURE;
     }
     m_metadataString = k4FWCore::getParameter<std::string>("MetadataString", this).value_or("");
     if (m_metadataString != "hello") {
-      error() << "ExampleString is not 'hello'" << endmsg;
+      error() << "MetadataString expected to be 'hello' but is '" << m_metadataString << "'" << endmsg;
       return StatusCode::FAILURE;
     }
     return StatusCode::SUCCESS;
@@ -64,11 +68,11 @@ struct ExampleFunctionalMetadataConsumer final : k4FWCore::Consumer<void(const e
     int i = 0;
     for (const auto& particle : input) {
       if (particle.getTime() != m_particleTime) {
-        error() << "Particle time is not " << m_particleTime << endmsg;
+        error() << "ParticleTime expected to be " << m_particleTime << " but is " << particle.getTime() << endmsg;
         return;
       }
       if (particle.getPDG() != m_PDGValues[i]) {
-        error() << "Particle PDG is not " << m_PDGValues[i] << endmsg;
+        error() << "PDGValues expected to be " << m_PDGValues[i] << " but is " << particle.getPDG() << endmsg;
         return;
       }
       ++i;
@@ -78,7 +82,7 @@ struct ExampleFunctionalMetadataConsumer final : k4FWCore::Consumer<void(const e
   StatusCode finalize() override {
     auto particleNum = k4FWCore::getParameter<int>("NumberOfParticles", this).value_or(-1);
     if (particleNum != 3) {
-      error() << "Metadata parameter NumberOfParticles is not 3" << endmsg;
+      error() << "NumberOfParticles expected to be 3 but is " << particleNum << endmsg;
       return StatusCode::FAILURE;
     }
 
@@ -91,7 +95,7 @@ struct ExampleFunctionalMetadataConsumer final : k4FWCore::Consumer<void(const e
 
     auto finalizeMetadataInt = k4FWCore::getParameter<int>("FinalizeMetadataInt", this).value_or(-1);
     if (finalizeMetadataInt != 10) {
-      error() << "FinalizeMetadataInt is not 10" << endmsg;
+      error() << "FinalizeMetadataInt expected to be 10 but is " << finalizeMetadataInt << endmsg;
       return StatusCode::FAILURE;
     }
 
