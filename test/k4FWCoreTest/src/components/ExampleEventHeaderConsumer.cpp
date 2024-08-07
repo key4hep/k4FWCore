@@ -22,12 +22,9 @@
 
 #include "k4FWCore/Consumer.h"
 
-#include <Gaudi/Functional/Consumer.h>
 #include <Gaudi/Property.h>
-#include <GaudiKernel/ISvcLocator.h>
 
 #include <fmt/core.h>
-#include <fmt/format.h>
 
 #include <atomic>
 #include <stdexcept>
