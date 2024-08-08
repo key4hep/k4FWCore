@@ -24,10 +24,12 @@
 
 #include "k4FWCore/IMetadataSvc.h"
 
-// #include "GaudiKernel/CommonMessaging.h"
-
 namespace k4FWCore {
 
+  /// @brief Save a metadata parameter in the metadata frame
+  /// @param name The name of the parameter
+  /// @param value The value of the parameter
+  /// @param alg The algorithm that is saving the parameter, typically "this"
   template <typename T> void putParameter(const std::string& name, const T& value, const Gaudi::Algorithm* alg) {
     auto metadataSvc = alg->service<IMetadataSvc>("MetadataSvc", false);
     if (!metadataSvc) {
@@ -36,6 +38,10 @@ namespace k4FWCore {
     }
     metadataSvc->put<T>(name, value);
   }
+  /// @brief Get a metadata parameter from the metadata frame
+  /// @param name The name of the parameter
+  /// @param alg The algorithm that is saving the parameter, typically "this"
+  /// @return std::optional<T> The value of the parameter, if it exists or std::nullopt
   template <typename T> std::optional<T> getParameter(const std::string& name, const Gaudi::Algorithm* alg) {
     auto metadataSvc = alg->service<IMetadataSvc>("MetadataSvc", false);
     if (!metadataSvc) {
