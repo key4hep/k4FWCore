@@ -72,8 +72,6 @@ StatusCode IOSvc::initialize() {
   if (m_reader) {
     auto categories = m_reader->getAvailableCategories();
     if (
-        // std::find(m_reader->getAvailableCategories().begin(), m_reader->getAvailableCategories().end(),
-        //           podio::Category::Metadata) != m_reader->getAvailableCategories().end() &&
         std::find(categories.begin(), categories.end(), podio::Category::Metadata) != categories.end() &&
         m_reader->getEntries(podio::Category::Metadata) > 0) {
       info() << "Setting metadata frame" << endmsg;
