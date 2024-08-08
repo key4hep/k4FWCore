@@ -19,6 +19,13 @@
 #ifndef K4FWCORE_METADATAHANDLE_H
 #define K4FWCORE_METADATAHANDLE_H
 
+#include <GaudiKernel/Bootstrap.h>
+#include <GaudiKernel/DataHandle.h>
+#include <GaudiKernel/Service.h>
+#include <GaudiKernel/ServiceHandle.h>
+
+#include "MetadataUtils.h"
+#include "k4FWCore/IMetadataSvc.h"
 #include "k4FWCore/PodioDataSvc.h"
 
 template <typename T> class MetaDataHandle {
@@ -95,10 +102,17 @@ template <typename T> std::optional<T> MetaDataHandle<T>::get_optional() const {
 
 //---------------------------------------------------------------------------
 template <typename T> const T MetaDataHandle<T>::get() const {
-  const auto maybeVal = get_optional();
-  if (!maybeVal.has_value()) {
-    throw GaudiException("MetaDataHandle empty handle access",
-                         "MetaDataHandle " + fullDescriptor() + " not (yet?) available", StatusCode::FAILURE);
+  std::optional<T> maybeVal;
+  // DataHandle based algorithms
+  if (m_podio_data_service) {
+    maybeVal = get_optional();
+    if (!maybeVal.has_value()) {
+      throw GaudiException("MetaDataHandle empty handle access",
+                           "MetaDataHandle " + fullDescriptor() + " not (yet?) available", StatusCode::FAILURE);
+    }
+    // Functional algorithms
+  } else {
+    maybeVal = k4FWCore::getParameter<T>(fullDescriptor());
   }
   return maybeVal.value();
 }
@@ -115,13 +129,20 @@ template <typename T> void MetaDataHandle<T>::put(T value) {
                          StatusCode::FAILURE);
   // check whether we are in the proper State
   // put is only allowed in the initalization
-  if (m_podio_data_service->targetFSMState() == Gaudi::StateMachine::RUNNING) {
-    throw GaudiException("MetaDataHandle policy violation", "Put cannot be used during the event loop",
-                         StatusCode::FAILURE);
+
+  std::string full_descriptor = fullDescriptor();
+  // DataHandle based algorithms
+  if (m_podio_data_service) {
+    if (m_podio_data_service->targetFSMState() == Gaudi::StateMachine::RUNNING) {
+      throw GaudiException("MetaDataHandle policy violation", "Put cannot be used during the event loop",
+                           StatusCode::FAILURE);
+    }
+    podio::Frame& frame = m_podio_data_service->getMetaDataFrame();
+    frame.putParameter(full_descriptor, value);
+    // Functional algorithms
+  } else {
+    k4FWCore::putParameter(full_descriptor, value);
   }
-  std::string   full_descriptor = fullDescriptor();
-  podio::Frame& frame           = m_podio_data_service->getMetaDataFrame();
-  frame.putParameter(full_descriptor, value);
 }
 
 //---------------------------------------------------------------------------
@@ -145,7 +166,7 @@ template <typename T> void MetaDataHandle<T>::checkPodioDataSvc() {
   if (cmd.find("genconf") != std::string::npos)
     return;
 
-  if (nullptr == m_podio_data_service) {
+  if (!m_podio_data_service && !Gaudi::svcLocator()->service<IMetadataSvc>("MetadataSvc")) {
     std::cout << "ERROR: MetaDataHandles require the PodioDataSvc" << std::endl;
   }
 }

@@ -38,6 +38,16 @@ namespace k4FWCore {
     }
     metadataSvc->put<T>(name, value);
   }
+  /// @brief Save a metadata parameter in the metadata frame. Overload for compatibility
+  /// with the MetadataHandle, don't use!
+  template <typename T> void putParameter(const std::string& name, const T& value) {
+    auto metadataSvc = Gaudi::svcLocator()->service<IMetadataSvc>("MetadataSvc", false);
+    if (!metadataSvc) {
+      std::cout << "MetadataSvc not found" << std::endl;
+      return;
+    }
+    return metadataSvc->put<T>(name, value);
+  }
   /// @brief Get a metadata parameter from the metadata frame
   /// @param name The name of the parameter
   /// @param alg The algorithm that is saving the parameter, typically "this"
@@ -46,6 +56,15 @@ namespace k4FWCore {
     auto metadataSvc = alg->service<IMetadataSvc>("MetadataSvc", false);
     if (!metadataSvc) {
       alg->error() << "MetadataSvc not found" << endmsg;
+      return std::nullopt;
+    }
+    return metadataSvc->get<T>(name);
+  }
+  /// @brief Get a metadata parameter from the metadata frame. Overload for compatibility
+  /// with the MetadataHandle, don't use!
+  template <typename T> std::optional<T> getParameter(const std::string& name) {
+    auto metadataSvc = Gaudi::svcLocator()->service<IMetadataSvc>("MetadataSvc", false);
+    if (!metadataSvc) {
       return std::nullopt;
     }
     return metadataSvc->get<T>(name);

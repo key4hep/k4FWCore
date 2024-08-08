@@ -175,3 +175,12 @@ for key, value in zip(
 ):
     if metadata.get_parameter(key) != value:
         raise RuntimeError(f"Metadata parameter {key} does not match expected value")
+
+reader = podio.root_io.Reader("functional_metadata_old_algorithm.root")
+metadata = reader.get("metadata")[0]
+for key, value in zip(
+    ["SimTrackerHits__CellIDEncoding"],
+    ["M:3,S-1:3,I:9,J:9,K-1:6"],
+):
+    if metadata.get_parameter(key) != value:
+        raise RuntimeError(f"Metadata parameter {key} does not match expected value")
