@@ -174,7 +174,7 @@ for key, value in zip(
     [3, 1.5, [1, 2, 3, 4], "hello", 10],
 ):
     if metadata.get_parameter(key) != value:
-        raise RuntimeError(f"Metadata parameter {key} does not match the expected value {value}")
+        raise RuntimeError(f"Metadata parameter {key} does not match the expected value, got {metadata.get_parameter(key)} but expected {value}")
 
 reader = podio.root_io.Reader("functional_metadata_old_algorithm.root")
 metadata = reader.get("metadata")[0]
@@ -183,4 +183,4 @@ for key, value in zip(
     ["M:3,S-1:3,I:9,J:9,K-1:6"],
 ):
     if metadata.get_parameter(key) != value:
-        raise RuntimeError(f"Metadata parameter {key} does not match the expected value {value}")
+        raise RuntimeError(f"Metadata parameter {key} does not match the expected value, got {metadata.get_parameter(key)} but expected {value}")
