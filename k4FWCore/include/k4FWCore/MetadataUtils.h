@@ -52,4 +52,4 @@ namespace k4FWCore {
   }
 }  // namespace k4FWCore
 
-#endif  // CORE_FUNCTIONALUTILS_H
+#endif  // FWCORE_METADATAUTILS_H
