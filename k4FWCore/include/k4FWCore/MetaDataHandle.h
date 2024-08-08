@@ -19,13 +19,9 @@
 #ifndef K4FWCORE_METADATAHANDLE_H
 #define K4FWCORE_METADATAHANDLE_H
 
-#include <GaudiKernel/Bootstrap.h>
 #include <GaudiKernel/DataHandle.h>
-#include <GaudiKernel/Service.h>
-#include <GaudiKernel/ServiceHandle.h>
 
-#include "MetadataUtils.h"
-#include "k4FWCore/IMetadataSvc.h"
+#include "k4FWCore/MetadataUtils.h"
 #include "k4FWCore/PodioDataSvc.h"
 
 template <typename T> class MetaDataHandle {
