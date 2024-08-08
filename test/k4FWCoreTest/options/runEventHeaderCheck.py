@@ -20,19 +20,17 @@
 
 from Gaudi.Configuration import INFO
 from Configurables import ExampleEventHeaderConsumer
-from k4FWCore import ApplicationMgr
-from Configurables import EventDataSvc, IOSvc, Reader
+from k4FWCore import ApplicationMgr, IOSvc
+from Configurables import EventDataSvc
 
 svc = IOSvc("IOSvc")
 svc.input = ["eventHeader.root"]
 # svc.CollectionNames = ['MCParticles']
 
-reader = Reader("Reader")
-
 consumer = ExampleEventHeaderConsumer("EventHeaderCheck", runNumber=42, eventNumberOffset=42)
 
 ApplicationMgr(
-    TopAlg=[reader, consumer],
+    TopAlg=[consumer],
     EvtSel="NONE",
     EvtMax=-1,
     ExtSvc=[EventDataSvc("EventDataSvc")],

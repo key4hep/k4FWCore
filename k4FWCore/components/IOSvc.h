@@ -62,6 +62,10 @@ protected:
       this, "outputCommands", {"keep *"}, "A set of commands to declare which collections to keep or drop."};
   Gaudi::Property<std::string> m_inputType{this, "ioType", "ROOT", "Type of input file (ROOT, RNTuple)"};
 
+  Gaudi::Property<bool> m_importedFromk4FWCore{
+      this, "ImportedFromk4FWCore", false,
+      "This is set to true when IOSvc is imported from k4FWCore instead of Configurables in python"};
+
   std::mutex m_changeBufferLock;
 
   KeepDropSwitch m_switch;

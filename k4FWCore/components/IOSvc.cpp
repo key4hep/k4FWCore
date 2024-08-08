@@ -38,6 +38,13 @@ StatusCode IOSvc::initialize() {
     error() << "Unable to initialize base class Service." << endmsg;
     return sc;
   }
+
+  if (!m_importedFromk4FWCore) {
+    error() << "Use 'from k4FWCore import IOSvc' instead of 'from Configurables import IOSvc' to access the service"
+            << endmsg;
+    return StatusCode::FAILURE;
+  }
+
   if (!m_readingFileNames.empty()) {
     m_reader = std::make_unique<podio::ROOTReader>();
     try {
