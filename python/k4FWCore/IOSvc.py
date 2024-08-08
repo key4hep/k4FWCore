@@ -16,13 +16,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from Configurables import IOSvc as IO
+from Configurables import IOSvc as IO, MetadataSvc
 import os
 
 
 class IOSvc:
     def __init__(self, *args, **kwargs):
         self._svc = IO(**kwargs)
+        MetadataSvc("MetadataSvc")
 
     def __getattr__(self, attr):
         return getattr(self._svc, attr)

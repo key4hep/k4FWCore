@@ -30,6 +30,7 @@
 #include "podio/ROOTWriter.h"
 
 #include "IIOSvc.h"
+#include "k4FWCore/IMetadataSvc.h"
 #include "k4FWCore/KeepDropSwitch.h"
 
 #include <string>
@@ -85,6 +86,7 @@ protected:
   SmartIF<IDataProviderSvc> m_dataSvc;
   SmartIF<IIncidentSvc>     m_incidentSvc;
   SmartIF<IHiveWhiteBoard>  m_hiveWhiteBoard;
+  SmartIF<IMetadataSvc>     m_metadataSvc;
   void                      handle(const Incident& incident) override;
 
   int m_entries{0};

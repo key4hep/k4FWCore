@@ -30,6 +30,7 @@
 
 #include "k4FWCore/DataWrapper.h"
 #include "k4FWCore/FunctionalUtils.h"
+#include "k4FWCore/IMetadataSvc.h"
 
 #include <GaudiKernel/IHiveWhiteBoard.h>
 #include <memory>
@@ -53,6 +54,7 @@ public:
   ServiceHandle<IIOSvc>     iosvc{this, "IOSvc", "IOSvc"};
   SmartIF<IHiveWhiteBoard>  m_hiveWhiteBoard;
   SmartIF<IDataProviderSvc> m_dataSvc;
+  SmartIF<IMetadataSvc>     m_metadataSvc;
   mutable bool              m_first{true};
 
   StatusCode initialize() override {
@@ -72,6 +74,12 @@ public:
       debug() << "Unable to locate IHiveWhiteBoard interface. This isn't a problem if we are not running in a "
                  "multi-threaded environment"
               << endmsg;
+    }
+
+    m_metadataSvc = service("MetadataSvc", false);
+    if (!m_metadataSvc) {
+      error() << "Unable to locate MetadataSvc service" << endmsg;
+      return StatusCode::FAILURE;
     }
 
     return StatusCode::SUCCESS;
@@ -113,7 +121,12 @@ public:
     }
     iosvc->getWriter()->writeFrame(config_metadata_frame, "configuration_metadata");
 
+    if (m_metadataSvc->m_frame) {
+      iosvc->getWriter()->writeFrame(*std::move(m_metadataSvc->m_frame), podio::Category::Metadata);
+    }
+
     iosvc->deleteWriter();
+
     return StatusCode::SUCCESS;
   }
 
