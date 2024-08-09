@@ -34,9 +34,11 @@ def check_wrong_imports(code: str) -> None:
         code (str): The code to check for wrong imports.
 
     Raises:
-        R
+        ImportError: If the code contains an import of IOSvc or ApplicationMgr from Configurables.
 
     """
+    # Check first that IOSvc is being used, in that case
+    # Importing either ApplicationMgr or IOSvc from Configurables is not allowed
     iosvc_regex = re.compile(
         r"^\s*from\s+(Configurables|k4FWCore)\s+import\s+\(?.*IOSvc.*\)?", re.MULTILINE
     )
