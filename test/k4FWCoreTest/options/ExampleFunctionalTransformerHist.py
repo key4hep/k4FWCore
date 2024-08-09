@@ -37,7 +37,10 @@ if multithreaded:
         ForceLeaves=True,
     )
     slimeventloopmgr = HiveSlimEventLoopMgr(
-        "HiveSlimEventLoopMgr", SchedulerName="AvalancheSchedulerSvc", OutputLevel=INFO
+        "HiveSlimEventLoopMgr",
+        SchedulerName="AvalancheSchedulerSvc",
+        Warnings=False,
+        OutputLevel=INFO,
     )
 
     scheduler = AvalancheSchedulerSvc(ThreadPoolSize=threads, OutputLevel=INFO)

@@ -28,7 +28,7 @@
 #include <vector>
 
 /**
- * The interface implemented by any class making IO and reading RawEvent Data
+ * The interface implemented by any class making IO with functional algorithms
  */
 class IIOSvc : virtual public IInterface {
 public:

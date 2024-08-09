@@ -30,7 +30,7 @@ from k4FWCore import ApplicationMgr, IOSvc
 from Configurables import EventDataSvc
 
 iosvc = IOSvc("IOSvc")
-iosvc.output = "functional_filter.root"
+iosvc.Output = "functional_filter.root"
 
 transformer = ExampleFunctionalTransformer(
     "Transformer", InputCollection=["MCParticles"], OutputCollection=["NewMCParticles"]

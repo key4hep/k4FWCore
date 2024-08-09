@@ -30,7 +30,7 @@ from Configurables import (
     k4FWCoreTest_CreateExampleEventData,
 )
 from Configurables import k4FWCoreTest_CheckExampleEventData
-from Configurables import ApplicationMgr
+from k4FWCore import ApplicationMgr
 from Configurables import k4DataSvc
 from Configurables import PodioInput, PodioOutput
 from k4FWCore.parseArgs import parser
@@ -149,12 +149,12 @@ ApplicationMgr(
         # Check we can read input
         consumer_input_functional,
         consumer_input_algorithm,
-        producer_functional,
         # Check we can read what's produced by a functional
+        producer_functional,
         consumer_producerfun_functional,
         consumer_producerfun_algorithm,
-        producer_algorithm,
         # Check we can read what's produced by an algorithm
+        producer_algorithm,
         consumer_produceralg_functional,
         consumer_produceralg_algorithm,
         transformer_functional,

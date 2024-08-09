@@ -20,23 +20,17 @@
 # This is an example reading from a file and using a transformer to create new
 # data
 
-from Gaudi.Configuration import INFO
-from Configurables import ExampleFunctionalTransformer
-from Configurables import EventDataSvc
-from k4FWCore import ApplicationMgr, IOSvc
 
-svc = IOSvc("IOSvc")
-svc.Input = "functional_producer.root"
-svc.Output = "functional_transformer.root"
-
-transformer = ExampleFunctionalTransformer(
-    "Transformer", InputCollection=["MCParticles"], OutputCollection=["NewMCParticles"]
-)
-
-mgr = ApplicationMgr(
-    TopAlg=[transformer],
-    EvtSel="NONE",
-    EvtMax=-1,
-    ExtSvc=[EventDataSvc("EventDataSvc")],
-    OutputLevel=INFO,
-)
+# fmt: off
+from Configurables import ApplicationMgr
+from Configurables import IOSvc
+from Configurables import IOSvc, ApplicationMgr
+from Configurables import ApplicationMgr, IOSvc
+from Configurables import ApplicationMgr, IOSvc, ExampleFunctionalTransformer
+from Configurables import ApplicationMgr, ExampleFunctionalTransformer, IOSvc
+from Configurables import ExampleFunctionalTransformer, IOSvc, ApplicationMgr
+from Configurables import (ApplicationMgr, IOSvc)
+from Configurables import (IOSvc, ApplicationMgr)
+from Configurables import (IOSvc, ApplicationMgr, ExampleFunctionalTransformer)
+from Configurables import (ApplicationMgr, IOSvc, ExampleFunctionalTransformer)
+from Configurables import (ExampleFunctionalTransformer, IOSvc, ApplicationMgr)
