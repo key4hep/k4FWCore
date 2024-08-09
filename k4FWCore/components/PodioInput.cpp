@@ -21,37 +21,7 @@
 
 #include "k4FWCore/PodioDataSvc.h"
 
-#include "edm4hep/CaloHitContributionCollection.h"
-#include "edm4hep/CalorimeterHitCollection.h"
-#include "edm4hep/ClusterCollection.h"
-#include "edm4hep/Constants.h"
-#include "edm4hep/EventHeaderCollection.h"
-#include "edm4hep/MCParticleCollection.h"
-#include "edm4hep/MCRecoCaloAssociationCollection.h"
-#include "edm4hep/MCRecoClusterParticleAssociationCollection.h"
-#include "edm4hep/MCRecoParticleAssociationCollection.h"
-#include "edm4hep/MCRecoTrackParticleAssociationCollection.h"
-#include "edm4hep/MCRecoTrackerAssociationCollection.h"
-#include "edm4hep/ParticleIDCollection.h"
-#include "edm4hep/RawCalorimeterHitCollection.h"
-#include "edm4hep/RawTimeSeriesCollection.h"
-#include "edm4hep/RecDqdxCollection.h"
-#include "edm4hep/RecoParticleVertexAssociationCollection.h"
-#include "edm4hep/ReconstructedParticleCollection.h"
-#include "edm4hep/SimCalorimeterHitCollection.h"
-#include "edm4hep/SimTrackerHitCollection.h"
-#include "edm4hep/TimeSeriesCollection.h"
-#include "edm4hep/TrackCollection.h"
-#if __has_include("edm4hep/TrackerHit3DCollection.h")
-#include "edm4hep/TrackerHit3DCollection.h"
-#else
-#include "edm4hep/TrackerHitCollection.h"
-namespace edm4hep {
-  using TrackerHit3DCollection = edm4hep::TrackerHitCollection;
-}  // namespace edm4hep
-#endif
-#include "edm4hep/TrackerHitPlaneCollection.h"
-#include "edm4hep/VertexCollection.h"
+#include "edm4hep/edm4hep.h"
 
 #include "podio/UserDataCollection.h"
 
@@ -109,23 +79,26 @@ void PodioInput::fillReaders() {
   m_readers["edm4hep::ReconstructedParticleCollection"] = [&](std::string_view collName) {
     maybeRead<edm4hep::ReconstructedParticleCollection>(collName);
   };
-  m_readers["edm4hep::MCRecoParticleAssociationCollection"] = [&](std::string_view collName) {
-    maybeRead<edm4hep::MCRecoParticleAssociationCollection>(collName);
+  m_readers["edm4hep::RecoMCParticleLinkCollection"] = [&](std::string_view collName) {
+    maybeRead<edm4hep::RecoMCParticleLinkCollection>(collName);
   };
-  m_readers["edm4hep::MCRecoCaloAssociationCollection"] = [&](std::string_view collName) {
-    maybeRead<edm4hep::MCRecoCaloAssociationCollection>(collName);
+  m_readers["edm4hep::CaloHitSimCaloHitLinkCollection"] = [&](std::string_view collName) {
+    maybeRead<edm4hep::CaloHitSimCaloHitLinkCollection>(collName);
   };
-  m_readers["edm4hep::MCRecoTrackerAssociationCollection"] = [&](std::string_view collName) {
-    maybeRead<edm4hep::MCRecoTrackerAssociationCollection>(collName);
+  m_readers["edm4hep::TrackerHitSimTrackerHitLinkCollection"] = [&](std::string_view collName) {
+    maybeRead<edm4hep::TrackerHitSimTrackerHitLinkCollection>(collName);
   };
-  m_readers["edm4hep::MCRecoClusterParticleAssociationCollection"] = [&](std::string_view collName) {
-    maybeRead<edm4hep::MCRecoClusterParticleAssociationCollection>(collName);
+  m_readers["edm4hep::CaloHitMCParticleLinkCollection"] = [&](std::string_view collName) {
+    maybeRead<edm4hep::CaloHitMCParticleLinkCollection>(collName);
   };
-  m_readers["edm4hep::MCRecoTrackParticleAssociationCollection"] = [&](std::string_view collName) {
-    maybeRead<edm4hep::MCRecoTrackParticleAssociationCollection>(collName);
+  m_readers["edm4hep::ClusterMCParticleLinkCollection"] = [&](std::string_view collName) {
+    maybeRead<edm4hep::ClusterMCParticleLinkCollection>(collName);
   };
-  m_readers["edm4hep::RecoParticleVertexAssociationCollection"] = [&](std::string_view collName) {
-    maybeRead<edm4hep::RecoParticleVertexAssociationCollection>(collName);
+  m_readers["edm4hep::TrackMCParticleLinkCollection"] = [&](std::string_view collName) {
+    maybeRead<edm4hep::TrackMCParticleLinkCollection>(collName);
+  };
+  m_readers["edm4hep::VertexRecoParticleLinkCollection"] = [&](std::string_view collName) {
+    maybeRead<edm4hep::VertexRecoParticleLinkCollection>(collName);
   };
   m_readers["edm4hep::TimeSeriesCollection"] = [&](std::string_view collName) {
     maybeRead<edm4hep::TimeSeriesCollection>(collName);
