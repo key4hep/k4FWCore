@@ -19,18 +19,21 @@
 #ifndef FWCORE_TRANSFORMER_H
 #define FWCORE_TRANSFORMER_H
 
+
 #include <GaudiKernel/FunctionalFilterDecision.h>
 #include "Gaudi/Functional/details.h"
 #include "Gaudi/Functional/utilities.h"
 
-#include "k4FWCore/FunctionalUtils.h"
-
 // #include "GaudiKernel/CommonMessaging.h"
+
+#include "podio/CollectionBase.h"
 
 #include <ranges>
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
+
+import k4FWCore.FunctionalUtils;
 
 namespace k4FWCore {
 

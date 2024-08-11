@@ -16,7 +16,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <GaudiKernel/SmartIF.h>
+
+// #include <GaudiKernel/SmartIF.h>
 #include "Gaudi/Functional/details.h"
 #include "Gaudi/Functional/utilities.h"
 #include "GaudiKernel/AnyDataWrapper.h"
@@ -28,10 +29,10 @@
 #include "podio/Frame.h"
 
 #include "IIOSvc.h"
-#include "k4FWCore/FunctionalUtils.h"
 
 #include <memory>
 
+import k4FWCore.FunctionalUtils;
 template <typename Container> using vector_of_ = std::vector<Container>;
 
 class CollectionPusher : public Gaudi::Functional::details::BaseClass_t<Gaudi::Functional::Traits::useDefaults> {

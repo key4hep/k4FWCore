@@ -22,7 +22,7 @@
 #include "podio/Frame.h"
 #include "podio/FrameCategories.h"
 
-#include "k4FWCore/FunctionalUtils.h"
+import k4FWCore.FunctionalUtils;
 #include "k4FWCore/KeepDropSwitch.h"
 
 #include "GaudiKernel/AnyDataWrapper.h"

@@ -29,7 +29,7 @@
 #include "IIOSvc.h"
 
 #include "k4FWCore/DataWrapper.h"
-#include "k4FWCore/FunctionalUtils.h"
+import k4FWCore.FunctionalUtils;
 #include "k4FWCore/IMetadataSvc.h"
 
 #include <GaudiKernel/IHiveWhiteBoard.h>

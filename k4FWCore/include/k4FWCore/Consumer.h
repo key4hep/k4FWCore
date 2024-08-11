@@ -25,12 +25,13 @@
 
 // #include "GaudiKernel/CommonMessaging.h"
 
-#include "k4FWCore/FunctionalUtils.h"
 
 #include <ranges>
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
+
+import k4FWCore.FunctionalUtils;
 
 namespace k4FWCore {
 

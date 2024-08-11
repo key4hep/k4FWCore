@@ -16,8 +16,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef FWCORE_FUNCTIONALUTILS_H
-#define FWCORE_FUNCTIONALUTILS_H
+// #ifndef FWCORE_FUNCTIONALUTILS_H
+// #define FWCORE_FUNCTIONALUTILS_H
+
+module;
 
 #include <GaudiKernel/AnyDataWrapper.h>
 #include <GaudiKernel/IDataProviderSvc.h>
@@ -26,7 +28,8 @@
 #include "k4FWCore/DataWrapper.h"
 #include "podio/CollectionBase.h"
 
-#include "GaudiKernel/DataObjectHandle.h"
+// #include "GaudiKernel/DataObjectHandle.h"
+#include "GaudiKernel/Algorithm.h"
 #include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 
@@ -36,9 +39,11 @@
 #include <tuple>
 #include <type_traits>
 
-namespace k4FWCore {
+export module k4FWCore.FunctionalUtils;
 
-  static const std::string frameLocation = "/_Frame";
+export namespace k4FWCore {
+
+  const std::string frameLocation = "/_Frame";
 
   namespace details {
 
@@ -262,4 +267,4 @@ namespace k4FWCore {
   }  // namespace details
 }  // namespace k4FWCore
 
-#endif  // CORE_FUNCTIONALUTILS_H
+// #endif  // CORE_FUNCTIONALUTILS_H

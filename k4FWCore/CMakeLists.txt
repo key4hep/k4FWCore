@@ -27,6 +27,7 @@ find_package(EDM4HEP)
 gaudi_install(SCRIPTS)
 gaudi_install(PYTHON)
 
+set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 
 gaudi_add_library(k4FWCore
 		  SOURCES src/PodioDataSvc.cpp
@@ -37,10 +38,27 @@ target_include_directories(k4FWCore PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
+file(GLOB headers /home/juanmi/Key4hep/Key4hep-all/k4FWCore/include/k4FWCore/FunctionalUtils.h)
+add_library(my_module)
+set_target_properties(my_module PROPERTIES LINKER_LANGUAGE CXX)
+# # target_sources(my_module PUBLIC FILE_SET CXX_MODULES FILES /home/juanmi/Key4hep/Key4hep-all/k4FWCore/include/k4FWCore/FunctionalUtils.h)
+target_sources(my_module
+  PUBLIC
+  FILE_SET cxx_modules
+  TYPE
+  CXX_MODULES
+  FILES
+  include/k4FWCore/FunctionalUtils.ixx
+)
+target_link_libraries(my_module PUBLIC Gaudi::GaudiKernel k4FWCore k4FWCore::k4Interface ROOT::Core ROOT::RIO ROOT::Tree EDM4HEP::edm4hep)
+target_include_directories(my_module PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+
 file(GLOB k4fwcore_plugin_sources components/*.cpp)
 gaudi_add_module(k4FWCorePlugins
                  SOURCES ${k4fwcore_plugin_sources}
-                 LINK Gaudi::GaudiKernel k4FWCore k4FWCore::k4Interface ROOT::Core ROOT::RIO ROOT::Tree EDM4HEP::edm4hep)
+                 LINK Gaudi::GaudiKernel k4FWCore k4FWCore::k4Interface ROOT::Core ROOT::RIO ROOT::Tree EDM4HEP::edm4hep my_module)
 target_include_directories(k4FWCorePlugins PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)

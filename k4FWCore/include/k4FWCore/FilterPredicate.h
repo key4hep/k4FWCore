@@ -18,7 +18,7 @@
  */
 
 #include "Gaudi/Functional/FilterPredicate.h"
-#include "k4FWCore/FunctionalUtils.h"
+import k4FWCore.FunctionalUtils;
 
 namespace k4FWCore {
 
