@@ -42,6 +42,8 @@ struct ExampleFunctionalConsumerRuntimeCollectionsMultiple final
   void operator()(const std::vector<const edm4hep::MCParticleCollection*>& particleVec,
                   const std::vector<const edm4hep::TrackCollection*>&      trackVec,
                   const edm4hep::SimTrackerHitCollection&                  simTrackerHits) const override {
+    // Silence warning about unused variable
+    (void)simTrackerHits;
     info() << "Received " << particleVec.size() << " particle collections and " << trackVec.size()
            << " track collections" << endmsg;
     if (particleVec.size() != 5) {

@@ -45,7 +45,7 @@ struct ExampleFunctionalTransformerRuntimeCollections final
   std::vector<edm4hep::MCParticleCollection> operator()(
       const std::vector<const edm4hep::MCParticleCollection*>& input) const override {
     std::vector<edm4hep::MCParticleCollection> outputCollections;
-    for (int i = 0; i < input.size(); ++i) {
+    for (size_t i = 0; i < input.size(); ++i) {
       std::string name     = "NewMCParticles" + std::to_string(i);
       auto&       old_coll = input.at(i);
       auto        coll     = edm4hep::MCParticleCollection();

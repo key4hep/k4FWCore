@@ -61,7 +61,7 @@ struct ExampleFunctionalMetadataConsumer final : k4FWCore::Consumer<void(const e
   void operator()(const edm4hep::MCParticleCollection& input) const override {
     // Check that it's possible to get metadata parameters from the main loop
     auto particleNum = k4FWCore::getParameter<int>("NumberOfParticles", this).value_or(-1);
-    if (input.size() != particleNum) {
+    if (input.size() != (size_t)particleNum) {
       error() << "Input MCParticleCollection size is not " << particleNum << endmsg;
       return;
     }

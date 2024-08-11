@@ -90,7 +90,7 @@ std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, std::vector<std:
   {
     std::scoped_lock<std::mutex> lock(m_changeBufferLock);
     if (m_nextEntry < m_entries) {
-      frame = podio::Frame(std::move(m_reader->readEntry(podio::Category::Event, m_nextEntry)));
+      frame = podio::Frame(m_reader->readEntry(podio::Category::Event, m_nextEntry));
     } else {
       return std::make_tuple(std::vector<std::shared_ptr<podio::CollectionBase>>(), std::vector<std::string>(),
                              std::move(frame));

@@ -167,7 +167,6 @@ public:
       //   continue;
       // }
       m_availableCollections.insert(pReg->name().substr(1, pReg->name().size() - 1));
-      const std::string& id = pReg->identifier();
     }
   }
 

@@ -40,6 +40,8 @@ StatusCode k4FWCoreTest_cellID_reader::initialize() {
 
 StatusCode k4FWCoreTest_cellID_reader::execute(const EventContext&) const {
   const auto simtrackerhits_coll = m_simTrackerHitReaderHandle.get();
+  // Silence warning because we don't use simtrackerhits_coll
+  (void)simtrackerhits_coll;
 
   const auto cellIDstr = m_cellIDHandle.get();
 
