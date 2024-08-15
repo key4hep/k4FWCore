@@ -37,7 +37,13 @@ public:
     getFrame()->putParameter(name, obj);
   }
 
-  template <typename T> std::optional<T> get(const std::string& name) { return getFrame()->getParameter<T>(name); }
+  template <typename T> std::optional<T> get(const std::string& name) {
+    auto* frame = getFrame();
+    if (!frame) {
+      return std::nullopt;
+    }
+    return frame->getParameter<T>(name);
+  }
 };
 
 #endif
