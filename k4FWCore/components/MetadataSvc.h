@@ -26,6 +26,8 @@
 
 #include "k4FWCore/IMetadataSvc.h"
 
+#include <memory>
+
 class MetadataSvc : public extends<Service, IMetadataSvc> {
   using extends::extends;
 
@@ -38,7 +40,8 @@ protected:
 
   std::unique_ptr<podio::Frame> m_frame;
 
-  void setFrame(podio::Frame&& frame) override;
+  podio::Frame* getFrame() override;
+  void          setFrame(podio::Frame&& frame) override;
 };
 
 #endif
