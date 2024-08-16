@@ -34,6 +34,7 @@
 
 #include <GaudiKernel/IHiveWhiteBoard.h>
 #include <memory>
+#include <utility>
 
 class Writer final : public Gaudi::Functional::Consumer<void(const EventContext&)> {
 public:
@@ -121,7 +122,7 @@ public:
     }
     iosvc->getWriter()->writeFrame(config_metadata_frame, "configuration_metadata");
 
-    if (auto* metadata_frame = m_metadataSvc->getFrame(); metadata_frame) {
+    if (const auto* metadata_frame = std::as_const(*m_metadataSvc).getFrame(); metadata_frame) {
       iosvc->getWriter()->writeFrame(*metadata_frame, podio::Category::Metadata);
     }
 

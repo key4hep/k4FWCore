@@ -27,8 +27,8 @@ class IMetadataSvc : virtual public IInterface {
 public:
   DeclareInterfaceID(IMetadataSvc, 1, 0);
 
-  virtual podio::Frame* getFrame()                     = 0;
-  virtual void          setFrame(podio::Frame&& frame) = 0;
+  virtual const podio::Frame* getFrame() const               = 0;
+  virtual void                setFrame(podio::Frame&& frame) = 0;
 
   template <typename T> void put(const std::string& name, const T& obj) {
     if (!getFrame()) {
@@ -37,13 +37,16 @@ public:
     getFrame()->putParameter(name, obj);
   }
 
-  template <typename T> std::optional<T> get(const std::string& name) {
-    auto* frame = getFrame();
+  template <typename T> std::optional<T> get(const std::string& name) const {
+    const auto* frame = getFrame();
     if (!frame) {
       return std::nullopt;
     }
     return frame->getParameter<T>(name);
   }
+
+protected:
+  virtual podio::Frame* getFrame() = 0;
 };
 
 #endif

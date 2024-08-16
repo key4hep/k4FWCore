@@ -40,8 +40,9 @@ protected:
 
   std::unique_ptr<podio::Frame> m_frame;
 
-  podio::Frame* getFrame() override;
-  void          setFrame(podio::Frame&& frame) override;
+  const podio::Frame* getFrame() const override;
+  podio::Frame*       getFrame() override;
+  void                setFrame(podio::Frame&& frame) override;
 };
 
 #endif

@@ -43,7 +43,8 @@ StatusCode MetadataSvc::initialize() {
 
 StatusCode MetadataSvc::finalize() { return Service::finalize(); }
 
-podio::Frame* MetadataSvc::getFrame() { return m_frame.get(); }
+const podio::Frame* MetadataSvc::getFrame() const { return m_frame.get(); }
+podio::Frame*       MetadataSvc::getFrame() { return m_frame.get(); }
 void MetadataSvc::setFrame(podio::Frame&& frame) { m_frame = std::make_unique<podio::Frame>(std::move(frame)); }
 
 DECLARE_COMPONENT(MetadataSvc)
