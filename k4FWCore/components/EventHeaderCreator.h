@@ -19,6 +19,7 @@
 #ifndef K4FWCORE_EVENTHEADERCREATOR
 #define K4FWCORE_EVENTHEADERCREATOR
 
+#include <edm4hep/Constants.h>
 #include "Gaudi/Algorithm.h"
 #include "k4FWCore/DataHandle.h"
 
@@ -44,7 +45,8 @@ private:
       this, "eventNumberOffset", 0,
       "Event number offset, eventNumber will be filled with 'event_index + eventNumberOffset'"};
   // datahandle for the EventHeader
-  mutable DataHandle<edm4hep::EventHeaderCollection> m_headerCol{"EventHeader", Gaudi::DataHandle::Writer, this};
+  mutable DataHandle<edm4hep::EventHeaderCollection> m_headerCol{edm4hep::labels::EventHeader,
+                                                                 Gaudi::DataHandle::Writer, this};
 };
 
 #endif
