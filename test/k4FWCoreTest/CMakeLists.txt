@@ -137,6 +137,9 @@ add_test_with_env(FunctionalCollectionMerger options/ExampleFunctionalCollection
 add_test_with_env(FunctionalFilterFile options/ExampleFunctionalFilterFile.py)
 add_test_with_env(FunctionalMetadata options/ExampleFunctionalMetadata.py)
 add_test_with_env(FunctionalMetadataOldAlgorithm options/ExampleFunctionalMetadataOldAlgorithm.py)
+add_test_with_env(createEventHeaderConcurrent options/createEventHeaderConcurrent.py)
+add_test_with_env(checkEventHeaderConcurrent options/checkEventHeaderConcurrent.py PROPERTIES DEPENDS createEventHeaderConcurrent)
+
 
 add_test_with_env(FunctionalWrongImport options/ExampleFunctionalWrongImport.py)
 set_tests_properties(FunctionalWrongImport PROPERTIES PASS_REGULAR_EXPRESSION "ImportError: Importing ApplicationMgr or IOSvc from Configurables is not allowed.")
