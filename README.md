@@ -22,9 +22,9 @@ Algorithm to read data from one or multiple input file(s) on disk.
 Algorithm to write data to an output file on disk.
 
 ## k4run
-```bash
+```
 $ k4run --help
-usage: k4run [-h] [--dry-run] [-v] [-n NUM_EVENTS] [-l] [--gdb] [--ncpus NCPUS] [config_files ...]
+usage: k4run [--dry-run] [-v] [-n NUM_EVENTS] [-l] [--gdb] [-h] [config_files ...]
 
 Run job in the Key4HEP framework
 
@@ -32,14 +32,14 @@ positional arguments:
   config_files          Gaudi config (python) files describing the job
 
 options:
-  -h, --help            show this help message and exit
   --dry-run             Do not actually run the job, just parse the config files
   -v, --verbose         Run job with verbose output
   -n NUM_EVENTS, --num-events NUM_EVENTS
                         Number of events to run
-  -l, --list            Print all the configurable components available in the framework and exit
+  -l, --list            Print all the configurable components available in the
+                        framework and exit
   --gdb                 Attach gdb debugger
-  --ncpus NCPUS         Start Gaudi in parallel mode using NCPUS processes. 0 => serial mode (default), -1 => use all CPUs
+  -h, --help            show this help message and exit
 ```
 When supplied with a Gaudi steering file `k4run --help file.py` also shows the settable properties of the Gaudi algorithms used in the file. Additionally, it is possible to add further arguments and use them in the steering file by using the Python `argparse.ArgumentParser` shared by `k4run`.
 ```python
