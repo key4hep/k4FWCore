@@ -37,7 +37,7 @@ public:
   /// Retrieve interface ID
   DeclareInterfaceID(ISimG4DetectorConstruction, 1, 0);
 
-  /** get initilization hook for the geometry
+  /** get initialization hook for the geometry
    *  @return pointer to G4VUserDetectorConstruction
    */
   virtual G4VUserDetectorConstruction* detectorConstruction() = 0;

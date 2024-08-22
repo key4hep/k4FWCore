@@ -37,7 +37,7 @@ public:
   /// Retrieve interface ID
   DeclareInterfaceID(ISimG4ActionTool, 1, 0);
 
-  /** get initilization hook for the user action
+  /** get initialization hook for the user action
    *  @return  pointer to G4VUserActionInitialization
    */
   virtual G4VUserActionInitialization* userActionInitialization() = 0;

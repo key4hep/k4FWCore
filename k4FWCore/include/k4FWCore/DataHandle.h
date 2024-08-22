@@ -103,7 +103,7 @@ DataHandle<T>::DataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode
 }
 
 /**
- * Try to retrieve from the transient store. If the retrieval succeded and
+ * Try to retrieve from the transient store. If the retrieval succeeded and
  * this is the first time we retrieve, perform a dynamic cast to the desired
  * object. Then finally set the handle as Read.
  * If this is not the first time we cast and the cast worked, just use the
