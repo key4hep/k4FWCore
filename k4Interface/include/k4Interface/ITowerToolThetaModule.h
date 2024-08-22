@@ -85,8 +85,6 @@ public:
   virtual void attachCells(float aTheta, float aPhi, uint aHalfThetaFinal, uint aHalfPhiFinal,
                            edm4hep::MutableCluster& aEdmCluster, edm4hep::CalorimeterHitCollection* aEdmClusterCells,
                            bool aEllipse) = 0;
-
-  virtual ~ITowerToolThetaModule() {}
 };
 
 #endif /* RECINTERFACE_ITOWERTOOLTHETAMODULE_H */

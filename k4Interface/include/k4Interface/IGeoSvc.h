@@ -36,7 +36,6 @@ public:
   virtual dd4hep::Detector*            getDetector()                             = 0;
   virtual G4VUserDetectorConstruction* getGeant4Geo()                            = 0;
   virtual std::string                  constantAsString(std::string const& name) = 0;
-  virtual ~IGeoSvc() {}
 };
 
 #endif  // IGEOSVC_H
