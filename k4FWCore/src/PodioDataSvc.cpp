@@ -143,9 +143,6 @@ void PodioDataSvc::endOfRead() {
 /// Standard Constructor
 PodioDataSvc::PodioDataSvc(const std::string& name, ISvcLocator* svc) : DataSvc(name, svc) {}
 
-/// Standard Destructor
-PodioDataSvc::~PodioDataSvc() {}
-
 const std::string_view PodioDataSvc::getCollectionType(const std::string& collName) {
   const auto coll = m_eventframe.get(collName);
   if (coll == nullptr) {

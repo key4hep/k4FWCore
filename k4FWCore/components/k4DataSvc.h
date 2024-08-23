@@ -26,8 +26,5 @@ class k4DataSvc : public PodioDataSvc {
 public:
   /// Standard Constructor
   k4DataSvc(const std::string& name, ISvcLocator* svc);
-
-  /// Standard Destructor
-  virtual ~k4DataSvc();
 };
 #endif

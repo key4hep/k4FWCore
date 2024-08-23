@@ -57,9 +57,6 @@ public:
   /// Standard Constructor
   PodioDataSvc(const std::string& name, ISvcLocator* svc);
 
-  /// Standard Destructor
-  virtual ~PodioDataSvc();
-
   // Use DataSvc functionality except where we override
   using DataSvc::registerObject;
   /// Overriding standard behaviour of evt service

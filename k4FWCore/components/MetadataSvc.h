@@ -30,8 +30,6 @@ class MetadataSvc : public extends<Service, IMetadataSvc> {
   using extends::extends;
 
 public:
-  ~MetadataSvc() override = default;
-
   StatusCode initialize() override;
   StatusCode finalize() override;
 
