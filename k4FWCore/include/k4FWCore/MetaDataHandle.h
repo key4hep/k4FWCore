@@ -52,7 +52,7 @@ public:
 
   /// Set the value for this MetaDataHandle
   ///
-  /// @note This can only be called during initalize and/or finalize but not
+  /// @note This can only be called during initialize and/or finalize but not
   /// during execute for algorithms that use it
   void put(T);
 
@@ -124,7 +124,7 @@ template <typename T> void MetaDataHandle<T>::put(T value) {
     throw GaudiException("MetaDataHandle policy violation", "Put for non-writing MetaDataHandle not allowed",
                          StatusCode::FAILURE);
   // check whether we are in the proper State
-  // put is only allowed in the initalization
+  // put is only allowed in the initialization
 
   std::string full_descriptor = fullDescriptor();
   // DataHandle based algorithms

@@ -23,7 +23,7 @@
 #include "k4FWCore/DataHandle.h"
 
 /***
- * Algortihm that creates an EventHeader collection and fills it with eventNumber and runNumber
+ * Algorithm that creates an EventHeader collection and fills it with eventNumber and runNumber
  */
 
 namespace edm4hep {

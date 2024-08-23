@@ -120,7 +120,7 @@ StatusCode PodioOutput::finalize() {
     // HepMCToEDMConverter.genparticles = "GenParticles";
     // Note that quotes are added to all property values,
     // which leads to problems with ints, lists, dicts and bools.
-    // For theses types, the quotes must be removed in postprocessing.
+    // For these types, the quotes must be removed in postprocessing.
     config_stream << std::get<0>(per_property) << " = \"" << std::get<1>(per_property) << "\";" << std::endl;
     config_data.push_back(config_stream.str());
   }

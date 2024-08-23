@@ -37,7 +37,7 @@ public:
   /// Retrieve interface ID
   DeclareInterfaceID(ISimG4PhysicsList, 1, 0);
 
-  /** get initilization hook for the physics list
+  /** get initialization hook for the physics list
    *  @return  pointer to G4VModularPhysicsList
    */
   virtual G4VModularPhysicsList* physicsList() = 0;
