@@ -183,9 +183,6 @@ namespace Gaudi {
   template <class T> class Property<::DataHandle<T>&> : public ::DataHandleProperty {
   public:
     Property(const std::string& name, ::DataHandle<T>& value) : ::DataHandleProperty(name, value) {}
-
-    /// virtual Destructor
-    virtual ~Property() {}
   };
 }  // namespace Gaudi
 
