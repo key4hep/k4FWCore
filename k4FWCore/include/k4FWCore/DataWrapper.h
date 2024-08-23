@@ -33,8 +33,7 @@ public:
   // ugly hack to circumvent the usage of boost::any yet
   // DataSvc would need a templated register method
   virtual podio::CollectionBase* collectionBase() = 0;
-  virtual ~DataWrapperBase(){};
-  virtual void resetData() = 0;
+  virtual void                   resetData()      = 0;
 };
 
 template <class T> class GAUDI_API DataWrapper : public DataWrapperBase {
