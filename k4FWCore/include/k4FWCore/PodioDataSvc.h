@@ -64,8 +64,7 @@ public:
   using DataSvc::registerObject;
   /// Overriding standard behaviour of evt service
   /// Register object with the data store.
-  virtual StatusCode registerObject(std::string_view parentPath, std::string_view fullPath,
-                                    DataObject* pObject) override final;
+  StatusCode registerObject(std::string_view parentPath, std::string_view fullPath, DataObject* pObject) final;
 
   const std::string_view getCollectionType(const std::string& collName);
 

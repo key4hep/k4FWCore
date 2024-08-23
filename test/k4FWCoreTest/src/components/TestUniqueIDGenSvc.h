@@ -31,15 +31,15 @@ public:
   /**  Initialize.
    *   @return status code
    */
-  virtual StatusCode initialize() final;
+  StatusCode initialize() final;
   /**  Execute.
    *   @return status code
    */
-  virtual StatusCode execute(const EventContext&) const final;
+  StatusCode execute(const EventContext&) const final;
   /**  Finalize.
    *   @return status code
    */
-  virtual StatusCode finalize() final;
+  StatusCode finalize() final;
 
 private:
   SmartIF<IUniqueIDGenSvc> m_service;

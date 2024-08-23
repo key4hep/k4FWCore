@@ -34,12 +34,12 @@ public:
   PodioOutput(const std::string& name, ISvcLocator* svcLoc);
 
   /// Initialization of PodioOutput. Acquires the data service, creates trees and root file.
-  StatusCode initialize();
+  StatusCode initialize() override;
   /// Execute. For the first event creates branches for all collections known to PodioDataSvc and prepares them for
   /// writing. For the following events it reconnects the branches with collections and prepares them for write.
-  StatusCode execute(const EventContext&) const;
+  StatusCode execute(const EventContext&) const override;
   /// Finalize. Writes the meta data tree; writes file and cleans up all ROOT-pointers.
-  StatusCode finalize();
+  StatusCode finalize() override;
 
 private:
   /// First event or not

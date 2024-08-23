@@ -53,15 +53,15 @@ public:
   };
   virtual ~DataWrapper();
 
-  const T*     getData() const { return m_data; }
-  void         setData(const T* data) { m_data = data; }
-  virtual void resetData() { m_data = nullptr; }
+  const T* getData() const { return m_data; }
+  void     setData(const T* data) { m_data = data; }
+  void     resetData() override { m_data = nullptr; }
 
   operator const T&() const& { return *m_data; }
 
 private:
   /// try to cast to collectionBase; may return nullptr;
-  virtual podio::CollectionBase* collectionBase();
+  podio::CollectionBase* collectionBase() override;
 
 private:
   const T* m_data;

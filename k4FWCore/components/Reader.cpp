@@ -69,7 +69,7 @@ public:
                            Gaudi::Details::Property::ImmediatelyInvokeHandler{true}} {}
 
   // derived classes can NOT implement execute
-  StatusCode execute(const EventContext&) const override final {
+  StatusCode execute(const EventContext&) const final {
     try {
       auto out = (*this)();
 

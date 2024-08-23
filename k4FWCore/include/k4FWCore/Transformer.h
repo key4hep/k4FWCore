@@ -109,7 +109,7 @@ namespace k4FWCore {
                         std::index_sequence_for<Out>{}) {}
 
       // derived classes are NOT allowed to implement execute ...
-      StatusCode execute(const EventContext& ctx) const override final {
+      StatusCode execute(const EventContext& ctx) const final {
         try {
           if constexpr (isVectorLike<Out>::value) {
             std::tuple<Out> tmp = filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs);
@@ -245,7 +245,7 @@ namespace k4FWCore {
                              std::index_sequence_for<Out...>{}) {}
 
       // derived classes are NOT allowed to implement execute ...
-      StatusCode execute(const EventContext& ctx) const override final {
+      StatusCode execute(const EventContext& ctx) const final {
         try {
           auto tmp = filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs);
           putVectorOutputs<0, Out...>(std::move(tmp), m_outputs, this);
