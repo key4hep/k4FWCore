@@ -44,5 +44,3 @@ StatusCode k4FWCoreTest_cellID_writer::execute(const EventContext&) const {
 
   return StatusCode::SUCCESS;
 }
-
-StatusCode k4FWCoreTest_cellID_writer::finalize() { return Gaudi::Algorithm::finalize(); }

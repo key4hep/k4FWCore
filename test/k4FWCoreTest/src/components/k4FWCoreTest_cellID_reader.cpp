@@ -29,13 +29,6 @@ k4FWCoreTest_cellID_reader::k4FWCoreTest_cellID_reader(const std::string& aName,
   setProperty("Cardinality", 1).ignore();
 }
 
-StatusCode k4FWCoreTest_cellID_reader::initialize() {
-  if (Gaudi::Algorithm::initialize().isFailure()) {
-    return StatusCode::FAILURE;
-  }
-  return StatusCode::SUCCESS;
-}
-
 StatusCode k4FWCoreTest_cellID_reader::execute(const EventContext&) const {
   [[maybe_unused]] const auto simtrackerhits_coll = m_simTrackerHitReaderHandle.get();
 
@@ -48,5 +41,3 @@ StatusCode k4FWCoreTest_cellID_reader::execute(const EventContext&) const {
 
   return StatusCode::SUCCESS;
 }
-
-StatusCode k4FWCoreTest_cellID_reader::finalize() { return Gaudi::Algorithm::finalize(); }

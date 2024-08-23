@@ -26,18 +26,10 @@
 class k4FWCoreTest_HelloWorldAlg : public Gaudi::Algorithm {
 public:
   explicit k4FWCoreTest_HelloWorldAlg(const std::string&, ISvcLocator*);
-  /**  Initialize.
-   *   @return status code
-   */
-  StatusCode initialize() final;
   /**  Execute.
    *   @return status code
    */
   StatusCode execute(const EventContext&) const final;
-  /**  Finalize.
-   *   @return status code
-   */
-  StatusCode finalize() final;
 
 private:
   // member variable

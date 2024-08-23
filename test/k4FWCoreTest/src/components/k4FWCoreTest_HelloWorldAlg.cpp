@@ -27,13 +27,6 @@ k4FWCoreTest_HelloWorldAlg::k4FWCoreTest_HelloWorldAlg(const std::string& aName,
   setProperty("Cardinality", 1).ignore();
 }
 
-StatusCode k4FWCoreTest_HelloWorldAlg::initialize() {
-  if (Gaudi::Algorithm::initialize().isFailure()) {
-    return StatusCode::FAILURE;
-  }
-  return StatusCode::SUCCESS;
-}
-
 StatusCode k4FWCoreTest_HelloWorldAlg::execute(const EventContext&) const {
   info() << endmsg;
   info() << endmsg;
@@ -42,5 +35,3 @@ StatusCode k4FWCoreTest_HelloWorldAlg::execute(const EventContext&) const {
   info() << endmsg;
   return StatusCode::SUCCESS;
 }
-
-StatusCode k4FWCoreTest_HelloWorldAlg::finalize() { return Gaudi::Algorithm::finalize(); }

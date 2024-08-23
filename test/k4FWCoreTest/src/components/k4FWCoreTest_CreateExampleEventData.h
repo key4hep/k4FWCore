@@ -56,18 +56,10 @@ namespace edm4hep {
 class k4FWCoreTest_CreateExampleEventData : public Gaudi::Algorithm {
 public:
   explicit k4FWCoreTest_CreateExampleEventData(const std::string&, ISvcLocator*);
-  /**  Initialize.
-   *   @return status code
-   */
-  StatusCode initialize() final;
   /**  Execute.
    *   @return status code
    */
   StatusCode execute(const EventContext&) const final;
-  /**  Finalize.
-   *   @return status code
-   */
-  StatusCode finalize() final;
 
 private:
   /// integer to add to the dummy values written to the edm

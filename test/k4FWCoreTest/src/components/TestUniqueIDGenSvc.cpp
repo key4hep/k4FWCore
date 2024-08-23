@@ -47,5 +47,3 @@ StatusCode TestUniqueIDGenSvc::execute(const EventContext&) const {
 
   return StatusCode::SUCCESS;
 }
-
-StatusCode TestUniqueIDGenSvc::finalize() { return Gaudi::Algorithm::finalize(); }

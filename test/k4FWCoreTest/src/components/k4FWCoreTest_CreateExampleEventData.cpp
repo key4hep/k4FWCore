@@ -46,13 +46,6 @@ k4FWCoreTest_CreateExampleEventData::k4FWCoreTest_CreateExampleEventData(const s
   setProperty("Cardinality", 1).ignore();
 }
 
-StatusCode k4FWCoreTest_CreateExampleEventData::initialize() {
-  if (Gaudi::Algorithm::initialize().isFailure()) {
-    return StatusCode::FAILURE;
-  }
-  return StatusCode::SUCCESS;
-}
-
 StatusCode k4FWCoreTest_CreateExampleEventData::execute(const EventContext&) const {
   auto* floatVector = m_vectorFloatHandle.createAndPut();
   floatVector->push_back(125.);
@@ -104,5 +97,3 @@ StatusCode k4FWCoreTest_CreateExampleEventData::execute(const EventContext&) con
 
   return StatusCode::SUCCESS;
 }
-
-StatusCode k4FWCoreTest_CreateExampleEventData::finalize() { return Gaudi::Algorithm::finalize(); }

@@ -47,10 +47,6 @@ public:
    *   @return status code
    */
   StatusCode execute(const EventContext&) const final;
-  /**  Finalize.
-   *   @return status code
-   */
-  StatusCode finalize() final;
 
 private:
   /// Handle for the SimTrackerHits to be written
