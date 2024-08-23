@@ -156,7 +156,7 @@ const std::string_view PodioDataSvc::getCollectionType(const std::string& collNa
 }
 
 StatusCode PodioDataSvc::registerObject(std::string_view parentPath, std::string_view fullPath, DataObject* pObject) {
-  DataWrapperBase* wrapper = dynamic_cast<DataWrapperBase*>(pObject);
+  auto* wrapper = dynamic_cast<DataWrapperBase*>(pObject);
   if (wrapper != nullptr) {
     podio::CollectionBase* coll = wrapper->collectionBase();
     if (coll != nullptr) {

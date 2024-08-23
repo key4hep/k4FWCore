@@ -65,8 +65,7 @@ std::vector<std::string> split(const std::string& s, char delim) {
 }
 
 bool KeepDropSwitch::isOn(const std::string& astring) const {
-  typedef std::map<std::string, bool>::const_iterator MIter;
-  MIter                                               im = m_cache.find(astring);
+  auto im = m_cache.find(astring);
   if (im != m_cache.end())
     return im->second;
   else {
