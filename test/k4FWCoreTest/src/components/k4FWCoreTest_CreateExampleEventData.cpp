@@ -46,8 +46,6 @@ k4FWCoreTest_CreateExampleEventData::k4FWCoreTest_CreateExampleEventData(const s
   setProperty("Cardinality", 1).ignore();
 }
 
-k4FWCoreTest_CreateExampleEventData::~k4FWCoreTest_CreateExampleEventData() {}
-
 StatusCode k4FWCoreTest_CreateExampleEventData::initialize() {
   if (Gaudi::Algorithm::initialize().isFailure()) {
     return StatusCode::FAILURE;

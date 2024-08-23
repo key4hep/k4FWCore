@@ -29,8 +29,6 @@ k4FWCoreTest_cellID_reader::k4FWCoreTest_cellID_reader(const std::string& aName,
   setProperty("Cardinality", 1).ignore();
 }
 
-k4FWCoreTest_cellID_reader::~k4FWCoreTest_cellID_reader() {}
-
 StatusCode k4FWCoreTest_cellID_reader::initialize() {
   if (Gaudi::Algorithm::initialize().isFailure()) {
     return StatusCode::FAILURE;

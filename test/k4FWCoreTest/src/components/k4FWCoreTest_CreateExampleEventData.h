@@ -56,7 +56,6 @@ namespace edm4hep {
 class k4FWCoreTest_CreateExampleEventData : public Gaudi::Algorithm {
 public:
   explicit k4FWCoreTest_CreateExampleEventData(const std::string&, ISvcLocator*);
-  virtual ~k4FWCoreTest_CreateExampleEventData();
   /**  Initialize.
    *   @return status code
    */

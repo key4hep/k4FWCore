@@ -39,7 +39,6 @@ const std::string cellIDtest = "M:3,S-1:3,I:9,J:9,K-1:6";
 class k4FWCoreTest_cellID_writer : public Gaudi::Algorithm {
 public:
   explicit k4FWCoreTest_cellID_writer(const std::string&, ISvcLocator*);
-  virtual ~k4FWCoreTest_cellID_writer();
   /**  Initialize.
    *   @return status code
    */

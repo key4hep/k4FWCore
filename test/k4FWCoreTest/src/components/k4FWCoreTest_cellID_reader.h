@@ -36,7 +36,6 @@
 class k4FWCoreTest_cellID_reader : public Gaudi::Algorithm {
 public:
   explicit k4FWCoreTest_cellID_reader(const std::string&, ISvcLocator*);
-  virtual ~k4FWCoreTest_cellID_reader();
   /**  Initialize.
    *   @return status code
    */

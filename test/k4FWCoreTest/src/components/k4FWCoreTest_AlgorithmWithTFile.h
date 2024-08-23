@@ -44,7 +44,6 @@ namespace edm4hep {
 class k4FWCoreTest_AlgorithmWithTFile : public Gaudi::Algorithm {
 public:
   explicit k4FWCoreTest_AlgorithmWithTFile(const std::string&, ISvcLocator*);
-  virtual ~k4FWCoreTest_AlgorithmWithTFile();
   /**  Initialize.
    *   @return status code
    */

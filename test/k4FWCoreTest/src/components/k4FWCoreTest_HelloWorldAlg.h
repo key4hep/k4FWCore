@@ -26,7 +26,6 @@
 class k4FWCoreTest_HelloWorldAlg : public Gaudi::Algorithm {
 public:
   explicit k4FWCoreTest_HelloWorldAlg(const std::string&, ISvcLocator*);
-  virtual ~k4FWCoreTest_HelloWorldAlg();
   /**  Initialize.
    *   @return status code
    */

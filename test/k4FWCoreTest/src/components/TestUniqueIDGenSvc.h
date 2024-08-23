@@ -27,7 +27,6 @@
 class TestUniqueIDGenSvc : public Gaudi::Algorithm {
 public:
   explicit TestUniqueIDGenSvc(const std::string&, ISvcLocator*);
-  virtual ~TestUniqueIDGenSvc();
   /**  Initialize.
    *   @return status code
    */
