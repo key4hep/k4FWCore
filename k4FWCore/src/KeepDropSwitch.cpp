@@ -58,7 +58,7 @@ std::vector<std::string> split(const std::string& s, char delim) {
   std::stringstream        ss(s);
   std::string              item;
   while (std::getline(ss, item, delim)) {
-    if (item != "")
+    if (!item.empty())
       elems.push_back(item);
   }
   return elems;
@@ -109,8 +109,8 @@ bool KeepDropSwitch::getFlag(const std::string& astring) const {
   return flag;
 }
 
-KeepDropSwitch::Cmd KeepDropSwitch::extractCommand(const std::string cmdline) const {
-  std::vector<std::string> words = split(cmdline, ' ');
+KeepDropSwitch::Cmd KeepDropSwitch::extractCommand(const std::string& cmdline) const {
+  auto words = split(cmdline, ' ');
   for (auto& word : words)
     std::cout << "'" << word << "' ";
   std::cout << std::endl;
