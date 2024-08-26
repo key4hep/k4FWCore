@@ -67,8 +67,8 @@ else:
     from k4FWCore import IOSvc, ApplicationMgr
 
     iosvc = IOSvc("IOSvc")
-    iosvc.input = "functional_producer_multiple.root"
-    iosvc.output = "functional_mix_iosvc.root"
+    iosvc.Input = "functional_producer_multiple.root"
+    iosvc.Output = "functional_mix_iosvc.root"
 
 # Check input with functional and old algorithms
 
