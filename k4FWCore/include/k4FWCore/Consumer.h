@@ -98,7 +98,7 @@ namespace k4FWCore {
        * @param i  The index of the input
        * @return   A range of the input locations
        */
-      auto inputLocations(unsigned i) const {
+      auto inputLocations(size_t i) const {
         if (i >= sizeof...(In)) {
           throw std::out_of_range("Called inputLocations with an index out of range, index: " + std::to_string(i) +
                                   ", number of inputs: " + std::to_string(sizeof...(In)));
