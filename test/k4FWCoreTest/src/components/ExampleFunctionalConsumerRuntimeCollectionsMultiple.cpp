@@ -41,7 +41,7 @@ struct ExampleFunctionalConsumerRuntimeCollectionsMultiple final
   // This is the function that will be called to produce the data
   void operator()(const std::vector<const edm4hep::MCParticleCollection*>& particleVec,
                   const std::vector<const edm4hep::TrackCollection*>&      trackVec,
-                  const edm4hep::SimTrackerHitCollection&                  simTrackerHits) const override {
+                  const edm4hep::SimTrackerHitCollection&) const override {
     info() << "Received " << particleVec.size() << " particle collections and " << trackVec.size()
            << " track collections" << endmsg;
     if (particleVec.size() != 5) {

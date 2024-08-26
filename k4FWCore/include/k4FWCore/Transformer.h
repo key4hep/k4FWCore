@@ -131,7 +131,7 @@ namespace k4FWCore {
        * @param i  The index of the input
        * @return   A range of the input locations
        */
-      auto inputLocations(int i) const {
+      auto inputLocations(unsigned i) const {
         if (i >= sizeof...(In)) {
           throw std::out_of_range("Called inputLocations with an index out of range, index: " + std::to_string(i) +
                                   ", number of inputs: " + std::to_string(sizeof...(In)));
@@ -143,7 +143,7 @@ namespace k4FWCore {
        * @param name  The name of the input
        * @return      A range of the input locations
        */
-      const auto inputLocations(std::string_view name) const {
+      auto inputLocations(std::string_view name) const {
         auto it = std::ranges::find_if(m_inputLocations, [&name](const auto& prop) { return prop.name() == name; });
         if (it == m_inputLocations.end()) {
           throw std::runtime_error("Called inputLocations with an unknown name");
@@ -164,7 +164,7 @@ namespace k4FWCore {
        * @param name  The name of the output
        * @return      A range of the output locations
        */
-      const auto outputLocations(std::string_view name) const {
+      auto outputLocations(std::string_view name) const {
         if (name != m_outputLocations.name()) {
           throw std::runtime_error("Called outputLocations with an unknown name");
         }
@@ -261,7 +261,7 @@ namespace k4FWCore {
        * @param i  The index of the input
        * @return   A range of the input locations
        */
-      const auto inputLocations(int i) const {
+      auto inputLocations(int i) const {
         if (i >= sizeof...(In)) {
           throw std::out_of_range("Called inputLocations with an index out of range, index: " + std::to_string(i) +
                                   ", number of inputs: " + std::to_string(sizeof...(In)));
@@ -273,7 +273,7 @@ namespace k4FWCore {
        * @param name  The name of the input
        * @return      A range of the input locations
        */
-      const auto inputLocations(std::string_view name) const {
+      auto inputLocations(std::string_view name) const {
         auto it = std::ranges::find_if(m_inputLocations, [&name](const auto& prop) { return prop.name() == name; });
         if (it == m_inputLocations.end()) {
           throw std::runtime_error("Called inputLocations with an unknown name");
@@ -298,7 +298,7 @@ namespace k4FWCore {
        * @param name  The name of the output
        * @return      A range of the output locations
        */
-      const auto outputLocations(std::string_view name) const {
+      auto outputLocations(std::string_view name) const {
         auto it = std::ranges::find_if(m_outputLocations.begin(), m_outputLocations.end(),
                                        [&name](const auto& prop) { return prop.name() == name; });
         if (it == m_outputLocations.end()) {

@@ -53,7 +53,7 @@ public:
         m_inputCollections{this,
                            "InputCollections",
                            {"Event"},
-                           [this](Gaudi::Details::PropertyBase& b) {
+                           [this](Gaudi::Details::PropertyBase&) {
                              const std::string cmd = System::cmdLineArgs()[0];
                              if (cmd.find("genconf") != std::string::npos) {
                                return;

@@ -33,7 +33,7 @@ struct ExampleFunctionalFilter final : k4FWCore::FilterPredicate<bool(const edm4
   // This is the function that will be called to check if the event passes
   // Note that the function has to be const, as well as the collections
   // we get from the input
-  bool operator()(const edm4hep::MCParticleCollection& input) const override {
+  bool operator()(const edm4hep::MCParticleCollection&) const override {
     ++m_counter;
     // Only pass for half of the events
     bool condition = m_counter.sum() % 2;
