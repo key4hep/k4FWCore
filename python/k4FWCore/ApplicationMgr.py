@@ -120,3 +120,12 @@ class ApplicationMgr:
                         ],
                     )
                 ]
+
+    def __getattr__(self, name):
+        return getattr(self._mgr, name)
+
+    def __setattr__(self, name, value):
+        if name == "_mgr":
+            super().__setattr__(name, value)
+        else:
+            setattr(self._mgr, name, value)

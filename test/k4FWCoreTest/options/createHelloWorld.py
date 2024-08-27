@@ -16,21 +16,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from Gaudi.Configuration import *
+from Gaudi.Configuration import INFO
 
-from Configurables import ApplicationMgr
+from k4FWCore import ApplicationMgr
+from Configurables import k4FWCoreTest_HelloWorldAlg
 
 ApplicationMgr().EvtSel = "NONE"
-ApplicationMgr().EvtMax = 1
+ApplicationMgr().EvtMax = 2
 ApplicationMgr().OutputLevel = INFO
 
-from Configurables import k4FWCoreTest_HelloWorldAlg
 
 producer = k4FWCoreTest_HelloWorldAlg("HelloWorldAlg1")
 producer.PerEventPrintMessage = "Hello World !"
+print(ApplicationMgr())
 ApplicationMgr().TopAlg += [producer]
 
-from Configurables import k4FWCoreTest_HelloWorldAlg
 
 producer2 = k4FWCoreTest_HelloWorldAlg("HelloWorldAlg2")
 producer2.PerEventPrintMessage = "Hello World2 !"

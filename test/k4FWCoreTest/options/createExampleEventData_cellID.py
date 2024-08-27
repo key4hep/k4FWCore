@@ -16,24 +16,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from Gaudi.Configuration import *
+from Gaudi.Configuration import INFO
 
 from Configurables import k4DataSvc
+from Configurables import k4FWCoreTest_cellID_writer, k4FWCoreTest_cellID_reader
+from Configurables import PodioOutput
+from k4FWCore import ApplicationMgr
 
 podioevent = k4DataSvc("EventDataSvc")
 
-from Configurables import k4FWCoreTest_cellID_writer, k4FWCoreTest_cellID_reader
 
 producer = k4FWCoreTest_cellID_writer()
 consumer = k4FWCoreTest_cellID_reader()
 
-from Configurables import PodioOutput
 
 out = PodioOutput("out")
 out.filename = "output_k4test_exampledata_cellid.root"
 out.outputCommands = ["keep *"]
 
-from Configurables import ApplicationMgr
 
 ApplicationMgr(
     TopAlg=[producer, consumer, out],

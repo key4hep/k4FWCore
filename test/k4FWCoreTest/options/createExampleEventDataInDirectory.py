@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 from Gaudi.Configuration import INFO
-from Configurables import ApplicationMgr
+from k4FWCore import ApplicationMgr
 from Configurables import k4FWCoreTest_CreateExampleEventData
 from Configurables import k4DataSvc
 from Configurables import PodioOutput
