@@ -63,9 +63,9 @@ def check_metadata(filename, keys, values):
     podio_reader = podio.root_io.Reader(filename)
     metadata = podio_reader.get("metadata")[0]
     for key, value in zip(keys, values):
-        if metadata.get_parameter(key) != value:
+        if (metaval := metadata.get_parameter(key)) != value:
             raise RuntimeError(
-                f"Metadata parameter {key} does not match the expected value, got {metadata.get_parameter(key)} but expected {value}"
+                f"Metadata parameter {key} does not match the expected value, got {metaval} but expected {value}"
             )
 
 
