@@ -32,8 +32,6 @@ k4FWCoreTest_AlgorithmWithTFile::k4FWCoreTest_AlgorithmWithTFile(const std::stri
   setProperty("Cardinality", 1).ignore();
 }
 
-k4FWCoreTest_AlgorithmWithTFile::~k4FWCoreTest_AlgorithmWithTFile() {}
-
 StatusCode k4FWCoreTest_AlgorithmWithTFile::initialize() {
   if (Gaudi::Algorithm::initialize().isFailure()) {
     return StatusCode::FAILURE;

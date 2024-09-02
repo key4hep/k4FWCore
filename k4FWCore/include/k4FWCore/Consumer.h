@@ -80,7 +80,7 @@ namespace k4FWCore {
           : Consumer(std::move(name), locator, inputs, std::index_sequence_for<In...>{}) {}
 
       // derived classes are NOT allowed to implement execute ...
-      StatusCode execute(const EventContext& ctx) const override final {
+      StatusCode execute(const EventContext& ctx) const final {
         try {
           filter_evtcontext_tt<In...>::apply(*this, ctx, m_inputs);
           return Gaudi::Functional::FilterDecision::PASSED;

@@ -40,8 +40,6 @@ class IOSvc : public extends<Service, IIOSvc, IIncidentListener> {
   using extends::extends;
 
 public:
-  ~IOSvc() override = default;
-
   StatusCode initialize() override;
   StatusCode finalize() override;
 

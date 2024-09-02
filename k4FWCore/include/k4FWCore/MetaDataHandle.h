@@ -29,7 +29,6 @@ public:
   MetaDataHandle();
   MetaDataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode a);
   MetaDataHandle(const Gaudi::DataHandle& handle, const std::string& descriptor, Gaudi::DataHandle::Mode a);
-  ~MetaDataHandle();
 
   /// Get the value that is stored in this MetaDataHandle
   ///
@@ -68,8 +67,6 @@ private:
   const Gaudi::DataHandle*        m_dataHandle{nullptr};  // holds the identifier in case we do collection metadata
   Gaudi::DataHandle::Mode         m_mode;
 };
-
-template <typename T> MetaDataHandle<T>::~MetaDataHandle() {}
 
 //---------------------------------------------------------------------------
 template <typename T>

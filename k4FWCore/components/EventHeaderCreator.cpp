@@ -26,12 +26,6 @@ EventHeaderCreator::EventHeaderCreator(const std::string& name, ISvcLocator* svc
                   "Name of the EventHeaderCollection that will be stored in the output root file.");
 }
 
-StatusCode EventHeaderCreator::initialize() {
-  if (Gaudi::Algorithm::initialize().isFailure())
-    return StatusCode::FAILURE;
-  return StatusCode::SUCCESS;
-}
-
 StatusCode EventHeaderCreator::execute(const EventContext&) const {
   static int eventNumber = 0;
   debug() << "Filling EventHeader with runNumber " << int(m_runNumber) << " and eventNumber "
@@ -40,11 +34,5 @@ StatusCode EventHeaderCreator::execute(const EventContext&) const {
   auto header  = headers->create();
   header.setRunNumber(m_runNumber);
   header.setEventNumber(eventNumber++ + m_eventNumberOffset);
-  return StatusCode::SUCCESS;
-}
-
-StatusCode EventHeaderCreator::finalize() {
-  if (Gaudi::Algorithm::finalize().isFailure())
-    return StatusCode::FAILURE;
   return StatusCode::SUCCESS;
 }

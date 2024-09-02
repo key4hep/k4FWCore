@@ -58,15 +58,14 @@ std::vector<std::string> split(const std::string& s, char delim) {
   std::stringstream        ss(s);
   std::string              item;
   while (std::getline(ss, item, delim)) {
-    if (item != "")
+    if (!item.empty())
       elems.push_back(item);
   }
   return elems;
 }
 
 bool KeepDropSwitch::isOn(const std::string& astring) const {
-  typedef std::map<std::string, bool>::const_iterator MIter;
-  MIter                                               im = m_cache.find(astring);
+  auto im = m_cache.find(astring);
   if (im != m_cache.end())
     return im->second;
   else {
@@ -110,8 +109,8 @@ bool KeepDropSwitch::getFlag(const std::string& astring) const {
   return flag;
 }
 
-KeepDropSwitch::Cmd KeepDropSwitch::extractCommand(const std::string cmdline) const {
-  std::vector<std::string> words = split(cmdline, ' ');
+KeepDropSwitch::Cmd KeepDropSwitch::extractCommand(const std::string& cmdline) const {
+  auto words = split(cmdline, ' ');
   for (auto& word : words)
     std::cout << "'" << word << "' ";
   std::cout << std::endl;

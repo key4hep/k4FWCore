@@ -57,15 +57,11 @@ public:
   /// Standard Constructor
   PodioDataSvc(const std::string& name, ISvcLocator* svc);
 
-  /// Standard Destructor
-  virtual ~PodioDataSvc();
-
   // Use DataSvc functionality except where we override
   using DataSvc::registerObject;
   /// Overriding standard behaviour of evt service
   /// Register object with the data store.
-  virtual StatusCode registerObject(std::string_view parentPath, std::string_view fullPath,
-                                    DataObject* pObject) override final;
+  StatusCode registerObject(std::string_view parentPath, std::string_view fullPath, DataObject* pObject) final;
 
   const std::string_view getCollectionType(const std::string& collName);
 

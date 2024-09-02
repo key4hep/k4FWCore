@@ -19,6 +19,8 @@
 #ifndef FWCORE_IMETADATASERVICE_H
 #define FWCORE_IMETADATASERVICE_H
 
+#include <memory>
+
 #include "GaudiKernel/IInterface.h"
 
 #include "podio/Frame.h"
@@ -32,7 +34,7 @@ public:
   virtual void               setFrame(podio::Frame&& fr) = 0;
   template <typename T> void put(const std::string& name, const T& obj) {
     if (!m_frame) {
-      m_frame.reset(new podio::Frame());
+      m_frame = std::make_unique<podio::Frame>();
     }
     m_frame->putParameter(name, obj);
   }

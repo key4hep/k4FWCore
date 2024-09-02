@@ -27,8 +27,5 @@ class FCCDataSvc : public PodioDataSvc {
 public:
   /// Standard Constructor
   FCCDataSvc(const std::string& name, ISvcLocator* svc);
-
-  /// Standard Destructor
-  virtual ~FCCDataSvc();
 };
 #endif

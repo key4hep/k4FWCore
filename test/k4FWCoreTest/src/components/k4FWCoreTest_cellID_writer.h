@@ -39,19 +39,14 @@ const std::string cellIDtest = "M:3,S-1:3,I:9,J:9,K-1:6";
 class k4FWCoreTest_cellID_writer : public Gaudi::Algorithm {
 public:
   explicit k4FWCoreTest_cellID_writer(const std::string&, ISvcLocator*);
-  virtual ~k4FWCoreTest_cellID_writer();
   /**  Initialize.
    *   @return status code
    */
-  virtual StatusCode initialize() final;
+  StatusCode initialize() final;
   /**  Execute.
    *   @return status code
    */
-  virtual StatusCode execute(const EventContext&) const final;
-  /**  Finalize.
-   *   @return status code
-   */
-  virtual StatusCode finalize() final;
+  StatusCode execute(const EventContext&) const final;
 
 private:
   /// Handle for the SimTrackerHits to be written

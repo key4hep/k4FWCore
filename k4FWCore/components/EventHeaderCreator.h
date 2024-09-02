@@ -34,9 +34,7 @@ class EventHeaderCreator : public Gaudi::Algorithm {
 public:
   EventHeaderCreator(const std::string& name, ISvcLocator* svcLoc);
 
-  StatusCode initialize();
-  StatusCode execute(const EventContext&) const;
-  StatusCode finalize();
+  StatusCode execute(const EventContext&) const override;
 
 private:
   // Run number value (fixed for the entire job, to be set by the job submitter)

@@ -36,19 +36,10 @@
 class k4FWCoreTest_cellID_reader : public Gaudi::Algorithm {
 public:
   explicit k4FWCoreTest_cellID_reader(const std::string&, ISvcLocator*);
-  virtual ~k4FWCoreTest_cellID_reader();
-  /**  Initialize.
-   *   @return status code
-   */
-  virtual StatusCode initialize() final;
   /**  Execute.
    *   @return status code
    */
-  virtual StatusCode execute(const EventContext&) const final;
-  /**  Finalize.
-   *   @return status code
-   */
-  virtual StatusCode finalize() final;
+  StatusCode execute(const EventContext&) const final;
 
 private:
   /// Handle for the SimTrackerHits to be read

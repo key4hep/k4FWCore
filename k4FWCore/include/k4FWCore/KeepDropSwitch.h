@@ -31,13 +31,13 @@ class KeepDropSwitch {
 public:
   enum Cmd { KEEP, DROP, UNKNOWN };
   typedef std::vector<std::string> CommandLines;
-  KeepDropSwitch() {}
+  KeepDropSwitch() = default;
   explicit KeepDropSwitch(const CommandLines& cmds) { m_commandlines = cmds; }
   bool isOn(const std::string& astring) const;
 
 private:
   bool                                getFlag(const std::string& astring) const;
-  Cmd                                 extractCommand(const std::string cmdLine) const;
+  Cmd                                 extractCommand(const std::string& cmdLine) const;
   CommandLines                        m_commandlines;
   mutable std::map<std::string, bool> m_cache;
 };

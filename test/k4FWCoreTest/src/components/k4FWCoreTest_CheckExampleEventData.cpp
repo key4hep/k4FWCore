@@ -32,8 +32,6 @@ k4FWCoreTest_CheckExampleEventData::k4FWCoreTest_CheckExampleEventData(const std
   setProperty("Cardinality", 1).ignore();
 }
 
-StatusCode k4FWCoreTest_CheckExampleEventData::initialize() { return Gaudi::Algorithm::initialize(); }
-
 StatusCode k4FWCoreTest_CheckExampleEventData::execute(const EventContext&) const {
   auto floatVector = m_vectorFloatHandle.get();
   if (floatVector->size() != 3 || (*floatVector)[2] != m_event) {
@@ -59,5 +57,3 @@ StatusCode k4FWCoreTest_CheckExampleEventData::execute(const EventContext&) cons
   }
   return StatusCode::SUCCESS;
 }
-
-StatusCode k4FWCoreTest_CheckExampleEventData::finalize() { return Gaudi::Algorithm::finalize(); }

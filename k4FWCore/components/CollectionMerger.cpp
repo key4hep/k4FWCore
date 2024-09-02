@@ -121,7 +121,7 @@ private:
   void mergeCollections(const std::shared_ptr<podio::CollectionBase>& source,
                         std::shared_ptr<podio::CollectionBase>&       ret) const {
     if (!ret) {
-      ret.reset(new T());
+      ret = std::make_shared<T>();
       if (!m_copy) {
         ret->setSubsetCollection();
       }

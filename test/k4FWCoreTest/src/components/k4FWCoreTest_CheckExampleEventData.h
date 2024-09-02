@@ -35,18 +35,10 @@ class k4FWCoreTest_CheckExampleEventData : public Gaudi::Algorithm {
 public:
   explicit k4FWCoreTest_CheckExampleEventData(const std::string&, ISvcLocator*);
   ~k4FWCoreTest_CheckExampleEventData() = default;
-  /**  Initialize.
-   *   @return status code
-   */
-  virtual StatusCode initialize() final;
   /**  Execute.
    *   @return status code
    */
-  virtual StatusCode execute(const EventContext&) const final;
-  /**  Finalize.
-   *   @return status code
-   */
-  virtual StatusCode finalize() final;
+  StatusCode execute(const EventContext&) const final;
 
 private:
   /// integer to add to the dummy values written to the edm

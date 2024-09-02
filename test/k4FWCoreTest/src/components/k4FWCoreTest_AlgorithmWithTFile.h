@@ -44,19 +44,18 @@ namespace edm4hep {
 class k4FWCoreTest_AlgorithmWithTFile : public Gaudi::Algorithm {
 public:
   explicit k4FWCoreTest_AlgorithmWithTFile(const std::string&, ISvcLocator*);
-  virtual ~k4FWCoreTest_AlgorithmWithTFile();
   /**  Initialize.
    *   @return status code
    */
-  virtual StatusCode initialize() final;
+  StatusCode initialize() final;
   /**  Execute.
    *   @return status code
    */
-  virtual StatusCode execute(const EventContext&) const final;
+  StatusCode execute(const EventContext&) const final;
   /**  Finalize.
    *   @return status code
    */
-  virtual StatusCode finalize() final;
+  StatusCode finalize() final;
 
 private:
   /// integer to add to the dummy values written to the edm

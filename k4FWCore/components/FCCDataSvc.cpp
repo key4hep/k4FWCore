@@ -28,6 +28,3 @@ FCCDataSvc::FCCDataSvc(const std::string& name, ISvcLocator* svc) : PodioDataSvc
   declareProperty("inputs", m_filenames = {}, "Names of the files to read");
   declareProperty("input", m_filename = "", "Name of the file to read");
 }
-
-/// Standard Destructor
-FCCDataSvc::~FCCDataSvc() {}

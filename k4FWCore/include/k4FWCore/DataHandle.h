@@ -118,7 +118,7 @@ template <typename T> const T* DataHandle<T>::get() {
       // only do this once (if both are false after this, we throw exception)
       m_isGoodType = nullptr != dynamic_cast<DataWrapper<T>*>(dataObjectp);
       if (!m_isGoodType) {
-        auto tmp = dynamic_cast<DataWrapper<podio::CollectionBase>*>(dataObjectp);
+        auto* tmp = dynamic_cast<DataWrapper<podio::CollectionBase>*>(dataObjectp);
         if (tmp != nullptr) {
           m_isCollection = nullptr != dynamic_cast<T*>(tmp->collectionBase());
         }
@@ -129,7 +129,7 @@ template <typename T> const T* DataHandle<T>::get() {
     } else if (m_isCollection) {
       // The reader does not know the specific type of the collection. So we need a reinterpret_cast if the handle was
       // created by the reader.
-      DataWrapper<podio::CollectionBase>* tmp = static_cast<DataWrapper<podio::CollectionBase>*>(dataObjectp);
+      auto* tmp = static_cast<DataWrapper<podio::CollectionBase>*>(dataObjectp);
       return reinterpret_cast<const T*>(tmp->collectionBase());
     } else {
       // When a functional has pushed a std::shared_ptr<podio::CollectionBase> into the store
@@ -183,9 +183,6 @@ namespace Gaudi {
   template <class T> class Property<::DataHandle<T>&> : public ::DataHandleProperty {
   public:
     Property(const std::string& name, ::DataHandle<T>& value) : ::DataHandleProperty(name, value) {}
-
-    /// virtual Destructor
-    virtual ~Property() {}
   };
 }  // namespace Gaudi
 

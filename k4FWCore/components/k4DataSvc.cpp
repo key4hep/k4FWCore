@@ -29,6 +29,3 @@ k4DataSvc::k4DataSvc(const std::string& name, ISvcLocator* svc) : PodioDataSvc(n
   declareProperty("input", m_filename = "", "Name of the file to read");
   declareProperty("FirstEventEntry", m_1stEvtEntry = 0, "First event to read");
 }
-
-/// Standard Destructor
-k4DataSvc::~k4DataSvc() {}

@@ -35,12 +35,12 @@ StatusCode PodioDataSvc::initialize() {
   m_cnvSvc = svc_loc->service("EventPersistencySvc");
   status   = setDataLoader(m_cnvSvc);
 
-  if (m_filename != "") {
+  if (!m_filename.empty()) {
     m_filenames.push_back(m_filename);
   }
 
-  if (m_filenames.size() > 0) {
-    if (m_filenames[0] != "") {
+  if (!m_filenames.empty()) {
+    if (!m_filenames[0].empty()) {
       m_reading_from_file = true;
       m_reader.openFiles(m_filenames);
       m_numAvailableEvents = m_reader.getEntries("events");
@@ -84,7 +84,7 @@ StatusCode PodioDataSvc::reinitialize() {
 }
 /// Service finalization
 StatusCode PodioDataSvc::finalize() {
-  m_cnvSvc = 0;  // release
+  m_cnvSvc = nullptr;  // release
   DataSvc::finalize().ignore();
   return StatusCode::SUCCESS;
 }
@@ -143,9 +143,6 @@ void PodioDataSvc::endOfRead() {
 /// Standard Constructor
 PodioDataSvc::PodioDataSvc(const std::string& name, ISvcLocator* svc) : DataSvc(name, svc) {}
 
-/// Standard Destructor
-PodioDataSvc::~PodioDataSvc() {}
-
 const std::string_view PodioDataSvc::getCollectionType(const std::string& collName) {
   const auto coll = m_eventframe.get(collName);
   if (coll == nullptr) {
@@ -156,7 +153,7 @@ const std::string_view PodioDataSvc::getCollectionType(const std::string& collNa
 }
 
 StatusCode PodioDataSvc::registerObject(std::string_view parentPath, std::string_view fullPath, DataObject* pObject) {
-  DataWrapperBase* wrapper = dynamic_cast<DataWrapperBase*>(pObject);
+  auto* wrapper = dynamic_cast<DataWrapperBase*>(pObject);
   if (wrapper != nullptr) {
     podio::CollectionBase* coll = wrapper->collectionBase();
     if (coll != nullptr) {
