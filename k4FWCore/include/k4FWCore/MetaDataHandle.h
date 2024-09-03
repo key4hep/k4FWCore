@@ -26,7 +26,6 @@
 
 template <typename T> class MetaDataHandle {
 public:
-  MetaDataHandle();
   MetaDataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode a);
   MetaDataHandle(const Gaudi::DataHandle& handle, const std::string& descriptor, Gaudi::DataHandle::Mode a);
 
