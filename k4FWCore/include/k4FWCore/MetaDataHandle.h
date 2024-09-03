@@ -89,8 +89,10 @@ MetaDataHandle<T>::MetaDataHandle(const Gaudi::DataHandle& handle, const std::st
 
 //---------------------------------------------------------------------------
 template <typename T> std::optional<T> MetaDataHandle<T>::get_optional() const {
-  const auto& frame = m_podio_data_service->getMetaDataFrame();
-  return frame.getParameter<T>(fullDescriptor());
+  if (m_podio_data_service) {
+    return m_podio_data_service->getMetaDataFrame().getParameter<T>(fullDescriptor());
+  }
+  return k4FWCore::getParameter<T>(fullDescriptor());
 }
 
 //---------------------------------------------------------------------------
