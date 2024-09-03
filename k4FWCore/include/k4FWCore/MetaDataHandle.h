@@ -159,12 +159,8 @@ template <typename T> void MetaDataHandle<T>::checkPodioDataSvc() {
   if (cmd.find("genconf") != std::string::npos)
     return;
 
-  // The proper check would be the following:
-  // if (!m_podio_data_service && !Gaudi::svcLocator()->service<IMetadataSvc>("MetadataSvc")) {
-  // However, it seems there is always a service called "MetadataSvc" from Gaudi,
-  // so the check will always pass
-  if (!m_podio_data_service) {
-    std::cout << "Warning: MetaDataHandles require the PodioDataSvc (ignore if using IOSvc)" << std::endl;
+  if (!m_podio_data_service && !Gaudi::svcLocator()->service<IMetadataSvc>("MetadataSvc", false)) {
+    std::cout << "Warning: MetaDataHandles require the PodioDataSvc or for compatibility the MetadataSvc" << std::endl;
   }
 }
 
