@@ -97,19 +97,12 @@ template <typename T> std::optional<T> MetaDataHandle<T>::get_optional() const {
 
 //---------------------------------------------------------------------------
 template <typename T> const T MetaDataHandle<T>::get() const {
-  std::optional<T> maybeVal;
-  // DataHandle based algorithms
-  if (m_podio_data_service) {
-    maybeVal = get_optional();
-    if (!maybeVal.has_value()) {
-      throw GaudiException("MetaDataHandle empty handle access",
-                           "MetaDataHandle " + fullDescriptor() + " not (yet?) available", StatusCode::FAILURE);
-    }
-    // Functional algorithms
-  } else {
-    maybeVal = k4FWCore::getParameter<T>(fullDescriptor());
+  auto optional_parameter = get_optional();
+  if (!optional_parameter.has_value()) {
+    throw GaudiException("MetaDataHandle empty handle access",
+                         "MetaDataHandle " + fullDescriptor() + " not (yet?) available", StatusCode::FAILURE);
   }
-  return maybeVal.value();
+  return optional_parameter.value();
 }
 
 //---------------------------------------------------------------------------
