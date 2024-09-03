@@ -1,0 +1,34 @@
+###############################################################################
+# k4FWCore CMake Config
+#
+# Exported Targets
+#  - k4FWCore::k4FWCore         The core library containing the PodioDataSvc
+#                               and the KeepDropSwitch
+#  - k4FWCore::k4FWCorePlugins  The plugin library for the core plugins
+#                               provided by k4FWCore. Includes all major
+#                               services for I/O and as well as some utility
+#                               algorithms
+#  - k4FWCore::k4Interface      The (header-only) target containing all
+#                               interface definitions
+#
+###############################################################################
+@PACKAGE_INIT@
+
+set_and_check(k4FWCore_INCLUDE_DIR "@PACKAGE_CMAKE_INSTALL_INCLUDEDIR@")
+set_and_check(k4FWCore_LIBRARY_DIR "@PACKAGE_CMAKE_INSTALL_LIBDIR@")
+
+include(CMakeFindDependencyMacro)
+find_dependency(podio @podio_VERSION@)
+find_dependency(Gaudi @Gaudi_VERSION@)
+find_dependency(EDM4HEP @EDM4HEP_VERSION@)
+find_dependency(ROOT @ROOT_VERSION@ COMPONENTS RIO Tree)
+
+if(NOT TARGET k4FWCore::k4FWCore)
+  include("${CMAKE_CURRENT_LIST_DIR}/k4FWCoreTargets.cmake")
+endif()
+
+check_required_components(k4FWCore)
+
+include(FindPackageHandleStandardArgs)
+get_property(TEST_K4FWCORE_LIBRARY TARGET k4FWCore::k4FWCore PROPERTY LOCATION)
+find_package_handle_standard_args(k4FWCore DEFAULT_MSG CMAKE_CURRENT_LIST_FILE TEST_K4FWCORE_LIBRARY)

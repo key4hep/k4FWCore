@@ -55,5 +55,6 @@ install(EXPORT ${PROJECT_NAME}Targets
   DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}/"
   )
 
-gaudi_install(CMAKE cmake/${PROJECT_NAME}Config.cmake)
+include(cmake/k4FWCoreCreateConfig.cmake)
 
+gaudi_install(CMAKE ${PROJECT_BINARY_DIR}/k4FWCoreConfig.cmake)
