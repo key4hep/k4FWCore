@@ -42,12 +42,12 @@ StatusCode k4FWCoreTest_cellID_reader::execute(const EventContext&) const {
   auto optCellIDstr = m_cellIDHandle.get_optional();
 
   if (!optCellIDstr.has_value()) {
-    error() << "ERROR cellID is empty but was expected to hold a value" << endmsg;
+    error() << "ERROR: cellID is empty but was expected to hold a value" << endmsg;
     return StatusCode::FAILURE;
   }
 
   if (optCellIDstr.value() != cellIDstr) {
-    error() << "ERROR metadata accessed with by optional and value differs" << endmsg;
+    error() << "ERROR: metadata accessed with by optional and value differs" << endmsg;
     return StatusCode::FAILURE;
   }
 
