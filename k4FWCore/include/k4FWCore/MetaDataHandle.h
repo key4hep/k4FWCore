@@ -26,7 +26,6 @@
 
 template <typename T> class MetaDataHandle {
 public:
-  MetaDataHandle();
   MetaDataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode a);
   MetaDataHandle(const Gaudi::DataHandle& handle, const std::string& descriptor, Gaudi::DataHandle::Mode a);
 
@@ -89,25 +88,20 @@ MetaDataHandle<T>::MetaDataHandle(const Gaudi::DataHandle& handle, const std::st
 
 //---------------------------------------------------------------------------
 template <typename T> std::optional<T> MetaDataHandle<T>::get_optional() const {
-  const auto& frame = m_podio_data_service->getMetaDataFrame();
-  return frame.getParameter<T>(fullDescriptor());
+  if (m_podio_data_service) {
+    return m_podio_data_service->getMetaDataFrame().getParameter<T>(fullDescriptor());
+  }
+  return k4FWCore::getParameter<T>(fullDescriptor());
 }
 
 //---------------------------------------------------------------------------
 template <typename T> const T MetaDataHandle<T>::get() const {
-  std::optional<T> maybeVal;
-  // DataHandle based algorithms
-  if (m_podio_data_service) {
-    maybeVal = get_optional();
-    if (!maybeVal.has_value()) {
-      throw GaudiException("MetaDataHandle empty handle access",
-                           "MetaDataHandle " + fullDescriptor() + " not (yet?) available", StatusCode::FAILURE);
-    }
-    // Functional algorithms
-  } else {
-    maybeVal = k4FWCore::getParameter<T>(fullDescriptor());
+  auto optional_parameter = get_optional();
+  if (!optional_parameter.has_value()) {
+    throw GaudiException("MetaDataHandle empty handle access",
+                         "MetaDataHandle " + fullDescriptor() + " not (yet?) available", StatusCode::FAILURE);
   }
-  return maybeVal.value();
+  return optional_parameter.value();
 }
 
 //---------------------------------------------------------------------------
@@ -159,12 +153,8 @@ template <typename T> void MetaDataHandle<T>::checkPodioDataSvc() {
   if (cmd.find("genconf") != std::string::npos)
     return;
 
-  // The proper check would be the following:
-  // if (!m_podio_data_service && !Gaudi::svcLocator()->service<IMetadataSvc>("MetadataSvc")) {
-  // However, it seems there is always a service called "MetadataSvc" from Gaudi,
-  // so the check will always pass
-  if (!m_podio_data_service) {
-    std::cout << "Warning: MetaDataHandles require the PodioDataSvc (ignore if using IOSvc)" << std::endl;
+  if (!m_podio_data_service && !Gaudi::svcLocator()->service<IMetadataSvc>("MetadataSvc", false)) {
+    std::cout << "Warning: MetaDataHandles require the PodioDataSvc or for compatibility the MetadataSvc" << std::endl;
   }
 }
 
