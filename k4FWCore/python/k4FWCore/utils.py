@@ -30,6 +30,12 @@ def check_wrong_imports(code: str) -> None:
     from Configurables instead of k4FWCore. If such an import is found, an ImportError
     is raised.
 
+    If IOSvc and ApplicationMgr are not imported from k4FWCore it's possible
+    that k4run will fail, for example, by not adding the reader and writer
+    algorithms manually, which is done by the wrapper in k4FWCore. The checks
+    are not comprehensive, it's still possible to import IOSvc or ApplicationMgr
+    from Configurables.
+
     Args:
         code (str): The code to check for wrong imports.
 
