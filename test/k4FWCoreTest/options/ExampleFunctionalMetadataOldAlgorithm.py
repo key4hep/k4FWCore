@@ -21,7 +21,7 @@ from Configurables import k4FWCoreTest_cellID_writer, k4FWCoreTest_cellID_reader
 from k4FWCore import ApplicationMgr, IOSvc
 
 iosvc = IOSvc()
-iosvc.output = "functional_metadata_old_algorithm.root"
+iosvc.Output = "functional_metadata_old_algorithm.root"
 
 producer = k4FWCoreTest_cellID_writer()
 consumer = k4FWCoreTest_cellID_reader()

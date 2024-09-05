@@ -18,8 +18,41 @@
 # limitations under the License.
 #
 import os
+import re
 from io import TextIOWrapper
 from typing import Union
+
+
+def check_wrong_imports(code: str) -> None:
+    """Check for wrong imports in the given code.
+
+    This function checks the given code for any imports of IOSvc or ApplicationMgr
+    from Configurables instead of k4FWCore. If such an import is found, an ImportError
+    is raised.
+
+    If IOSvc and ApplicationMgr are not imported from k4FWCore it's possible
+    that k4run will fail, for example, by not adding the reader and writer
+    algorithms manually, which is done by the wrapper in k4FWCore. The checks
+    are not comprehensive, it's still possible to import IOSvc or ApplicationMgr
+    from Configurables.
+
+    Args:
+        code (str): The code to check for wrong imports.
+
+    Raises:
+        ImportError: If the code contains an import of IOSvc or ApplicationMgr from Configurables.
+
+    """
+    # Check first that IOSvc is being used, in that case
+    # Importing either ApplicationMgr or IOSvc from Configurables is not allowed
+    iosvc_regex = re.compile(
+        r"^\s*from\s+(Configurables|k4FWCore)\s+import\s+\(?.*IOSvc.*\)?", re.MULTILINE
+    )
+    regex = re.compile(
+        r"^\s*from\s+Configurables\s+import\s+\(?.*(ApplicationMgr|IOSvc).*\)?", re.MULTILINE
+    )
+    if re.search(iosvc_regex, code) and re.search(regex, code):
+        raise ImportError("Importing ApplicationMgr or IOSvc from Configurables is not allowed.")
 
 
 def load_file(opt_file: Union[TextIOWrapper, str, os.PathLike]) -> None:
@@ -44,8 +77,9 @@ def load_file(opt_file: Union[TextIOWrapper, str, os.PathLike]) -> None:
     """
     if isinstance(opt_file, (str, os.PathLike)):
         with open(opt_file, "r") as file:
-            code = compile(file.read(), file.name, "exec")
+            code = file.read()
     else:
-        code = compile(opt_file.read(), opt_file.name, "exec")
+        code = opt_file.read()
+    check_wrong_imports(str(code))
 
     exec(code, globals())

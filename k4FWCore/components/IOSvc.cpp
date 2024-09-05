@@ -38,7 +38,19 @@ StatusCode IOSvc::initialize() {
     error() << "Unable to initialize base class Service." << endmsg;
     return sc;
   }
+
+  if (!m_importedFromk4FWCore) {
+    error() << "Use 'from k4FWCore import IOSvc' instead of 'from Configurables import IOSvc' to access the service"
+            << endmsg;
+    return StatusCode::FAILURE;
+  }
+
+  if (!m_readingFileNamesDeprecated.empty()) {
+    warning() << ".input is deprecated, use .Input instead in the steering file" << endmsg;
+    m_readingFileNames = m_readingFileNamesDeprecated;
+  }
   if (!m_readingFileNames.empty()) {
+    info() << m_readingFileNames.size() << " files to be read" << endmsg;
     m_reader = std::make_unique<podio::ROOTReader>();
     try {
       m_reader->openFiles(m_readingFileNames);
@@ -47,6 +59,11 @@ StatusCode IOSvc::initialize() {
       return StatusCode::FAILURE;
     }
     m_entries = m_reader->getEntries(podio::Category::Event);
+  }
+
+  if (!m_writingFileNameDeprecated.empty()) {
+    warning() << ".output is deprecated, use .Output instead in the steering file" << endmsg;
+    m_writingFileName = m_writingFileNameDeprecated;
   }
 
   m_switch = KeepDropSwitch(m_outputCommands);

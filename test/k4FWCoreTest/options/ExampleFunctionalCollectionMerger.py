@@ -28,8 +28,8 @@ from k4FWCore import ApplicationMgr, IOSvc
 from Configurables import ExampleFunctionalProducer
 
 svc = IOSvc("IOSvc")
-svc.input = "functional_producer_multiple.root"
-svc.output = "functional_merged_collections.root"
+svc.Input = "functional_producer_multiple.root"
+svc.Output = "functional_merged_collections.root"
 svc.outputCommands = [
     "drop *",
     "keep MCParticles1",

@@ -30,9 +30,9 @@ args = parser.parse_known_args()
 
 iosvc = IOSvc("IOSvc")
 name = "functional_producer.root" if not args[0].second else "functional_producer2.root"
-iosvc.output = name
+iosvc.Output = name
 # Collections can be dropped
-# out.outputCommands = ["drop *"]
+# out.OutputCommands = ["drop *"]
 
 
 producer = ExampleFunctionalProducer("ExampleFunctionalProducer")

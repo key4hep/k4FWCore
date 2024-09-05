@@ -17,16 +17,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from Gaudi.Configuration import *
+from Gaudi.Configuration import INFO
 
 from Configurables import k4DataSvc
+from Configurables import PodioInput
+from k4FWCore.parseArgs import parser
+from Configurables import k4FWCoreTest_CheckExampleEventData
+from k4FWCore import ApplicationMgr
 
 podioevent = k4DataSvc("EventDataSvc")
 podioevent.input = "output_k4test_exampledata.root"
-
-from Configurables import PodioInput
-
-from k4FWCore.parseArgs import parser
 
 parser.add_argument(
     "--collections",
@@ -40,11 +40,8 @@ my_args = parser.parse_known_args()[0]
 inp = PodioInput()
 inp.collections = my_args.collections
 
-from Configurables import k4FWCoreTest_CheckExampleEventData
 
 checker = k4FWCoreTest_CheckExampleEventData()
-
-from Configurables import ApplicationMgr
 
 ApplicationMgr(
     TopAlg=[inp, checker],

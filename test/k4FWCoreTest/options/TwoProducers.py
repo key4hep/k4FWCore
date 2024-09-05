@@ -16,9 +16,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from Gaudi.Configuration import *
+from Gaudi.Configuration import INFO
 
-from Configurables import ApplicationMgr
+from k4FWCore import ApplicationMgr
+from Configurables import k4DataSvc
+from Configurables import k4FWCoreTest_CreateExampleEventData
+from Configurables import PodioOutput
 
 ApplicationMgr(
     EvtSel="NONE",
@@ -28,18 +31,13 @@ ApplicationMgr(
 )
 
 
-from Configurables import k4DataSvc
-
 podioevent = k4DataSvc("EventDataSvc")
 ApplicationMgr().ExtSvc += [podioevent]
 
-from Configurables import k4FWCoreTest_CreateExampleEventData
 
 producer1 = k4FWCoreTest_CreateExampleEventData("Producer1")
 ApplicationMgr().TopAlg += [producer1]
 
-
-from Configurables import k4FWCoreTest_CreateExampleEventData
 
 producer2 = k4FWCoreTest_CreateExampleEventData("Producer2")
 producer2.mcparticles.Path = "mcparticles2"
@@ -49,7 +47,6 @@ producer2.tracks.Path = "tracks2"
 producer2.vectorfloat.Path = "vectorfloat2"
 ApplicationMgr().TopAlg += [producer2]
 
-from Configurables import PodioOutput
 
 out = PodioOutput("out")
 out.filename = "output_k4test_exampledata_twoproducer.root"

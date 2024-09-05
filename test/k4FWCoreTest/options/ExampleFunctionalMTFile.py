@@ -35,14 +35,17 @@ whiteboard = HiveWhiteBoard(
 )
 
 slimeventloopmgr = HiveSlimEventLoopMgr(
-    "HiveSlimEventLoopMgr", SchedulerName="AvalancheSchedulerSvc", OutputLevel=WARNING
+    "HiveSlimEventLoopMgr",
+    SchedulerName="AvalancheSchedulerSvc",
+    Warnings=False,
+    OutputLevel=WARNING,
 )
 
 scheduler = AvalancheSchedulerSvc(ThreadPoolSize=threads, ShowDataFlow=True, OutputLevel=WARNING)
 
 svc = IOSvc("IOSvc")
-svc.input = "functional_producer_multiple.root"
-svc.output = "functional_transformerMT.root"
+svc.Input = "functional_producer_multiple.root"
+svc.Output = "functional_transformerMT.root"
 
 consumer = ExampleFunctionalConsumer(
     "Consumer1",

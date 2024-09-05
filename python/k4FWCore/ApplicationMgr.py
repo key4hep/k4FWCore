@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 from Configurables import ApplicationMgr as AppMgr
-from Configurables import Reader, Writer, IOSvc, MetadataSvc, Gaudi__Sequencer
+from Configurables import Reader, Writer, IOSvc, MetadataSvc, Gaudi__Sequencer, EventLoopMgr
 import os
 from podio.root_io import Reader as PodioReader
 
@@ -37,6 +37,12 @@ class ApplicationMgr:
 
     def __init__(self, **kwargs):
         self._mgr = AppMgr(**kwargs)
+        # If there isn't an EventLoopMgr then it's the default
+        # This will suppress two warnings about not using external input
+        try:
+            self._mgr.EventLoop
+        except AttributeError:
+            self._mgr.EventLoop = EventLoopMgr(Warnings=False)
 
         for conf in frozenset(self._mgr.allConfigurables.values()):
             if isinstance(conf, MetadataSvc):
@@ -45,18 +51,24 @@ class ApplicationMgr:
                 continue
             props = conf.getPropertiesWithDescription()
             reader = writer = None
-            add_reader = add_writer = False
+            add_reader = False
             for alg in self._mgr.TopAlg:
                 if isinstance(alg, Reader):
                     reader = alg
                 elif isinstance(alg, Writer):
                     writer = alg
-            if reader is None and props["input"][0]:
+            # Remove "input" when the corresponding property is removed from IOSvc
+            if reader is None and (props["input"][0] or props["Input"][0]):
                 reader = Reader("k4FWCore__Reader")
                 add_reader = True
             # It seems for a single string the default without a value is '<no value>'
             # while for a list it's an empty list
-            if writer is None and props["output"][0] and props["output"][0] != "<no value>":
+            # Remove "output" when the corresponding property is removed from IOSvc
+            if (
+                writer is None
+                and (props["output"][0] and props["output"][0] != "<no value>")
+                or (props["Output"][0] and props["Output"][0] != "<no value>")
+            ):
                 writer = Writer("k4FWCore__Writer")
             # Let's tell the Reader one of the input files so it can
             # know which collections it's going to read
@@ -67,15 +79,24 @@ class ApplicationMgr:
                 # (possibly) the first 9 complete and 9 more are scheduled, out of
                 # which only one will be finished without errors. If we know the
                 # number of events in advance then we can just schedule those.
+                inp = None
                 if props["input"][0]:
-                    if os.path.exists(props["input"][0][0]):
-                        path = props["input"][0][0]
+                    inp = "input"
+                elif props["Input"][0]:
+                    inp = "Input"
+                if inp:
+                    if os.path.exists(props[inp][0][0]):
+                        path = props[inp][0][0]
                     else:
-                        path = os.getcwd() + "/" + props["input"][0][0]
+                        path = os.getcwd() + "/" + props[inp][0][0]
                     podio_reader = PodioReader(path)
                     if self._mgr.EvtMax == -1:
                         self._mgr.EvtMax = podio_reader._reader.getEntries("events")
-                    frame = podio_reader.get("events")[0]
+                    try:
+                        frame = podio_reader.get("events")[0]
+                    except IndexError:
+                        print("Warning, the events category wasn't found in the input file")
+                        raise
                     collections = list(frame.getAvailableCollections())
                     reader.InputCollections = collections
             self._mgr.TopAlg = ([reader] if add_reader else []) + self._mgr.TopAlg
@@ -99,3 +120,12 @@ class ApplicationMgr:
                         ],
                     )
                 ]
+
+    def __getattr__(self, name):
+        return getattr(self._mgr, name)
+
+    def __setattr__(self, name, value):
+        if name == "_mgr":
+            super().__setattr__(name, value)
+        else:
+            setattr(self._mgr, name, value)

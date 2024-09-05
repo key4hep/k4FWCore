@@ -29,7 +29,7 @@ from k4FWCore import ApplicationMgr, IOSvc
 from Configurables import EventDataSvc
 
 iosvc = IOSvc("IOSvc")
-iosvc.output = "functional_transformer_runtime_empty.root"
+iosvc.Output = "functional_transformer_runtime_empty.root"
 
 producer0 = ExampleFunctionalProducer(
     "Producer0",
