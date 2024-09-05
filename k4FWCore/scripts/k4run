@@ -9,7 +9,6 @@ from k4FWCore.utils import load_file
 
 # these default properties are filtered as otherwise they will clutter the argument list
 FILTER_GAUDI_PROPS = [
-    "ContextService",
     "Cardinality",
     "Context",
     "CounterList",
@@ -21,8 +20,6 @@ FILTER_GAUDI_PROPS = [
     "ExtraInputs",
     "ExtraOutputs",
     "FilterCircularDependencies",
-    "StatEntityList",
-    "IsIOBound",
     "MonitorService",
     "NeededResources",
     "PropertiesPrint",
@@ -33,7 +30,6 @@ FILTER_GAUDI_PROPS = [
     "StatPrint",
     "StatTableHeader",
     "Timeline",
-    "TypePrint",
     "UseEfficiencyRowFormat",
     "EnableFaultHandler",
     "InhibitPathes",
@@ -43,7 +39,6 @@ FILTER_GAUDI_PROPS = [
     "DataAccessName",
     "DataFaultName",
     "RootCLID",
-    "PrintEmptyCounters",
     "Blocking",
     "VetoObjects",
     "CheckToolDeps",
