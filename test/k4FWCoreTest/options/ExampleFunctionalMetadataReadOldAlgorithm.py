@@ -24,8 +24,8 @@ from Configurables import k4FWCoreTest_cellID_reader
 from k4FWCore import ApplicationMgr, IOSvc
 
 iosvc = IOSvc()
-iosvc.input = "functional_metadata_old_algorithm.root"
-iosvc.output = "functional_metadata_old_algorithm_propagate.root"
+iosvc.Input = "functional_metadata_old_algorithm.root"
+iosvc.Output = "functional_metadata_old_algorithm_propagate.root"
 
 consumer = k4FWCoreTest_cellID_reader()
 

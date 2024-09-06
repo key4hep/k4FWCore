@@ -25,8 +25,8 @@ from k4FWCore import ApplicationMgr, IOSvc
 from Configurables import EventDataSvc
 
 iosvc = IOSvc()
-iosvc.input = "functional_metadata.root"
-iosvc.output = "functional_metadata_propagate.root"
+iosvc.Input = "functional_metadata.root"
+iosvc.Output = "functional_metadata_propagate.root"
 
 consumer = ExampleFunctionalMetadataConsumer("Consumer", InputCollection=["MCParticles"])
 
