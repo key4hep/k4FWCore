@@ -61,7 +61,6 @@ StatusCode IOSvc::initialize() {
     }
     m_entries = m_reader->getEvents();
   }
-  }
 
   if ((m_entries && m_firstEventEntry >= m_entries) || m_firstEventEntry < 0) {
     error() << "First event entry is larger than the number of entries in the file or negative" << endmsg;
