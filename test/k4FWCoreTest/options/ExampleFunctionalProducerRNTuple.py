@@ -27,8 +27,6 @@ from k4FWCore import ApplicationMgr, IOSvc
 iosvc = IOSvc("IOSvc")
 iosvc.Output = "functional_producer_rntuple.root"
 iosvc.IOType = "RNTuple"
-# Collections can be dropped
-# out.outputCommands = ["drop *"]
 
 
 producer = ExampleFunctionalProducer("ExampleFunctionalProducer")
