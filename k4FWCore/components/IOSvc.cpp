@@ -61,8 +61,8 @@ StatusCode IOSvc::initialize() {
     m_entries = m_reader->getEntries(podio::Category::Event);
   }
 
-  if (m_entries && m_firstEventEntry >= m_entries) {
-    error() << "First event entry is larger than the number of entries in the file" << endmsg;
+  if ((m_entries && m_firstEventEntry >= m_entries) || m_firstEventEntry < 0) {
+    error() << "First event entry is larger than the number of entries in the file or negative" << endmsg;
     return StatusCode::FAILURE;
   }
 
