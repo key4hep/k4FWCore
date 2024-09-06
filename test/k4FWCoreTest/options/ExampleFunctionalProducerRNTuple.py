@@ -25,8 +25,7 @@ from Configurables import EventDataSvc
 from k4FWCore import ApplicationMgr, IOSvc
 
 iosvc = IOSvc("IOSvc")
-name = "functional_producer_rntuple.root"
-iosvc.Output = name
+iosvc.Output = "functional_producer_rntuple.root"
 iosvc.IOType = "RNTuple"
 # Collections can be dropped
 # out.outputCommands = ["drop *"]
