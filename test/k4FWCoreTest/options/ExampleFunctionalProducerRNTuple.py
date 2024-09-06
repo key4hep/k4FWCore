@@ -26,7 +26,7 @@ from k4FWCore import ApplicationMgr, IOSvc
 
 iosvc = IOSvc("IOSvc")
 iosvc.Output = "functional_producer_rntuple.root"
-iosvc.IOType = "RNTuple"
+iosvc.OutputType = "RNTuple"
 
 
 producer = ExampleFunctionalProducer("ExampleFunctionalProducer")
