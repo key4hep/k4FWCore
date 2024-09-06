@@ -44,7 +44,7 @@ StatusCode IOSvc::initialize() {
             << endmsg;
   }
   if (m_outputType != "default" && m_outputType != "ROOT" && m_outputType != "RNTuple") {
-    error() << "Unknown input type: " << m_outputType << ", expected ROOT or RNTuple" << endmsg;
+    error() << "Unknown input type: " << m_outputType << ", expected ROOT, RNTuple or default" << endmsg;
     return StatusCode::FAILURE;
   }
 
