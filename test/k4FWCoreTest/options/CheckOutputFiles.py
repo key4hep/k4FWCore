@@ -188,3 +188,24 @@ for key, value in zip(
         raise RuntimeError(
             f"Metadata parameter {key} does not match the expected value, got {metadata.get_parameter(key)} but expected {value}"
         )
+
+reader = podio.root_io.Reader("eventHeaderConcurrent.root")
+events = reader.get("events")
+expected_events_length = 10
+expected_run_number = 42
+expected_event_numbers = set(range(42, 42 + expected_events_length))
+seen_event_numbers = set()
+if len(events) != expected_events_length:
+    raise RuntimeError("Number of events does not match expected number")
+for frame in events:
+    event_header = frame.get("EventHeader")[0]
+    if (run_number := event_header.getRunNumber()) != expected_run_number:
+        raise RuntimeError(
+            f"Run number is not set correctly (expected {expected_run_number}, actual {run_number})"
+        )
+    event_number = event_header.getEventNumber()
+    if event_number not in expected_event_numbers:
+        raise RuntimeError(f"Event number {event_number} is not in expected numbers")
+    if event_number in seen_event_numbers:
+        raise RuntimeError(f"Event number {event_number} is duplicated")
+    seen_event_numbers.add(event_number)
