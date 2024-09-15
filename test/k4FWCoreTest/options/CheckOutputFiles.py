@@ -212,5 +212,5 @@ for frame in events:
 
 check_events(
     "functional_nth_event.root",
-    5,
+    3,
 )

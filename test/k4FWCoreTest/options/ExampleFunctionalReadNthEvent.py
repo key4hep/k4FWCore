@@ -28,7 +28,7 @@ from k4FWCore import ApplicationMgr, IOSvc
 svc = IOSvc("IOSvc")
 svc.Input = "functional_producer.root"
 svc.Output = "functional_nth_event.root"
-svc.FirstEventEntry = 5
+svc.FirstEventEntry = 7
 
 consumer = ExampleFunctionalTransformer(Offset=0)
 
