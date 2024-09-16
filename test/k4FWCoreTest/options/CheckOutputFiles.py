@@ -228,3 +228,8 @@ for frame in events:
     if event_number in seen_event_numbers:
         raise RuntimeError(f"Event number {event_number} is duplicated")
     seen_event_numbers.add(event_number)
+
+check_events(
+    "functional_nth_event.root",
+    3,
+)
