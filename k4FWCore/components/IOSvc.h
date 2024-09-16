@@ -67,6 +67,7 @@ protected:
   Gaudi::Property<bool> m_importedFromk4FWCore{
       this, "ImportedFromk4FWCore", false,
       "This is set to true when IOSvc is imported from k4FWCore instead of Configurables in python"};
+  Gaudi::Property<int> m_firstEventEntry{this, "FirstEventEntry", 0, "First event entry to read"};
 
   std::mutex m_changeBufferLock;
 

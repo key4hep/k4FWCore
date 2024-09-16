@@ -61,10 +61,16 @@ StatusCode IOSvc::initialize() {
     m_entries = m_reader->getEntries(podio::Category::Event);
   }
 
+  if ((m_entries && m_firstEventEntry >= m_entries) || m_firstEventEntry < 0) {
+    error() << "First event entry is larger than the number of entries in the file or negative" << endmsg;
+    return StatusCode::FAILURE;
+  }
+
   if (!m_writingFileNameDeprecated.empty()) {
     warning() << ".output is deprecated, use .Output instead in the steering file" << endmsg;
     m_writingFileName = m_writingFileNameDeprecated;
   }
+  m_nextEntry = m_firstEventEntry;
 
   m_switch = KeepDropSwitch(m_outputCommands);
 
