@@ -24,11 +24,12 @@
 #include "podio/Frame.h"
 
 class IMetadataSvc : virtual public IInterface {
+  friend class Writer;
+
 public:
   DeclareInterfaceID(IMetadataSvc, 1, 0);
 
-  virtual const podio::Frame* getFrame() const               = 0;
-  virtual void                setFrame(podio::Frame&& frame) = 0;
+  virtual void setFrame(podio::Frame&& frame) = 0;
 
   template <typename T> void put(const std::string& name, const T& obj) {
     if (!getFrame()) {
@@ -46,7 +47,8 @@ public:
   }
 
 protected:
-  virtual podio::Frame* getFrame() = 0;
+  virtual podio::Frame*       getFrame()       = 0;
+  virtual const podio::Frame* getFrame() const = 0;
 };
 
 #endif
