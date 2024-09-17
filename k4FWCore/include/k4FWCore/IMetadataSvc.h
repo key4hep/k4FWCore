@@ -19,26 +19,36 @@
 #ifndef FWCORE_IMETADATASERVICE_H
 #define FWCORE_IMETADATASERVICE_H
 
-#include <memory>
-
 #include "GaudiKernel/IInterface.h"
 
 #include "podio/Frame.h"
 
 class IMetadataSvc : virtual public IInterface {
+  friend class Writer;
+
 public:
   DeclareInterfaceID(IMetadataSvc, 1, 0);
 
-  std::unique_ptr<podio::Frame> m_frame;
+  virtual void setFrame(podio::Frame&& frame) = 0;
 
-  virtual void               setFrame(podio::Frame&& fr) = 0;
   template <typename T> void put(const std::string& name, const T& obj) {
-    if (!m_frame) {
-      m_frame = std::make_unique<podio::Frame>();
+    if (!getFrame()) {
+      setFrame(podio::Frame{});
     }
-    m_frame->putParameter(name, obj);
+    getFrame()->putParameter(name, obj);
   }
-  template <typename T> std::optional<T> get(const std::string& name) { return m_frame->getParameter<T>(name); }
+
+  template <typename T> std::optional<T> get(const std::string& name) const {
+    const auto* frame = getFrame();
+    if (!frame) {
+      return std::nullopt;
+    }
+    return frame->getParameter<T>(name);
+  }
+
+protected:
+  virtual podio::Frame*       getFrame()       = 0;
+  virtual const podio::Frame* getFrame() const = 0;
 };
 
 #endif

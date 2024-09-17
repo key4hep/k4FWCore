@@ -58,6 +58,17 @@ def check_events(filename, number):
         raise RuntimeError("Number of events does not match expected number")
 
 
+def check_metadata(filename, expected_metadata):
+    print(f'Checking file "{filename}" for metadata')
+    podio_reader = podio.root_io.Reader(filename)
+    metadata = podio_reader.get("metadata")[0]
+    for key, value in expected_metadata.items():
+        if (metaval := metadata.get_parameter(key)) != value:
+            raise RuntimeError(
+                f"Metadata parameter {key} does not match the expected value, got {metaval} but expected {value}"
+            )
+
+
 check_collections("functional_transformer.root", ["MCParticles", "NewMCParticles"])
 check_collections(
     "functional_transformer_multiple.root",
@@ -161,33 +172,41 @@ check_events(
 
 check_collections("functional_metadata.root", ["MCParticles"])
 
-reader = podio.root_io.Reader("functional_metadata.root")
-metadata = reader.get("metadata")[0]
-for key, value in zip(
-    [
-        "NumberOfParticles",
-        "ParticleTime",
-        "PDGValues",
-        "MetadataString",
-        "FinalizeMetadataInt",
-    ],
-    [3, 1.5, [1, 2, 3, 4], "hello", 10],
-):
-    if metadata.get_parameter(key) != value:
-        raise RuntimeError(
-            f"Metadata parameter {key} does not match the expected value, got {metadata.get_parameter(key)} but expected {value}"
-        )
+check_metadata(
+    "functional_metadata.root",
+    {
+        "NumberOfParticles": 3,
+        "ParticleTime": 1.5,
+        "PDGValues": [1, 2, 3, 4],
+        "MetadataString": "hello",
+        "FinalizeMetadataInt": 10,
+    },
+)
 
-reader = podio.root_io.Reader("functional_metadata_old_algorithm.root")
-metadata = reader.get("metadata")[0]
-for key, value in zip(
-    ["SimTrackerHits__CellIDEncoding"],
-    ["M:3,S-1:3,I:9,J:9,K-1:6"],
-):
-    if metadata.get_parameter(key) != value:
-        raise RuntimeError(
-            f"Metadata parameter {key} does not match the expected value, got {metadata.get_parameter(key)} but expected {value}"
-        )
+check_metadata(
+    "functional_metadata_propagate.root",
+    {
+        "NumberOfParticles": 3,
+        "ParticleTime": 1.5,
+        "PDGValues": [1, 2, 3, 4],
+        "MetadataString": "hello",
+        "FinalizeMetadataInt": 10,
+    },
+)
+
+check_metadata(
+    "functional_metadata_old_algorithm.root",
+    {
+        "SimTrackerHits__CellIDEncoding": "M:3,S-1:3,I:9,J:9,K-1:6",
+    },
+)
+
+check_metadata(
+    "functional_metadata_old_algorithm_propagate.root",
+    {
+        "SimTrackerHits__CellIDEncoding": "M:3,S-1:3,I:9,J:9,K-1:6",
+    },
+)
 
 reader = podio.root_io.Reader("eventHeaderConcurrent.root")
 events = reader.get("events")

@@ -38,14 +38,13 @@ StatusCode MetadataSvc::initialize() {
     error() << "Unable to locate the EventDataSvc" << endmsg;
     return StatusCode::FAILURE;
   }
-
-  m_frame = std::make_unique<podio::Frame>();
-
   return StatusCode::SUCCESS;
 }
 
 StatusCode MetadataSvc::finalize() { return Service::finalize(); }
 
-void MetadataSvc::setFrame(podio::Frame&& fr) { m_frame = std::make_unique<podio::Frame>(std::move(fr)); }
+const podio::Frame* MetadataSvc::getFrame() const { return m_frame.get(); }
+podio::Frame*       MetadataSvc::getFrame() { return m_frame.get(); }
+void MetadataSvc::setFrame(podio::Frame&& frame) { m_frame = std::make_unique<podio::Frame>(std::move(frame)); }
 
 DECLARE_COMPONENT(MetadataSvc)
