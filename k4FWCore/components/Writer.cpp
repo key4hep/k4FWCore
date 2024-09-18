@@ -117,7 +117,7 @@ public:
     }
 
     config_metadata_frame.putParameter("gaudiConfigOptions", config_data);
-    if (auto env_key4hep_stack = std::getenv("KEY4HEP_STACK")) {
+    if (const auto* env_key4hep_stack = std::getenv("KEY4HEP_STACK")) {
       config_metadata_frame.putParameter("key4hepstack", env_key4hep_stack);
     }
     iosvc->getWriter()->writeFrame(config_metadata_frame, "configuration_metadata");
