@@ -33,10 +33,39 @@ function(set_test_env testname)
   set_property(TEST ${testname} APPEND PROPERTY ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/${PROJECT_NAME}/genConfDir:${PROJECT_BINARY_DIR}/test/k4FWCoreTest/genConfDir:$ENV{PYTHONPATH}")
 endfunction()
 
+#[[
+add_test_with_env
+-----------------
+
+Adds a test with custom properties and environment setup.
+
+.. command:: add_test_with_env(testname [test_arguments...] [PROPERTIES property1 value1...] [ADD_TO_CHECK_FILES])
+
+  :param testname: Name of the test
+  :param test_arguments: Arguments passed to the test command
+
+  Supports two special keywords:
+
+  - ``PROPERTIES``: Followed by property-value pairs to set on the test
+  - ``ADD_TO_CHECK_FILES``: Adds the test to the 'FunctionalCheckFiles' test dependencies
+
+  Key Features:
+  * Uses k4run as the test command prefix
+  * Automatically sets up the test environment via set_test_env()
+  * Handles multi-test dependencies by escaping semicolons in arguments
+
+  Example::
+
+    add_test_with_env(FunctionalTest options/Example.py PROPERTIES TIMEOUT 300 ADD_TO_CHECK_FILES)
+]]
 function(add_test_with_env testname)
   foreach(arg ${ARGN})
     if(arg STREQUAL "PROPERTIES")
       set(TEST_PROPERTIES_FOUND TRUE)
+    elseif(arg STREQUAL "ADD_TO_CHECK_FILES")
+      get_property(CheckOutputFilesTest TEST FunctionalCheckFiles PROPERTY DEPENDS)
+      list(APPEND CheckOutputFilesTest ${testname})
+      set_property(TEST FunctionalCheckFiles PROPERTY DEPENDS ${CheckOutputFilesTest})
     else()
       # For tests that depend on multiple tests and the original cmake way is to
       # add a colon between them this should make it work
@@ -56,6 +85,8 @@ function(add_test_with_env testname)
   endif()
   set_test_env(${testname})
 endfunction()
+
+add_test(NAME FunctionalCheckFiles COMMAND python3 ${CMAKE_CURRENT_LIST_DIR}/options/CheckOutputFiles.py)
 
 add_test_with_env(CreateExampleEventData options/createExampleEventData.py)
 add_test_with_env(CreateExampleEventDataInDirectory options/createExampleEventDataInDirectory.py)
@@ -108,46 +139,39 @@ add_test_with_env(Testk4runVerboseOutput options/TestArgs.py --verbose PROPERTIE
 add_test_with_env(Testk4runHelpOnly options/TestArgs.py --help PROPERTIES PASS_REGULAR_EXPRESSION "show this help message and exit")
 
 
-# WARNING: If test names are changed, they also need to be changed below for the dependencies of
-# the FunctionalCheckFiles test
-
 add_test_with_env(FunctionalMemory options/ExampleFunctionalMemory.py)
 add_test_with_env(FunctionalMTMemory options/ExampleFunctionalMTMemory.py)
 add_test_with_env(FunctionalMultipleMemory options/ExampleFunctionalMultipleMemory.py)
 add_test_with_env(FunctionalProducer options/ExampleFunctionalProducer.py)
 add_test_with_env(FunctionalProducerAnother options/ExampleFunctionalProducer.py --second)
 add_test_with_env(FunctionalProducerMultiple options/ExampleFunctionalProducerMultiple.py)
-add_test_with_env(FunctionalProducerAbsolutePath options/ExampleFunctionalProducerAbsolutePath.py)
-add_test_with_env(FunctionalFile options/ExampleFunctionalFile.py PROPERTIES DEPENDS FunctionalProducer)
+add_test_with_env(FunctionalProducerAbsolutePath options/ExampleFunctionalProducerAbsolutePath.py ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalFile options/ExampleFunctionalFile.py PROPERTIES DEPENDS FunctionalProducer ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalSeveralInputFiles options/ExampleFunctionalSeveralInputFiles.py)
 set_tests_properties(FunctionalSeveralInputFiles PROPERTIES DEPENDS "FunctionalProducer;FunctionalProducerAnother")
-add_test_with_env(FunctionalMTFile options/ExampleFunctionalMTFile.py PROPERTIES DEPENDS FunctionalProducer)
-add_test_with_env(FunctionalMultipleFile options/ExampleFunctionalFileMultiple.py PROPERTIES DEPENDS FunctionalProducerMultiple)
-add_test_with_env(FunctionalMix options/runFunctionalMix.py PROPERTIES DEPENDS FunctionalProducerMultiple)
-add_test_with_env(FunctionalMixIOSvc options/runFunctionalMix.py --iosvc PROPERTIES DEPENDS FunctionalProducerMultiple)
-add_test_with_env(FunctionalOutputCommands options/ExampleFunctionalOutputCommands.py PROPERTIES DEPENDS FunctionalProducerMultiple)
+add_test_with_env(FunctionalMTFile options/ExampleFunctionalMTFile.py PROPERTIES DEPENDS FunctionalProducer ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalMultipleFile options/ExampleFunctionalFileMultiple.py PROPERTIES DEPENDS FunctionalProducerMultiple ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalMix options/runFunctionalMix.py PROPERTIES DEPENDS FunctionalProducerMultiple ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalMixIOSvc options/runFunctionalMix.py --iosvc PROPERTIES DEPENDS FunctionalProducerMultiple ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalOutputCommands options/ExampleFunctionalOutputCommands.py PROPERTIES DEPENDS FunctionalProducerMultiple ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalConsumerRuntimeCollections options/ExampleFunctionalConsumerRuntimeCollections.py)
 add_test_with_env(FunctionalConsumerRuntimeCollectionsMultiple options/ExampleFunctionalConsumerRuntimeCollectionsMultiple.py)
 add_test_with_env(FunctionalProducerRuntimeCollections options/ExampleFunctionalProducerRuntimeCollections.py)
 add_test_with_env(FunctionalTransformerRuntimeCollections options/ExampleFunctionalTransformerRuntimeCollections.py)
-add_test_with_env(FunctionalTransformerRuntimeEmpty options/ExampleFunctionalTransformerRuntimeEmpty.py)
+add_test_with_env(FunctionalTransformerRuntimeEmpty options/ExampleFunctionalTransformerRuntimeEmpty.py ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalTransformerRuntimeCollectionsMultiple options/ExampleFunctionalTransformerRuntimeCollectionsMultiple.py)
-add_test_with_env(FunctionalTransformerHist options/ExampleFunctionalTransformerHist.py)
-add_test_with_env(FunctionalCollectionMerger options/ExampleFunctionalCollectionMerger.py)
-add_test_with_env(FunctionalFilterFile options/ExampleFunctionalFilterFile.py)
-add_test_with_env(FunctionalMetadata options/ExampleFunctionalMetadata.py)
-add_test_with_env(FunctionalMetadataRead options/ExampleFunctionalMetadataRead.py PROPERTIES DEPENDS FunctionalMetadata)
-add_test_with_env(FunctionalMetadataOldAlgorithm options/ExampleFunctionalMetadataOldAlgorithm.py)
-add_test_with_env(createEventHeaderConcurrent options/createEventHeaderConcurrent.py)
-add_test_with_env(FunctionalMetadataReadOldAlgorithm options/ExampleFunctionalMetadataReadOldAlgorithm.py PROPERTIES DEPENDS ExampleFunctionalMetadataOldAlgorithm)
+add_test_with_env(FunctionalTransformerHist options/ExampleFunctionalTransformerHist.py ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalCollectionMerger options/ExampleFunctionalCollectionMerger.py ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalFilterFile options/ExampleFunctionalFilterFile.py ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalMetadata options/ExampleFunctionalMetadata.py ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalMetadataRead options/ExampleFunctionalMetadataRead.py PROPERTIES DEPENDS FunctionalMetadata ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalMetadataOldAlgorithm options/ExampleFunctionalMetadataOldAlgorithm.py ADD_TO_CHECK_FILES)
+add_test_with_env(createEventHeaderConcurrent options/createEventHeaderConcurrent.py ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalMetadataReadOldAlgorithm options/ExampleFunctionalMetadataReadOldAlgorithm.py PROPERTIES DEPENDS ExampleFunctionalMetadataOldAlgorithm ADD_TO_CHECK_FILES)
 
 add_test_with_env(FunctionalWrongImport options/ExampleFunctionalWrongImport.py)
 set_tests_properties(FunctionalWrongImport PROPERTIES PASS_REGULAR_EXPRESSION "ImportError: Importing ApplicationMgr or IOSvc from Configurables is not allowed.")
-add_test_with_env(FunctionalReadNthEvent options/ExampleFunctionalReadNthEvent.py)
-
-add_test(NAME FunctionalCheckFiles COMMAND python3 ${CMAKE_CURRENT_LIST_DIR}/options/CheckOutputFiles.py)
-
-set_tests_properties(FunctionalCheckFiles PROPERTIES DEPENDS "FunctionalFile;FunctionalMTFile;FunctionalMultipleFile;FunctionalOutputCommands;FunctionalProducerAbsolutePath;FunctionalTransformerRuntimeEmpty;FunctionalMix;FunctionalMixIOSvc;FunctionalTransformerHist;FunctionalCollectionMerger;FunctionalFilterFile;FunctionalMetadata;FunctionalMetadataRead;FunctionalMetadataOldAlgorithm;FunctionalMetadataReadOldAlgorithm;createEventHeaderConcurrent;FunctionalReadNthEvent")
+add_test_with_env(FunctionalReadNthEvent options/ExampleFunctionalReadNthEvent.py ADD_TO_CHECK_FILES)
 
 # Do this after checking the files not to overwrite them
 add_test_with_env(FunctionalFile_toolong options/ExampleFunctionalFile.py -n 999 PROPERTIES DEPENDS FunctionalCheckFiles PASS_REGULAR_EXPRESSION
