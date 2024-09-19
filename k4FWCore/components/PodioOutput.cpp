@@ -140,7 +140,7 @@ StatusCode PodioOutput::finalize() {
   // Collect all the metadata
   podio::Frame config_metadata_frame{};
   config_metadata_frame.putParameter("gaudiConfigOptions", config_data);
-  if (const auto* env_key4hep_stack = std::getenv("KEY4HEP_STACK")) {
+  if (const char* env_key4hep_stack = std::getenv("KEY4HEP_STACK")) {
     std::string s_env_key4hep_stack = env_key4hep_stack;
     config_metadata_frame.putParameter("key4hepstack", s_env_key4hep_stack);
   }
