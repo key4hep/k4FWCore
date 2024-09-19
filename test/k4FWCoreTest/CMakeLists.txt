@@ -86,7 +86,7 @@ function(add_test_with_env testname)
   set_test_env(${testname})
 endfunction()
 
-add_test(NAME FunctionalCheckFiles COMMAND python3 ${CMAKE_CURRENT_LIST_DIR}/options/CheckOutputFiles.py)
+add_test(NAME FunctionalCheckFiles COMMAND python3 ${CMAKE_CURRENT_LIST_DIR}/scripts/CheckOutputFiles.py)
 
 add_test_with_env(CreateExampleEventData options/createExampleEventData.py)
 add_test_with_env(CreateExampleEventDataInDirectory options/createExampleEventDataInDirectory.py)
