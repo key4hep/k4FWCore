@@ -73,6 +73,14 @@ hps = RootHistSvc("HistogramPersistencySvc")
 root_hist_svc = RootHistoSink("RootHistoSink")
 root_hist_svc.FileName = "functional_transformer_hist.root"
 
+try:
+    transformer1.CustomHistogram_Title = "Custom Title"
+    # Bins can be defined here
+    transformer1.CustomHistogram_Axis0 = (10, -5.0, 10.0, "X")
+# Before Gaudi v40 there isn't a way to set the bins from python
+except Exception:
+    pass
+
 
 app = ApplicationMgr(
     TopAlg=[producer1, producer2, transformer1, transformer2],
