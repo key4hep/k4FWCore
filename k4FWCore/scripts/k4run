@@ -206,7 +206,7 @@ def main():
     opts_dict = vars(opts)
     for optionName, propTuple in option_db.items():
         logger.info("Option name: %s %s %s", propTuple[1], optionName, opts_dict[optionName])
-        # After Gaudi v40 the new configurable histograms have properties that are tuples
+        # After Gaudi v39 the new configurable histograms have properties that are tuples
         # and by default one of the member is an empty tuple that Gaudi seems not to like
         # when used in setProp - it will try to parse it as a string and fail
         if "_Axis" in optionName:
