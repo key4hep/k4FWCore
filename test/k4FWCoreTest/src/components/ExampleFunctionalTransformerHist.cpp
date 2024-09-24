@@ -68,6 +68,7 @@ private:
 public:
 #if GAUDI_MAJOR_VERSION >= 39
   // This is a histogram with title, name and bins that can be set from python
+  // The callback function is only needed for these histograms with configurable properties
   void registerCallBack(Gaudi::StateMachine::Transition, std::function<void()>) {}
   mutable Gaudi::Accumulators::RootHistogram<1> m_customHistogram{this, "CustomHistogram"};
 #endif
