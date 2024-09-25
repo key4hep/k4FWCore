@@ -60,11 +60,9 @@ def add_arguments(parser, app_mgr):
         # skip public tools and the applicationmgr itself
         if "ToolSvc" in conf.name() or "ApplicationMgr" in conf.name():
             continue
-        props = (
-            conf.getPropertiesWithDescription()
-        )  # dict propertyname: (propertyvalue, propertydescription)
+        # dict propertyname: (propertyvalue, propertydescription)
+        props = conf.getPropertiesWithDescription()
         for prop in props:
-            # only add arguments for relevant properties
             if (
                 prop in FILTER_GAUDI_PROPS
                 or "Audit" in prop
@@ -208,7 +206,15 @@ def main():
     opts_dict = vars(opts)
     for optionName, propTuple in option_db.items():
         logger.info("Option name: %s %s %s", propTuple[1], optionName, opts_dict[optionName])
-        propTuple[0].setProp(propTuple[1].rsplit(".", 1)[1], opts_dict[optionName])
+        # After Gaudi v39 the new configurable histograms have properties that are tuples
+        # and by default one of the member is an empty tuple that Gaudi seems not to like
+        # when used in setProp - it will try to parse it as a string and fail
+        if "_Axis" in optionName:
+            propTuple[0].setProp(
+                propTuple[1].rsplit(".", 1)[1], tuple(x for x in opts_dict[optionName] if x != ())
+            )
+        else:
+            propTuple[0].setProp(propTuple[1].rsplit(".", 1)[1], opts_dict[optionName])
 
     if opts.verbose:
         from Gaudi.Configuration import VERBOSE

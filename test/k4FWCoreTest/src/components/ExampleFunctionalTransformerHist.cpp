@@ -25,8 +25,24 @@
 
 #include <string>
 
+#include "GAUDI_VERSION.h"
+
+#if GAUDI_MAJOR_VERSION < 39
+namespace Gaudi::Accumulators {
+  template <unsigned int ND, atomicity Atomicity = atomicity::full, typename Arithmetic = double>
+  using StaticRootHistogram =
+      Gaudi::Accumulators::RootHistogramingCounterBase<ND, Atomicity, Arithmetic, naming::histogramString>;
+}
+#endif
+
 struct ExampleFunctionalTransformerHist final
     : k4FWCore::Transformer<edm4hep::MCParticleCollection(const edm4hep::MCParticleCollection& input)> {
+  StatusCode initialize() override {
+#if GAUDI_MAJOR_VERSION >= 39
+    m_customHistogram.createHistogram(*this);
+#endif
+    return StatusCode::SUCCESS;
+  }
   // The pairs in KeyValues can be changed from python and they correspond
   // to the name of the input and output collections respectively
   ExampleFunctionalTransformerHist(const std::string& name, ISvcLocator* svcLoc)
@@ -36,14 +52,26 @@ struct ExampleFunctionalTransformerHist final
   // This is the function that will be called to produce the data
   edm4hep::MCParticleCollection operator()(const edm4hep::MCParticleCollection& input) const override {
     // Fill the histogram with the energy of one particle
-    ++m_histograms[input[0 + !m_firstParticle.value()].getEnergy()];
+    ++m_histogram[input[0 + !m_firstParticle.value()].getEnergy()];
+#if GAUDI_MAJOR_VERSION >= 39
+    ++m_customHistogram[input[0 + !m_firstParticle.value()].getEnergy()];
+#endif
     // Return an empty collection since we don't care about the collection
     return {};
   }
 
 private:
   // This is the histogram that will be filled, 1 is the number of dimensions of the histogram (1D)
-  mutable Gaudi::Accumulators::RootHistogram<1> m_histograms{this, "Histogram Name", "Histogram Title", {100, 0, 10.}};
+  mutable Gaudi::Accumulators::StaticRootHistogram<1> m_histogram{
+      this, "Histogram Name", "Histogram Title", {100, 0, 10.}};
+
+public:
+#if GAUDI_MAJOR_VERSION >= 39
+  // This is a histogram with title, name and bins that can be set from python
+  // The callback function is only needed for these histograms with configurable properties
+  void registerCallBack(Gaudi::StateMachine::Transition, std::function<void()>) {}
+  mutable Gaudi::Accumulators::RootHistogram<1> m_customHistogram{this, "CustomHistogram"};
+#endif
 
   Gaudi::Property<bool> m_firstParticle{this, "FirstParticle", true};
 };
