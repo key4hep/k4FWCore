@@ -151,7 +151,7 @@ def main():
     parser.add_argument(
         "--interactive-root",
         action="store_true",
-        help="Do not enforce ROOT batch mode",
+        help="Run with ROOT in interactive mode (e.g. to see plots)",
         default=False,
     )
 
