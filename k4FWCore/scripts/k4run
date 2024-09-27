@@ -236,9 +236,7 @@ def main():
     c = gaudimain()
     if not opts.dry_run:
         if not opts.disableROOTBatchMode:
-            # ensure ROOT runs in batch mode
             from ROOT import gROOT
-
             gROOT.SetBatch(True)
 
         # Do the real processing
