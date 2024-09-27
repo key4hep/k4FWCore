@@ -45,23 +45,32 @@ FILTER_GAUDI_PROPS = [
     "AutoRetrieveTools",
 ]
 
-# ---------------------------------------------------------------------
-
-seen_files = set()
-option_db = {}
-
 
 def add_arguments(parser, app_mgr):
+    """
+        Add arguments to the parser for all properties of all configurables in the application manager
+
+        :param parser: the parser to add the arguments to
+        :param app_mgr: the application manager to get the properties from
+
+        :return: a dictionary mapping the argument name to the configurable it belongs to
+
+        Iterate over all the properties of all configurables in the application manager and add them to the parser.
+        The property name is used as the argument name (twice) and the property value as the default value.
+        If the property is a list, the type of the first element is used as the type of the argument.
+
+    """
+
+    option_db = {}
+
     # length increases when properties of an algorithm with tools are inspected
     # see https://github.com/key4hep/k4FWCore/pull/138
     # can contain the same value multiple times
     # see https://github.com/key4hep/k4FWCore/issues/141
     for conf in frozenset(app_mgr.allConfigurables.values()):
-        # skip public tools and the applicationmgr itself
-        if "ToolSvc" in conf.name() or "ApplicationMgr" in conf.name():
+        if conf.name() in ["ApplicationMgr", "ToolSvc", "k4FWCore__Sequencer", "k4FWCore__Algs"]:
             continue
-        # dict propertyname: (propertyvalue, propertydescription)
-        props = conf.getPropertiesWithDescription()
+        props = conf.getPropertiesWithDescription()  # property values -> property description
         for prop in props:
             if (
                 prop in FILTER_GAUDI_PROPS
@@ -69,38 +78,32 @@ def add_arguments(parser, app_mgr):
                 or hasattr(props[prop][0], "__slots__")
             ):
                 continue
-            propvalue = props[prop][0]
+            value = props[prop][0]
 
             # if it is set to "no value" it hasn't been touched in the options file
-            if propvalue == conf.propertyNoValue:
-                propvalue = conf.getDefaultProperty(prop)  # thus get the default value
+            if value == conf.propertyNoValue:
+                value = conf.getDefaultProperty(prop)
             proptype = type(props[prop][0])
-            # if the property is a list of something, we need to set argparse nargs to '+'
-            propnargs = "?"
-            if proptype == list:
-                # tricky edgecase: if the default is an empty list there is no way to get the type
-                if len(propvalue) == 0:
-                    # just skip for now
-                    # print("Warning: argparse cannot deduce type for property %s of %s. Needs to be set in options file." % (prop, conf.name()))
-                    continue
-                else:
-                    # deduce type from first item of the list
-                    proptype = type(propvalue[0])
-                propnargs = "+"
+            args = "?"
+            if proptype is list:
+                if value:
+                    proptype = type(value[0])
+                args = "+"
 
             # add the argument twice, once as "--PodioOutput.filename"
             # and once as "--filename.PodioOutput"
             propName = conf.name() + "." + prop
             propNameReversed = prop + "." + conf.name()
-            option_db[propName] = (conf, propName)
+            option_db[propName] = conf
             parser.add_argument(
                 f"--{propName}",
                 f"--{propNameReversed}",
                 type=proptype,
                 help=props[prop][1],
-                nargs=propnargs,
-                default=propvalue,
+                nargs=args,
+                default=value,
             )
+    return option_db
 
 
 class LoggingHandler(logging.StreamHandler):
@@ -119,7 +122,6 @@ def main():
 
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
-    # formatter = logging.Formatter('[%(asctime)s %(levelname)s] %(message)s', datefmt='%Y-%b-%d %H:%M:%S')
     formatter = logging.Formatter("[k4run] %(message)s")
     handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(formatter)
@@ -163,30 +165,24 @@ def main():
     if opts[0].list:
         from Gaudi import Configuration
 
-        cfgDb = Configuration.cfgDb
-        logger.info("Available components:\n%s", (21 * "="))
-        for item in sorted(cfgDb):
-            if True:  # another option could filter Gaudi components here
-                try:
-                    path_to_component = __import__(cfgDb[item]["module"]).__file__
-                except ImportError:
-                    path_to_component = "NotFound"
-                print(
-                    "  %s (from %s), \n\t\t path: %s\n"
-                    % (item, cfgDb[item]["lib"], path_to_component)
-                )
-            else:
-                if "Gaudi" not in cfgDb[item]["lib"]:
-                    print("  %s (from %s)" % (item, cfgDb[item]["lib"]))
+        cfgdb = Configuration.cfgDb
+        logger.info("Available components:\n")
+        for item in sorted(cfgdb):
+            try:
+                path_to_component = __import__(cfgdb[item]["module"]).__file__
+            except ImportError:
+                path_to_component = "NotFound"
+            print(
+                f"{item} (from {cfgdb[item]['lib']}), \npath: {path_to_component}"
+            )
         sys.exit()
 
     for file in opts[0].config_files:
         load_file(file)
 
-    # ApplicationMgr is a singleton
     from Configurables import ApplicationMgr
 
-    add_arguments(parser, ApplicationMgr())
+    option_db = add_arguments(parser, ApplicationMgr())
 
     # add help manually here, if it is added earlier the parser exits after the first parse_arguments call
     parser.add_argument(
@@ -210,17 +206,17 @@ def main():
     logger.info(" ".join(f"--> {alg.name()}" for alg in ApplicationMgr().TopAlg))
 
     opts_dict = vars(opts)
-    for optionName, propTuple in option_db.items():
-        logger.info("Option name: %s %s %s", propTuple[1], optionName, opts_dict[optionName])
+    for optionName, conf in option_db.items():
+        logger.info(f"Option name: {optionName} {opts_dict[optionName]}")
         # After Gaudi v39 the new configurable histograms have properties that are tuples
         # and by default one of the member is an empty tuple that Gaudi seems not to like
         # when used in setProp - it will try to parse it as a string and fail
         if "_Axis" in optionName:
-            propTuple[0].setProp(
-                propTuple[1].rsplit(".", 1)[1], tuple(x for x in opts_dict[optionName] if x != ())
+            conf.setProp(
+                optionName.rsplit(".", 1)[1], tuple(x for x in opts_dict[optionName] if x != ())
             )
         else:
-            propTuple[0].setProp(propTuple[1].rsplit(".", 1)[1], opts_dict[optionName])
+            conf.setProp(optionName.rsplit(".", 1)[1], opts_dict[optionName])
 
     if opts.verbose:
         from Gaudi.Configuration import VERBOSE
@@ -233,7 +229,7 @@ def main():
 
     from Gaudi.Main import gaudimain
 
-    c = gaudimain()
+    gaudi = gaudimain()
     if not opts.dry_run:
         if not opts.interactive_root:
             from ROOT import gROOT
@@ -241,8 +237,8 @@ def main():
             gROOT.SetBatch(True)
 
         # Do the real processing
-        retcode = c.run(opts.gdb)
-        # User requested stop returns non-zero exit code see: https://github.com/key4hep/k4FWCore/issues/125
+        retcode = gaudi.run(opts.gdb)
+        # User requested stop returns non-zero exit code, see https://github.com/key4hep/k4FWCore/issues/125
         if retcode == 4:
             retcode = 0
         sys.exit(retcode)
