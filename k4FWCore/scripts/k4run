@@ -173,7 +173,7 @@ def main():
             except ImportError:
                 path_to_component = "NotFound"
             print(
-                f"{item} (from {cfgdb[item]['lib']}), \npath: {path_to_component}"
+                f"{item} (from {cfgdb[item]['lib']}), path: {path_to_component}"
             )
         sys.exit()
 
