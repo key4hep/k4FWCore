@@ -237,6 +237,7 @@ def main():
     if not opts.dry_run:
         if not opts.interactive_root:
             from ROOT import gROOT
+
             gROOT.SetBatch(True)
 
         # Do the real processing
