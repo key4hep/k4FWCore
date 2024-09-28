@@ -70,20 +70,19 @@ def add_arguments(parser, app_mgr):
     for conf in frozenset(app_mgr.allConfigurables.values()):
         if conf.name() in ["ApplicationMgr", "ToolSvc", "k4FWCore__Sequencer", "k4FWCore__Algs"]:
             continue
-        props = conf.getPropertiesWithDescription()  # property values -> property description
-        for prop in props:
+        for prop_name, prop_value in conf.getPropertiesWithDescription().items():
             if (
-                prop in FILTER_GAUDI_PROPS
-                or "Audit" in prop
-                or hasattr(props[prop][0], "__slots__")
+                prop_name in FILTER_GAUDI_PROPS
+                or "Audit" in prop_name
+                or hasattr(prop_value[0], "__slots__")
             ):
                 continue
-            value = props[prop][0]
+            value = prop_value[0]
 
             # if it is set to "no value" it hasn't been touched in the options file
             if value == conf.propertyNoValue:
-                value = conf.getDefaultProperty(prop)
-            proptype = type(props[prop][0])
+                value = conf.getDefaultProperty(prop_name)
+            proptype = type(prop_value[0])
             args = "?"
             if proptype is list:
                 if value:
@@ -92,14 +91,14 @@ def add_arguments(parser, app_mgr):
 
             # add the argument twice, once as "--PodioOutput.filename"
             # and once as "--filename.PodioOutput"
-            propName = conf.name() + "." + prop
-            propNameReversed = prop + "." + conf.name()
+            propName = f"{conf.name()}.{prop_name}"
+            propNameReversed = f"{prop_name}.{conf.name()}"
             option_db[propName] = conf
             parser.add_argument(
                 f"--{propName}",
                 f"--{propNameReversed}",
                 type=proptype,
-                help=props[prop][1],
+                help=prop_value[1],
                 nargs=args,
                 default=value,
             )
