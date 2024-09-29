@@ -48,16 +48,16 @@ FILTER_GAUDI_PROPS = [
 
 def add_arguments(parser, app_mgr):
     """
-        Add arguments to the parser for all properties of all configurables in the application manager
+    Add arguments to the parser for all properties of all configurables in the application manager
 
-        :param parser: the parser to add the arguments to
-        :param app_mgr: the application manager to get the properties from
+    :param parser: the parser to add the arguments to
+    :param app_mgr: the application manager to get the properties from
 
-        :return: a dictionary mapping the argument name to the configurable it belongs to
+    :return: a dictionary mapping the argument name to the configurable it belongs to
 
-        Iterate over all the properties of all configurables in the application manager and add them to the parser.
-        The property name is used as the argument name (twice) and the property value as the default value.
-        If the property is a list, the type of the first element is used as the type of the argument.
+    Iterate over all the properties of all configurables in the application manager and add them to the parser.
+    The property name is used as the argument name (twice) and the property value as the default value.
+    If the property is a list, the type of the first element is used as the type of the argument.
 
     """
 
@@ -171,9 +171,7 @@ def main():
                 path_to_component = __import__(cfgdb[item]["module"]).__file__
             except ImportError:
                 path_to_component = "NotFound"
-            print(
-                f"{item} (from {cfgdb[item]['lib']}), path: {path_to_component}"
-            )
+            print(f"{item} (from {cfgdb[item]['lib']}), path: {path_to_component}")
         sys.exit()
 
     for file in opts[0].config_files:
