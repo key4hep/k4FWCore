@@ -22,7 +22,7 @@
 #include "GaudiKernel/IInterface.h"
 
 #include "podio/CollectionBase.h"
-#include "podio/ROOTWriter.h"
+#include "podio/Writer.h"
 
 #include <memory>
 #include <vector>
@@ -48,10 +48,10 @@ public:
                                                     next()                     = 0;
   virtual std::shared_ptr<std::vector<std::string>> getCollectionNames() const = 0;
 
-  virtual std::shared_ptr<podio::ROOTWriter> getWriter()                                         = 0;
-  virtual void                               deleteWriter()                                      = 0;
-  virtual void                               deleteReader()                                      = 0;
-  virtual bool                               checkIfWriteCollection(const std::string& collName) = 0;
+  virtual std::shared_ptr<podio::Writer> getWriter()                                         = 0;
+  virtual void                           deleteWriter()                                      = 0;
+  virtual void                           deleteReader()                                      = 0;
+  virtual bool                           checkIfWriteCollection(const std::string& collName) = 0;
 };
 
 #endif

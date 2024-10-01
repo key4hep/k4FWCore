@@ -26,8 +26,8 @@
 #include "GaudiKernel/IIncidentSvc.h"
 #include "GaudiKernel/Service.h"
 
-#include "podio/ROOTReader.h"
-#include "podio/ROOTWriter.h"
+#include "podio/Reader.h"
+#include "podio/Writer.h"
 
 #include "IIOSvc.h"
 #include "k4FWCore/IMetadataSvc.h"
@@ -73,12 +73,12 @@ protected:
 
   KeepDropSwitch m_switch;
 
-  std::unique_ptr<podio::ROOTReader> m_reader{nullptr};
-  std::shared_ptr<podio::ROOTWriter> m_writer{nullptr};
+  std::unique_ptr<podio::Reader> m_reader{nullptr};
+  std::shared_ptr<podio::Writer> m_writer{nullptr};
 
-  std::shared_ptr<podio::ROOTWriter> getWriter() override {
+  std::shared_ptr<podio::Writer> getWriter() override {
     if (!m_writer) {
-      m_writer = std::make_shared<podio::ROOTWriter>(m_writingFileName.value());
+      m_writer = std::make_shared<podio::Writer>(podio::makeWriter(m_writingFileName.value(), m_inputType));
     }
     return m_writer;
   }

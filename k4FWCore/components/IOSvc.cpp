@@ -21,6 +21,7 @@
 
 #include "podio/Frame.h"
 #include "podio/FrameCategories.h"
+#include "podio/Reader.h"
 
 #include "k4FWCore/FunctionalUtils.h"
 #include "k4FWCore/KeepDropSwitch.h"
@@ -28,7 +29,6 @@
 #include "GaudiKernel/AnyDataWrapper.h"
 #include "GaudiKernel/IEventProcessor.h"
 
-#include <algorithm>
 #include <mutex>
 #include <tuple>
 
@@ -42,6 +42,9 @@ StatusCode IOSvc::initialize() {
   if (!m_importedFromk4FWCore) {
     error() << "Use 'from k4FWCore import IOSvc' instead of 'from Configurables import IOSvc' to access the service"
             << endmsg;
+  }
+  if (m_inputType != "ROOT" && m_inputType != "RNTuple") {
+    error() << "Unknown input type: " << m_inputType << ", expected ROOT or RNTuple" << endmsg;
     return StatusCode::FAILURE;
   }
 
@@ -50,15 +53,14 @@ StatusCode IOSvc::initialize() {
     m_readingFileNames = m_readingFileNamesDeprecated;
   }
   if (!m_readingFileNames.empty()) {
-    info() << m_readingFileNames.size() << " files to be read" << endmsg;
-    m_reader = std::make_unique<podio::ROOTReader>();
     try {
-      m_reader->openFiles(m_readingFileNames);
+      m_reader = std::make_unique<podio::Reader>(podio::makeReader(m_readingFileNames.value()));
     } catch (std::runtime_error& e) {
       error() << "Error when opening files: " << e.what() << endmsg;
       return StatusCode::FAILURE;
     }
-    m_entries = m_reader->getEntries(podio::Category::Event);
+    m_entries = m_reader->getEvents();
+  }
   }
 
   if ((m_entries && m_firstEventEntry >= m_entries) || m_firstEventEntry < 0) {
@@ -97,7 +99,7 @@ StatusCode IOSvc::initialize() {
     if (std::find(categories.begin(), categories.end(), podio::Category::Metadata) != categories.end() &&
         m_reader->getEntries(podio::Category::Metadata) > 0) {
       info() << "Setting metadata frame" << endmsg;
-      m_metadataSvc->setFrame(m_reader->readEntry(podio::Category::Metadata, 0));
+      m_metadataSvc->setFrame(m_reader->readFrame(podio::Category::Metadata, 0));
     }
   }
 
@@ -113,7 +115,7 @@ std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, std::vector<std:
   {
     std::scoped_lock<std::mutex> lock(m_changeBufferLock);
     if (m_nextEntry < m_entries) {
-      frame = podio::Frame(m_reader->readEntry(podio::Category::Event, m_nextEntry));
+      frame = podio::Frame(m_reader->readEvent(m_nextEntry));
     } else {
       return std::make_tuple(std::vector<std::shared_ptr<podio::CollectionBase>>(), std::vector<std::string>(),
                              std::move(frame));
