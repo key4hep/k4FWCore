@@ -31,7 +31,7 @@ gaudi_install(PYTHON)
 gaudi_add_library(k4FWCore
 		  SOURCES src/PodioDataSvc.cpp
               src/KeepDropSwitch.cpp
-                  LINK Gaudi::GaudiKernel podio::podioRootIO ROOT::Core ROOT::RIO ROOT::Tree
+                  LINK Gaudi::GaudiKernel podio::podioIO ROOT::Core ROOT::RIO ROOT::Tree
                   )
 target_include_directories(k4FWCore PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>

@@ -26,8 +26,8 @@
 #include "GaudiKernel/IIncidentSvc.h"
 #include "GaudiKernel/Service.h"
 
-#include "podio/ROOTReader.h"
-#include "podio/ROOTWriter.h"
+#include "podio/Reader.h"
+#include "podio/Writer.h"
 
 #include "IIOSvc.h"
 #include "k4FWCore/IMetadataSvc.h"
@@ -62,7 +62,8 @@ protected:
   Gaudi::Property<std::string> m_writingFileName{this, "Output", {}, "List of files to write output to"};
   Gaudi::Property<std::vector<std::string>> m_outputCommands{
       this, "outputCommands", {"keep *"}, "A set of commands to declare which collections to keep or drop."};
-  Gaudi::Property<std::string> m_inputType{this, "IOType", "ROOT", "Type of input file (ROOT, RNTuple)"};
+  Gaudi::Property<std::string> m_outputType{this, "OutputType", "default",
+                                            "Type of the output file (ROOT or RNTuple, or default)"};
 
   Gaudi::Property<bool> m_importedFromk4FWCore{
       this, "ImportedFromk4FWCore", false,
@@ -73,14 +74,14 @@ protected:
 
   KeepDropSwitch m_switch;
 
-  std::unique_ptr<podio::ROOTReader> m_reader{nullptr};
-  std::shared_ptr<podio::ROOTWriter> m_writer{nullptr};
+  std::optional<podio::Reader> m_reader;
+  std::optional<podio::Writer> m_writer;
 
-  std::shared_ptr<podio::ROOTWriter> getWriter() override {
+  podio::Writer& getWriter() override {
     if (!m_writer) {
-      m_writer = std::make_shared<podio::ROOTWriter>(m_writingFileName.value());
+      m_writer = podio::makeWriter(m_writingFileName.value(), m_outputType);
     }
-    return m_writer;
+    return *m_writer;
   }
 
   // Gaudi doesn't always run the destructor of the Services so we have to

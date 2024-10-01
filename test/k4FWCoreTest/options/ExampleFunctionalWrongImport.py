@@ -17,8 +17,7 @@
 # limitations under the License.
 #
 
-# This is an example reading from a file and using a transformer to create new
-# data
+# This is an example of imports that should fail with the checks from utils.py
 
 
 # fmt: off

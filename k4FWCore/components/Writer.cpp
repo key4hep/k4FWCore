@@ -120,10 +120,10 @@ public:
     if (const char* env_key4hep_stack = std::getenv("KEY4HEP_STACK")) {
       config_metadata_frame.putParameter("key4hepstack", env_key4hep_stack);
     }
-    iosvc->getWriter()->writeFrame(config_metadata_frame, "configuration_metadata");
+    iosvc->getWriter().writeFrame(config_metadata_frame, "configuration_metadata");
 
     if (const auto* metadata_frame = m_metadataSvc->getFrame(); metadata_frame) {
-      iosvc->getWriter()->writeFrame(*metadata_frame, podio::Category::Metadata);
+      iosvc->getWriter().writeFrame(*metadata_frame, podio::Category::Metadata);
     }
 
     iosvc->deleteWriter();
@@ -262,7 +262,7 @@ public:
     }
 
     debug() << "Writing frame" << endmsg;
-    iosvc->getWriter()->writeFrame(ptr->getData(), podio::Category::Event, m_collectionsToSave);
+    iosvc->getWriter().writeFrame(ptr->getData(), podio::Category::Event, m_collectionsToSave);
   }
 };
 
