@@ -46,14 +46,14 @@ class ApplicationMgr:
         except AttributeError:
             self._mgr.EventLoop = EventLoopMgr(Warnings=False)
 
-        if 'MetadataSvc' in self._mgr.allConfigurables:
-            self._mgr.ExtSvc.append(self._mgr.allConfigurables['MetadataSvc'])
+        if "MetadataSvc" in self._mgr.allConfigurables:
+            self._mgr.ExtSvc.append(self._mgr.allConfigurables["MetadataSvc"])
 
-        if 'IOSvc' not in self._mgr.allConfigurables:
+        if "IOSvc" not in self._mgr.allConfigurables:
             return
-        if not isinstance(self._mgr.allConfigurables['IOSvc'], IOSvc):
+        if not isinstance(self._mgr.allConfigurables["IOSvc"], IOSvc):
             raise TypeError("The IOSvc is not an instance of IOSvc")
-        conf = self._mgr.allConfigurables['IOSvc']
+        conf = self._mgr.allConfigurables["IOSvc"]
 
         props = conf.getPropertiesWithDescription()
         reader = writer = None

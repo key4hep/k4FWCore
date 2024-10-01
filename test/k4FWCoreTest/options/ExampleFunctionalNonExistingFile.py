@@ -37,4 +37,4 @@ mgr = ApplicationMgr(
     EvtMax=-1,
     ExtSvc=[EventDataSvc("EventDataSvc")],
     OutputLevel=INFO,
-    )
+)

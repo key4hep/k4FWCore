@@ -226,6 +226,7 @@ def main():
     # Apply fixes from the k4FWCore wrapper
 
     from k4FWCore import ApplicationMgr
+
     ApplicationMgr().fix_properties()
 
     from Gaudi.Main import gaudimain
