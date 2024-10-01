@@ -171,6 +171,9 @@ add_test_with_env(FunctionalMetadataReadOldAlgorithm options/ExampleFunctionalMe
 add_test_with_env(FunctionalNonExistingFile options/ExampleFunctionalNonExistingFile.py)
 set_tests_properties(FunctionalNonExistingFile PROPERTIES PASS_REGULAR_EXPRESSION "File.*couldn't be found")
 add_test_with_env(FunctionalNonExistingFileOverwritten options/ExampleFunctionalNonExistingFile.py --IOSvc.Input functional_producer.root)
+add_test_with_env(FunctionalFileTooLong options/ExampleFunctionalFile.py -n 999 --IOSvc.Output toolong.root PROPERTIES PASS_REGULAR_EXPRESSION
+                  "Application Manager Terminated successfully with a user requested ScheduledStop")
+add_test_with_env(FunctionalFileTooShort options/ExampleFunctionalFile.py -n 2 --IOSvc.Output two_events.root ADD_TO_CHECK_FILES)
 
 add_test_with_env(FunctionalWrongImport options/ExampleFunctionalWrongImport.py)
 set_tests_properties(FunctionalWrongImport PROPERTIES PASS_REGULAR_EXPRESSION "ImportError: Importing ApplicationMgr or IOSvc from Configurables is not allowed.")
@@ -178,9 +181,6 @@ add_test_with_env(FunctionalReadNthEvent options/ExampleFunctionalReadNthEvent.p
 add_test_with_env(FunctionalProducerRNTuple options/ExampleFunctionalProducerRNTuple.py ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalTTreeToRNTuple options/ExampleFunctionalTTreeToRNTuple.py ADD_TO_CHECK_FILES)
 
-# Do this after checking the files not to overwrite them
-add_test_with_env(FunctionalFile_toolong options/ExampleFunctionalFile.py -n 999 PROPERTIES DEPENDS FunctionalCheckFiles PASS_REGULAR_EXPRESSION
-                  "Application Manager Terminated successfully with a user requested ScheduledStop")
 
 # The following is done to make the tests work without installing the files in
 # the installation directory. The k4FWCore in the build directory is populated by
