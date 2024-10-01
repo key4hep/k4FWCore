@@ -24,7 +24,6 @@ FILTER_GAUDI_PROPS = [
     "NeededResources",
     "PropertiesPrint",
     "RegisterForContextService",
-    "RegularRowFormat",
     "RequireObjects",
     "RootInTES",
     "StatPrint",
@@ -223,6 +222,11 @@ def main():
         ApplicationMgr().EvtMax = opts.num_events
     # Allow graceful exit with Ctrl + C
     ApplicationMgr().StopOnSignal = True
+
+    # Apply fixes from the k4FWCore wrapper
+
+    from k4FWCore import ApplicationMgr
+    ApplicationMgr().fix_properties()
 
     from Gaudi.Main import gaudimain
 
