@@ -24,9 +24,9 @@ Algorithm to write data to an output file on disk.
 ## k4run
 ```
 $ k4run --help
-usage: k4run [--dry-run] [-v] [-n NUM_EVENTS] [-l] [--gdb] [-h] [config_files ...]
+usage: k4run [--dry-run] [-v] [-n NUM_EVENTS] [-l] [--gdb] [--interactive-root] [-h] [config_files ...]
 
-Run job in the Key4HEP framework
+Run job in the Key4hep framework
 
 positional arguments:
   config_files          Gaudi config (python) files describing the job
@@ -36,9 +36,9 @@ options:
   -v, --verbose         Run job with verbose output
   -n NUM_EVENTS, --num-events NUM_EVENTS
                         Number of events to run
-  -l, --list            Print all the configurable components available in the
-                        framework and exit
+  -l, --list            Print all the configurable components available in the framework and exit
   --gdb                 Attach gdb debugger
+  --interactive-root    Run with ROOT in interactive mode (e.g. to see plots)
   -h, --help            show this help message and exit
 ```
 When supplied with a Gaudi steering file `k4run --help file.py` also shows the settable properties of the Gaudi algorithms used in the file. Additionally, it is possible to add further arguments and use them in the steering file by using the Python `argparse.ArgumentParser` shared by `k4run`.
@@ -77,6 +77,8 @@ types of algorithms, depending on your use case:
 - The `Transformer` is the more general one (both the `Consumer` and the
   `Producer` are a particular case of this one) and takes both inputs and
   outputs
+- The `Filter`, for removing events from the events that are going to be
+  processed.
 
 A more complete list of algorithms can be found in
 https://lhcb.github.io/DevelopKit/03a-gaudi/, in the `Gaudi::Functional`
@@ -91,5 +93,3 @@ each one of the above-mentioned algorithms. In addition, there are tests that
 have either multiple inputs and / or multiple outputs (like
 `ExampleFunctionalProducerMultiple`) that can be used as a template for the more
 typical case when working with multiple inputs or outputs.
-
-**`GaudiAlg` is deprecated and will be removed in future versions of Gaudi.**
