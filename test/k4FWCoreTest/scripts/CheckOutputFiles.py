@@ -70,6 +70,7 @@ def check_metadata(filename, expected_metadata):
 
 
 check_collections("functional_transformer.root", ["MCParticles", "NewMCParticles"])
+check_collections("functional_transformer_cli.root", ["MCParticles", "NewMCParticles"])
 check_collections(
     "functional_transformer_multiple.root",
     [

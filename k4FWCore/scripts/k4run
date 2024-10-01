@@ -86,6 +86,10 @@ def add_arguments(parser, app_mgr):
             if proptype is list:
                 if value:
                     proptype = type(value[0])
+                # If the list is empty, we can't determine the type
+                # Assume it's a string by default and hope it will work
+                else:
+                    proptype = str
                 args = "+"
 
             # add the argument twice, once as "--PodioOutput.filename"
