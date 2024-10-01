@@ -43,10 +43,10 @@ public:
                                                     next()                     = 0;
   virtual std::shared_ptr<std::vector<std::string>> getCollectionNames() const = 0;
 
-  virtual podio::Writer&                 getWriter()                                         = 0;
-  virtual void                           deleteWriter()                                      = 0;
-  virtual void                           deleteReader()                                      = 0;
-  virtual bool                           checkIfWriteCollection(const std::string& collName) = 0;
+  virtual podio::Writer& getWriter()                                         = 0;
+  virtual void           deleteWriter()                                      = 0;
+  virtual void           deleteReader()                                      = 0;
+  virtual bool           checkIfWriteCollection(const std::string& collName) = 0;
 };
 
 #endif
