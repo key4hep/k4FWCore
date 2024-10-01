@@ -54,7 +54,7 @@ StatusCode IOSvc::initialize() {
   }
   if (!m_readingFileNames.empty()) {
     try {
-      m_reader = std::make_unique<podio::Reader>(podio::makeReader(m_readingFileNames.value()));
+      m_reader = podio::makeReader(m_readingFileNames.value());
     } catch (std::runtime_error& e) {
       error() << "Error when opening files: " << e.what() << endmsg;
       return StatusCode::FAILURE;

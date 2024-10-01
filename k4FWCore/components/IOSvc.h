@@ -74,14 +74,14 @@ protected:
 
   KeepDropSwitch m_switch;
 
-  std::unique_ptr<podio::Reader> m_reader{nullptr};
-  std::shared_ptr<podio::Writer> m_writer{nullptr};
+  std::optional<podio::Reader> m_reader;
+  std::optional<podio::Writer> m_writer;
 
-  std::shared_ptr<podio::Writer> getWriter() override {
+  podio::Writer& getWriter() override {
     if (!m_writer) {
-      m_writer = std::make_shared<podio::Writer>(podio::makeWriter(m_writingFileName.value(), m_outputType));
+      m_writer = podio::makeWriter(m_writingFileName.value(), m_outputType);
     }
-    return m_writer;
+    return *m_writer;
   }
 
   // Gaudi doesn't always run the destructor of the Services so we have to

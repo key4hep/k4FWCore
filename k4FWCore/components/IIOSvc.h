@@ -32,11 +32,6 @@
  */
 class IIOSvc : virtual public IInterface {
 public:
-  struct EndOfInput : std::logic_error {
-    EndOfInput() : logic_error("Reached end of input while more data were expected"){};
-  };
-
-public:
   /// InterfaceID
   DeclareInterfaceID(IIOSvc, 1, 0);
 
@@ -48,7 +43,7 @@ public:
                                                     next()                     = 0;
   virtual std::shared_ptr<std::vector<std::string>> getCollectionNames() const = 0;
 
-  virtual std::shared_ptr<podio::Writer> getWriter()                                         = 0;
+  virtual podio::Writer&                 getWriter()                                         = 0;
   virtual void                           deleteWriter()                                      = 0;
   virtual void                           deleteReader()                                      = 0;
   virtual bool                           checkIfWriteCollection(const std::string& collName) = 0;
