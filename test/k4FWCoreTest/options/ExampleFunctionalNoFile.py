@@ -17,8 +17,8 @@
 # limitations under the License.
 #
 
-# This is an example reading from a file and using a transformer to create new
-# data
+# This is an example when a file to be read is not provided, it will fail as it
+# is but the file can be provided through the command line
 
 from Gaudi.Configuration import INFO
 from Configurables import ExampleFunctionalTransformer
