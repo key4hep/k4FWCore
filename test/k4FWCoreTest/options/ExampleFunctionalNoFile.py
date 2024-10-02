@@ -34,7 +34,7 @@ transformer = ExampleFunctionalTransformer(
 mgr = ApplicationMgr(
     TopAlg=[transformer],
     EvtSel="NONE",
-    EvtMax=-1,
+    EvtMax=1,
     ExtSvc=[EventDataSvc("EventDataSvc")],
     OutputLevel=INFO,
 )
