@@ -91,13 +91,7 @@ class ApplicationMgr:
             elif props["Input"][0]:
                 inp = "Input"
             if inp:
-                print(f"Reading collections from {props[inp][0][0]}")
-                # breakpoint()
-                if os.path.exists(props[inp][0][0]):
-                    path = props[inp][0][0]
-                else:
-                    path = os.getcwd() + "/" + props[inp][0][0]
-                podio_reader = PodioReader(path)
+                podio_reader = PodioReader(props[inp][0])
                 if self._mgr.EvtMax == -1:
                     self._mgr.EvtMax = podio_reader._reader.getEntries("events")
                 try:

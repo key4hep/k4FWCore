@@ -176,6 +176,8 @@ add_test_with_env(FunctionalFileTooLong options/ExampleFunctionalFile.py -n 999 
 add_test_with_env(FunctionalFileTooShort options/ExampleFunctionalFile.py -n 2 --IOSvc.Output two_events.root ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalFileCLI options/ExampleFunctionalNoFile.py --IOSvc.Input functional_producer.root --IOSvc.Output functional_transformer_cli.root ADD_TO_CHECK_FILES)
 set_tests_properties(FunctionalFileCLI PROPERTIES DEPENDS FunctionalProducer)
+add_test_with_env(FunctionalFileCLIMultiple options/ExampleFunctionalNoFile.py --IOSvc.Input functional_producer.root functional_producer.root --IOSvc.Output functional_transformer_cli_multiple.root -n -1 ADD_TO_CHECK_FILES)
+set_tests_properties(FunctionalFileCLIMultiple PROPERTIES DEPENDS FunctionalProducer)
 
 add_test_with_env(FunctionalWrongImport options/ExampleFunctionalWrongImport.py)
 set_tests_properties(FunctionalWrongImport PROPERTIES PASS_REGULAR_EXPRESSION "ImportError: Importing ApplicationMgr or IOSvc from Configurables is not allowed.")

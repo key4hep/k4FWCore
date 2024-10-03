@@ -251,5 +251,6 @@ for name, events in {
     "functional_filter.root": 5,
     "functional_nth_event.root": 3,
     "two_events.root": 2,
+    "functional_transformer_cli_multiple.root": 20,
 }.items():
     check_events(name, events)
