@@ -24,7 +24,6 @@ FILTER_GAUDI_PROPS = [
     "NeededResources",
     "PropertiesPrint",
     "RegisterForContextService",
-    "RegularRowFormat",
     "RequireObjects",
     "RootInTES",
     "StatPrint",
@@ -87,6 +86,10 @@ def add_arguments(parser, app_mgr):
             if proptype is list:
                 if value:
                     proptype = type(value[0])
+                # If the list is empty, we can't determine the type
+                # Assume it's a string by default and hope it will work
+                else:
+                    proptype = str
                 args = "+"
 
             # add the argument twice, once as "--PodioOutput.filename"
@@ -223,6 +226,12 @@ def main():
         ApplicationMgr().EvtMax = opts.num_events
     # Allow graceful exit with Ctrl + C
     ApplicationMgr().StopOnSignal = True
+
+    # Apply fixes from the k4FWCore wrapper
+
+    from k4FWCore import ApplicationMgr
+
+    ApplicationMgr().fix_properties()
 
     from Gaudi.Main import gaudimain
 

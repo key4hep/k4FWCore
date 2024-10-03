@@ -70,6 +70,7 @@ def check_metadata(filename, expected_metadata):
 
 
 check_collections("functional_transformer.root", ["MCParticles", "NewMCParticles"])
+check_collections("functional_transformer_cli.root", ["MCParticles", "NewMCParticles"])
 check_collections(
     "functional_transformer_multiple.root",
     [
@@ -165,11 +166,6 @@ ev = frames[0]
 if len(ev.get("NewMCParticles")) != 4:
     raise RuntimeError(f"Expected 4 NewMCParticles but got {len(ev.get('NewMCParticles'))}")
 
-check_events(
-    "functional_filter.root",
-    5,
-)
-
 check_collections("functional_metadata.root", ["MCParticles"])
 
 check_metadata(
@@ -251,7 +247,10 @@ for frame in events:
         raise RuntimeError(f"Event number {event_number} is duplicated")
     seen_event_numbers.add(event_number)
 
-check_events(
-    "functional_nth_event.root",
-    3,
-)
+for name, events in {
+    "functional_filter.root": 5,
+    "functional_nth_event.root": 3,
+    "two_events.root": 2,
+    "functional_transformer_cli_multiple.root": 20,
+}.items():
+    check_events(name, events)
