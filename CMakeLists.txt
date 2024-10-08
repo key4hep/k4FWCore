@@ -54,13 +54,4 @@ if(ENABLE_CPACK)
   include(cmake/${PROJECT_NAME}CPack.cmake)
 endif()
 
-
-install(EXPORT ${PROJECT_NAME}Targets
-  NAMESPACE ${PROJECT_NAME}::
-  FILE "${PROJECT_NAME}Targets.cmake"
-  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}/"
-  )
-
 include(cmake/k4FWCoreCreateConfig.cmake)
-
-gaudi_install(CMAKE ${PROJECT_BINARY_DIR}/k4FWCoreConfig.cmake)
