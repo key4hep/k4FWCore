@@ -77,8 +77,8 @@ types of algorithms, depending on your use case:
 - The `Transformer` is the more general one (both the `Consumer` and the
   `Producer` are a particular case of this one) and takes both inputs and
   outputs
-- The `Filter`, for removing events from the events that are going to be
-  processed.
+- The `FilterPredicate`, for determining whether subsequent algorithms in the
+  sequence are bypassed.
 
 A more complete list of algorithms can be found in
 https://lhcb.github.io/DevelopKit/03a-gaudi/, in the `Gaudi::Functional`
