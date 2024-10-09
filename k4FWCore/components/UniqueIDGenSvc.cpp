@@ -48,7 +48,7 @@ size_t UniqueIDGenSvc::getUniqueID(uint32_t evt_num, uint32_t run_num, const std
     combined_bits[i + bits32 + bits32 + bitsSizeT] = seed_bits[i];
   }
 
-  auto                        hash = std::hash<std::bitset<bits64 + bits32 + bits32 + bitsSizeT>>{}(combined_bits);
+  auto hash     = std::hash<std::bitset<bits64 + bits32 + bits32 + bitsSizeT>>{}(combined_bits);
   bool inserted = false;
   {
     std::lock_guard<std::mutex> lock(m_mutex);
