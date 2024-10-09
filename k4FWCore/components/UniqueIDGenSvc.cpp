@@ -52,7 +52,7 @@ size_t UniqueIDGenSvc::getUniqueID(uint32_t evt_num, uint32_t run_num, const std
   bool inserted = false;
   {
     std::lock_guard<std::mutex> lock(m_mutex);
-    std::tie(std::ignore, inserted),  = m_uniqueIDs.insert(hash);
+    std::tie(std::ignore, inserted) = m_uniqueIDs.insert(hash);
   }
   if (!inserted) {
     warning() << "Event number " << evt_num << ", run number " << run_num << " and algorithm name \"" << name
