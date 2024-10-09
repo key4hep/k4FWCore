@@ -21,8 +21,6 @@
 #include <cstdint>
 #include <string>
 
-DECLARE_COMPONENT(UniqueIDGenSvc)
-
 UniqueIDGenSvc::UniqueIDGenSvc(const std::string& name, ISvcLocator* svcLoc) : base_class(name, svcLoc) {}
 
 constexpr size_t bits32    = std::numeric_limits<uint32_t>::digits;
@@ -62,3 +60,5 @@ size_t UniqueIDGenSvc::getUniqueID(uint32_t evt_num, uint32_t run_num, const std
 
   return hash;
 }
+
+DECLARE_COMPONENT(UniqueIDGenSvc)
