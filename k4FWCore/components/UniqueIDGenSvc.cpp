@@ -49,13 +49,15 @@ size_t UniqueIDGenSvc::getUniqueID(uint32_t evt_num, uint32_t run_num, const std
   }
 
   auto                        hash = std::hash<std::bitset<bits64 + bits32 + bits32 + bitsSizeT>>{}(combined_bits);
-  std::lock_guard<std::mutex> lock(m_mutex);
-  if (m_uniqueIDs.contains(hash)) {
+  bool inserted = false;
+  {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    std::tie(std::ignore, inserted),  = m_uniqueIDs.insert(hash);
+  }
+  if (!inserted) {
     warning() << "Event number " << evt_num << ", run number " << run_num << " and algorithm name \"" << name
               << "\" have already been used. Please check the uniqueness of the event number, run number and name."
               << endmsg;
-  } else {
-    m_uniqueIDs.insert(hash);
   }
 
   return hash;
