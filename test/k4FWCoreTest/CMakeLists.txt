@@ -126,6 +126,7 @@ add_test(NAME checkKeepDropSwitch
 set_test_env(checkKeepDropSwitch)
 set_property(TEST checkKeepDropSwitch APPEND PROPERTY DEPENDS ReadExampleEventData)
 add_test_with_env(TestUniqueIDGenSvc options/TestUniqueIDGenSvc.py)
+add_test_with_env(TestUniqueIDGenSvcRepeated options/TestUniqueIDGenSvc.py PROPERTIES PASS_REGULAR_EXPRESSION "WARNING *Event number 4, run number 3 and algorithm name \"Some algorithm name\" have already been used. Please check the uniqueness of the event number, run number and name.")
 add_test_with_env(TestEventHeaderFiller options/createEventHeader.py)
 add_test_with_env(EventHeaderCheck options/runEventHeaderCheck.py PROPERTIES DEPENDS TestEventHeaderFiller)
 add_test(NAME TestExec WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR} COMMAND python options/TestExec.py)
