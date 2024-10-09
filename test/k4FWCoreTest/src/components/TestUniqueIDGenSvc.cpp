@@ -18,6 +18,8 @@
  */
 #include "TestUniqueIDGenSvc.h"
 
+#include <cstdint>
+
 DECLARE_COMPONENT(TestUniqueIDGenSvc)
 
 TestUniqueIDGenSvc::TestUniqueIDGenSvc(const std::string& aName, ISvcLocator* aSvcLoc)
@@ -33,16 +35,19 @@ StatusCode TestUniqueIDGenSvc::initialize() {
   return StatusCode::SUCCESS;
 }
 
+// This is meant to run up to two times
+// For the first event, check that when giving two different event numbers, the unique IDs are different
+// For the second event, the service throws when trying to get the same ID twice
 StatusCode TestUniqueIDGenSvc::execute(const EventContext&) const {
-  uint        evt_num = 4;
-  uint        run_num = 3;
+  ++m_counter;
+  uint32_t    evt_num = 4;
+  uint32_t    run_num = 3 + m_counter.sum();
   std::string name    = "Some algorithm name";
 
   auto uid       = m_service->getUniqueID(evt_num, run_num, name);
-  auto uid_again = m_service->getUniqueID(evt_num, run_num, name);
-
-  if (uid != uid_again) {
-    return StatusCode::FAILURE;
+  auto uid_again = m_service->getUniqueID(evt_num + (m_counter.sum() % 2), run_num, name);
+  if (uid == uid_again) {
+    throw std::runtime_error("Unique IDs are the same");
   }
 
   return StatusCode::SUCCESS;
