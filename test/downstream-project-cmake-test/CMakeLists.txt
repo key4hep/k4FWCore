@@ -23,5 +23,13 @@ project(DownstreamProjectUsingk4FWCore)
 
 find_package(k4FWCore)
 
+if (NOT DEFINED ${k4FWCore_VERSION})
+  message(FATAL_ERROR "CAnnot find k4FWCore version information")
+endif()
+
+if (NOT ${k4FWCore_VERSION} MATCHES "^[0-9]+\\.[0-9+](\\.[0-9]+)?$")
+  message(FATEL_ERROR "Exported k4FWCore version cannot be used as a version: " ${k4FWCore_VERSION})
+endif()
+
 add_executable(appUsingk4FWCore main.cxx)
 target_link_libraries(appUsingk4FWCore k4FWCore::k4FWCore)
