@@ -89,7 +89,7 @@ namespace k4FWCore {
       requires std::is_base_of_v<podio::CollectionBase, std::remove_cvref_t<Value>>
     struct isVectorLike<std::vector<Value>> : std::true_type {};
 
-    template <class T> inline constexpr bool isVectorLike_v = isVectorLike<T>::value;
+    template <class T> constexpr bool isVectorLike_v = isVectorLike<T>::value;
 
     // transformType function to transform the types from the ones that the user wants
     // like edm4hep::MCParticleCollection, to the ones that are actually stored in the
