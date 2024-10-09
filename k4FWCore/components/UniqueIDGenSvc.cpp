@@ -35,17 +35,17 @@ size_t UniqueIDGenSvc::getUniqueID(uint32_t evt_num, uint32_t run_num, const std
 
   std::bitset<bits64 + bits32 + bits32 + bitsSizeT> combined_bits;
 
-  for (size_t i = 0; i < bits64; i++) {
-    combined_bits[i + bits32 + bits32 + bitsSizeT] = seed_bits[i];
-  }
-  for (size_t i = 0; i < bits32; i++) {
-    combined_bits[i + bits32 + bitsSizeT] = event_num_bits[i];
+  for (size_t i = 0; i < bitsSizeT; i++) {
+    combined_bits[i] = name_bits[i];
   }
   for (size_t i = 0; i < bits32; i++) {
     combined_bits[i + bitsSizeT] = run_num_bits[i];
   }
-  for (size_t i = 0; i < bitsSizeT; i++) {
-    combined_bits[i] = name_bits[i];
+  for (size_t i = 0; i < bits32; i++) {
+    combined_bits[i + bits32 + bitsSizeT] = event_num_bits[i];
+  }
+  for (size_t i = 0; i < bits64; i++) {
+    combined_bits[i + bits32 + bits32 + bitsSizeT] = seed_bits[i];
   }
 
   auto                        hash = std::hash<std::bitset<bits64 + bits32 + bits32 + bitsSizeT>>{}(combined_bits);
