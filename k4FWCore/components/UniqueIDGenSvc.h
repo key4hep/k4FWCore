@@ -42,6 +42,7 @@ private:
   Gaudi::Property<uint64_t>                         m_seed{this, "Seed", {123456789}};
   mutable std::unordered_set<size_t, std::identity> m_uniqueIDs;
   mutable std::mutex                                m_mutex;
+  Gaudi::Property<bool>                             m_throwIfDuplicate{this, "ThrowIfDuplicate", {true}};
 };
 
 #endif

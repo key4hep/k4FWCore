@@ -19,6 +19,7 @@
 #include "UniqueIDGenSvc.h"
 
 #include <cstdint>
+#include <stdexcept>
 #include <string>
 
 UniqueIDGenSvc::UniqueIDGenSvc(const std::string& name, ISvcLocator* svcLoc) : base_class(name, svcLoc) {}
@@ -55,9 +56,12 @@ size_t UniqueIDGenSvc::getUniqueID(uint32_t evt_num, uint32_t run_num, const std
     std::tie(std::ignore, inserted) = m_uniqueIDs.insert(hash);
   }
   if (!inserted) {
-    warning() << "Event number " << evt_num << ", run number " << run_num << " and algorithm name \"" << name
-              << "\" have already been used. Please check the uniqueness of the event number, run number and name."
-              << endmsg;
+    error() << "Event number " << evt_num << ", run number " << run_num << " and algorithm name \"" << name
+            << "\" have already been used. Please check the uniqueness of the event number, run number and name."
+            << endmsg;
+    if (m_throwIfDuplicate) {
+      throw std::runtime_error("Duplicate event number, run number and algorithm name");
+    }
   }
 
   return hash;
