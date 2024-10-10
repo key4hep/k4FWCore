@@ -188,10 +188,13 @@ public:
     DataObject*                   p;
     StatusCode                    code = m_dataSvc->retrieveObject("/Event" + k4FWCore::frameLocation, p);
     AnyDataWrapper<podio::Frame>* ptr;
+    bool deletePtr = false;
     // This is the case when we are reading from a file
+    // Since we unregistered the object, we need to delete it
     if (code.isSuccess()) {
       m_dataSvc->unregisterObject(p).ignore();
       ptr = dynamic_cast<AnyDataWrapper<podio::Frame>*>(p);
+      deletePtr = true;
     }
     // This is the case when no reading is being done
     // Will be deleted by the store
@@ -263,6 +266,9 @@ public:
 
     debug() << "Writing frame" << endmsg;
     iosvc->getWriter().writeFrame(ptr->getData(), podio::Category::Event, m_collectionsToSave);
+    if (deletePtr && m_collectionsToAdd.empty()) {
+      delete ptr;
+    }
   }
 };
 
