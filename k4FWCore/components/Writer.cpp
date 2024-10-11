@@ -23,7 +23,6 @@
 #include "GaudiKernel/IDataProviderSvc.h"
 #include "GaudiKernel/SmartDataPtr.h"
 #include "GaudiKernel/StatusCode.h"
-
 #include "podio/Frame.h"
 
 #include "IIOSvc.h"
@@ -189,7 +188,7 @@ public:
     StatusCode  code = m_dataSvc->retrieveObject("/Event" + k4FWCore::frameLocation, p);
     std::unique_ptr<AnyDataWrapper<podio::Frame>> ptr;
     // This is the case when we are reading from a file
-    // Since we unregistered the object, we need to delete it
+    // Putting it into a unique_ptr will make sure it's deleted
     if (code.isSuccess()) {
       auto sc = m_dataSvc->unregisterObject(p);
       if (!sc.isSuccess()) {
@@ -233,6 +232,10 @@ public:
         error() << "Failed to unregister collection " << coll << endmsg;
         return;
       }
+      // We still have to delete the AnyDataWrapper to avoid a leak
+      auto storePtr = dynamic_cast<AnyDataWrapper<std::unique_ptr<podio::CollectionBase>>*>(storeCollection);
+      storePtr->getData().release();
+      delete storePtr;
     }
 
     for (auto& coll : m_collectionsToAdd) {
@@ -247,7 +250,10 @@ public:
         return;
       }
       const auto collection = dynamic_cast<AnyDataWrapper<std::unique_ptr<podio::CollectionBase>>*>(storeCollection);
-      if (!collection) {
+      if (collection) {
+        ptr->getData().put(std::move(collection->getData()), coll);
+        delete collection;
+      } else {
         // Check the case when the data has been produced using the old DataHandle
         const auto old_collection = dynamic_cast<DataWrapperBase*>(storeCollection);
         if (!old_collection) {
@@ -258,10 +264,6 @@ public:
               const_cast<podio::CollectionBase*>(old_collection->collectionBase()));
           ptr->getData().put(std::move(uptr), coll);
         }
-
-      } else {
-        std::unique_ptr<podio::CollectionBase> uptr(std::move(collection->getData()));
-        ptr->getData().put(std::move(uptr), coll);
       }
     }
 
