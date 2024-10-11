@@ -112,7 +112,7 @@ StatusCode IOSvc::finalize() { return Service::finalize(); }
 std::tuple<std::vector<podio::CollectionBase*>, std::vector<std::string>, podio::Frame> IOSvc::next() {
   podio::Frame frame;
   {
-    std::scoped_lock<std::mutex> lock(m_changeBufferLock);
+    std::lock_guard<std::mutex> lock(m_changeBufferLock);
     if (m_nextEntry < m_entries) {
       frame = podio::Frame(m_reader->readEvent(m_nextEntry));
     } else {
@@ -177,7 +177,10 @@ void IOSvc::handle(const Incident& incident) {
     code = m_dataSvc->retrieveObject("/Event/" + coll, collPtr);
     if (code.isSuccess()) {
       debug() << "Removing the collection: " << coll << " from the store" << endmsg;
-      code = m_dataSvc->unregisterObject(collPtr);
+      code          = m_dataSvc->unregisterObject(collPtr);
+      auto storePtr = dynamic_cast<AnyDataWrapper<std::unique_ptr<podio::CollectionBase>>*>(collPtr);
+      storePtr->getData().release();
+      delete storePtr;
     } else {
       error() << "Expected collection " << coll << " in the store but it was not found" << endmsg;
     }
