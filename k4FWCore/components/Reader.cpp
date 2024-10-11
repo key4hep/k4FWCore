@@ -16,12 +16,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <GaudiKernel/SmartIF.h>
 #include "Gaudi/Functional/details.h"
 #include "Gaudi/Functional/utilities.h"
 #include "GaudiKernel/AnyDataWrapper.h"
 #include "GaudiKernel/FunctionalFilterDecision.h"
 #include "GaudiKernel/IDataProviderSvc.h"
+#include "GaudiKernel/SmartIF.h"
 #include "GaudiKernel/StatusCode.h"
 
 #include "podio/CollectionBase.h"
@@ -32,18 +32,16 @@
 
 #include <memory>
 
-template <typename Container> using vector_of_ = std::vector<Container>;
-
 class CollectionPusher : public Gaudi::Functional::details::BaseClass_t<Gaudi::Functional::Traits::useDefaults> {
   using Traits_    = Gaudi::Functional::Traits::useDefaults;
-  using Out        = std::shared_ptr<podio::CollectionBase>;
+  using Out        = std::unique_ptr<podio::CollectionBase>;
   using base_class = Gaudi::Functional::details::BaseClass_t<Traits_>;
   static_assert(std::is_base_of_v<Algorithm, base_class>, "BaseClass must inherit from Algorithm");
 
   template <typename T>
   using OutputHandle_t = Gaudi::Functional::details::OutputHandle_t<Traits_, std::remove_pointer_t<T>>;
-  std::vector<OutputHandle_t<std::shared_ptr<podio::CollectionBase>>> m_outputs;
-  Gaudi::Property<std::vector<std::string>>                           m_inputCollections{
+  std::vector<OutputHandle_t<Out>>          m_outputs;
+  Gaudi::Property<std::vector<std::string>> m_inputCollections{
       this, "InputCollections", {"First collection"}, "List of input collections"};
   // Gaudi::Property<std::string>                                        m_input{this, "Input", "Event", "Input file"};
 
@@ -73,7 +71,7 @@ public:
     try {
       auto out = (*this)();
 
-      auto outColls        = std::get<std::vector<std::shared_ptr<podio::CollectionBase>>>(out);
+      auto outColls        = std::get<std::vector<podio::CollectionBase*>>(out);
       auto outputLocations = std::get<std::vector<std::string>>(out);
 
       // if (out.size() != m_outputs.size()) {
@@ -82,7 +80,7 @@ public:
       //                        this->name(), StatusCode::FAILURE);
       // }
       for (size_t i = 0; i != outColls.size(); ++i) {
-        m_outputs[i].put(std::move(outColls[i]));
+        m_outputs[i].put(std::unique_ptr<podio::CollectionBase>(outColls[i]));
       }
       return Gaudi::Functional::FilterDecision::PASSED;
     } catch (GaudiException& e) {
@@ -91,7 +89,7 @@ public:
     }
   }
 
-  virtual std::tuple<vector_of_<Out>, std::vector<std::string>> operator()() const = 0;
+  virtual std::tuple<std::vector<podio::CollectionBase*>, std::vector<std::string>> operator()() const = 0;
 
 private:
   ServiceHandle<IDataProviderSvc> m_dataSvc{this, "EventDataSvc", "EventDataSvc"};
@@ -108,7 +106,7 @@ public:
   // Gaudi doesn't run the destructor of the Services so we have to
   // manually ask for the reader to be deleted so it will call finish()
   // See https://gitlab.cern.ch/gaudi/Gaudi/-/issues/169
-  ~Reader() { iosvc->deleteReader(); }
+  ~Reader() override { iosvc->deleteReader(); }
 
   ServiceHandle<IIOSvc> iosvc{this, "IOSvc", "IOSvc"};
 
@@ -131,8 +129,7 @@ public:
   // The IOSvc takes care of reading and passing the data
   // By convention the Frame is pushed to the store
   // so that it's deleted at the right time
-  std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, std::vector<std::string>> operator()()
-      const override {
+  std::tuple<std::vector<podio::CollectionBase*>, std::vector<std::string>> operator()() const override {
     auto val = iosvc->next();
 
     auto eds   = eventSvc().as<IDataProviderSvc>();

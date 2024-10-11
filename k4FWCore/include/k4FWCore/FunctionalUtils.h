@@ -42,37 +42,33 @@ namespace k4FWCore {
 
   namespace details {
 
-    // This function will be used to modify std::shared_ptr<podio::CollectionBase> to the actual collection type
-    template <typename T, typename P>
-      requires std::same_as<P, std::vector<std::string, std::shared_ptr<podio::CollectionBase>>>
-    auto maybeTransformToEDM4hep(P& arg) {
-      return arg;
-    }
+    // It doesn't need to be a template but this allows parameter pack expansion
+    template <typename T> struct EventStoreType {
+      using type = std::unique_ptr<podio::CollectionBase>;
+    };
+    using EventStoreType_t = typename EventStoreType<void>::type;
+
 
     template <typename T, typename P>
-      requires(!std::is_same_v<P, std::shared_ptr<podio::CollectionBase>>)
+      requires(!std::is_same_v<P, podio::CollectionBase*>)
     const auto& maybeTransformToEDM4hep(const P& arg) {
       return arg;
     }
 
     template <typename T, typename P>
-      requires std::is_base_of_v<podio::CollectionBase, P>
+      requires(std::is_base_of_v<podio::CollectionBase, P> && !std::same_as<podio::CollectionBase, P>)
     const auto& maybeTransformToEDM4hep(P* arg) {
       return *arg;
     }
 
     template <typename T, typename P>
-      requires std::same_as<P, std::shared_ptr<podio::CollectionBase>>
-    const auto& maybeTransformToEDM4hep(P arg) {
+      requires std::same_as<P, podio::CollectionBase*>
+    const auto& maybeTransformToEDM4hep(P&& arg) {
       return static_cast<const T&>(*arg);
     }
 
     template <typename T, bool addPtr = std::is_base_of_v<podio::CollectionBase, T>>
     using addPtrIfColl = std::conditional_t<addPtr, std::add_pointer_t<T>, T>;
-
-    template <typename T> const auto& transformtoEDM4hep(const std::shared_ptr<podio::CollectionBase>& arg) {
-      return static_cast<const T>(*arg);
-    }
 
     // Check if the type is a vector like type, where vector is the special
     // type to have an arbitrary number of collections as input or output:
@@ -82,7 +78,7 @@ namespace k4FWCore {
 
     template <typename Value>
       requires std::is_base_of_v<podio::CollectionBase, std::remove_cvref_t<Value>> ||
-               std::is_same_v<std::shared_ptr<podio::CollectionBase>, std::remove_cvref_t<Value>>
+               std::is_same_v<podio::CollectionBase*, std::remove_cvref_t<Value>>
     struct isVectorLike<std::vector<Value*>> : std::true_type {};
 
     template <typename Value>
@@ -91,28 +87,16 @@ namespace k4FWCore {
 
     template <class T> inline constexpr bool isVectorLike_v = isVectorLike<T>::value;
 
-    // transformType function to transform the types from the ones that the user wants
-    // like edm4hep::MCParticleCollection, to the ones that are actually stored in the
-    // event store, like std::shared_ptr<podio::CollectionBase>
-    // For std::map<std::string, Coll>, th
-    template <typename T> struct transformType {
-      using type = T;
-    };
-
-    template <typename T>
-      requires std::is_base_of_v<podio::CollectionBase, T> || isVectorLike_v<T>
-    struct transformType<T> {
-      using type = std::shared_ptr<podio::CollectionBase>;
-    };
-
-    template <typename T> auto convertToSharedPtr(T&& arg) {
-      return std::shared_ptr<podio::CollectionBase>(std::make_shared<T>(std::move(arg)));
-    }
-
-    template <typename T>
-      requires std::is_same_v<T, std::shared_ptr<podio::CollectionBase>>
-    auto convertToSharedPtr(T&& arg) {
-      return std::move(arg);
+    template <typename T> auto convertToUniquePtr(T&& arg) {
+      // This is the case for CollectionMerger.cpp, where a raw pointer is
+      // returned from the algorithm
+      if constexpr (std::same_as<T, podio::CollectionBase*>) {
+        return std::unique_ptr<podio::CollectionBase>(std::forward<T>(arg));
+      // Most common case, when an algorithm returns a collection and
+      // we want to store a unique_ptr
+      } else {
+        return std::make_unique<T>(std::forward<T>(arg));
+      }
     }
 
     template <typename... In> struct filter_evtcontext_tt {
@@ -146,18 +130,18 @@ namespace k4FWCore {
               std::remove_pointer_t<typename std::tuple_element_t<Index, std::tuple<In...>>::value_type>;
           auto inputMap = std::vector<const EDM4hepType*>();
           for (auto& handle : std::get<Index>(handles)) {
-            if constexpr (std::is_same_v<EDM4hepType, const std::shared_ptr<podio::CollectionBase>>) {
+            if constexpr (std::is_same_v<EDM4hepType, const podio::CollectionBase*>) {
               inputMap.push_back(&get(handle, thisClass, Gaudi::Hive::currentContext()));
             } else {
-              auto in = get(handle, thisClass, Gaudi::Hive::currentContext());
-              inputMap.push_back(static_cast<EDM4hepType*>(in.get()));
+              podio::CollectionBase* in = handle.get()->get();
+              inputMap.push_back(static_cast<EDM4hepType*>(in));
             }
           }
           std::get<Index>(inputTuple) = std::move(inputMap);
         } else {
           try {
-            auto in                     = get(std::get<Index>(handles)[0], thisClass, Gaudi::Hive::currentContext());
-            std::get<Index>(inputTuple) = static_cast<std::tuple_element_t<Index, std::tuple<In...>>*>(in.get());
+            podio::CollectionBase* in   = std::get<Index>(handles)[0].get()->get();
+            std::get<Index>(inputTuple) = static_cast<std::tuple_element_t<Index, std::tuple<In...>>*>(in);
           } catch (GaudiException& e) {
             // When the type of the collection is different from the one requested, this can happen because
             // 1. a mistake was made in the input types of a functional algorithm
@@ -201,12 +185,12 @@ namespace k4FWCore {
             throw GaudiException(thisClass->name(), msg, StatusCode::FAILURE);
           }
           for (auto& val : std::get<Index>(handles)) {
-            Gaudi::Functional::details::put(std::get<Index>(m_outputs)[i], convertToSharedPtr(std::move(val)));
+            Gaudi::Functional::details::put(std::get<Index>(m_outputs)[i], convertToUniquePtr(std::move(val)));
             i++;
           }
         } else {
           Gaudi::Functional::details::put(std::get<Index>(m_outputs)[0],
-                                          convertToSharedPtr(std::move(std::get<Index>(handles))));
+                                          convertToUniquePtr(std::move(std::get<Index>(handles))));
         }
 
         // Recursive call for the next index
@@ -248,8 +232,8 @@ namespace k4FWCore {
         throw GaudiException("Cannot retrieve \'" + this->objKey() + "\' from transient store.",
                              this->m_owner ? this->owner()->name() : "no owner", StatusCode::FAILURE);
       }
-      auto ptr = dynamic_cast<AnyDataWrapper<std::shared_ptr<podio::CollectionBase>>*>(dataObj);
-      return maybeTransformToEDM4hep<T>(ptr->getData());
+      auto ptr = dynamic_cast<AnyDataWrapper<std::unique_ptr<podio::CollectionBase>>*>(dataObj);
+      return maybeTransformToEDM4hep<T>(ptr->getData().get());
     }
 
     struct BaseClass_t {

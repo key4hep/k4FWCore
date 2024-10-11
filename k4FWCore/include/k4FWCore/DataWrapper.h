@@ -41,7 +41,7 @@ public:
   template <class T2> friend class DataHandle;
 
 public:
-  DataWrapper() : m_data(nullptr){};
+  DataWrapper() : m_data(nullptr) {};
   DataWrapper(T&& coll) {
     m_data   = new T(std::move(coll));
     is_owner = true;

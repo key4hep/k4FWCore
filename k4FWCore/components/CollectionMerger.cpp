@@ -38,12 +38,11 @@
 #include "k4FWCore/Transformer.h"
 
 #include <map>
-#include <memory>
 #include <string>
 #include <string_view>
 
-struct CollectionMerger final : k4FWCore::Transformer<std::shared_ptr<podio::CollectionBase>(
-                                    const std::vector<const std::shared_ptr<podio::CollectionBase>*>&)> {
+struct CollectionMerger final
+    : k4FWCore::Transformer<podio::CollectionBase*(const std::vector<const podio::CollectionBase*>&)> {
   CollectionMerger(const std::string& name, ISvcLocator* svcLoc)
       : Transformer(name, svcLoc, {KeyValues("InputCollections", {"MCParticles"})},
                     {KeyValues("OutputCollection", {"NewMCParticles"})}) {
@@ -91,43 +90,38 @@ struct CollectionMerger final : k4FWCore::Transformer<std::shared_ptr<podio::Col
         &CollectionMerger::mergeCollections<edm4hep::GeneratorPdfInfoCollection>;
   }
 
-  std::shared_ptr<podio::CollectionBase> operator()(
-      const std::vector<const std::shared_ptr<podio::CollectionBase>*>& input) const override {
-    std::shared_ptr<podio::CollectionBase> ret;
+  podio::CollectionBase* operator()(const std::vector<const podio::CollectionBase*>& input) const override {
+    podio::CollectionBase* ret = nullptr;
     debug() << "Merging " << input.size() << " collections" << endmsg;
     std::string_view type = "";
     for (const auto& coll : input) {
-      debug() << "Merging collection of type " << (*coll)->getTypeName() << " with " << (*coll)->size() << " elements"
+      debug() << "Merging collection of type " << coll->getTypeName() << " with " << coll->size() << " elements"
               << endmsg;
       if (type.empty()) {
-        type = (*coll)->getTypeName();
-      } else if (type != (*coll)->getTypeName()) {
+        type = coll->getTypeName();
+      } else if (type != coll->getTypeName()) {
         throw std::runtime_error("Different collection types are not supported");
-        return ret;
       }
-      (this->*m_map.at((*coll)->getTypeName()))(*coll, ret);
+      (this->*m_map.at(coll->getTypeName()))(coll, ret);
     }
     return ret;
   }
 
 private:
-  using MergeType = void (CollectionMerger::*)(const std::shared_ptr<podio::CollectionBase>&,
-                                               std::shared_ptr<podio::CollectionBase>&) const;
+  using MergeType = void (CollectionMerger::*)(const podio::CollectionBase*, podio::CollectionBase*&) const;
   std::map<std::string_view, MergeType> m_map;
   Gaudi::Property<bool>                 m_copy{this, "Copy", false,
                                "Copy the elements of the collections instead of creating a subset collection"};
 
-  template <typename T>
-  void mergeCollections(const std::shared_ptr<podio::CollectionBase>& source,
-                        std::shared_ptr<podio::CollectionBase>&       ret) const {
+  template <typename T> void mergeCollections(const podio::CollectionBase* source, podio::CollectionBase*& ret) const {
     if (!ret) {
-      ret = std::make_shared<T>();
+      ret = new T();
       if (!m_copy) {
         ret->setSubsetCollection();
       }
     }
-    const auto ptr        = std::static_pointer_cast<T>(ret);
-    const auto sourceColl = std::static_pointer_cast<T>(source);
+    const auto ptr        = static_cast<T*>(ret);
+    const auto sourceColl = static_cast<const T*>(source);
     if (m_copy) {
       for (const auto& elem : *sourceColl) {
         ptr->push_back(elem.clone());

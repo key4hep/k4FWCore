@@ -185,18 +185,22 @@ public:
       }
     }
 
-    DataObject*                   p;
-    StatusCode                    code = m_dataSvc->retrieveObject("/Event" + k4FWCore::frameLocation, p);
-    AnyDataWrapper<podio::Frame>* ptr;
+    DataObject* p;
+    StatusCode  code = m_dataSvc->retrieveObject("/Event" + k4FWCore::frameLocation, p);
+    std::unique_ptr<AnyDataWrapper<podio::Frame>> ptr;
     // This is the case when we are reading from a file
+    // Since we unregistered the object, we need to delete it
     if (code.isSuccess()) {
-      m_dataSvc->unregisterObject(p).ignore();
-      ptr = dynamic_cast<AnyDataWrapper<podio::Frame>*>(p);
+      auto sc = m_dataSvc->unregisterObject(p);
+      if (!sc.isSuccess()) {
+        error() << "Failed to unregister object" << endmsg;
+        return;
+      }
+      ptr = std::unique_ptr<AnyDataWrapper<podio::Frame>>(dynamic_cast<AnyDataWrapper<podio::Frame>*>(p));
     }
     // This is the case when no reading is being done
-    // Will be deleted by the store
     else {
-      ptr = new AnyDataWrapper<podio::Frame>(podio::Frame());
+      ptr = std::make_unique<AnyDataWrapper<podio::Frame>>(podio::Frame());
     }
 
     const auto& frameCollections = ptr->getData().getAvailableCollections();
@@ -242,7 +246,7 @@ public:
         error() << "Failed to unregister collection " << coll << endmsg;
         return;
       }
-      const auto collection = dynamic_cast<AnyDataWrapper<std::shared_ptr<podio::CollectionBase>>*>(storeCollection);
+      const auto collection = dynamic_cast<AnyDataWrapper<std::unique_ptr<podio::CollectionBase>>*>(storeCollection);
       if (!collection) {
         // Check the case when the data has been produced using the old DataHandle
         const auto old_collection = dynamic_cast<DataWrapperBase*>(storeCollection);
@@ -256,7 +260,7 @@ public:
         }
 
       } else {
-        std::unique_ptr<podio::CollectionBase> uptr(collection->getData().get());
+        std::unique_ptr<podio::CollectionBase> uptr(std::move(collection->getData()));
         ptr->getData().put(std::move(uptr), coll);
       }
     }
