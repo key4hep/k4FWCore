@@ -19,9 +19,9 @@
 #ifndef FWCORE_CONSUMER_H
 #define FWCORE_CONSUMER_H
 
-#include <GaudiKernel/FunctionalFilterDecision.h>
 #include "Gaudi/Functional/details.h"
 #include "Gaudi/Functional/utilities.h"
+#include "GaudiKernel/FunctionalFilterDecision.h"
 
 // #include "GaudiKernel/CommonMessaging.h"
 
@@ -43,14 +43,13 @@ namespace k4FWCore {
         : Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_> {
       using Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>::DataHandleMixin;
 
-      static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike_v<In>)&&...),
+      static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike_v<In>) && ...),
                     "Consumer input types must be EDM4hep collections or vectors of collection pointers");
 
-      template <typename T>
-      using InputHandle_t = Gaudi::Functional::details::InputHandle_t<Traits_, std::remove_pointer_t<T>>;
+      template <typename T> using InputHandle_t = Gaudi::Functional::details::InputHandle_t<Traits_, T>;
 
-      std::tuple<std::vector<InputHandle_t<typename transformType<In>::type>>...> m_inputs;
-      std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)>          m_inputLocations{};
+      std::tuple<std::vector<InputHandle_t<typename EventStoreType<In>::type>>...> m_inputs;
+      std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)>           m_inputLocations{};
 
       using base_class = Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>;
 
@@ -66,9 +65,9 @@ namespace k4FWCore {
             m_inputLocations{Gaudi::Property<std::vector<DataObjID>>{
                 this, std::get<I>(inputs).first, to_DataObjID(std::get<I>(inputs).second),
                 [this](Gaudi::Details::PropertyBase&) {
-                  std::vector<InputHandle_t<typename transformType<In>::type>> handles;
+                  std::vector<InputHandle_t<EventStoreType_t>> handles;
                   for (auto& value : this->m_inputLocations[I].value()) {
-                    auto handle = InputHandle_t<typename transformType<In>::type>(value, this);
+                    auto handle = InputHandle_t<EventStoreType_t>(value, this);
                     handles.push_back(std::move(handle));
                   }
                   std::get<I>(m_inputs) = std::move(handles);
