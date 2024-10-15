@@ -19,10 +19,7 @@
 #ifndef FWCORE_IUNIQUEIDGENSVC_H
 #define FWCORE_IUNIQUEIDGENSVC_H
 
-#include <bitset>
 #include <cstdint>
-#include <functional>
-#include <limits>
 #include <string>
 
 #include <GaudiKernel/IInterface.h>

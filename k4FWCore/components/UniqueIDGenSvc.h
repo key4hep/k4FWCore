@@ -19,11 +19,13 @@
 #ifndef FWCORE_UNIQUEIDGENSVC_H
 #define FWCORE_UNIQUEIDGENSVC_H
 
-#include <cstdint>
-#include <string>
-
-#include <GaudiKernel/Service.h>
+#include "GaudiKernel/Service.h"
 #include "k4Interface/IUniqueIDGenSvc.h"
+
+#include <cstdint>
+#include <functional>
+#include <string>
+#include <unordered_set>
 
 /** @class UniqueIDGenSvc
  *  Generate unique, reproducible numbers using
@@ -34,11 +36,13 @@
 class UniqueIDGenSvc : public extends<Service, IUniqueIDGenSvc> {
 public:
   UniqueIDGenSvc(const std::string& name, ISvcLocator* svcLoc);
-  StatusCode initialize() override;
-  size_t     getUniqueID(uint32_t evt_num, uint32_t run_num, const std::string& name) const override;
+  size_t getUniqueID(uint32_t evt_num, uint32_t run_num, const std::string& name) const override;
 
 private:
-  Gaudi::Property<int64_t> m_seed{this, "Seed", {123456789}};
+  Gaudi::Property<uint64_t>                         m_seed{this, "Seed", {123456789}};
+  mutable std::unordered_set<size_t, std::identity> m_uniqueIDs;
+  mutable std::mutex                                m_mutex;
+  Gaudi::Property<bool>                             m_throwIfDuplicate{this, "ThrowIfDuplicate", {true}};
 };
 
 #endif
