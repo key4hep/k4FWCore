@@ -23,7 +23,6 @@
 #include "GaudiKernel/IDataProviderSvc.h"
 #include "GaudiKernel/SmartDataPtr.h"
 #include "GaudiKernel/StatusCode.h"
-
 #include "podio/Frame.h"
 
 #include "IIOSvc.h"
@@ -185,18 +184,22 @@ public:
       }
     }
 
-    DataObject*                   p;
-    StatusCode                    code = m_dataSvc->retrieveObject("/Event" + k4FWCore::frameLocation, p);
-    AnyDataWrapper<podio::Frame>* ptr;
+    DataObject* p;
+    StatusCode  code = m_dataSvc->retrieveObject("/Event" + k4FWCore::frameLocation, p);
+    std::unique_ptr<AnyDataWrapper<podio::Frame>> ptr;
     // This is the case when we are reading from a file
+    // Putting it into a unique_ptr will make sure it's deleted
     if (code.isSuccess()) {
-      m_dataSvc->unregisterObject(p).ignore();
-      ptr = dynamic_cast<AnyDataWrapper<podio::Frame>*>(p);
+      auto sc = m_dataSvc->unregisterObject(p);
+      if (!sc.isSuccess()) {
+        error() << "Failed to unregister object" << endmsg;
+        return;
+      }
+      ptr = std::unique_ptr<AnyDataWrapper<podio::Frame>>(dynamic_cast<AnyDataWrapper<podio::Frame>*>(p));
     }
     // This is the case when no reading is being done
-    // Will be deleted by the store
     else {
-      ptr = new AnyDataWrapper<podio::Frame>(podio::Frame());
+      ptr = std::make_unique<AnyDataWrapper<podio::Frame>>(podio::Frame());
     }
 
     const auto& frameCollections = ptr->getData().getAvailableCollections();
@@ -229,6 +232,10 @@ public:
         error() << "Failed to unregister collection " << coll << endmsg;
         return;
       }
+      // We still have to delete the AnyDataWrapper to avoid a leak
+      auto storePtr = dynamic_cast<AnyDataWrapper<std::unique_ptr<podio::CollectionBase>>*>(storeCollection);
+      storePtr->getData().release();
+      delete storePtr;
     }
 
     for (auto& coll : m_collectionsToAdd) {
@@ -242,8 +249,11 @@ public:
         error() << "Failed to unregister collection " << coll << endmsg;
         return;
       }
-      const auto collection = dynamic_cast<AnyDataWrapper<std::shared_ptr<podio::CollectionBase>>*>(storeCollection);
-      if (!collection) {
+      const auto collection = dynamic_cast<AnyDataWrapper<std::unique_ptr<podio::CollectionBase>>*>(storeCollection);
+      if (collection) {
+        ptr->getData().put(std::move(collection->getData()), coll);
+        delete collection;
+      } else {
         // Check the case when the data has been produced using the old DataHandle
         const auto old_collection = dynamic_cast<DataWrapperBase*>(storeCollection);
         if (!old_collection) {
@@ -254,10 +264,6 @@ public:
               const_cast<podio::CollectionBase*>(old_collection->collectionBase()));
           ptr->getData().put(std::move(uptr), coll);
         }
-
-      } else {
-        std::unique_ptr<podio::CollectionBase> uptr(collection->getData().get());
-        ptr->getData().put(std::move(uptr), coll);
       }
     }
 

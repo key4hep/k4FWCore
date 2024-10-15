@@ -109,15 +109,14 @@ StatusCode IOSvc::initialize() {
 
 StatusCode IOSvc::finalize() { return Service::finalize(); }
 
-std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, std::vector<std::string>, podio::Frame> IOSvc::next() {
+std::tuple<std::vector<podio::CollectionBase*>, std::vector<std::string>, podio::Frame> IOSvc::next() {
   podio::Frame frame;
   {
-    std::scoped_lock<std::mutex> lock(m_changeBufferLock);
+    std::lock_guard<std::mutex> lock(m_changeBufferLock);
     if (m_nextEntry < m_entries) {
       frame = podio::Frame(m_reader->readEvent(m_nextEntry));
     } else {
-      return std::make_tuple(std::vector<std::shared_ptr<podio::CollectionBase>>(), std::vector<std::string>(),
-                             std::move(frame));
+      return std::make_tuple(std::vector<podio::CollectionBase*>(), std::vector<std::string>(), std::move(frame));
     }
     m_nextEntry++;
     if (m_collectionNames.empty()) {
@@ -134,11 +133,11 @@ std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, std::vector<std:
     }
   }
 
-  std::vector<std::shared_ptr<podio::CollectionBase>> collections;
+  std::vector<podio::CollectionBase*> collections;
 
   for (const auto& name : m_collectionNames) {
     auto ptr = const_cast<podio::CollectionBase*>(frame.get(name));
-    collections.push_back(std::shared_ptr<podio::CollectionBase>(ptr));
+    collections.push_back(ptr);
   }
 
   return std::make_tuple(collections, m_collectionNames, std::move(frame));
@@ -178,7 +177,10 @@ void IOSvc::handle(const Incident& incident) {
     code = m_dataSvc->retrieveObject("/Event/" + coll, collPtr);
     if (code.isSuccess()) {
       debug() << "Removing the collection: " << coll << " from the store" << endmsg;
-      code = m_dataSvc->unregisterObject(collPtr);
+      code          = m_dataSvc->unregisterObject(collPtr);
+      auto storePtr = dynamic_cast<AnyDataWrapper<std::unique_ptr<podio::CollectionBase>>*>(collPtr);
+      storePtr->getData().release();
+      delete storePtr;
     } else {
       error() << "Expected collection " << coll << " in the store but it was not found" << endmsg;
     }
