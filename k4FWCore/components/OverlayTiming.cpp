@@ -221,13 +221,13 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection&         
       for (int k = 0; k < NOverlay_to_this_BX; ++k) {
         info() << "Overlaying background event " << m_bkgEvents->m_nextEntry[groupIndex] << " from group " << groupIndex
                << " to BX " << bxInTrain << endmsg;
-        auto backgroundEvent =
-            m_bkgEvents->m_rootFileReaders[groupIndex].readEvent(m_bkgEvents->m_nextEntry[groupIndex]);
-        m_bkgEvents->m_nextEntry[groupIndex]++;
         if (m_bkgEvents->m_nextEntry[groupIndex] >= m_bkgEvents->m_totalNumberOfEvents[groupIndex] &&
             !m_allowReusingBackgroundFiles) {
           throw GaudiException("No more events in background file", name(), StatusCode::FAILURE);
         }
+        auto backgroundEvent =
+            m_bkgEvents->m_rootFileReaders[groupIndex].readEvent(m_bkgEvents->m_nextEntry[groupIndex]);
+        m_bkgEvents->m_nextEntry[groupIndex]++;
         m_bkgEvents->m_nextEntry[groupIndex] %= m_bkgEvents->m_totalNumberOfEvents[groupIndex];
         auto availableCollections = backgroundEvent.getAvailableCollections();
 
