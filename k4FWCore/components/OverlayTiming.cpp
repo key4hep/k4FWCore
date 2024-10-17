@@ -21,7 +21,10 @@
 
 #include "podio/Frame.h"
 
+#include "edm4hep/Constants.h"
 #include "edm4hep/MutableCaloHitContribution.h"
+
+#include "k4FWCore/MetadataUtils.h"
 
 #include <TMath.h>
 
@@ -376,6 +379,26 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection&         
 
   return std::make_tuple(std::move(oparticles), std::move(osimTrackerHits), std::move(osimCaloHits),
                          std::move(ocaloHitContribs));
+}
+
+StatusCode OverlayTiming::finalize() {
+  if (m_copyCellIDMetadata) {
+    for (auto& [input, output] :
+         {std::make_pair(inputLocations(SIMTRACKERHIT_INDEX_POSITION), outputLocations("OutputSimTrackerHits")),
+          std::make_pair(inputLocations(SIMCALOHIT_INDEX_POSITION), outputLocations("OutputSimCalorimeterHits"))}) {
+      for (size_t i = 0; i < input.size(); ++i) {
+        auto name  = input[i];
+        auto value = k4FWCore::getParameter<std::string>(name + "__" + edm4hep::labels::CellIDEncoding, this);
+        if (value.has_value()) {
+          k4FWCore::putParameter(output[i] + "__" + edm4hep::labels::CellIDEncoding, value.value(), this);
+        } else {
+          warning() << "No metadata found for " << name << endmsg;
+        }
+      }
+    }
+  }
+
+  return Gaudi::Algorithm::finalize();
 }
 
 DECLARE_COMPONENT(OverlayTiming)

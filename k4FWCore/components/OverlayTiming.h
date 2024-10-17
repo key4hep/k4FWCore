@@ -94,6 +94,7 @@ struct OverlayTiming : public k4FWCore::MultiTransformer<retType(
   template <typename T> void overlayCollection(std::string collName, const podio::CollectionBase& inColl);
 
   virtual StatusCode initialize() final;
+  virtual StatusCode finalize() final;
 
   retType virtual operator()(
       const edm4hep::EventHeaderCollection& headers, const edm4hep::MCParticleCollection& mcParticles,
@@ -140,6 +141,9 @@ private:
       this, "TimeWindows", std::map<std::string, std::vector<float>>(), "Time windows for the different collections"};
   Gaudi::Property<bool> m_allowReusingBackgroundFiles{
       this, "AllowReusingBackgroundFiles", false, "If true the same background file can be used for the same event"};
+  Gaudi::Property<bool> m_copyCellIDMetadata{this, "CopyCellIDMetadata", false,
+                                             "If metadata is found in the signal file, copy it to the output file, "
+                                             "replacing the old names with the new names"};
 
   // Gaudi::Property<int> m_maxCachedFrames{
   //   this, "MaxCachedFrames", 0, "Maximum number of frames cached from background files"};
