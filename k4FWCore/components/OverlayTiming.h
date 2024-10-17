@@ -48,7 +48,10 @@
 #include "Gaudi/Parsers/Factory.h"
 #include "Gaudi/Property.h"
 
+#include <map>
 #include <random>
+#include <string>
+#include <vector>
 
 struct EventHolder {
   std::vector<std::vector<std::string>> m_fileNames;
