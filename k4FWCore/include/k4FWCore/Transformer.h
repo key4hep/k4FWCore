@@ -152,8 +152,7 @@ namespace k4FWCore {
       }
 
       /**
-       * @brief    Get the output locations for a given output index
-       * @param i  The index of the output
+       * @brief    Get the output locations
        * @return   A range of the output locations
        */
       auto outputLocations() const {
@@ -261,7 +260,7 @@ namespace k4FWCore {
        * @param i  The index of the input
        * @return   A range of the input locations
        */
-      auto inputLocations(int i) const {
+      auto inputLocations(size_t i) const {
         if (i >= sizeof...(In)) {
           throw std::out_of_range("Called inputLocations with an index out of range, index: " + std::to_string(i) +
                                   ", number of inputs: " + std::to_string(sizeof...(In)));
@@ -286,7 +285,7 @@ namespace k4FWCore {
        * @param i  The index of the output
        * @return   A range of the output locations
        */
-      auto outputLocations(int i) const {
+      auto outputLocations(size_t i) const {
         if (i >= sizeof...(Out)) {
           throw std::out_of_range("Called outputLocations with an index out of range");
         }
