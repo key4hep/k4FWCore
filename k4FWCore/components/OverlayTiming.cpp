@@ -392,7 +392,7 @@ StatusCode OverlayTiming::finalize() {
         if (value.has_value()) {
           k4FWCore::putParameter(output[i] + "__" + edm4hep::labels::CellIDEncoding, value.value(), this);
         } else {
-          warning() << "No metadata found for " << name << endmsg;
+          warning() << "No metadata found for " << name << " when copying CellID metadata was requested" << endmsg;
         }
       }
     }
