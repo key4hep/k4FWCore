@@ -384,8 +384,8 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection&         
 StatusCode OverlayTiming::finalize() {
   if (m_copyCellIDMetadata) {
     for (auto& [input, output] :
-         {std::make_pair(inputLocations(SIMTRACKERHIT_INDEX_POSITION), outputLocations("OutputSimTrackerHits")),
-          std::make_pair(inputLocations(SIMCALOHIT_INDEX_POSITION), outputLocations("OutputSimCalorimeterHits"))}) {
+         {std::make_pair(inputLocations("SimTrackerHits"), outputLocations("OutputSimTrackerHits")),
+          std::make_pair(inputLocations("SimCalorimeterHits"), outputLocations("OutputSimCalorimeterHits"))}) {
       for (size_t i = 0; i < input.size(); ++i) {
         auto name  = input[i];
         auto value = k4FWCore::getParameter<std::string>(name + "__" + edm4hep::labels::CellIDEncoding, this);
