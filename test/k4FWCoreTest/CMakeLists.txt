@@ -140,7 +140,8 @@ add_test_with_env(Testk4runVerboseOutput options/TestArgs.py --verbose PROPERTIE
 add_test_with_env(Testk4runHelpOnly options/TestArgs.py --help PROPERTIES PASS_REGULAR_EXPRESSION "show this help message and exit")
 
 add_test_with_env(TestEventCounter options/TestEventCounter.py)
-set_tests_properties(TestEventCounter PROPERTIES FAIL_REGULAR_EXPRESSION "Processing event 1;Processing event 3" PASS_REGULAR_EXPRESSION "Processing event 0.*Processing event 2;Processing event 2.*Processing event 0")
+set_tests_properties(TestEventCounter PROPERTIES FAIL_REGULAR_EXPRESSION "Processing event 1;Processing event 3"
+                     PASS_REGULAR_EXPRESSION "(Processing event 0.*Processing event 2|Processing event 2.*Processing event 0).*Processed 4 events.*Processed 4 events")
 
 add_test_with_env(FunctionalMemory options/ExampleFunctionalMemory.py)
 add_test_with_env(FunctionalMTMemory options/ExampleFunctionalMTMemory.py)

@@ -31,6 +31,11 @@ public:
     }
   }
 
+  StatusCode finalize() override {
+    info() << "Processed " << m_count.value() << " events" << endmsg;
+    return Consumer::finalize();
+  }
+
 private:
   mutable Gaudi::Accumulators::Counter<> m_count{this, "count"};
   Gaudi::Property<unsigned int>          m_frequency{this, "Frequency", 1, "How often to print the event number"};
