@@ -19,16 +19,17 @@
 #ifndef FWCORE_FUNCTIONALUTILS_H
 #define FWCORE_FUNCTIONALUTILS_H
 
-#include <GaudiKernel/AnyDataWrapper.h>
-#include <GaudiKernel/IDataProviderSvc.h>
 #include "Gaudi/Functional/details.h"
+#include "GaudiKernel/AnyDataWrapper.h"
 #include "GaudiKernel/DataObjID.h"
-#include "k4FWCore/DataWrapper.h"
-#include "podio/CollectionBase.h"
-
 #include "GaudiKernel/DataObjectHandle.h"
 #include "GaudiKernel/EventContext.h"
+#include "GaudiKernel/IDataProviderSvc.h"
 #include "GaudiKernel/ThreadLocalContext.h"
+
+#include "podio/CollectionBase.h"
+
+#include "k4FWCore/DataWrapper.h"
 
 // #include "GaudiKernel/CommonMessaging.h"
 
@@ -48,22 +49,25 @@ namespace k4FWCore {
     };
     using EventStoreType_t = typename EventStoreType<void>::type;
 
+    // This is used when there is an arbitrary number of collections as input/output
     template <typename T, typename P>
       requires(!std::is_same_v<P, podio::CollectionBase*>)
     const auto& maybeTransformToEDM4hep(const P& arg) {
       return arg;
     }
 
-    template <typename T, typename P>
-      requires(std::is_base_of_v<podio::CollectionBase, P> && !std::same_as<podio::CollectionBase, P>)
-    const auto& maybeTransformToEDM4hep(P* arg) {
-      return *arg;
-    }
-
+    // This is used by the FilterPredicate
     template <typename T, typename P>
       requires std::same_as<P, podio::CollectionBase*>
     const auto& maybeTransformToEDM4hep(P&& arg) {
       return static_cast<const T&>(*arg);
+    }
+
+    // This is used in all the remaining cases
+    template <typename T, typename P>
+      requires(std::is_base_of_v<podio::CollectionBase, P> && !std::same_as<podio::CollectionBase, P>)
+    const auto& maybeTransformToEDM4hep(P* arg) {
+      return *arg;
     }
 
     template <typename T, bool addPtr = std::is_base_of_v<podio::CollectionBase, T>>
@@ -91,9 +95,9 @@ namespace k4FWCore {
       // returned from the algorithm
       if constexpr (std::same_as<T, podio::CollectionBase*>) {
         return std::unique_ptr<podio::CollectionBase>(std::forward<T>(arg));
+      } else {
         // Most common case, when an algorithm returns a collection and
         // we want to store a unique_ptr
-      } else {
         return std::make_unique<T>(std::forward<T>(arg));
       }
     }
@@ -205,6 +209,8 @@ namespace k4FWCore {
     }
 
     // Functional handles
+    // This is currently used so that the FilterPredicate can be used together with the
+    // consumer/producer/transformer
     template <typename T> class FunctionalDataObjectReadHandle : public ::details::ReadHandle<T> {
       template <typename... Args, std::size_t... Is>
       FunctionalDataObjectReadHandle(std::tuple<Args...>&& args, std::index_sequence<Is...>)
