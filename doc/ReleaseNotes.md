@@ -1,3 +1,21 @@
+# v01-01-01
+
+* 2024-10-28 jmcarcell ([PR#250](https://github.com/key4hep/k4FWCore/pull/250))
+  - Use `std::unique_ptr<podio::CollectionBase>` for the collections in the store instead of `std::shared_ptr<podio::CollectionBase>`. 
+  - Fix leak in the `Writer` that otherwise would have been difficult to fix (without the change above)
+  - Clean up `FunctionalUtils.h`: remove some unused overloads and change some names.
+
+* 2024-10-17 jmcarcell ([PR#251](https://github.com/key4hep/k4FWCore/pull/251))
+  - Use size_t in the arguments for getting the input and output locations to remove warnings, and fix some comments
+
+* 2024-10-15 jmcarcell ([PR#247](https://github.com/key4hep/k4FWCore/pull/247))
+  - Overhaul the `UniqueIDGenSvc`:
+    - Use bit manipulation with the `UniqueIDGenSvc` which is about 1000 times faster than the string manipulation that was being done
+    - Add a check for the case where an ID is repeated - trying to catch the case where the event number and run number is always the same, then the same random number sequence will be generated.
+
+* 2024-10-09 jmcarcell ([PR#244](https://github.com/key4hep/k4FWCore/pull/244))
+  - Update README: remove note about GaudiAlg being outdated since it's not there anymore and Use Key4hep instead of Key4HEP
+
 # v01-01-00
 
 * 2024-10-03 jmcarcell ([PR#243](https://github.com/key4hep/k4FWCore/pull/243))
