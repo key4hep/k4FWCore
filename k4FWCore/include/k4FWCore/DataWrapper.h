@@ -41,7 +41,7 @@ public:
   template <class T2> friend class DataHandle;
 
 public:
-  DataWrapper() : m_data(nullptr){};
+  DataWrapper() : m_data(nullptr) {}
   DataWrapper(T&& coll) {
     m_data   = new T(std::move(coll));
     is_owner = true;
@@ -49,7 +49,7 @@ public:
   DataWrapper(std::unique_ptr<T> uptr) : m_data(uptr.get()) {
     uptr.release();
     is_owner = false;
-  };
+  }
   virtual ~DataWrapper();
 
   const T* getData() const { return m_data; }

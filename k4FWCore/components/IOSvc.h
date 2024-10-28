@@ -43,8 +43,7 @@ public:
   StatusCode initialize() override;
   StatusCode finalize() override;
 
-  std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, std::vector<std::string>, podio::Frame> next()
-      override;
+  std::tuple<std::vector<podio::CollectionBase*>, std::vector<std::string>, podio::Frame> next() override;
 
   std::shared_ptr<std::vector<std::string>> getCollectionNames() const override {
     return std::make_shared<std::vector<std::string>>(m_collectionNames);
