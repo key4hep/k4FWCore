@@ -54,8 +54,8 @@ namespace k4FWCore {
       template <typename T>
       using OutputHandle_t = Gaudi::Functional::details::OutputHandle_t<Traits_, std::remove_pointer_t<T>>;
 
-      std::tuple<std::vector<InputHandle_t<typename transformType<In>::type>>...> m_inputs;
-      std::tuple<std::vector<OutputHandle_t<typename transformType<Out>::type>>>  m_outputs;
+      std::tuple<std::vector<InputHandle_t<typename EventStoreType<In>::type>>...> m_inputs;
+      std::tuple<std::vector<OutputHandle_t<typename EventStoreType<Out>::type>>>  m_outputs;
       std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)>          m_inputLocations{};
       Gaudi::Property<std::vector<DataObjID>>                                     m_outputLocations{};
 
@@ -75,9 +75,9 @@ namespace k4FWCore {
             m_inputLocations{Gaudi::Property<std::vector<DataObjID>>{
                 this, std::get<I>(inputs).first, to_DataObjID(std::get<I>(inputs).second),
                 [this](Gaudi::Details::PropertyBase&) {
-                  std::vector<InputHandle_t<typename transformType<In>::type>> h;
+                  std::vector<InputHandle_t<typename EventStoreType<In>::type>> h;
                   for (auto& value : this->m_inputLocations[I].value()) {
-                    auto handle = InputHandle_t<typename transformType<In>::type>(value, this);
+                    auto handle = InputHandle_t<typename EventStoreType<In>::type>(value, this);
                     h.push_back(std::move(handle));
                   }
                   std::get<I>(m_inputs) = std::move(h);
@@ -87,12 +87,12 @@ namespace k4FWCore {
             m_outputLocations{Gaudi::Property<std::vector<DataObjID>>{
                 this, std::get<J>(outputs).first, to_DataObjID(std::get<J>(outputs).second),
                 [this](Gaudi::Details::PropertyBase&) {
-                  std::vector<OutputHandle_t<typename transformType<Out>::type>> h;
+                  std::vector<OutputHandle_t<typename EventStoreType<Out>::type>> h;
                   for (auto& inpID : this->m_outputLocations.value()) {
                     if (inpID.key().empty()) {
                       continue;
                     }
-                    auto handle = OutputHandle_t<typename transformType<Out>::type>(inpID, this);
+                    auto handle = OutputHandle_t<typename EventStoreType<Out>::type>(inpID, this);
                     h.push_back(std::move(handle));
                   }
                   std::get<0>(m_outputs) = std::move(h);
@@ -192,8 +192,8 @@ namespace k4FWCore {
       template <typename T>
       using OutputHandle_t = Gaudi::Functional::details::OutputHandle_t<Traits_, std::remove_pointer_t<T>>;
 
-      std::tuple<std::vector<InputHandle_t<typename transformType<In>::type>>...>   m_inputs;
-      std::tuple<std::vector<OutputHandle_t<typename transformType<Out>::type>>...> m_outputs;
+      std::tuple<std::vector<InputHandle_t<typename EventStoreType<In>::type>>...>   m_inputs;
+      std::tuple<std::vector<OutputHandle_t<typename EventStoreType<Out>::type>>...> m_outputs;
       std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)>            m_inputLocations{};
       std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(Out)>           m_outputLocations{};
 
@@ -208,9 +208,9 @@ namespace k4FWCore {
             m_inputLocations{Gaudi::Property<std::vector<DataObjID>>{
                 this, std::get<I>(inputs).first, to_DataObjID(std::get<I>(inputs).second),
                 [this](Gaudi::Details::PropertyBase&) {
-                  std::vector<InputHandle_t<typename transformType<In>::type>> h;
+                  std::vector<InputHandle_t<typename EventStoreType<In>::type>> h;
                   for (auto& value : this->m_inputLocations[I].value()) {
-                    auto handle = InputHandle_t<typename transformType<In>::type>(value, this);
+                    auto handle = InputHandle_t<typename EventStoreType<In>::type>(value, this);
                     h.push_back(std::move(handle));
                   }
                   std::get<I>(m_inputs) = std::move(h);
@@ -219,7 +219,7 @@ namespace k4FWCore {
             m_outputLocations{Gaudi::Property<std::vector<DataObjID>>{
                 this, std::get<J>(outputs).first, to_DataObjID(std::get<J>(outputs).second),
                 [this](Gaudi::Details::PropertyBase&) {
-                  std::vector<OutputHandle_t<typename transformType<Out>::type>> h;
+                  std::vector<OutputHandle_t<typename EventStoreType<Out>::type>> h;
                   // Is this needed?
                   // std::sort(this->m_outputLocations[J].value().begin(), this->m_outputLocations[J].value().end(),
                   //           [](const DataObjID& a, const DataObjID& b) { return a.key() < b.key(); });
@@ -227,7 +227,7 @@ namespace k4FWCore {
                     if (inpID.key().empty()) {
                       continue;
                     }
-                    auto handle = OutputHandle_t<typename transformType<Out>::type>(inpID, this);
+                    auto handle = OutputHandle_t<typename EventStoreType<Out>::type>(inpID, this);
                     h.push_back(std::move(handle));
                   }
                   std::get<J>(m_outputs) = std::move(h);
