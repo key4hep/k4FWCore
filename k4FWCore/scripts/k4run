@@ -67,7 +67,10 @@ def add_arguments(parser, app_mgr):
     # can contain the same value multiple times
     # see https://github.com/key4hep/k4FWCore/issues/141
     for conf in frozenset(app_mgr.allConfigurables.values()):
-        if conf.name() in ["ApplicationMgr", "ToolSvc", "k4FWCore__Sequencer", "k4FWCore__Algs"]:
+        # ToolSvcs will have their properties duplicated, once as the
+        # named service itself and another one as "ToolSvc" if it's not
+        # excluded here
+        if any(name in conf.name() for name in ["ApplicationMgr", "ToolSvc"]):
             continue
         for prop_name, prop_value in conf.getPropertiesWithDescription().items():
             if (
