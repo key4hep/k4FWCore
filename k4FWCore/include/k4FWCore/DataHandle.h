@@ -22,10 +22,7 @@
 #include "k4FWCore/DataWrapper.h"
 #include "k4FWCore/PodioDataSvc.h"
 
-#include "Gaudi/Algorithm.h"
 #include "GaudiKernel/DataObjectHandle.h"
-
-#include "edm4hep/Constants.h"
 
 #include <GaudiKernel/AnyDataWrapper.h>
 #include <type_traits>
@@ -68,8 +65,6 @@ public:
 
 private:
   ServiceHandle<IDataProviderSvc> m_eds;
-  bool                            m_isGoodType{false};
-  bool                            m_isCollection{false};
   T*                              m_dataPtr;
 };
 
@@ -108,40 +103,28 @@ DataHandle<T>::DataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode
  * static cast: we do not need the checks of the dynamic cast for every access!
  */
 template <typename T> const T* DataHandle<T>::get() {
-  DataObject* dataObjectp = nullptr;
-  auto        sc          = m_eds->retrieveObject(DataObjectHandle<DataWrapper<T>>::fullKey().key(), dataObjectp);
+  DataObject* dataObjectp;
+  auto        sc = m_eds->retrieveObject(DataObjectHandle<DataWrapper<T>>::fullKey().key(), dataObjectp);
 
-  if (sc.isSuccess()) {
-    if (!m_isGoodType && !m_isCollection) {
-      // only do this once (if both are false after this, we throw exception)
-      m_isGoodType = nullptr != dynamic_cast<DataWrapper<T>*>(dataObjectp);
-      if (!m_isGoodType) {
-        auto* tmp = dynamic_cast<DataWrapper<podio::CollectionBase>*>(dataObjectp);
-        if (tmp != nullptr) {
-          m_isCollection = nullptr != dynamic_cast<T*>(tmp->collectionBase());
-        }
-      }
-    }
-    if (m_isGoodType) {
-      return static_cast<DataWrapper<T>*>(dataObjectp)->getData();
-    } else if (m_isCollection) {
-      // The reader does not know the specific type of the collection. So we need a reinterpret_cast if the handle was
-      // created by the reader.
-      auto* tmp = static_cast<DataWrapper<podio::CollectionBase>*>(dataObjectp);
-      return reinterpret_cast<const T*>(tmp->collectionBase());
-    } else {
-      // When a functional has pushed a std::shared_ptr<podio::CollectionBase> into the store
-      auto ptr = static_cast<AnyDataWrapper<std::unique_ptr<podio::CollectionBase>>*>(dataObjectp);
-      if (ptr) {
-        return static_cast<const T*>(ptr->getData().get());
-      }
-      std::string errorMsg("The type provided for " + DataObjectHandle<DataWrapper<T>>::pythonRepr() +
-                           " is different from the one of the object in the store.");
-      throw GaudiException(errorMsg, "wrong product type", StatusCode::FAILURE);
-    }
+  if (sc.isFailure()) {
+    std::string msg("Could not retrieve product " + DataObjectHandle<DataWrapper<T>>::pythonRepr());
+    throw GaudiException(msg, "wrong product name", StatusCode::FAILURE);
   }
-  std::string msg("Could not retrieve product " + DataObjectHandle<DataWrapper<T>>::pythonRepr());
-  throw GaudiException(msg, "wrong product name", StatusCode::FAILURE);
+  bool isGoodType = nullptr != dynamic_cast<DataWrapper<T>*>(dataObjectp);
+  if (isGoodType) {
+    return static_cast<DataWrapper<T>*>(dataObjectp)->getData();
+  }
+
+  // When a functional has pushed a std::unique_ptr<podio::CollectionBase> into the store
+  // We wrap it inside constexpr because if the handle has a type that is not a collection
+  // then the static_cast will fail at compile time
+  if constexpr (std::is_base_of_v<podio::CollectionBase, T>) {
+    auto ptr = static_cast<AnyDataWrapper<std::unique_ptr<podio::CollectionBase>>*>(dataObjectp);
+    return static_cast<const T*>(ptr->getData().get());
+  }
+  std::string errorMsg("The type provided for " + DataObjectHandle<DataWrapper<T>>::pythonRepr() +
+                       " is different from the one of the object in the store.");
+  throw GaudiException(errorMsg, "wrong product type", StatusCode::FAILURE);
 }
 
 //---------------------------------------------------------------------------
