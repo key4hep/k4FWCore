@@ -26,14 +26,14 @@ public:
 
   void operator()(const EventContext& ctx) const override {
     ++m_count;
-    if ((m_frequency > 0) && (ctx.evt() % m_frequency == 0)) {
+    if (m_frequency && (ctx.evt() % m_frequency == 0)) {
       info() << "Processing event " << ctx.evt() << endmsg;
     }
   }
 
 private:
   mutable Gaudi::Accumulators::Counter<> m_count{this, "count"};
-  Gaudi::Property<int>                   m_frequency{this, "Frequency", 1, "How often to print the event number"};
+  Gaudi::Property<unsigned int>          m_frequency{this, "Frequency", 1, "How often to print the event number"};
 };
 
 DECLARE_COMPONENT(EventCounter)
