@@ -43,10 +43,10 @@ namespace k4FWCore {
         : Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_> {
       using Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>::DataHandleMixin;
 
-      static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike_v<In>)&&...),
+      static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike_v<In>) && ...),
                     "Transformer and Producer input types must be EDM4hep collections or vectors of collections");
       static_assert((std::is_base_of_v<podio::CollectionBase, Out> || isVectorLike_v<Out> ||
-                     std::is_same_v<std::shared_ptr<podio::CollectionBase>, Out>),
+                     std::is_same_v<podio::CollectionBase*, Out>),
                     "Transformer and Producer output types must be EDM4hep collections or vectors of collections");
 
       template <typename T>
@@ -56,8 +56,8 @@ namespace k4FWCore {
 
       std::tuple<std::vector<InputHandle_t<typename EventStoreType<In>::type>>...> m_inputs;
       std::tuple<std::vector<OutputHandle_t<typename EventStoreType<Out>::type>>>  m_outputs;
-      std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)>          m_inputLocations{};
-      Gaudi::Property<std::vector<DataObjID>>                                     m_outputLocations{};
+      std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)>           m_inputLocations{};
+      Gaudi::Property<std::vector<DataObjID>>                                      m_outputLocations{};
 
       using base_class = Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>;
 
@@ -117,7 +117,7 @@ namespace k4FWCore {
           } else {
             Gaudi::Functional::details::put(
                 std::get<0>(this->m_outputs)[0],
-                convertToSharedPtr(std::move(filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs))));
+                convertToUniquePtr(std::move(filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs))));
           }
           return Gaudi::Functional::FilterDecision::PASSED;
         } catch (GaudiException& e) {
@@ -194,8 +194,8 @@ namespace k4FWCore {
 
       std::tuple<std::vector<InputHandle_t<typename EventStoreType<In>::type>>...>   m_inputs;
       std::tuple<std::vector<OutputHandle_t<typename EventStoreType<Out>::type>>...> m_outputs;
-      std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)>            m_inputLocations{};
-      std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(Out)>           m_outputLocations{};
+      std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)>             m_inputLocations{};
+      std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(Out)>            m_outputLocations{};
 
       using base_class = Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>;
 
