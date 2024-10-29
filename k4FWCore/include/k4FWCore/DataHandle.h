@@ -26,6 +26,7 @@
 
 #include <GaudiKernel/AnyDataWrapper.h>
 #include <type_traits>
+#include <stdexcept>
 
 /**
  * Specialisation of the Gaudi DataHandle
@@ -123,8 +124,8 @@ template <typename T> const T* DataHandle<T>::get() {
     return static_cast<const T*>(ptr->getData().get());
   }
   std::string errorMsg("The type provided for " + DataObjectHandle<DataWrapper<T>>::pythonRepr() +
-                       " is different from the one of the object in the store.");
-  throw GaudiException(errorMsg, "wrong product type", StatusCode::FAILURE);
+                       " is different from the one of the object in the store " + typeid(*dataObjectp).name());
+  throw std::runtime_error(errorMsg);
 }
 
 //---------------------------------------------------------------------------
