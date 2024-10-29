@@ -25,8 +25,8 @@
 #include "GaudiKernel/DataObjectHandle.h"
 
 #include <GaudiKernel/AnyDataWrapper.h>
-#include <type_traits>
 #include <stdexcept>
+#include <type_traits>
 
 /**
  * Specialisation of the Gaudi DataHandle
