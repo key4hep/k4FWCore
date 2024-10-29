@@ -1,3 +1,11 @@
+# v01-01-02
+
+* 2024-10-29 jmcarcell ([PR#253](https://github.com/key4hep/k4FWCore/pull/253))
+  - Fix DataHandle::get() for non-collection types and remove dead code. A `reinterpret_cast` was changed to `static_cast` in https://github.com/key4hep/k4FWCore/pull/250 that made it fail at compile time for non-collection types. Now the `static_cast` is properly wrapped around an `if constexpr` and code around it has been deleted since it looked impossible to trigger.
+
+* 2024-10-28 jmcarcell ([PR#254](https://github.com/key4hep/k4FWCore/pull/254))
+  - Don't add duplicated options for ToolSvcs
+
 # v01-01-01
 
 * 2024-10-28 jmcarcell ([PR#250](https://github.com/key4hep/k4FWCore/pull/250))
