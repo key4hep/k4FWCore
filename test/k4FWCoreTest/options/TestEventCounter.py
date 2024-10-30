@@ -52,7 +52,9 @@ mgr = ApplicationMgr(
     TopAlg=[counter_1, counter_2],
     EvtSel="NONE",
     EvtMax=4,
-    ExtSvc=[whiteboard, "Gaudi::Monitoring::MessageSvcSink"],
+    # Add "MessageSvcSink" for a table at the end with a statistical summary of the counter data
+    # ExtSvc=[whiteboard, "Gaudi::Monitoring::MessageSvcSink"],
+    ExtSvc=[whiteboard],
     EventLoop=slimeventloopmgr,
     OutputLevel=INFO,
 )
