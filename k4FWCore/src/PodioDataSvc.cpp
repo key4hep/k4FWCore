@@ -59,13 +59,12 @@ StatusCode PodioDataSvc::initialize() {
     m_metadataframe = podio::Frame();
   }
 
-  IProperty* property;
-  auto       sc = service("ApplicationMgr", property);
-  if (sc == StatusCode::FAILURE) {
-    error() << "Could not get ApplicationMgr properties" << std::endl;
+  auto appMgr = service<IProperty>("ApplicationMgr", false);
+  if (!appMgr) {
+    throw std::runtime_error("Could not get ApplicationMgr");
   }
   Gaudi::Property<int> evtMax;
-  evtMax.assign(property->getProperty("EvtMax"));
+  evtMax.assign(appMgr->getProperty("EvtMax"));
   m_requestedEventMax = evtMax;
   m_requestedEventMax -= m_1stEvtEntry;
 
@@ -133,11 +132,15 @@ void PodioDataSvc::endOfRead() {
   if (m_eventNum >= m_numAvailableEvents) {
     info() << "Reached end of file with event " << m_eventNum << " (" << m_requestedEventMax << " events requested)"
            << endmsg;
-    IEventProcessor* eventProcessor;
-    sc = service("ApplicationMgr", eventProcessor);
+    auto eventProcessor = service<IEventProcessor>("ApplicationMgr", false);
+    if (!eventProcessor) {
+      throw std::runtime_error("Could not retrieve ApplicationMgr to schedule a stop");
+    }
     sc = eventProcessor->stopRun();
+    if (sc.isFailure()) {
+      throw std::runtime_error("Failed to stop the run");
+    }
   }
-  // todo: figure out sthg to do with sc (added to silence -Wunused-result)
 }
 
 /// Standard Constructor
