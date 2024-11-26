@@ -9,13 +9,13 @@ jobs:
       fail-fast: false
       matrix:
         cvmfs_base: ['sft.cern.ch/lcg/views']
-        ENVIRONMENT: ['dev3/latest/x86_64-centos7-gcc11-opt']
+        ENVIRONMENT: ['dev3/latest/x86_64-el9-gcc13-opt']
     steps:
     - uses: actions/checkout@v2
     - uses: cvmfs-contrib/github-action-cvmfs@v2
     - name: Start container
       run: |
-        docker run -it --name CI_container -v ${GITHUB_WORKSPACE}:/Package -v /cvmfs:/cvmfs:shared -d ghcr.io/aidasoft/centos7:latest /bin/bash
+        docker run -it --name CI_container -v ${GITHUB_WORKSPACE}:/Package -v /cvmfs:/cvmfs:shared -d ghcr.io/aidasoft/alma9:latest /bin/bash
     - name: CMake Configure
       run: |
          docker exec CI_container /bin/bash -c 'cd Package;\
