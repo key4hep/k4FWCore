@@ -23,7 +23,17 @@ from k4FWCore import ApplicationMgr, IOSvc
 iosvc = IOSvc()
 iosvc.Output = "functional_metadata_old_algorithm.root"
 
-producer = k4FWCoreTest_cellID_writer()
+producer = k4FWCoreTest_cellID_writer(
+    "CellIDWriter",
+    intProp2=69,
+    floatProp2=2.71828,
+    doubleProp2=2.7182818,
+    stringProp2="Hello, World!",
+    vectorIntProp2=[1, 2, 3, 4],
+    vectorFloatProp2=[1.1, 2.2, 3.3, 4.4],
+    vectorDoubleProp2=[1.1, 2.2, 3.3, 4.4],
+    vectorStringProp2=["one", "two", "three", "four"],
+)
 consumer = k4FWCoreTest_cellID_reader()
 
 
