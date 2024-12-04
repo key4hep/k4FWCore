@@ -165,19 +165,19 @@ add_test_with_env(FunctionalTransformerRuntimeCollections options/ExampleFunctio
 add_test_with_env(FunctionalTransformerRuntimeEmpty options/ExampleFunctionalTransformerRuntimeEmpty.py ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalTransformerRuntimeCollectionsMultiple options/ExampleFunctionalTransformerRuntimeCollectionsMultiple.py)
 add_test_with_env(FunctionalTransformerHist options/ExampleFunctionalTransformerHist.py ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalCollectionMerger options/ExampleFunctionalCollectionMerger.py ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalCollectionMerger options/ExampleFunctionalCollectionMerger.py PROPERTIES DEPENDS FunctionalProducerMultiple ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalFilterFile options/ExampleFunctionalFilterFile.py ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalMetadata options/ExampleFunctionalMetadata.py ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalMetadataRead options/ExampleFunctionalMetadataRead.py PROPERTIES DEPENDS FunctionalMetadata ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalMetadataOldAlgorithm options/ExampleFunctionalMetadataOldAlgorithm.py ADD_TO_CHECK_FILES)
 add_test_with_env(createEventHeaderConcurrent options/createEventHeaderConcurrent.py ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalMetadataReadOldAlgorithm options/ExampleFunctionalMetadataReadOldAlgorithm.py PROPERTIES DEPENDS ExampleFunctionalMetadataOldAlgorithm ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalMetadataReadOldAlgorithm options/ExampleFunctionalMetadataReadOldAlgorithm.py PROPERTIES DEPENDS FunctionalMetadataOldAlgorithm ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalNonExistingFile options/ExampleFunctionalNonExistingFile.py)
 set_tests_properties(FunctionalNonExistingFile PROPERTIES PASS_REGULAR_EXPRESSION "File.*couldn't be found")
-add_test_with_env(FunctionalNonExistingFileOverwritten options/ExampleFunctionalNonExistingFile.py --IOSvc.Input functional_producer.root)
-add_test_with_env(FunctionalFileTooLong options/ExampleFunctionalFile.py -n 999 --IOSvc.Output toolong.root PROPERTIES PASS_REGULAR_EXPRESSION
+add_test_with_env(FunctionalNonExistingFileOverwritten options/ExampleFunctionalNonExistingFile.py --IOSvc.Input functional_producer.root PROPERTIES DEPENDS FunctionalProducer)
+add_test_with_env(FunctionalFileTooLong options/ExampleFunctionalFile.py -n 999 --IOSvc.Output toolong.root PROPERTIES DEPENDS FunctionalProducer PASS_REGULAR_EXPRESSION
                   "Application Manager Terminated successfully with a user requested ScheduledStop")
-add_test_with_env(FunctionalFileTooShort options/ExampleFunctionalFile.py -n 2 --IOSvc.Output two_events.root ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalFileTooShort options/ExampleFunctionalFile.py -n 2 --IOSvc.Output two_events.root PROPERTIES DEPENDS FunctionalProducer ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalFileCLI options/ExampleFunctionalNoFile.py --IOSvc.Input functional_producer.root --IOSvc.Output functional_transformer_cli.root ADD_TO_CHECK_FILES)
 set_tests_properties(FunctionalFileCLI PROPERTIES DEPENDS FunctionalProducer)
 add_test_with_env(FunctionalFileCLIMultiple options/ExampleFunctionalNoFile.py --IOSvc.Input functional_producer.root functional_producer.root --IOSvc.Output functional_transformer_cli_multiple.root -n -1 ADD_TO_CHECK_FILES)
@@ -185,9 +185,9 @@ set_tests_properties(FunctionalFileCLIMultiple PROPERTIES DEPENDS FunctionalProd
 
 add_test_with_env(FunctionalWrongImport options/ExampleFunctionalWrongImport.py)
 set_tests_properties(FunctionalWrongImport PROPERTIES PASS_REGULAR_EXPRESSION "ImportError: Importing ApplicationMgr or IOSvc from Configurables is not allowed.")
-add_test_with_env(FunctionalReadNthEvent options/ExampleFunctionalReadNthEvent.py ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalReadNthEvent options/ExampleFunctionalReadNthEvent.py PROPERTIES DEPENDS FunctionalProducer ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalProducerRNTuple options/ExampleFunctionalProducerRNTuple.py ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalTTreeToRNTuple options/ExampleFunctionalTTreeToRNTuple.py ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalTTreeToRNTuple options/ExampleFunctionalTTreeToRNTuple.py PROPERTIES DEPENDS FunctionalProducer ADD_TO_CHECK_FILES)
 
 
 # The following is done to make the tests work without installing the files in
