@@ -114,7 +114,7 @@ add_test(NAME AlgorithmWithTFileCheckMyTFileOutput
 set_property(TEST AlgorithmWithTFileCheckMyTFileOutput APPEND PROPERTY DEPENDS AlgorithmWithTFile)
 set_test_env(AlgorithmWithTFileCheckMyTFileOutput)
 
-add_test_with_env(CreateExampleEventData_cellID options/createExampleEventData_cellID.py)
+add_test_with_env(CreateExampleEventData_cellID options/createExampleEventData_cellID.py ADD_TO_CHECK_FILES)
 add_test_with_env(TwoProducers options/TwoProducers.py --filename output_k4fwcore_test_twoproducer.root
                   --magicNumberOffset.Producer2 12345 --Producer1.magicNumberOffset 54321)
 add_test_with_env(CheckCommandLineArguments options/createHelloWorld.py --HelloWorldAlg1.PerEventPrintMessage TwasBrilligAndTheSlithyToves

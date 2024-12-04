@@ -254,3 +254,47 @@ for name, events in {
     "functional_transformer_cli_multiple.root": 20,
 }.items():
     check_events(name, events)
+
+
+for i, filename in enumerate(
+    [
+        "output_k4test_exampledata_cellid.root",
+        "functional_metadata_old_algorithm.root",
+        "functional_metadata.root",
+    ]
+):
+    reader = podio.root_io.Reader(filename)
+    configuration_metadata = reader.get("configuration_metadata")[0].get_parameter(
+        "gaudiConfigOptions"
+    )
+    configuration_metadata = [elem.strip(" ,;\n") for elem in configuration_metadata]
+    configuration_metadata = {
+        elem.split("=")[0]: elem.split("=")[1] for elem in configuration_metadata
+    }
+
+    props_and_values = {
+        "intProp": '"42"',
+        "intProp2": '"69"',
+        "floatProp": '"3.14000"',
+        "floatProp2": '"2.71828"',
+        "doubleProp": '"3.1400000"',
+        "doubleProp2": '"2.7182818"',
+        "stringProp": "\"'Hello'\"",
+        "stringProp2": "\"'Hello, World!'\"",
+        "vectorIntProp": '"[ 1 , 2 , 3 ]"',
+        "vectorIntProp2": '"[ 1 , 2 , 3 , 4 ]"',
+        "vectorFloatProp": '"[ 1.10000 , 2.20000 , 3.30000 ]"',
+        "vectorFloatProp2": '"[ 1.10000 , 2.20000 , 3.30000 , 4.40000 ]"',
+        "vectorDoubleProp": '"[ 1.1000000 , 2.2000000 , 3.3000000 ]"',
+        "vectorDoubleProp2": '"[ 1.1000000 , 2.2000000 , 3.3000000 , 4.4000000 ]"',
+        "vectorStringProp": "\"[ 'one' , 'two' , 'three' ]\"",
+        "vectorStringProp2": "\"[ 'one' , 'two' , 'three' , 'four' ]\"",
+    }
+
+    alg_name = "CellIDWriter" if i < 2 else "Producer"
+    for prop, value in props_and_values.items():
+        print(prop, value)
+        if configuration_metadata[f"{alg_name}.{prop} "] != f" {value}":
+            raise RuntimeError(
+                f"Property {prop} has value {configuration_metadata[f'CellIDWriter.{prop} ']}, expected {value}"
+            )
