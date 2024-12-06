@@ -311,6 +311,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection&         
                 continue;
               auto nhit = elem.clone(false);
               nhit.setOverlay(true);
+              nhit.setTime(elem.getTime() + timeOffset);
               nhit.setParticle(oparticles[oldToNewMap[elem.getParticle().getObjectID().index]]);
               ocoll->push_back(nhit);
             }
@@ -344,6 +345,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection&         
                   // TODO: Make sure a contribution is not added twice
                   auto newcontrib = contrib.clone(false);
                   newcontrib.setParticle(oparticles[oldToNewMap[contrib.getParticle().getObjectID().index]]);
+                  newcontrib.setTime(contrib.getTime() + timeOffset);
                   calhit.addToContributions(newcontrib);
                   calHitContribs.push_back(newcontrib);
                 }
@@ -362,6 +364,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection&         
                   // TODO: Make sure a contribution is not added twice
                   auto newcontrib = contrib.clone(false);
                   newcontrib.setParticle(oparticles[oldToNewMap[contrib.getParticle().getObjectID().index]]);
+                  newcontrib.setTime(contrib.getTime() + timeOffset);
                   calhit.addToContributions(newcontrib);
                   calHitContribs.push_back(newcontrib);
                 }
