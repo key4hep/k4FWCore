@@ -39,7 +39,7 @@ public:
 
 public:
   DataHandle();
-  ~DataHandle();
+  ~DataHandle() override;
 
   /// Initialises mother class
   DataHandle(DataObjID& descriptor, Gaudi::DataHandle::Mode a, IDataHandleHolder* fatherAlg);

@@ -21,7 +21,6 @@
 
 #include <type_traits>
 
-// Include files
 #include "GaudiKernel/DataObject.h"
 #include "podio/CollectionBase.h"
 
@@ -50,7 +49,7 @@ public:
     uptr.release();
     is_owner = false;
   }
-  virtual ~DataWrapper();
+  virtual ~DataWrapper() override;
 
   const T* getData() const { return m_data; }
   void     setData(const T* data) { m_data = data; }
