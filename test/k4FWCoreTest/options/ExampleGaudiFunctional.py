@@ -21,19 +21,23 @@
 # data
 
 from Gaudi.Configuration import INFO
-from Configurables import ExampleGaudiFunctionalProducer
+from Configurables import ExampleGaudiFunctionalProducer, ExampleFunctionalTransformer
 from Configurables import EventDataSvc
 from k4FWCore import ApplicationMgr, IOSvc
 
 svc = IOSvc("IOSvc")
-svc.Output = "functional_transformer.root"
+svc.Input = "functional_producer.root"
+svc.Output = "gaudi_functional.root"
 
-producer = ExampleGaudiFunctionalProducer("Producer", OutputCollectionName="Output")
+gaudi_producer = ExampleGaudiFunctionalProducer("GaudiProducer", OutputCollectionName="Output")
+transformer = ExampleFunctionalTransformer(
+    "Transformer", InputCollection=["MCParticles"], OutputCollection=["NewMCParticles"]
+)
 
 mgr = ApplicationMgr(
-    TopAlg=[producer],
+    TopAlg=[gaudi_producer, transformer],
     EvtSel="NONE",
-    EvtMax=3,
+    EvtMax=-1,
     ExtSvc=[EventDataSvc("EventDataSvc")],
     OutputLevel=INFO,
 )
