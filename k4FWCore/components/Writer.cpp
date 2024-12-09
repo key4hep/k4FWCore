@@ -257,8 +257,15 @@ public:
         // Check the case when the data has been produced using the old DataHandle
         const auto old_collection = dynamic_cast<DataWrapperBase*>(storeCollection);
         if (!old_collection) {
-          error() << "Failed to cast collection " << coll << endmsg;
-          return;
+          // This can happen for objects that are not collections like in the
+          // MarlinWrapper for converter maps or a LCEvent, or, in general,
+          // anything else
+          warning() << "Object in the store with name " << coll
+                    << " does not look like a collection so it can not be written to the output file" << endmsg;
+          m_collectionsToSave.erase(std::remove(m_collectionsToSave.begin(), m_collectionsToSave.end(), coll),
+                                    m_collectionsToSave.end());
+          m_collectionsToAdd.erase(std::remove(m_collectionsToAdd.begin(), m_collectionsToAdd.end(), coll),
+                                   m_collectionsToAdd.end());
         } else {
           std::unique_ptr<podio::CollectionBase> uptr(
               const_cast<podio::CollectionBase*>(old_collection->collectionBase()));
