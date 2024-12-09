@@ -49,7 +49,7 @@ public:
     uptr.release();
     is_owner = false;
   }
-  virtual ~DataWrapper() override;
+  ~DataWrapper() override;
 
   const T* getData() const { return m_data; }
   void     setData(const T* data) { m_data = data; }
