@@ -82,10 +82,6 @@ public:
       return StatusCode::FAILURE;
     }
 
-    return StatusCode::SUCCESS;
-  }
-
-  StatusCode finalize() override {
     podio::Frame config_metadata_frame;
 
     //// prepare job options metadata ///////////////////////
@@ -104,7 +100,7 @@ public:
     }
     // Some default components are not captured by the job option service
     // and have to be traversed like this. Note that Gaudi!577 will improve this.
-    for (const auto* name : {"NTupleSvc"}) {
+    for (const auto* name : {"ApplicationMgr", "MessageSvc", "NTupleSvc"}) {
       std::stringstream config_stream;
       auto              svc = service<IProperty>(name);
       if (!svc.isValid())
@@ -121,6 +117,10 @@ public:
     }
     iosvc->getWriter().writeFrame(config_metadata_frame, "configuration_metadata");
 
+    return StatusCode::SUCCESS;
+  }
+
+  StatusCode finalize() override {
     if (const auto* metadata_frame = m_metadataSvc->getFrame(); metadata_frame) {
       iosvc->getWriter().writeFrame(*metadata_frame, podio::Category::Metadata);
     }

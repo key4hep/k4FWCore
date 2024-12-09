@@ -30,7 +30,18 @@ from Configurables import EventDataSvc
 iosvc = IOSvc()
 iosvc.Output = "functional_metadata.root"
 
-producer = ExampleFunctionalMetadataProducer("Producer", OutputCollection=["MCParticles"])
+producer = ExampleFunctionalMetadataProducer(
+    "Producer",
+    intProp2=69,
+    floatProp2=2.71828,
+    doubleProp2=2.7182818,
+    stringProp2="Hello, World!",
+    vectorIntProp2=[1, 2, 3, 4],
+    vectorFloatProp2=[1.1, 2.2, 3.3, 4.4],
+    vectorDoubleProp2=[1.1, 2.2, 3.3, 4.4],
+    vectorStringProp2=["one", "two", "three", "four"],
+    OutputCollection=["MCParticles"],
+)
 consumer = ExampleFunctionalMetadataConsumer("Consumer", InputCollection=["MCParticles"])
 
 ApplicationMgr(
