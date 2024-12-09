@@ -28,9 +28,7 @@ from k4FWCore import ApplicationMgr, IOSvc
 svc = IOSvc("IOSvc")
 svc.Output = "functional_transformer.root"
 
-producer = ExampleGaudiFunctionalProducer(
-    "Producer", OutputCollectionName="Output"
-)
+producer = ExampleGaudiFunctionalProducer("Producer", OutputCollectionName="Output")
 
 mgr = ApplicationMgr(
     TopAlg=[producer],
