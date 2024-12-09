@@ -21,8 +21,10 @@
 #include "GaudiKernel/AnyDataWrapper.h"
 #include "GaudiKernel/IDataManagerSvc.h"
 #include "GaudiKernel/IDataProviderSvc.h"
+#include "GaudiKernel/IHiveWhiteBoard.h"
 #include "GaudiKernel/SmartDataPtr.h"
 #include "GaudiKernel/StatusCode.h"
+
 #include "podio/Frame.h"
 
 #include "IIOSvc.h"
@@ -31,7 +33,7 @@
 #include "k4FWCore/FunctionalUtils.h"
 #include "k4FWCore/IMetadataSvc.h"
 
-#include <GaudiKernel/IHiveWhiteBoard.h>
+#include <algorithm>
 #include <memory>
 #include <utility>
 
