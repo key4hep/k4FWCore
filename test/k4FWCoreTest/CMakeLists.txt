@@ -188,6 +188,7 @@ set_tests_properties(FunctionalWrongImport PROPERTIES PASS_REGULAR_EXPRESSION "I
 add_test_with_env(FunctionalReadNthEvent options/ExampleFunctionalReadNthEvent.py PROPERTIES DEPENDS FunctionalProducer ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalProducerRNTuple options/ExampleFunctionalProducerRNTuple.py ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalTTreeToRNTuple options/ExampleFunctionalTTreeToRNTuple.py PROPERTIES DEPENDS FunctionalProducer ADD_TO_CHECK_FILES)
+add_test_with_env(GaudiFunctional options/ExampleGaudiFunctional.py)
 
 
 # The following is done to make the tests work without installing the files in
