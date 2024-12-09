@@ -156,7 +156,7 @@ public:
       error() << "Failed to retrieve object leaves" << endmsg;
       return;
     }
-    for (auto& pReg : leaves) {
+    for (const auto& pReg : leaves) {
       if (pReg->name() == k4FWCore::frameLocation) {
         continue;
       }
@@ -190,7 +190,7 @@ public:
     // This is the case when we are reading from a file
     // Putting it into a unique_ptr will make sure it's deleted
     if (code.isSuccess()) {
-      auto sc = m_dataSvc->unregisterObject(p);
+      const auto sc = m_dataSvc->unregisterObject(p);
       if (!sc.isSuccess()) {
         error() << "Failed to unregister object" << endmsg;
         return;
@@ -221,7 +221,7 @@ public:
     // Remove the collections owned by a Frame (if any) so that they are not
     // deleted by the store (and later deleted by the Frame, triggering a double
     // delete)
-    for (auto& coll : frameCollections) {
+    for (const auto& coll : frameCollections) {
       DataObject* storeCollection;
       if (m_dataSvc->retrieveObject("/Event/" + coll, storeCollection).isFailure()) {
         error() << "Failed to retrieve collection " << coll << endmsg;
@@ -233,12 +233,12 @@ public:
         return;
       }
       // We still have to delete the AnyDataWrapper to avoid a leak
-      auto storePtr = dynamic_cast<AnyDataWrapper<std::unique_ptr<podio::CollectionBase>>*>(storeCollection);
-      storePtr->getData().release();
+      const auto storePtr = dynamic_cast<AnyDataWrapper<std::unique_ptr<podio::CollectionBase>>*>(storeCollection);
+      [[maybe_unused]] auto releasedPtr = storePtr->getData().release();
       delete storePtr;
     }
 
-    for (auto& coll : m_collectionsToAdd) {
+    for (const auto& coll : m_collectionsToAdd) {
       DataObject* storeCollection;
       if (m_dataSvc->retrieveObject("/Event/" + coll, storeCollection).isFailure()) {
         error() << "Failed to retrieve collection " << coll << endmsg;
