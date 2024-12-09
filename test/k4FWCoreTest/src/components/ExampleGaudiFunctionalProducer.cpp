@@ -27,12 +27,10 @@ struct ExampleGaudiFunctionalProducer final : Gaudi::Functional::Producer<int(),
   // The pair in KeyValues can be changed from python and it corresponds
   // to the name of the output collection
   ExampleGaudiFunctionalProducer(const std::string& name, ISvcLocator* svcLoc)
-    : Producer(name, svcLoc, KeyValue{"OutputCollectionName", "OutputCollection"}) {}
+      : Producer(name, svcLoc, KeyValue{"OutputCollectionName", "OutputCollection"}) {}
 
   // This is the function that will be called to produce the data
-  int operator()() const override {
-    return 3;
-  }
+  int operator()() const override { return 3; }
 };
 
 DECLARE_COMPONENT(ExampleGaudiFunctionalProducer)
