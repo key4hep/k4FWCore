@@ -19,26 +19,14 @@
 #ifndef K4FWCORE_K4FWCORETEST_CREATEEXAMPLEEVENTDATA
 #define K4FWCORE_K4FWCORETEST_CREATEEXAMPLEEVENTDATA
 
-// GAUDI
 #include "Gaudi/Algorithm.h"
 
-// key4hep
 #include "k4FWCore/DataHandle.h"
 
-// edm4hep
-#if __has_include("edm4hep/TrackerHit3DCollection.h")
 #include "edm4hep/TrackerHit3DCollection.h"
-#else
-#include "edm4hep/TrackerHitCollection.h"
-namespace edm4hep {
-  using TrackerHit3DCollection = edm4hep::TrackerHitCollection;
-}  // namespace edm4hep
-#endif
 
-// podio
 #include "podio/UserDataCollection.h"
 
-// datamodel
 namespace edm4hep {
   class MCParticleCollection;
   class SimTrackerHitCollection;
