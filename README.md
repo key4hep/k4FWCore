@@ -1,25 +1,40 @@
 # k4FWCore (key4hep FrameWork Core)
 
-k4FWCore is a Gaudi package that provides the PodioDataService, which allows to
+k4FWCore is a Gaudi package that provides the IOSvc, which allows to
 use podio-based event data models like EDM4hep in Gaudi workflows.
 
-k4FWCore also provides the `k4run` script used to run Gaudi steering files.
+k4FWCore also provides the `k4run` script used to run Gaudi steering files. See the [documentation](doc/k4run-args.md) for more information.
 
 ## Components
 
 ### Basic I/O
 
-#### k4DataSvc
+| Current | Legacy | Description |
+|---------|--------|-|
+| IOSvc | k4DataSvc | Service handling the PODIO types and collections |
+| Reader | PodioInput | Algorithm to read data from input files on disk. |
+| Writer | PodioOutput | Algorithm to write data to an output file on disk. |
+| MetadataSvc | MetaDataHandle | Service/Handle handling user defined metadata |
 
-Component wrapping the PodioDataService to handle PODIO types and collections.
+See the [documentation](doc/IO.md) for more information.
 
-#### PodioInput
+### Auxiliary
 
-Algorithm to read data from one or multiple input file(s) on disk.
+### Collection Merger
 
-#### PodioOutput
+Algorithm merging multiple collections of the same type into a single collection.
 
-Algorithm to write data to an output file on disk.
+### EventHeaderCreator
+
+Algorithm creating new `edm4hep::EventHeaderCollection` data object.
+
+### EventCounter
+
+Algorithm counting processed events and printing heart-bit.
+
+### UniqueIDGenSvc
+
+Service generating unique, reproducible numbers to be used for seeding RNG used by the algorithms. See the [documentation](doc/uniqueIDGen.md) for more information.
 
 ## k4run
 ```
@@ -56,6 +71,8 @@ print(my_opts[0].foo)
 * PODIO
 
 * Gaudi
+
+* EDM4HEP
 
 ## Installation and downstream usage.
 
