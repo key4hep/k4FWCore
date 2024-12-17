@@ -27,7 +27,7 @@ The facilities to read and write EDM4hep (or in general event data models based 
 ```python
 from k4FWCore import IOSvc
 
-io_svc = IOSvc("IOSvc")
+io_svc = IOSvc("IOSvc") # or just IOSvc() as "IOSvc" name is used by default
 ```
 
 After instantiation the service should be register as an external service in the `ApplicationMgr`. Similarly, it's important to import the `ApplicationMgr` from `k4FWCore`:
