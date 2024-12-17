@@ -19,6 +19,7 @@
 
 #include "Gaudi/Functional/Consumer.h"
 #include "GaudiKernel/AnyDataWrapper.h"
+#include "GaudiKernel/DataObject.h"
 #include "GaudiKernel/IDataManagerSvc.h"
 #include "GaudiKernel/IDataProviderSvc.h"
 #include "GaudiKernel/IHiveWhiteBoard.h"
@@ -133,8 +134,8 @@ public:
   }
 
   void getOutputCollections() const {
-    SmartIF<IDataManagerSvc> m_mgr;
-    m_mgr = eventSvc();
+    SmartIF<IDataManagerSvc> mgr;
+    mgr = eventSvc();
 
     SmartDataPtr<DataObject> root(eventSvc(), "/Event");
     if (!root) {
@@ -147,13 +148,8 @@ public:
       error() << "Failed to retrieve the root registry object" << endmsg;
       return;
     }
-    auto mgr = eventSvc().as<IDataManagerSvc>();
-    if (!mgr) {
-      error() << "Failed to retrieve IDataManagerSvc" << endmsg;
-      return;
-    }
     std::vector<IRegistry*> leaves;
-    StatusCode              sc = m_mgr->objectLeaves(pObj, leaves);
+    StatusCode              sc = mgr->objectLeaves(pObj, leaves);
     if (!sc.isSuccess()) {
       error() << "Failed to retrieve object leaves" << endmsg;
       return;
@@ -240,6 +236,7 @@ public:
       delete storePtr;
     }
 
+    std::vector<std::string_view> collectionsToRemove;
     for (const auto& coll : m_collectionsToAdd) {
       DataObject* storeCollection;
       if (m_dataSvc->retrieveObject("/Event/" + coll, storeCollection).isFailure()) {
@@ -264,16 +261,22 @@ public:
           // anything else
           info() << "Object in the store with name " << coll
                  << " does not look like a collection so it can not be written to the output file" << endmsg;
+          // Collections to remove in m_collectionsToAdd are saved for later
+          // not to modify the vector while iterating over it
+          collectionsToRemove.push_back(coll);
           m_collectionsToSave.erase(std::remove(m_collectionsToSave.begin(), m_collectionsToSave.end(), coll),
                                     m_collectionsToSave.end());
-          m_collectionsToAdd.erase(std::remove(m_collectionsToAdd.begin(), m_collectionsToAdd.end(), coll),
-                                   m_collectionsToAdd.end());
         } else {
           std::unique_ptr<podio::CollectionBase> uptr(
               const_cast<podio::CollectionBase*>(old_collection->collectionBase()));
           ptr->getData().put(std::move(uptr), coll);
         }
       }
+    }
+
+    for (const auto& coll : collectionsToRemove) {
+      m_collectionsToAdd.erase(std::remove(m_collectionsToAdd.begin(), m_collectionsToAdd.end(), coll),
+                               m_collectionsToAdd.end());
     }
 
     debug() << "Writing frame" << endmsg;
