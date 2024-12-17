@@ -232,6 +232,8 @@ public:
       }
       // We still have to delete the AnyDataWrapper to avoid a leak
       const auto storePtr = dynamic_cast<AnyDataWrapper<std::unique_ptr<podio::CollectionBase>>*>(storeCollection);
+      // Assign to an unused variable to silence the warning about not using the
+      // result of release()
       [[maybe_unused]] auto releasedPtr = storePtr->getData().release();
       delete storePtr;
     }
