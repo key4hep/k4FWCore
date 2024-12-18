@@ -19,10 +19,13 @@
 
 #include "Gaudi/Functional/Consumer.h"
 #include "GaudiKernel/AnyDataWrapper.h"
+#include "GaudiKernel/DataObject.h"
 #include "GaudiKernel/IDataManagerSvc.h"
 #include "GaudiKernel/IDataProviderSvc.h"
+#include "GaudiKernel/IHiveWhiteBoard.h"
 #include "GaudiKernel/SmartDataPtr.h"
 #include "GaudiKernel/StatusCode.h"
+
 #include "podio/Frame.h"
 
 #include "IIOSvc.h"
@@ -31,7 +34,7 @@
 #include "k4FWCore/FunctionalUtils.h"
 #include "k4FWCore/IMetadataSvc.h"
 
-#include <GaudiKernel/IHiveWhiteBoard.h>
+#include <algorithm>
 #include <memory>
 #include <utility>
 
@@ -131,8 +134,8 @@ public:
   }
 
   void getOutputCollections() const {
-    SmartIF<IDataManagerSvc> m_mgr;
-    m_mgr = eventSvc();
+    SmartIF<IDataManagerSvc> mgr;
+    mgr = eventSvc();
 
     SmartDataPtr<DataObject> root(eventSvc(), "/Event");
     if (!root) {
@@ -145,18 +148,13 @@ public:
       error() << "Failed to retrieve the root registry object" << endmsg;
       return;
     }
-    auto mgr = eventSvc().as<IDataManagerSvc>();
-    if (!mgr) {
-      error() << "Failed to retrieve IDataManagerSvc" << endmsg;
-      return;
-    }
     std::vector<IRegistry*> leaves;
-    StatusCode              sc = m_mgr->objectLeaves(pObj, leaves);
+    StatusCode              sc = mgr->objectLeaves(pObj, leaves);
     if (!sc.isSuccess()) {
       error() << "Failed to retrieve object leaves" << endmsg;
       return;
     }
-    for (auto& pReg : leaves) {
+    for (const auto& pReg : leaves) {
       if (pReg->name() == k4FWCore::frameLocation) {
         continue;
       }
@@ -190,7 +188,7 @@ public:
     // This is the case when we are reading from a file
     // Putting it into a unique_ptr will make sure it's deleted
     if (code.isSuccess()) {
-      auto sc = m_dataSvc->unregisterObject(p);
+      const auto sc = m_dataSvc->unregisterObject(p);
       if (!sc.isSuccess()) {
         error() << "Failed to unregister object" << endmsg;
         return;
@@ -221,7 +219,7 @@ public:
     // Remove the collections owned by a Frame (if any) so that they are not
     // deleted by the store (and later deleted by the Frame, triggering a double
     // delete)
-    for (auto& coll : frameCollections) {
+    for (const auto& coll : frameCollections) {
       DataObject* storeCollection;
       if (m_dataSvc->retrieveObject("/Event/" + coll, storeCollection).isFailure()) {
         error() << "Failed to retrieve collection " << coll << endmsg;
@@ -233,12 +231,15 @@ public:
         return;
       }
       // We still have to delete the AnyDataWrapper to avoid a leak
-      auto storePtr = dynamic_cast<AnyDataWrapper<std::unique_ptr<podio::CollectionBase>>*>(storeCollection);
-      storePtr->getData().release();
+      const auto storePtr = dynamic_cast<AnyDataWrapper<std::unique_ptr<podio::CollectionBase>>*>(storeCollection);
+      // Assign to an unused variable to silence the warning about not using the
+      // result of release()
+      [[maybe_unused]] auto releasedPtr = storePtr->getData().release();
       delete storePtr;
     }
 
-    for (auto& coll : m_collectionsToAdd) {
+    std::vector<std::string_view> collectionsToRemove;
+    for (const auto& coll : m_collectionsToAdd) {
       DataObject* storeCollection;
       if (m_dataSvc->retrieveObject("/Event/" + coll, storeCollection).isFailure()) {
         error() << "Failed to retrieve collection " << coll << endmsg;
@@ -257,14 +258,27 @@ public:
         // Check the case when the data has been produced using the old DataHandle
         const auto old_collection = dynamic_cast<DataWrapperBase*>(storeCollection);
         if (!old_collection) {
-          error() << "Failed to cast collection " << coll << endmsg;
-          return;
+          // This can happen for objects that are not collections like in the
+          // MarlinWrapper for converter maps or a LCEvent, or, in general,
+          // anything else
+          info() << "Object in the store with name " << coll
+                 << " does not look like a collection so it can not be written to the output file" << endmsg;
+          // Collections to remove in m_collectionsToAdd are saved for later
+          // not to modify the vector while iterating over it
+          collectionsToRemove.push_back(coll);
+          m_collectionsToSave.erase(std::remove(m_collectionsToSave.begin(), m_collectionsToSave.end(), coll),
+                                    m_collectionsToSave.end());
         } else {
           std::unique_ptr<podio::CollectionBase> uptr(
               const_cast<podio::CollectionBase*>(old_collection->collectionBase()));
           ptr->getData().put(std::move(uptr), coll);
         }
       }
+    }
+
+    for (const auto& coll : collectionsToRemove) {
+      m_collectionsToAdd.erase(std::remove(m_collectionsToAdd.begin(), m_collectionsToAdd.end(), coll),
+                               m_collectionsToAdd.end());
     }
 
     debug() << "Writing frame" << endmsg;
