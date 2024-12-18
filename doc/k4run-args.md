@@ -18,7 +18,8 @@ limitations under the License.
 -->
 # Adding custom arguments to `k4run`
 
-It is possible to extend `k4run` with custom arguments from a steering file using `k4FWCore.parseArgs`.
+It is possible to extend `k4run` with custom arguments from a steering file
+using `k4FWCore.parseArgs`.
 
 Example:
 
@@ -32,4 +33,9 @@ if my_opts.trackingOnly:
     # only run track reconstruction
 ```
 
-Behind the scenes parser is just a normal instance of pythons [`argparse.ArgumentParser`](https://docs.python.org/3/library/argparse.html), please refer to its documentation for usage details. The only important thing to keep in mind is to always use `parse_known_args()` instead of `parse_args()` so that the normal `k4run` arguments keep working.
+Behind the scenes `parser` is just a normal instance of python's
+[`argparse.ArgumentParser`](https://docs.python.org/3/library/argparse.html),
+please refer to its documentation for usage details. Use `parse_known_args()`
+instead of `parse_args()` so that the normal `k4run` arguments keep working. The
+`[0]` is necessary because the added arguments will be in the first element of
+the tuple returned from `parse_known_args`.
