@@ -22,7 +22,7 @@ The facilities to read and write EDM4hep (or in general event data models based 
 
 ## Accessing event data
 
-`IOSvc` is an external Gaudi service for reading and writing EDM4hep and other PODIO-based data models. The service should be imported from `k4FWCore` and named "IOSvc" as other components may look for it under this name.
+`IOSvc` is an external Gaudi service for reading and writing EDM4hep files. The service should be imported from `k4FWCore` and named "IOSvc" as other components may look for it under this name.
 
 ```python
 from k4FWCore import IOSvc
@@ -46,7 +46,7 @@ ApplicationMgr(
 
 ### Reading events
 
-The `IOSvc` supports reading ROOT files containing PODIO-based data-models such as EDM4hep. Both files written with ROOT TTree or RNTuple backend are supported with the backend inferred automatically from the files themselves.
+The `IOSvc` supports reading EDM4hep ROOT files. Both files written with the ROOT TTree or RNTuple backend are supported with the backend inferred automatically from the files themselves.
 
 The `Input` property can be used to specify the input. The `IOSvc` will not read any files unless the `Input` property is specified.
 
@@ -117,7 +117,7 @@ k4run <steering-file> --IOSvc.CollectionNames "MCParticles" "SimTrackerHits"
 
 ### Writing events
 
-The `IOSvc` supports writing PODIO-based data-models such as EDM4hep to the ROOT output. The `Output` property can be used to specify the output. The `IOSvc` will not write any files unless the `Output` property is specified.
+The `IOSvc` supports writing EDM4hep to the ROOT output. The `Output` property can be used to specify the output. The `IOSvc` will not write any files unless the `Output` property is specified.
 
 ::::{tab-set}
 :::{tab-item} Python
@@ -179,7 +179,7 @@ k4run <steering-file> --IOSvc.outputCommands \
 
 The k4FWCore provides the `MetadataSvc` that allows accessing user metadata in PODIO-based data-models. There is no need to instantiate the `MetadataSvc` explicitly when using `IOSvc` as `IOSvc` can instantiate it on its own if needed.
 
-When both `Input` and `Output` properties of `IOSvc` are defined, all the metadata originally present in the input will be propagated to the output, possibly adding also any user metadata created during processing.
+When both the `Input` and `Output` properties of `IOSvc` are defined, all the metadata originally present in the input will be propagated to the output, possibly adding also any user metadata created during processing.
 
 Unlike event data, metadata is not exposed to users through the Gaudi TES and cannot be accessed directly by algorithms in the same way. Instead, handling metadata is encapsulated within the algorithm implementation itself. For more details on how this is managed, refer to the developer documentation.
 
@@ -229,7 +229,3 @@ ApplicationMgr(
 ```
 
 Both functional algorithms and classic algorithms are compatible with either `IOSvc` or `PodioDataSvc`.
-
-The biggest challenge for the transition are the algorithms and services that explicitly request and operate on `PodioDataSvc`. These components are not compatible with `IOSvc` and their internals have to be adapted for the usage with `IOSvc` case by case.
-
-If you encounter an algorithm or service that seems to be incompatible `IOSvc`, please open an issue in the bugtracker to report it for further investigation.
