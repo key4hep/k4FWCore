@@ -16,7 +16,7 @@ k4FWCore also provides the `k4run` script used to run Gaudi steering files. See 
 | Writer | PodioOutput | Algorithm to write data to an output file on disk. |
 | MetadataSvc | MetaDataHandle | Service/Handle handling user defined metadata |
 
-See the [documentation](doc/IO.md) for more information.
+See the [documentation](doc/PodioInputOutput.md) for more information.
 
 ### Auxiliary
 
