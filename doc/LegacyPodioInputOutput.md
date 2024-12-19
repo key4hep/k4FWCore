@@ -16,12 +16,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-# Legacy reading and writing EDM4hep files in Gaudi with the legacy k4DataSvc
+# Legacy reading and writing EDM4hep files in Gaudi with the 4DataSvc
 
 :::{caution}
 `k4DataSvc` is a legacy service previously used in K4FWCore for reading and writing data in EDM4hep or other data models based on PODIO.
 
-The currently used service is `IOSvc`, which offers improved streamlined functionality and better support for modern workflows. For detailed documentation on `IOSvc`, refer to [this documentation](IO.md).
+The currently used service is `IOSvc`, which offers improved streamlined functionality and better support for modern workflows. For detailed documentation on `IOSvc`, refer to [this documentation](PodioInputOutput.md).
 :::
 
 This page will describe the usage of legacy [k4FWCore](https://github.com/key4hep/k4FWCore)

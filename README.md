@@ -1,7 +1,7 @@
 # k4FWCore (key4hep FrameWork Core)
 
 k4FWCore is a Gaudi package that provides the IOSvc, which allows to
-use podio-based event data models like EDM4hep in Gaudi workflows.
+use EDM4hep in Gaudi workflows.
 
 k4FWCore also provides the `k4run` script used to run Gaudi steering files. See the [documentation](doc/k4run-args.md) for more information.
 
@@ -26,7 +26,7 @@ Algorithm merging multiple collections of the same type into a single collection
 
 ### EventHeaderCreator
 
-Algorithm creating new `edm4hep::EventHeaderCollection` data object.
+Algorithm creating a new `edm4hep::EventHeaderCollection` data object.
 
 ### EventCounter
 
