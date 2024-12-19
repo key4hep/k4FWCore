@@ -29,7 +29,7 @@ class IMetadataSvc : virtual public IInterface {
 public:
   DeclareInterfaceID(IMetadataSvc, 1, 0);
 
-  virtual void setFrame(podio::Frame&& frame) = 0;
+  virtual void setFrame(podio::Frame frame) = 0;
 
   template <typename T> void put(const std::string& name, const T& obj) {
     if (!getFrame()) {
