@@ -195,6 +195,8 @@ add_test_with_env(FunctionalProducerRNTuple options/ExampleFunctionalProducerRNT
 add_test_with_env(FunctionalTTreeToRNTuple options/ExampleFunctionalTTreeToRNTuple.py PROPERTIES FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
 add_test_with_env(GaudiFunctional options/ExampleGaudiFunctional.py PROPERTIES FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
 
+add_test_with_env(ParticleIDMetadataFramework options/ExampleParticleIDMetadata.py)
+
 
 # The following is done to make the tests work without installing the files in
 # the installation directory. The k4FWCore in the build directory is populated by
