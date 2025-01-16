@@ -69,7 +69,7 @@ struct ExampleParticleIDConsumer final
     auto maybePID = pidHandler.getPID(reco, pidMeta.algoType());
     if (!maybePID) {
       throw std::runtime_error(
-          std::format("Could net retrieve the {} PID object for reco particle {}", pidMeta.algoName, reco.id().index));
+          fmt::format("Could net retrieve the {} PID object for reco particle {}", pidMeta.algoName, reco.id().index));
     }
     auto pid      = maybePID.value();
     auto paramVal = pid.getParameters()[paramIndex];
@@ -99,7 +99,7 @@ struct ExampleParticleIDConsumer final
     if (m_paramIndex1 < 0 || m_paramIndex2 < 0) {
       error() << fmt::format("Could not get a parameter index for {} (got {}) or {} (got {})",
                              m_paramOfInterest1.value(), m_paramIndex1, m_paramOfInterest2.value(), m_paramIndex2)
-              << std::endl;
+              << endmsg;
     }
 
     return StatusCode::SUCCESS;
@@ -114,7 +114,7 @@ struct ExampleParticleIDConsumer final
       auto pids = pidHandler.getPIDs(r);
       if (pids.size() != 2) {
         throw std::runtime_error(
-            std::format("Could not get 2 ParticleID objects related to reco particle {}", r.id().index));
+            fmt::format("Could not get 2 ParticleID objects related to reco particle {}", r.id().index));
       }
 
       checkPIDForAlgo(pidHandler, r, m_pidMeta1, m_paramIndex1);
