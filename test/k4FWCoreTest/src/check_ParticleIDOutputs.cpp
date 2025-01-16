@@ -47,23 +47,33 @@ bool checkAlgoMetadata(const edm4hep::utils::ParticleIDMeta& pidMeta, const std:
   return true;
 }
 
+// Test configuration (this needs to match the settings in
+// options/ExampleParticleIDMetadata.py)
+constexpr auto                 pidCollectionName1 = "RecoParticlesPIDs_1";
+constexpr auto                 pidCollectionName2 = "RecoParticlesPIDs_2";
+constexpr auto                 pidAlgo1           = "PIDAlgo1";
+constexpr auto                 pidAlgo2           = "PIDAlgo2";
+constexpr auto                 pidParam1          = "single_param";
+constexpr auto                 pidParam2          = "param_2";
+const std::vector<std::string> paramNames1        = {"single_param"};
+const std::vector<std::string> paramNames2        = {"param_1", "param_2", "param_3"};
+
 int main(int, char* argv[]) {
   auto       reader   = podio::makeReader(argv[1]);
   const auto metadata = reader.readFrame(podio::Category::Metadata, 0);
 
-  const auto pidMeta1 = edm4hep::utils::PIDHandler::getAlgoInfo(metadata, "RecoParticlesPIDs_1").value();
-  const auto pidMeta2 = edm4hep::utils::PIDHandler::getAlgoInfo(metadata, "RecoParticlesPIDs_2").value();
+  const auto pidMeta1 = edm4hep::utils::PIDHandler::getAlgoInfo(metadata, pidCollectionName1).value();
+  const auto pidMeta2 = edm4hep::utils::PIDHandler::getAlgoInfo(metadata, pidCollectionName2).value();
 
-  if (!checkAlgoMetadata(pidMeta1, "PIDAlgo1", {"single_param"}) ||
-      !checkAlgoMetadata(pidMeta2, "PIDAlgo2", {"param_1", "param_2", "param_3"})) {
+  if (!checkAlgoMetadata(pidMeta1, pidAlgo1, paramNames1) || !checkAlgoMetadata(pidMeta2, pidAlgo2, paramNames2)) {
     return 1;
   }
 
-  const auto paramIndex1 = edm4hep::utils::getParamIndex(pidMeta1, "single_param").value_or(-1);
-  const auto paramIndex2 = edm4hep::utils::getParamIndex(pidMeta2, "param_2").value_or(-1);
+  const auto paramIndex1 = edm4hep::utils::getParamIndex(pidMeta1, pidParam1).value_or(-1);
+  const auto paramIndex2 = edm4hep::utils::getParamIndex(pidMeta2, pidParam2).value_or(-1);
   if (paramIndex1 < 0 || paramIndex2 < 0) {
-    fmt::print("Could not get a parameter index for 'single_param' (got {}) or 'param_2' (got {})\n", paramIndex1,
-               paramIndex2);
+    fmt::print("Could not get a parameter index for '{}' (got {}) or '{}' (got {})\n", pidParam1, paramIndex1,
+               pidParam2, paramIndex2);
   }
 
   const auto event      = reader.readEvent(0);
