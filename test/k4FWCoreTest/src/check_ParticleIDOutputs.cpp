@@ -1,0 +1,85 @@
+#include <edm4hep/ReconstructedParticleCollection.h>
+#include <edm4hep/utils/ParticleIDUtils.h>
+
+#include <podio/Reader.h>
+
+#include <fmt/format.h>
+#include <fmt/ranges.h>
+
+#include <algorithm>
+
+void checkPIDForAlgo(const edm4hep::utils::PIDHandler& pidHandler, const edm4hep::ReconstructedParticle& reco,
+                     const edm4hep::utils::ParticleIDMeta& pidMeta, const int paramIndex) {
+  auto maybePID = pidHandler.getPID(reco, pidMeta.algoType());
+  if (!maybePID) {
+    throw std::runtime_error(
+        fmt::format("Could net retrieve the {} PID object for reco particle {}", pidMeta.algoName, reco.id().index));
+  }
+  auto pid      = maybePID.value();
+  auto paramVal = pid.getParameters()[paramIndex];
+
+  // As set in the producer
+  if (paramVal != paramIndex * 0.5f) {
+    throw std::runtime_error(
+        fmt::format("Could not retrieve the correct parameter value for param {} (expected {}, actual {})",
+                    pidMeta.paramNames[paramIndex], paramIndex * 0.5f, paramVal));
+  }
+}
+
+bool checkAlgoMetadata(const edm4hep::utils::ParticleIDMeta& pidMeta, const std::string& algoName,
+                       const std::vector<std::string>& paramNames) {
+  if (pidMeta.algoName != algoName) {
+    fmt::print(
+        "The PID algorithm name from metadata does not match the expected one from the properties: (expected {}, "
+        "actual {})\n",
+        algoName, pidMeta.algoName);
+    return false;
+  }
+
+  if (!std::ranges::equal(pidMeta.paramNames, paramNames)) {
+    fmt::print(
+        "The PID parameter names retrieved from metadata does not match the expected ones from the properties: "
+        "(expected {}, actual {})\n",
+        paramNames, pidMeta.paramNames);
+    return false;
+  }
+
+  return true;
+}
+
+int main(int, char* argv[]) {
+  auto       reader   = podio::makeReader(argv[1]);
+  const auto metadata = reader.readFrame(podio::Category::Metadata, 0);
+
+  const auto pidMeta1 = edm4hep::utils::PIDHandler::getAlgoInfo(metadata, "RecoParticlesPIDs_1").value();
+  const auto pidMeta2 = edm4hep::utils::PIDHandler::getAlgoInfo(metadata, "RecoParticlesPIDs_2").value();
+
+  if (!checkAlgoMetadata(pidMeta1, "PIDAlgo1", {"single_param"}) ||
+      !checkAlgoMetadata(pidMeta2, "PIDAlgo2", {"param_1", "param_2", "param_3"})) {
+    return 1;
+  }
+
+  const auto paramIndex1 = edm4hep::utils::getParamIndex(pidMeta1, "single_param").value_or(-1);
+  const auto paramIndex2 = edm4hep::utils::getParamIndex(pidMeta2, "param_2").value_or(-1);
+  if (paramIndex1 < 0 || paramIndex2 < 0) {
+    fmt::print("Could not get a parameter index for 'single_param' (got {}) or 'param_2' (got {})\n", paramIndex1,
+               paramIndex2);
+  }
+
+  const auto event      = reader.readEvent(0);
+  const auto pidHandler = edm4hep::utils::PIDHandler::from(event, metadata);
+
+  const auto& recos = event.get<edm4hep::ReconstructedParticleCollection>("RecoParticles");
+  for (const auto r : recos) {
+    auto pids = pidHandler.getPIDs(r);
+    if (pids.size() != 2) {
+      throw std::runtime_error(fmt::format(
+          "Failed to retrieve the two expected ParticlID objects related to reco particle {}", r.id().index));
+
+      checkPIDForAlgo(pidHandler, r, pidMeta1, paramIndex1);
+      checkPIDForAlgo(pidHandler, r, pidMeta2, paramIndex2);
+    }
+  }
+
+  return 0;
+}
