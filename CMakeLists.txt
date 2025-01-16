@@ -20,6 +20,12 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.15)
 
 project(k4FWCore)
 
+set(${PROJECT_NAME}_VERSION_MAJOR 1)
+set(${PROJECT_NAME}_VERSION_MINOR 1)
+set(${PROJECT_NAME}_VERSION_PATCH 2)
+
+set( ${PROJECT_NAME}_VERSION  "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH}" )
+
 find_package(ROOT COMPONENTS RIO Tree REQUIRED)
 find_package(Gaudi REQUIRED)
 find_package(podio 1.0.1 REQUIRED)
@@ -48,12 +54,4 @@ if(ENABLE_CPACK)
   include(cmake/${PROJECT_NAME}CPack.cmake)
 endif()
 
-
-install(EXPORT ${PROJECT_NAME}Targets
-  NAMESPACE ${PROJECT_NAME}::
-  FILE "${PROJECT_NAME}Targets.cmake"
-  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}/"
-  )
-
-gaudi_install(CMAKE cmake/${PROJECT_NAME}Config.cmake)
-
+include(cmake/k4FWCoreCreateConfig.cmake)
