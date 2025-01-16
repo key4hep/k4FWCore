@@ -24,7 +24,7 @@ project(DownstreamProjectUsingk4FWCore)
 find_package(k4FWCore)
 
 if (NOT DEFINED ${k4FWCore_VERSION})
-  message(FATAL_ERROR "CAnnot find k4FWCore version information")
+  message(FATAL_ERROR "Cannot find k4FWCore version information")
 endif()
 
 if (NOT ${k4FWCore_VERSION} MATCHES "^[0-9]+\\.[0-9+](\\.[0-9]+)?$")
