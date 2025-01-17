@@ -45,6 +45,7 @@ add_subdirectory(k4FWCore)
 add_subdirectory(k4Interface)
 add_subdirectory(python)
 if(BUILD_TESTING)
+  find_package(fmt REQUIRED)
   add_subdirectory(test/k4FWCoreTest)
 endif()
 
