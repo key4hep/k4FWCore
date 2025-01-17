@@ -204,3 +204,5 @@ add_test_with_env(GaudiFunctional options/ExampleGaudiFunctional.py PROPERTIES F
 add_custom_command(TARGET k4FWCoreTestPlugins POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
                    ${PROJECT_SOURCE_DIR}/python/k4FWCore/ ${PROJECT_BINARY_DIR}/k4FWCore/genConfDir/k4FWCore)
+
+add_test_with_env(TypeMisMatchDemo options/TypeMisMatchDemo.py)
