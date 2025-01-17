@@ -8,22 +8,24 @@
 
 #include <algorithm>
 
-void checkPIDForAlgo(const edm4hep::utils::PIDHandler& pidHandler, const edm4hep::ReconstructedParticle& reco,
+bool checkPIDForAlgo(const edm4hep::utils::PIDHandler& pidHandler, const edm4hep::ReconstructedParticle& reco,
                      const edm4hep::utils::ParticleIDMeta& pidMeta, const int paramIndex) {
   auto maybePID = pidHandler.getPID(reco, pidMeta.algoType());
   if (!maybePID) {
-    throw std::runtime_error(
-        fmt::format("Could net retrieve the {} PID object for reco particle {}", pidMeta.algoName, reco.id().index));
+    fmt::print("Could not retrieve the {} PID object for reco particle {}", pidMeta.algoName, reco.id().index);
+    return false;
   }
   auto pid      = maybePID.value();
   auto paramVal = pid.getParameters()[paramIndex];
 
   // As set in the producer
   if (paramVal != paramIndex * 0.5f) {
-    throw std::runtime_error(
-        fmt::format("Could not retrieve the correct parameter value for param {} (expected {}, actual {})",
-                    pidMeta.paramNames[paramIndex], paramIndex * 0.5f, paramVal));
+    fmt::print("Could not retrieve the correct parameter value for param {} (expected {}, actual {})",
+               pidMeta.paramNames[paramIndex], paramIndex * 0.5f, paramVal);
+    return false;
   }
+
+  return true;
 }
 
 bool checkAlgoMetadata(const edm4hep::utils::ParticleIDMeta& pidMeta, const std::string& algoName,
@@ -71,7 +73,7 @@ int main(int, char* argv[]) {
 
   const auto paramIndex1 = edm4hep::utils::getParamIndex(pidMeta1, pidParam1).value_or(-1);
   const auto paramIndex2 = edm4hep::utils::getParamIndex(pidMeta2, pidParam2).value_or(-1);
-  if (paramIndex1 < 0 || paramIndex2 < 0) {
+  if (paramIndex1 == -1 || paramIndex2 == -1) {
     fmt::print("Could not get a parameter index for '{}' (got {}) or '{}' (got {})\n", pidParam1, paramIndex1,
                pidParam2, paramIndex2);
   }
@@ -83,11 +85,13 @@ int main(int, char* argv[]) {
   for (const auto r : recos) {
     auto pids = pidHandler.getPIDs(r);
     if (pids.size() != 2) {
-      throw std::runtime_error(fmt::format(
-          "Failed to retrieve the two expected ParticlID objects related to reco particle {}", r.id().index));
+      fmt::print("Failed to retrieve the two expected ParticlID objects related to reco particle {}", r.id().index);
+      return 1;
+    }
 
-      checkPIDForAlgo(pidHandler, r, pidMeta1, paramIndex1);
-      checkPIDForAlgo(pidHandler, r, pidMeta2, paramIndex2);
+    if (!checkPIDForAlgo(pidHandler, r, pidMeta1, paramIndex1) ||
+        !checkPIDForAlgo(pidHandler, r, pidMeta2, paramIndex2)) {
+      return 1;
     }
   }
 

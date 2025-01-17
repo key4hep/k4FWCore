@@ -96,7 +96,7 @@ struct ExampleParticleIDConsumer final
 
     m_paramIndex1 = edm4hep::utils::getParamIndex(m_pidMeta1, m_paramOfInterest1.value()).value_or(-1);
     m_paramIndex2 = edm4hep::utils::getParamIndex(m_pidMeta2, m_paramOfInterest2.value()).value_or(-1);
-    if (m_paramIndex1 < 0 || m_paramIndex2 < 0) {
+    if (m_paramIndex1 == -1 || m_paramIndex2 == -1) {
       error() << fmt::format("Could not get a parameter index for {} (got {}) or {} (got {})",
                              m_paramOfInterest1.value(), m_paramIndex1, m_paramOfInterest2.value(), m_paramIndex2)
               << endmsg;
