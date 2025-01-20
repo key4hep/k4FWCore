@@ -30,6 +30,7 @@ find_package(ROOT COMPONENTS RIO Tree REQUIRED)
 find_package(Gaudi REQUIRED)
 find_package(podio 1.0.1 REQUIRED)
 find_package(EDM4HEP 0.99 REQUIRED)
+find_package(fmt REQUIRED)
 
 include(cmake/Key4hepConfig.cmake)
 
@@ -45,7 +46,6 @@ add_subdirectory(k4FWCore)
 add_subdirectory(k4Interface)
 add_subdirectory(python)
 if(BUILD_TESTING)
-  find_package(fmt REQUIRED)
   add_subdirectory(test/k4FWCoreTest)
 endif()
 
