@@ -207,4 +207,4 @@ add_custom_command(TARGET k4FWCoreTestPlugins POST_BUILD
 
 add_test_with_env(TypeMisMatchDemo options/TypeMisMatchDemo.py PROPERTIES PASS_REGULAR_EXPRESSION "Failed to cast collection MCParticles to the required type")
 
-add_test_with_env(TypeMisMatchDemoMultiple options/TypeMisMatchDemoMultiple.py PROPERTIES PASS_REGULAR_EXPRESSION "Failed to cast collection MCParticles to the required type")
+add_test_with_env(TypeMisMatchDemoMultiple options/TypeMisMatchDemoMultiple.py PROPERTIES PASS_REGULAR_EXPRESSION "Failed to cast collection MCParticles1 to the required type")
