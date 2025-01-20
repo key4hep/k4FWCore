@@ -24,3 +24,23 @@ struct TypeMisMatchDemo final : k4FWCore::Transformer<edm4hep::MCParticleCollect
 };
 
 DECLARE_COMPONENT(TypeMisMatchDemo)
+
+struct TypeMisMatchDemoMultiple final
+    : k4FWCore::Transformer<edm4hep::MCParticleCollection(const std::vector<const edm4hep::TrackCollection*>&)> {
+  TypeMisMatchDemoMultiple(const std::string& name, ISvcLocator* svcLoc)
+      : Transformer(name, svcLoc, {KeyValues("InputCollections", {"MCParticles1", "MCParticles2"})},
+                    {KeyValues("OutputCollection", {"OutputMCParticles"})}) {}
+
+  edm4hep::MCParticleCollection operator()(const std::vector<const edm4hep::TrackCollection*>& input) const final {
+    for (const auto& trackColl : input) {
+      debug() << "collection size: " << trackColl->size() << " type = " << trackColl->getTypeName() << endmsg;
+      auto track = (*trackColl)[0];
+      // The next line goes boom
+      debug() << track.getTrackerHits().size() << endmsg;
+    }
+
+    return edm4hep::MCParticleCollection{};
+  }
+};
+
+DECLARE_COMPONENT(TypeMisMatchDemoMultiple)
