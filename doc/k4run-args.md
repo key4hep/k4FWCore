@@ -16,6 +16,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+
+
 # Adding custom arguments to `k4run`
 
 It is possible to extend `k4run` with custom arguments from a steering file
@@ -31,6 +33,12 @@ my_opts = parser.parse_known_args()[0]
 # later
 if my_opts.trackingOnly:
     # only run track reconstruction
+```
+
+The example steering file can then be executed as follows:
+
+```
+k4run example_steering_file.py --trackingOnly --some-other-args 
 ```
 
 Behind the scenes `parser` is just a normal instance of python's
