@@ -38,7 +38,7 @@ if my_opts.trackingOnly:
 The example steering file can then be executed as follows:
 
 ```
-k4run example_steering_file.py --trackingOnly --some-other-args 
+k4run example_steering_file.py --trackingOnly --some-other-args
 ```
 
 Behind the scenes `parser` is just a normal instance of python's
