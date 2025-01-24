@@ -41,9 +41,9 @@ struct ExampleParticleIDProducer final
     return StatusCode::SUCCESS;
   }
 
-  edm4hep::ParticleIDCollection operator()(const edm4hep::ReconstructedParticleCollection& recos) const {
+  edm4hep::ParticleIDCollection operator()(const edm4hep::ReconstructedParticleCollection& recos) const override {
     auto pidColl = edm4hep::ParticleIDCollection{};
-    for (const auto r : recos) {
+    for (const auto& r : recos) {
       auto pid = pidColl.create();
       pid.setAlgorithmType(m_pidMeta.algoType());
       pid.setPDG(r.getPDG() - 10);
