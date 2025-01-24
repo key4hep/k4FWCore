@@ -108,7 +108,8 @@ struct ExampleParticleIDConsumer final
   void operator()(const edm4hep::ParticleIDCollection& pidColl1, const edm4hep::ParticleIDCollection& pidColl2,
                   const edm4hep::ReconstructedParticleCollection& recos) const override {
     auto pidHandler = edm4hep::utils::PIDHandler::from(pidColl1, pidColl2);
-    pidHandler.addMetaInfos(m_pidMeta1, m_pidMeta2);
+    pidHandler.addMetaInfo(m_pidMeta1);
+    pidHandler.addMetaInfo(m_pidMeta2);
 
     for (const auto r : recos) {
       auto pids = pidHandler.getPIDs(r);
