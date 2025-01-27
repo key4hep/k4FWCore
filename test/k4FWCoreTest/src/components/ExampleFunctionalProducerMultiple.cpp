@@ -22,6 +22,7 @@
 #include "k4FWCore/Producer.h"
 
 #include "edm4hep/MCParticleCollection.h"
+#include "edm4hep/ReconstructedParticleCollection.h"
 #include "edm4hep/SimTrackerHitCollection.h"
 #include "edm4hep/TrackCollection.h"
 #include "edm4hep/TrackerHit3DCollection.h"
@@ -33,19 +34,21 @@
 
 using retType =
     std::tuple<podio::UserDataCollection<float>, edm4hep::MCParticleCollection, edm4hep::MCParticleCollection,
-               edm4hep::SimTrackerHitCollection, edm4hep::TrackerHit3DCollection, edm4hep::TrackCollection>;
+               edm4hep::SimTrackerHitCollection, edm4hep::TrackerHit3DCollection, edm4hep::TrackCollection,
+               edm4hep::ReconstructedParticleCollection>;
 
 struct ExampleFunctionalProducerMultiple final : k4FWCore::Producer<retType()> {
   // The pairs in KeyValue can be changed from python and they correspond
   // to the names of the output collections
   ExampleFunctionalProducerMultiple(const std::string& name, ISvcLocator* svcLoc)
-      : Producer(name, svcLoc, {},
-                 {KeyValues("OutputCollectionFloat", {"VectorFloat"}),
-                  KeyValues("OutputCollectionParticles1", {"MCParticles1"}),
-                  KeyValues("OutputCollectionParticles2", {"MCParticles2"}),
-                  KeyValues("OutputCollectionSimTrackerHits", {"SimTrackerHits"}),
-                  KeyValues("OutputCollectionTrackerHits", {"TrackerHits"}),
-                  KeyValues("OutputCollectionTracks", {"Tracks"})}) {}
+      : Producer(
+            name, svcLoc, {},
+            {KeyValues("OutputCollectionFloat", {"VectorFloat"}),
+             KeyValues("OutputCollectionParticles1", {"MCParticles1"}),
+             KeyValues("OutputCollectionParticles2", {"MCParticles2"}),
+             KeyValues("OutputCollectionSimTrackerHits", {"SimTrackerHits"}),
+             KeyValues("OutputCollectionTrackerHits", {"TrackerHits"}), KeyValues("OutputCollectionTracks", {"Tracks"}),
+             KeyValues("OutputCollectionRecoParticles", {"RecoParticles"})}) {}
 
   // This is the function that will be called to produce the data
   retType operator()() const override {
@@ -84,8 +87,14 @@ struct ExampleFunctionalProducerMultiple final : k4FWCore::Producer<retType()> {
     track.addToTrackerHits(trackerHit);
     track.addToTracks(track2);
 
+    auto recos = edm4hep::ReconstructedParticleCollection();
+    for (int i = 1; i < 5; ++i) {
+      auto reco = recos.create();
+      reco.setPDG(i);
+    }
+
     return std::make_tuple(std::move(floatVector), std::move(particles), edm4hep::MCParticleCollection(),
-                           std::move(simTrackerHits), std::move(trackerHits), std::move(tracks));
+                           std::move(simTrackerHits), std::move(trackerHits), std::move(tracks), std::move(recos));
   }
 
 private:

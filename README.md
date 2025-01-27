@@ -74,6 +74,8 @@ print(my_opts[0].foo)
 
 * EDM4HEP
 
+* fmt
+
 ## Installation and downstream usage.
 
 k4FWCore is a CMake project. After setting up the dependencies (use for example `source /cvmfs/sw.hsf.org/key4hep/setup.sh`)

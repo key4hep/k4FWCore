@@ -90,6 +90,7 @@ producer_functional = ExampleFunctionalProducerMultiple(
     OutputCollectionSimTrackerHits=["FunctionalSimTrackerHits"],
     OutputCollectionTrackerHits=["FunctionalTrackerHits"],
     OutputCollectionTracks=["FunctionalTracks"],
+    OutputCollectionRecoParticles=["FunctionalRecos"],
     ExampleInt=5,
 )
 

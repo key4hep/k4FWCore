@@ -22,6 +22,7 @@ find_dependency(podio @podio_VERSION@)
 find_dependency(Gaudi @Gaudi_VERSION@)
 find_dependency(EDM4HEP @EDM4HEP_VERSION@)
 find_dependency(ROOT @ROOT_VERSION@ COMPONENTS RIO Tree)
+find_dependency(fmt @fmt_VERSION@)
 
 if(NOT TARGET k4FWCore::k4FWCore)
   include("${CMAKE_CURRENT_LIST_DIR}/k4FWCoreTargets.cmake")
