@@ -161,7 +161,8 @@ namespace k4FWCore {
               throw GaudiException(
                   thisClass->name(),
                   fmt::format("Failed to cast collection {} to the required type {}, the type of the collection is {}",
-                              std::get<Index>(handles)[0].objKey(), EDM4hepType::typeName, in->getTypeName()),
+                              std::get<Index>(handles)[0].objKey(), EDM4hepType::typeName,
+                              in ? in->getTypeName() : "[undetermined]"),
                   StatusCode::FAILURE);
             }
           } catch (GaudiException& e) {
