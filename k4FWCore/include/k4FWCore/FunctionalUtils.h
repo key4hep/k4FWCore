@@ -137,15 +137,15 @@ namespace k4FWCore {
           auto inputMap     = std::vector<const EDM4hepType*>();
           for (auto& handle : std::get<Index>(handles)) {
             podio::CollectionBase* in = handle.get()->get();
-            auto*                  typedIn = dynamic_cast<EDM4hepType*>(in);
+            auto*                  typedIn = dynamic_cast<const EDM4hepType*>(in);
             if (typedIn) {
-              inputMap.push_back(static_cast<EDM4hepType*>(typedIn));
+              inputMap.push_back(typedIn);
             } else {
               throw GaudiException(
                   thisClass->name(),
                   fmt::format(
                       "Failed to cast collection {} to the required type {}, the type of the collection is {}",
-                      handle.objKey(), typeid(EDM4hepType).name(), in ? in->getTypeName() : "[undetermined]"),
+                        handle.objKey(), EDM4hepType::typeName, in ? in->getTypeName() : "[undetermined]"),
                   StatusCode::FAILURE);
             }
           }
