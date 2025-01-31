@@ -135,7 +135,17 @@ namespace k4FWCore {
           auto inputMap     = std::vector<const EDM4hepType*>();
           for (auto& handle : std::get<Index>(handles)) {
             podio::CollectionBase* in = handle.get()->get();
-            inputMap.push_back(static_cast<const EDM4hepType*>(in));
+            auto*                  typedIn = dynamic_cast<EDM4hepType*>(in);
+            if (typedIn) {
+              inputMap.push_back(static_cast<EDM4hepType*>(typedIn));
+            } else {
+              throw GaudiException(
+                  thisClass->name(),
+                  fmt::format(
+                      "Failed to cast collection {} to the required type {}, the type of the collection is {}",
+                      handle.objKey(), typeid(EDM4hepType).name(), in ? in->getTypeName() : "[undetermined]"),
+                  StatusCode::FAILURE);
+            }
           }
           std::get<Index>(inputTuple) = std::move(inputMap);
         } else {
@@ -150,8 +160,7 @@ namespace k4FWCore {
               throw GaudiException(
                   thisClass->name(),
                   fmt::format("Failed to cast collection {} to the required type {}, the type of the collection is {}",
-                              std::get<Index>(handles)[0].objKey(),
-                              typeid(std::tuple_element_t<Index, std::tuple<In...>>).name(), in->getTypeName()),
+                              std::get<Index>(handles)[0].objKey(), EDM4hepType::typeName, in->getTypeName()),
                   StatusCode::FAILURE);
             }
           } catch (GaudiException& e) {
