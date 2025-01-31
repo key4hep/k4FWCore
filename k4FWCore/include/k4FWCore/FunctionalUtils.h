@@ -145,8 +145,8 @@ namespace k4FWCore {
           // Bare EDM4hep type, without pointers or const
           using EDM4hepType = std::remove_cvref_t<std::remove_pointer_t<TupleType>>;
           try {
-            podio::CollectionBase* in = std::get<Index>(handles)[0].get()->get();
-            std::get<Index>(inputTuple)     = static_cast<EDM4hepType*>(in);
+            podio::CollectionBase* in   = std::get<Index>(handles)[0].get()->get();
+            std::get<Index>(inputTuple) = static_cast<EDM4hepType*>(in);
           } catch (GaudiException& e) {
             // When the type of the collection is different from the one requested, this can happen because
             // 1. a mistake was made in the input types of a functional algorithm
