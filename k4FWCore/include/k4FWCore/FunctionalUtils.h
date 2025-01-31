@@ -80,12 +80,12 @@ namespace k4FWCore {
     template <typename T> struct isVectorLike : std::false_type {};
 
     template <typename Value>
-      requires std::is_base_of_v<podio::CollectionBase, std::remove_cvref_t<Value>> ||
-               std::is_same_v<podio::CollectionBase*, std::remove_cvref_t<Value>>
+      requires std::is_base_of_v<podio::CollectionBase, std::remove_cv_t<Value>> ||
+               std::is_same_v<podio::CollectionBase*, std::remove_cv_t<Value>>
     struct isVectorLike<std::vector<Value*>> : std::true_type {};
 
     template <typename Value>
-      requires std::is_base_of_v<podio::CollectionBase, std::remove_cvref_t<Value>>
+      requires std::is_base_of_v<podio::CollectionBase, std::remove_cv_t<Value>>
     struct isVectorLike<std::vector<Value>> : std::true_type {};
 
     template <class T> inline constexpr bool isVectorLike_v = isVectorLike<T>::value;
@@ -130,7 +130,7 @@ namespace k4FWCore {
         using TupleType = std::tuple_element_t<Index, std::tuple<In...>>;
         if constexpr (isVectorLike_v<TupleType>) {
           // Bare EDM4hep type, without pointers or const
-          using EDM4hepType = std::remove_cvref_t<std::remove_pointer_t<typename TupleType::value_type>>;
+          using EDM4hepType = std::remove_cv_t<std::remove_pointer_t<typename TupleType::value_type>>;
           auto inputMap     = std::vector<const EDM4hepType*>();
           for (auto& handle : std::get<Index>(handles)) {
             podio::CollectionBase* in = handle.get()->get();
@@ -139,7 +139,7 @@ namespace k4FWCore {
           std::get<Index>(inputTuple) = std::move(inputMap);
         } else {
           // Bare EDM4hep type, without pointers or const
-          using EDM4hepType = std::remove_cvref_t<std::remove_pointer_t<TupleType>>;
+          using EDM4hepType = std::remove_cv_t<std::remove_pointer_t<TupleType>>;
           try {
             podio::CollectionBase* in   = std::get<Index>(handles)[0].get()->get();
             std::get<Index>(inputTuple) = static_cast<EDM4hepType*>(in);
