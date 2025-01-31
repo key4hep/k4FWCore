@@ -133,12 +133,8 @@ namespace k4FWCore {
           using EDM4hepType = std::remove_cvref_t<std::remove_pointer_t<typename TupleType::value_type>>;
           auto inputMap     = std::vector<const EDM4hepType*>();
           for (auto& handle : std::get<Index>(handles)) {
-            if constexpr (std::is_same_v<EDM4hepType, podio::CollectionBase>) {
-              inputMap.push_back(get(handle, thisClass, Gaudi::Hive::currentContext()).get());
-            } else {
-              podio::CollectionBase* in = handle.get()->get();
-              inputMap.push_back(static_cast<const EDM4hepType*>(in));
-            }
+            podio::CollectionBase* in = handle.get()->get();
+            inputMap.push_back(static_cast<const EDM4hepType*>(in));
           }
           std::get<Index>(inputTuple) = std::move(inputMap);
         } else {
