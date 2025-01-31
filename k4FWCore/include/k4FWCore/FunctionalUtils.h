@@ -137,15 +137,15 @@ namespace k4FWCore {
               inputMap.push_back(get(handle, thisClass, Gaudi::Hive::currentContext()).get());
             } else {
               podio::CollectionBase* in = handle.get()->get();
-              inputMap.push_back(dynamic_cast<EDM4hepType*>(in));
+              inputMap.push_back(static_cast<const EDM4hepType*>(in));
             }
           }
           std::get<Index>(inputTuple) = std::move(inputMap);
         } else {
-          using EDM4hepType = std::remove_cvref_t<std::remove_pointer_t<typename TupleType::value_type>>;
+          using EDM4hepType = std::remove_cvref_t<std::remove_pointer_t<TupleType>>;
           try {
-            podio::CollectionBase* in   = std::get<Index>(handles)[0].get()->get();
-            auto*                  typedIn = dynamic_cast<EDM4hepType*>(in);
+            const podio::CollectionBase* in   = std::get<Index>(handles)[0].get()->get();
+            std::get<Index>(inputTuple) = const_cast<EDM4hepType*>(static_cast<const EDM4hepType*>(in));
           } catch (GaudiException& e) {
             // When the type of the collection is different from the one requested, this can happen because
             // 1. a mistake was made in the input types of a functional algorithm
