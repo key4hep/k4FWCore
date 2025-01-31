@@ -80,12 +80,12 @@ namespace k4FWCore {
     template <typename T> struct isVectorLike : std::false_type {};
 
     template <typename Value>
-      requires std::is_base_of_v<podio::CollectionBase, std::remove_cvref_t<Value>> ||
-               std::is_same_v<podio::CollectionBase*, std::remove_cvref_t<Value>>
+      requires std::is_base_of_v<podio::CollectionBase, std::remove_cv_t<Value>> ||
+               std::is_same_v<podio::CollectionBase*, std::remove_cv_t<Value>>
     struct isVectorLike<std::vector<Value*>> : std::true_type {};
 
     template <typename Value>
-      requires std::is_base_of_v<podio::CollectionBase, std::remove_cvref_t<Value>>
+      requires std::is_base_of_v<podio::CollectionBase, std::remove_cv_t<Value>>
     struct isVectorLike<std::vector<Value>> : std::true_type {};
 
     template <class T> inline constexpr bool isVectorLike_v = isVectorLike<T>::value;
@@ -127,24 +127,22 @@ namespace k4FWCore {
     template <size_t Index, typename... In, typename... Handles, typename InputTuple>
     void readVectorInputs(const std::tuple<Handles...>& handles, auto thisClass, InputTuple& inputTuple) {
       if constexpr (Index < sizeof...(Handles)) {
-        if constexpr (isVectorLike_v<std::tuple_element_t<Index, std::tuple<In...>>>) {
-          // Bare EDM4hep type, without pointers
-          using EDM4hepType =
-              std::remove_pointer_t<typename std::tuple_element_t<Index, std::tuple<In...>>::value_type>;
-          auto inputMap = std::vector<const EDM4hepType*>();
+        using TupleType = std::tuple_element_t<Index, std::tuple<In...>>;
+        if constexpr (isVectorLike_v<TupleType>) {
+          // Bare EDM4hep type, without pointers or const
+          using EDM4hepType = std::remove_cv_t<std::remove_pointer_t<typename TupleType::value_type>>;
+          auto inputMap     = std::vector<const EDM4hepType*>();
           for (auto& handle : std::get<Index>(handles)) {
-            if constexpr (std::is_same_v<EDM4hepType, const podio::CollectionBase*>) {
-              inputMap.push_back(&get(handle, thisClass, Gaudi::Hive::currentContext()));
-            } else {
-              podio::CollectionBase* in = handle.get()->get();
-              inputMap.push_back(static_cast<EDM4hepType*>(in));
-            }
+            podio::CollectionBase* in = handle.get()->get();
+            inputMap.push_back(static_cast<const EDM4hepType*>(in));
           }
           std::get<Index>(inputTuple) = std::move(inputMap);
         } else {
+          // Bare EDM4hep type, without pointers or const
+          using EDM4hepType = std::remove_cv_t<std::remove_pointer_t<TupleType>>;
           try {
             podio::CollectionBase* in   = std::get<Index>(handles)[0].get()->get();
-            std::get<Index>(inputTuple) = static_cast<std::tuple_element_t<Index, std::tuple<In...>>*>(in);
+            std::get<Index>(inputTuple) = static_cast<EDM4hepType*>(in);
           } catch (GaudiException& e) {
             // When the type of the collection is different from the one requested, this can happen because
             // 1. a mistake was made in the input types of a functional algorithm
@@ -153,17 +151,16 @@ namespace k4FWCore {
               thisClass->debug() << "Trying to cast the collection " << std::get<Index>(handles)[0].objKey()
                                  << " to the requested type didn't work " << endmsg;
               DataObject*       p;
-              IDataProviderSvc* svc = thisClass->serviceLocator()->template service<IDataProviderSvc>("EventDataSvc");
+              IDataProviderSvc* svc = thisClass->evtSvc();
               svc->retrieveObject("/Event/" + std::get<Index>(handles)[0].objKey(), p).ignore();
-              const auto wrp = dynamic_cast<const DataWrapper<std::tuple_element_t<Index, std::tuple<In...>>>*>(p);
+              const auto* wrp = dynamic_cast<const DataWrapper<EDM4hepType>*>(p);
               if (!wrp) {
                 throw GaudiException(thisClass->name(),
                                      "Failed to cast collection " + std::get<Index>(handles)[0].objKey() +
-                                         " to the requested type " +
-                                         typeid(std::tuple_element_t<Index, std::tuple<In...>>).name(),
+                                         " to the requested type " + EDM4hepType::typeName,
                                      StatusCode::FAILURE);
               }
-              std::get<Index>(inputTuple) = const_cast<std::tuple_element_t<Index, std::tuple<In...>>*>(wrp->getData());
+              std::get<Index>(inputTuple) = const_cast<EDM4hepType*>(wrp->getData());
             } else {
               throw e;
             }
