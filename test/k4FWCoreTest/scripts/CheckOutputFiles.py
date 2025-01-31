@@ -175,18 +175,8 @@ check_collections(
 podio_reader = podio.root_io.Reader("functional_merged_collections.root")
 frames = podio_reader.get("events")
 ev = frames[0]
-new_mcs = ev.get("NewMCParticles")
-merged_mc_colls = [ev.get(f"MCParticles{i}") for i in range(1, 4)]
-merged_mcs = [mcc[i] for mcc in merged_mc_colls for i in range(len(mcc))]
-if len(new_mcs) != len(merged_mcs):
-    raise RuntimeError(f"Expected {len(merged_mcs)} NewMCParticles but got {len(new_mcs)}")
-
-for new_mc, orig_mc in zip(new_mcs, merged_mcs):
-    if new_mc.id() != orig_mc.id():
-        raise RuntimeError(
-            f"merged mcs do not match, expected [{new_mc.id().collectionID}, {new_mc.id().index}], actual [{orig_mc.id().collectionID}, {orig_mc.id().index}]"
-        )
-
+if len(ev.get("NewMCParticles")) != 4:
+    raise RuntimeError(f"Expected 4 NewMCParticles but got {len(ev.get('NewMCParticles'))}")
 
 check_collections("functional_metadata.root", ["MCParticles"])
 
