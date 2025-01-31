@@ -151,9 +151,9 @@ namespace k4FWCore {
               thisClass->debug() << "Trying to cast the collection " << std::get<Index>(handles)[0].objKey()
                                  << " to the requested type didn't work " << endmsg;
               DataObject*       p;
-              IDataProviderSvc* svc = thisClass->serviceLocator()->template service<IDataProviderSvc>("EventDataSvc");
+              IDataProviderSvc* svc = thisClass->evtSvc();
               svc->retrieveObject("/Event/" + std::get<Index>(handles)[0].objKey(), p).ignore();
-              const auto wrp = dynamic_cast<const DataWrapper<EDM4hepType>*>(p);
+              const auto* wrp = dynamic_cast<const DataWrapper<EDM4hepType>*>(p);
               if (!wrp) {
                 throw GaudiException(thisClass->name(),
                                      "Failed to cast collection " + std::get<Index>(handles)[0].objKey() +
