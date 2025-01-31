@@ -212,4 +212,4 @@ target_link_libraries(check_ParticleIDOutputs PRIVATE podio::podioIO EDM4HEP::ed
 add_test(NAME check_ParticleIDOutputs COMMAND check_ParticleIDOutputs example_with_particleids.root)
 set_test_env(check_ParticleIDOutputs)
 set_tests_properties(check_ParticleIDOutputs PROPERTIES DEPENDS ParticleIDMetadataFramework)
-add_test_with_env(TypeMisMatchDemo options/TypeMisMatchDemo.py)
+add_test_with_env(TypeMisMatchDemo options/TypeMisMatchDemo.py PROPERTIES PASS_REGULAR_EXPRESSION "Failed to cast collection MCParticles to the required type")
