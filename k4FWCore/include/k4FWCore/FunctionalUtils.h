@@ -129,7 +129,7 @@ namespace k4FWCore {
       if constexpr (Index < sizeof...(Handles)) {
         using TupleType = std::tuple_element_t<Index, std::tuple<In...>>;
         if constexpr (isVectorLike_v<TupleType>) {
-          // Bare EDM4hep type, without pointers
+          // Bare EDM4hep type, without pointers or const
           using EDM4hepType = std::remove_cvref_t<std::remove_pointer_t<typename TupleType::value_type>>;
           auto inputMap     = std::vector<const EDM4hepType*>();
           for (auto& handle : std::get<Index>(handles)) {
@@ -142,10 +142,11 @@ namespace k4FWCore {
           }
           std::get<Index>(inputTuple) = std::move(inputMap);
         } else {
+          // Bare EDM4hep type, without pointers or const
           using EDM4hepType = std::remove_cvref_t<std::remove_pointer_t<TupleType>>;
           try {
-            const podio::CollectionBase* in   = std::get<Index>(handles)[0].get()->get();
-            std::get<Index>(inputTuple) = const_cast<EDM4hepType*>(static_cast<const EDM4hepType*>(in));
+            podio::CollectionBase* in = std::get<Index>(handles)[0].get()->get();
+            std::get<Index>(inputTuple)     = static_cast<EDM4hepType*>(in);
           } catch (GaudiException& e) {
             // When the type of the collection is different from the one requested, this can happen because
             // 1. a mistake was made in the input types of a functional algorithm
@@ -163,7 +164,7 @@ namespace k4FWCore {
                                          " to the requested type " + EDM4hepType::typeName,
                                      StatusCode::FAILURE);
               }
-              std::get<Index>(inputTuple) = const_cast<TupleType*>(wrp->getData());
+              std::get<Index>(inputTuple) = const_cast<EDM4hepType*>(wrp->getData());
             } else {
               throw e;
             }
