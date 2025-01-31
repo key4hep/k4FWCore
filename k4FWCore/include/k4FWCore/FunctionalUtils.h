@@ -19,6 +19,7 @@
 #ifndef FWCORE_FUNCTIONALUTILS_H
 #define FWCORE_FUNCTIONALUTILS_H
 
+#include <GaudiKernel/GaudiException.h>
 #include "Gaudi/Functional/details.h"
 #include "GaudiKernel/AnyDataWrapper.h"
 #include "GaudiKernel/DataObjID.h"
@@ -142,7 +143,17 @@ namespace k4FWCore {
           using EDM4hepType = std::remove_cv_t<std::remove_pointer_t<TupleType>>;
           try {
             podio::CollectionBase* in   = std::get<Index>(handles)[0].get()->get();
-            std::get<Index>(inputTuple) = static_cast<EDM4hepType*>(in);
+            auto*                  typedIn = dynamic_cast<EDM4hepType*>(in);
+            if (typedIn) {
+              std::get<Index>(inputTuple) = typedIn;
+            } else {
+              throw GaudiException(
+                  thisClass->name(),
+                  fmt::format("Failed to cast collection {} to the required type {}, the type of the collection is {}",
+                              std::get<Index>(handles)[0].objKey(),
+                              typeid(std::tuple_element_t<Index, std::tuple<In...>>).name(), in->getTypeName()),
+                  StatusCode::FAILURE);
+            }
           } catch (GaudiException& e) {
             // When the type of the collection is different from the one requested, this can happen because
             // 1. a mistake was made in the input types of a functional algorithm
