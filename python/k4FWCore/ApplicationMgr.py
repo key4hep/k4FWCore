@@ -19,7 +19,6 @@
 import os
 from Configurables import ApplicationMgr as AppMgr
 from Configurables import Reader, Writer, IOSvc, Gaudi__Sequencer, EventLoopMgr
-from podio.root_io import Reader as PodioReader
 
 
 class ApplicationMgr:
@@ -91,6 +90,8 @@ class ApplicationMgr:
             elif props["Input"][0]:
                 inp = "Input"
             if inp:
+                # Import here to avoid always importing ROOT which is slow
+                from podio.root_io import Reader as PodioReader
                 podio_reader = PodioReader(props[inp][0])
                 if self._mgr.EvtMax == -1:
                     self._mgr.EvtMax = podio_reader._reader.getEntries("events")
