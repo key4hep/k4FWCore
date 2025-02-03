@@ -20,9 +20,9 @@
 #define K4FWCORE_EVENTHEADERCREATOR
 
 #include <edm4hep/Constants.h>
+#include <edm4hep/EventHeaderCollection.h>
 #include "Gaudi/Algorithm.h"
 #include "k4FWCore/DataHandle.h"
-
 /***
  * Algorithm that creates an EventHeader collection and fills it with eventNumber and runNumber
  */
@@ -38,12 +38,16 @@ public:
   StatusCode execute(const EventContext&) const override;
 
 private:
+  // Since the type of the runNumber and eventNumber changed recently in EDM4hep, deduce their type
+  // instead of hardcoding it to avoid warnings
   // Run number value (fixed for the entire job, to be set by the job submitter)
-  Gaudi::Property<int> m_runNumber{this, "runNumber", 1, "Run number value"};
+  Gaudi::Property<decltype(std::declval<edm4hep::EventHeader>().getRunNumber())> m_runNumber{this, "runNumber", 1,
+                                                                                             "Run number value"};
   // Event number offset, use it if you want two separated jobs with the same run number
-  Gaudi::Property<int> m_eventNumberOffset{
+  Gaudi::Property<decltype(std::declval<edm4hep::EventHeader>().getEventNumber())> m_eventNumberOffset{
       this, "eventNumberOffset", 0,
       "Event number offset, eventNumber will be filled with 'event_index + eventNumberOffset'"};
+
   // datahandle for the EventHeader
   mutable DataHandle<edm4hep::EventHeaderCollection> m_headerCol{edm4hep::labels::EventHeader,
                                                                  Gaudi::DataHandle::Writer, this};
