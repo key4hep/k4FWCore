@@ -179,7 +179,7 @@ namespace k4FWCore {
               if (!wrp) {
                 throw GaudiException(thisClass->name(),
                                      "Failed to cast collection " + std::get<Index>(handles)[0].objKey() +
-                                         " to the requested type " + EDM4hepType::typeName,
+                                         " to the requested type " + typeid(EDM4hepType).name(),
                                      StatusCode::FAILURE);
               }
               std::get<Index>(inputTuple) = const_cast<EDM4hepType*>(wrp->getData());
