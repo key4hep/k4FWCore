@@ -55,10 +55,12 @@ struct ExampleEventHeaderConsumer final : k4FWCore::Consumer<void(const edm4hep:
     }
   }
 
-  Gaudi::Property<int>              m_runNumber{this, "runNumber", 0, "The expected run number"};
-  Gaudi::Property<int>              m_eventNumberOffset{this, "eventNumberOffset", 0,
+  Gaudi::Property<int> m_runNumber{this, "runNumber", 0, "The expected run number"};
+  Gaudi::Property<int> m_eventNumberOffset{this, "eventNumberOffset", 0,
                                            "The event number offset where events will start counting from"};
-  mutable std::atomic<std::int32_t> m_evtCounter{0};
+  // Since the type of the runNumber changed recently in EDM4hep, use its type
+  // instead of hardcoding it to avoid warnings
+  mutable std::atomic<decltype(std::declval<edm4hep::EventHeader>().getRunNumber())> m_evtCounter{0};
 };
 
 DECLARE_COMPONENT(ExampleEventHeaderConsumer)
