@@ -92,6 +92,7 @@ class ApplicationMgr:
             if inp:
                 # Import here to avoid always importing ROOT which is slow
                 from podio.root_io import Reader as PodioReader
+
                 podio_reader = PodioReader(props[inp][0])
                 if self._mgr.EvtMax == -1:
                     self._mgr.EvtMax = podio_reader._reader.getEntries("events")
