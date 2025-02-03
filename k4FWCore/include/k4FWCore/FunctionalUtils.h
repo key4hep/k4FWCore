@@ -19,6 +19,7 @@
 #ifndef FWCORE_FUNCTIONALUTILS_H
 #define FWCORE_FUNCTIONALUTILS_H
 
+#include <GaudiKernel/GaudiException.h>
 #include "Gaudi/Functional/details.h"
 #include "GaudiKernel/AnyDataWrapper.h"
 #include "GaudiKernel/DataObjID.h"
@@ -32,6 +33,8 @@
 #include "k4FWCore/DataWrapper.h"
 
 // #include "GaudiKernel/CommonMessaging.h"
+
+#include <fmt/format.h>
 
 #include <memory>
 #include <tuple>
@@ -133,16 +136,35 @@ namespace k4FWCore {
           using EDM4hepType = std::remove_cv_t<std::remove_pointer_t<typename TupleType::value_type>>;
           auto inputMap     = std::vector<const EDM4hepType*>();
           for (auto& handle : std::get<Index>(handles)) {
-            podio::CollectionBase* in = handle.get()->get();
-            inputMap.push_back(static_cast<const EDM4hepType*>(in));
+            podio::CollectionBase* in      = handle.get()->get();
+            auto*                  typedIn = dynamic_cast<const EDM4hepType*>(in);
+            if (typedIn) {
+              inputMap.push_back(typedIn);
+            } else {
+              throw GaudiException(
+                  thisClass->name(),
+                  fmt::format("Failed to cast collection {} to the required type {}, the type of the collection is {}",
+                              handle.objKey(), typeid(EDM4hepType).name(), in ? in->getTypeName() : "[undetermined]"),
+                  StatusCode::FAILURE);
+            }
           }
           std::get<Index>(inputTuple) = std::move(inputMap);
         } else {
           // Bare EDM4hep type, without pointers or const
           using EDM4hepType = std::remove_cv_t<std::remove_pointer_t<TupleType>>;
           try {
-            podio::CollectionBase* in   = std::get<Index>(handles)[0].get()->get();
-            std::get<Index>(inputTuple) = static_cast<EDM4hepType*>(in);
+            podio::CollectionBase* in      = std::get<Index>(handles)[0].get()->get();
+            auto*                  typedIn = dynamic_cast<EDM4hepType*>(in);
+            if (typedIn) {
+              std::get<Index>(inputTuple) = typedIn;
+            } else {
+              throw GaudiException(
+                  thisClass->name(),
+                  fmt::format("Failed to cast collection {} to the required type {}, the type of the collection is {}",
+                              std::get<Index>(handles)[0].objKey(), EDM4hepType::typeName,
+                              in ? in->getTypeName() : "[undetermined]"),
+                  StatusCode::FAILURE);
+            }
           } catch (GaudiException& e) {
             // When the type of the collection is different from the one requested, this can happen because
             // 1. a mistake was made in the input types of a functional algorithm

@@ -207,9 +207,11 @@ add_custom_command(TARGET k4FWCoreTestPlugins POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
                    ${PROJECT_SOURCE_DIR}/python/k4FWCore/ ${PROJECT_BINARY_DIR}/k4FWCore/genConfDir/k4FWCore)
 
-
 add_executable(check_ParticleIDOutputs src/check_ParticleIDOutputs.cpp)
 target_link_libraries(check_ParticleIDOutputs PRIVATE podio::podioIO EDM4HEP::edm4hep EDM4HEP::utils fmt::fmt)
 add_test(NAME check_ParticleIDOutputs COMMAND check_ParticleIDOutputs example_with_particleids.root)
 set_test_env(check_ParticleIDOutputs)
 set_tests_properties(check_ParticleIDOutputs PROPERTIES DEPENDS ParticleIDMetadataFramework)
+add_test_with_env(TypeMisMatchDemo options/TypeMisMatchDemo.py PROPERTIES PASS_REGULAR_EXPRESSION "Failed to cast collection MCParticles to the required type")
+
+add_test_with_env(TypeMisMatchDemoMultiple options/TypeMisMatchDemoMultiple.py PROPERTIES PASS_REGULAR_EXPRESSION "Failed to cast collection MCParticles1 to the required type")
