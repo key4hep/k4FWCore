@@ -175,14 +175,22 @@ namespace k4FWCore {
               DataObject*       p;
               IDataProviderSvc* svc = thisClass->evtSvc();
               svc->retrieveObject("/Event/" + std::get<Index>(handles)[0].objKey(), p).ignore();
+              // This is how Gaudi::Algorithms saves collections through the DataHandle
               const auto* wrp = dynamic_cast<const DataWrapper<EDM4hepType>*>(p);
-              if (!wrp) {
+              // This is how the Marlin wrapper saves collections when converting from LCIO to EDM4hep
+              const auto* marlinWrp = dynamic_cast<const DataWrapper<podio::CollectionBase>*>(p);
+              if (!wrp && !marlinWrp) {
                 throw GaudiException(thisClass->name(),
                                      "Failed to cast collection " + std::get<Index>(handles)[0].objKey() +
                                          " to the requested type " + typeid(EDM4hepType).name(),
                                      StatusCode::FAILURE);
               }
-              std::get<Index>(inputTuple) = const_cast<EDM4hepType*>(wrp->getData());
+              if (wrp) {
+                std::get<Index>(inputTuple) = const_cast<EDM4hepType*>(wrp->getData());
+              } else {
+                std::get<Index>(inputTuple) =
+                    dynamic_cast<EDM4hepType*>(const_cast<podio::CollectionBase*>(marlinWrp->getData()));
+              }
             } else {
               throw e;
             }

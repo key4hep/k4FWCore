@@ -215,3 +215,4 @@ set_tests_properties(check_ParticleIDOutputs PROPERTIES DEPENDS ParticleIDMetada
 add_test_with_env(TypeMisMatchDemo options/TypeMisMatchDemo.py PROPERTIES PASS_REGULAR_EXPRESSION "Failed to cast collection MCParticles to the required type")
 
 add_test_with_env(TypeMisMatchDemoMultiple options/TypeMisMatchDemoMultiple.py PROPERTIES PASS_REGULAR_EXPRESSION "Failed to cast collection MCParticles1 to the required type")
+add_test_with_env(ReadMarlinWrapperCollection options/readMarlinWrapperCollection.py)
