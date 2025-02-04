@@ -23,16 +23,14 @@
 
 #include "k4FWCore/DataHandle.h"
 
-#include "edm4hep/TrackerHit3DCollection.h"
-
 #include "podio/UserDataCollection.h"
 
-namespace edm4hep {
-  class MCParticleCollection;
-  class SimTrackerHitCollection;
-  class SimCaloHitCollection;
-  class TrackCollection;
-}  // namespace edm4hep
+#include "edm4hep/MCParticleCollection.h"
+#include "edm4hep/RecoMCParticleLinkCollection.h"
+#include "edm4hep/ReconstructedParticleCollection.h"
+#include "edm4hep/SimTrackerHitCollection.h"
+#include "edm4hep/TrackCollection.h"
+#include "edm4hep/TrackerHit3DCollection.h"
 
 /** @class k4FWCoreTest_CreateExampleEventData
  *  Lightweight producer for edm data for tests that do not depend on the actual
@@ -51,21 +49,21 @@ public:
 
 private:
   /// integer to add to the dummy values written to the edm
-  Gaudi::Property<int> m_magicNumberOffset{this, "magicNumberOffset", 0,
+  Gaudi::Property<int>                              m_magicNumberOffset{this, "magicNumberOffset", 0,
                                            "Integer to add to the dummy values written to the edm"};
-  /// Handle for the MCParticles to be written
   mutable DataHandle<edm4hep::MCParticleCollection> m_mcParticleHandle{"MCParticles", Gaudi::DataHandle::Writer, this};
-  /// Handle for the SimTrackerHits to be written
   mutable DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitHandle{"SimTrackerHits",
                                                                              Gaudi::DataHandle::Writer, this};
   mutable DataHandle<edm4hep::TrackerHit3DCollection>  m_TrackerHitHandle{"TrackerHits", Gaudi::DataHandle::Writer,
                                                                          this};
 
-  /// Handle for the Tracks to be written
   mutable DataHandle<edm4hep::TrackCollection> m_trackHandle{"Tracks", Gaudi::DataHandle::Writer, this};
 
   mutable DataHandle<podio::UserDataCollection<float>> m_vectorFloatHandle{"VectorFloat", Gaudi::DataHandle::Writer,
                                                                            this};
+  mutable DataHandle<edm4hep::ReconstructedParticleCollection> m_recoHandle{"RecoParticles", Gaudi::DataHandle::Writer,
+                                                                            this};
+  mutable DataHandle<edm4hep::RecoMCParticleLinkCollection>    m_linkHandle{"Links", Gaudi::DataHandle::Writer, this};
 
   mutable int m_event{0};
 };

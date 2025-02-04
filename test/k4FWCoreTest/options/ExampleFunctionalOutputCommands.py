@@ -31,6 +31,7 @@ svc.outputCommands = [
     "drop Tracks",
     "drop Counter",
     "drop NewMCParticles",
+    "drop NewLinks",
 ]
 
 transformer = ExampleFunctionalTransformerMultiple(

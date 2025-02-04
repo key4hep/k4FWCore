@@ -20,6 +20,8 @@
 #include "Gaudi/Property.h"
 
 #include "edm4hep/MCParticleCollection.h"
+#include "edm4hep/RecoMCParticleLinkCollection.h"
+#include "edm4hep/ReconstructedParticleCollection.h"
 #include "edm4hep/SimTrackerHitCollection.h"
 #include "edm4hep/TrackCollection.h"
 #include "edm4hep/TrackerHit3DCollection.h"
@@ -37,10 +39,12 @@ using ParticleColl      = edm4hep::MCParticleCollection;
 using SimTrackerHitColl = edm4hep::SimTrackerHitCollection;
 using TrackerHitColl    = edm4hep::TrackerHit3DCollection;
 using TrackColl         = edm4hep::TrackCollection;
+using RecoColl          = edm4hep::ReconstructedParticleCollection;
+using LinkColl          = edm4hep::RecoMCParticleLinkCollection;
 
 struct ExampleFunctionalConsumerMultiple final
     : k4FWCore::Consumer<void(const FloatColl&, const ParticleColl&, const SimTrackerHitColl&, const TrackerHitColl&,
-                              const TrackColl&)> {
+                              const TrackColl&, const RecoColl&, const LinkColl&)> {
   // The pairs in KeyValue can be changed from python and they correspond
   // to the names of the input collections
   ExampleFunctionalConsumerMultiple(const std::string& name, ISvcLocator* svcLoc)
@@ -51,13 +55,16 @@ struct ExampleFunctionalConsumerMultiple final
                      KeyValues("InputCollectionSimTrackerHits", {"SimTrackerHits"}),
                      KeyValues("InputCollectionTrackerHits", {"TrackerHits"}),
                      KeyValues("InputCollectionTracks", {"Tracks"}),
+                     KeyValues("InputCollectionRecoParticles", {"RecoParticles"}),
+                     KeyValues("InputCollectionLinks", {"Links"}),
                  }) {}
 
   // This is the function that will be called to transform the data
   // Note that the function has to be const, as well as the collections
   // we get from the input
   void operator()(const FloatColl& floatVector, const ParticleColl& particles, const SimTrackerHitColl& simTrackerHits,
-                  const TrackerHitColl& trackerHits, const TrackColl& tracks) const override {
+                  const TrackerHitColl& trackerHits, const TrackColl& tracks, const RecoColl& recos,
+                  const LinkColl& links) const override {
     if (floatVector.size() != 3) {
       throw std::runtime_error("Wrong size of floatVector collection, expected 3, got " +
                                std::to_string(floatVector.size()) + "");
@@ -106,6 +113,15 @@ struct ExampleFunctionalConsumerMultiple final
       error << "Wrong data in tracks collection, expected 1, 2.1, 3, 4.1, 5.1, 6.1 got " << tracks[0].getType() << ", "
             << tracks[0].getChi2() << ", " << tracks[0].getNdf();
       throw std::runtime_error(error.str());
+    }
+
+    for (size_t j = 0; j < links.size(); j++) {
+      if (links[j].getFrom() != recos[j] || links[j].getTo() != particles[j]) {
+        std::stringstream error;
+        error << "Wrong data in links collection, link" << j << " expected " << recos[0] << ", " << particles[j]
+              << " got " << links[j].getFrom() << ", " << links[j].getTo();
+        throw std::runtime_error(error.str());
+      }
     }
   }
 

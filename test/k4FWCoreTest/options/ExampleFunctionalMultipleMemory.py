@@ -50,6 +50,7 @@ consumer = ExampleFunctionalConsumerMultiple(
     InputCollectionSimTrackerHits=["SimTrackerHits"],
     InputCollectionTrackerHits=["TrackerHits"],
     InputCollectionTracks=["Tracks"],
+    InputCollectionLinks=["NewLinks"],
     Offset=10,
 )
 

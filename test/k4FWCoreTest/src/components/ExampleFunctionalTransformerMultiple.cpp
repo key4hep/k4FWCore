@@ -20,6 +20,8 @@
 #include "Gaudi/Property.h"
 
 #include "edm4hep/MCParticleCollection.h"
+#include "edm4hep/RecoMCParticleLinkCollection.h"
+#include "edm4hep/ReconstructedParticleCollection.h"
 #include "edm4hep/SimTrackerHitCollection.h"
 #include "edm4hep/TrackCollection.h"
 #include "edm4hep/TrackerHit3DCollection.h"
@@ -36,39 +38,43 @@ using ParticleColl      = edm4hep::MCParticleCollection;
 using SimTrackerHitColl = edm4hep::SimTrackerHitCollection;
 using TrackerHitColl    = edm4hep::TrackerHit3DCollection;
 using TrackColl         = edm4hep::TrackCollection;
+using RecoColl          = edm4hep::ReconstructedParticleCollection;
+using LinkColl          = edm4hep::RecoMCParticleLinkCollection;
 
 // As a simple example, we'll write an integer and a collection of MCParticles
 using Counter  = podio::UserDataCollection<int>;
 using Particle = edm4hep::MCParticleCollection;
 
 struct ExampleFunctionalTransformerMultiple final
-    : k4FWCore::MultiTransformer<std::tuple<Counter, Particle>(
-          const FloatColl&, const ParticleColl&, const SimTrackerHitColl&, const TrackerHitColl&, const TrackColl&)> {
+    : k4FWCore::MultiTransformer<std::tuple<Counter, Particle, LinkColl>(
+          const FloatColl&, const ParticleColl&, const SimTrackerHitColl&, const TrackerHitColl&, const TrackColl&,
+          const RecoColl&, const LinkColl&)> {
   ExampleFunctionalTransformerMultiple(const std::string& name, ISvcLocator* svcLoc)
       : MultiTransformer(
             name, svcLoc,
             {KeyValues("InputCollectionFloat", {"VectorFloat"}),
              KeyValues("InputCollectionParticles", {"MCParticles1"}),
              KeyValues("InputCollectionSimTrackerHits", {"SimTrackerHits"}),
-             KeyValues("InputCollectionTrackerHits", {"TrackerHits"}), KeyValues("InputCollectionTracks", {"Tracks"})},
+             KeyValues("InputCollectionTrackerHits", {"TrackerHits"}), KeyValues("InputCollectionTracks", {"Tracks"}),
+             KeyValues("InputCollectionRecoParticles", {"RecoParticles"}),
+             KeyValues("InputCollectionLinks", {"Links"})},
             {KeyValues("OutputCollectionCounter", {"Counter"}),
-             KeyValues("OutputCollectionParticles", {"NewMCParticles"})}) {}
+             KeyValues("OutputCollectionParticles", {"NewMCParticles"}),
+             KeyValues("OutputLinkCollection", {"NewLinks"})}) {}
 
   // This is the function that will be called to transform the data
   // Note that the function has to be const, as well as the collections
   // we get from the input
-  std::tuple<Counter, Particle> operator()(const FloatColl& floatVector, const ParticleColl& particles,
-                                           const SimTrackerHitColl& simTrackerHits, const TrackerHitColl& trackerHits,
-                                           const TrackColl& tracks) const override {
+  std::tuple<Counter, Particle, LinkColl> operator()(const FloatColl&, const ParticleColl& particles,
+                                                     const SimTrackerHitColl& simTrackerHits,
+                                                     const TrackerHitColl& trackerHits, const TrackColl& tracks,
+                                                     const RecoColl& recos, const LinkColl& links) const override {
     Counter counter;
-
-    counter.push_back(floatVector.size());
 
     auto newParticlesColl = edm4hep::MCParticleCollection();
     for (const auto& p : particles) {
       // We need to create a new particle since the current one is already in a collection
 
-      // We could create a new one
       auto newParticle = newParticlesColl->create();
       newParticle.setPDG(p.getPDG() + m_offset);
       newParticle.setGeneratorStatus(p.getGeneratorStatus() + m_offset);
@@ -82,7 +88,14 @@ struct ExampleFunctionalTransformerMultiple final
     counter.push_back(trackerHits.size());
     counter.push_back(tracks.size());
 
-    return std::make_tuple(std::move(counter), std::move(newParticlesColl));
+    auto newLinks = edm4hep::RecoMCParticleLinkCollection();
+    for (size_t i = 0; i < links.size(); ++i) {
+      auto link = newLinks.create();
+      link.setFrom(recos[i]);
+      link.setTo(newParticlesColl[i]);
+    }
+
+    return std::make_tuple(std::move(counter), std::move(newParticlesColl), std::move(newLinks));
   }
 
   Gaudi::Property<int> m_offset{this, "Offset", 10, "Integer to add to the dummy values written to the edm"};
