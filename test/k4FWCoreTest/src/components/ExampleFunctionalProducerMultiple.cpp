@@ -22,6 +22,7 @@
 #include "k4FWCore/Producer.h"
 
 #include "edm4hep/MCParticleCollection.h"
+#include "edm4hep/RecoMCParticleLinkCollection.h"
 #include "edm4hep/ReconstructedParticleCollection.h"
 #include "edm4hep/SimTrackerHitCollection.h"
 #include "edm4hep/TrackCollection.h"
@@ -35,7 +36,7 @@
 using retType =
     std::tuple<podio::UserDataCollection<float>, edm4hep::MCParticleCollection, edm4hep::MCParticleCollection,
                edm4hep::SimTrackerHitCollection, edm4hep::TrackerHit3DCollection, edm4hep::TrackCollection,
-               edm4hep::ReconstructedParticleCollection>;
+               edm4hep::ReconstructedParticleCollection, edm4hep::RecoMCParticleLinkCollection>;
 
 struct ExampleFunctionalProducerMultiple final : k4FWCore::Producer<retType()> {
   // The pairs in KeyValue can be changed from python and they correspond
@@ -48,7 +49,8 @@ struct ExampleFunctionalProducerMultiple final : k4FWCore::Producer<retType()> {
              KeyValues("OutputCollectionParticles2", {"MCParticles2"}),
              KeyValues("OutputCollectionSimTrackerHits", {"SimTrackerHits"}),
              KeyValues("OutputCollectionTrackerHits", {"TrackerHits"}), KeyValues("OutputCollectionTracks", {"Tracks"}),
-             KeyValues("OutputCollectionRecoParticles", {"RecoParticles"})}) {}
+             KeyValues("OutputCollectionRecoParticles", {"RecoParticles"}),
+             KeyValues("OutputCollectionLinks", {"Links"})}) {}
 
   // This is the function that will be called to produce the data
   retType operator()() const override {
@@ -62,8 +64,8 @@ struct ExampleFunctionalProducerMultiple final : k4FWCore::Producer<retType()> {
 
     auto              particles = edm4hep::MCParticleCollection();
     edm4hep::Vector3d v{0, 0, 0};
-    particles.create(1, 2, 3, 4.f, 5.f, 6.f, v, v, v);
-    particles.create(2, 3, 4, 5.f, 6.f, 7.f);
+    auto              part1 = particles.create(1, 2, 3, 4.f, 5.f, 6.f, v, v, v);
+    auto              part2 = particles.create(2, 3, 4, 5.f, 6.f, 7.f);
 
     auto simTrackerHits = edm4hep::SimTrackerHitCollection();
     auto hit            = simTrackerHits.create();
@@ -88,13 +90,21 @@ struct ExampleFunctionalProducerMultiple final : k4FWCore::Producer<retType()> {
     track.addToTracks(track2);
 
     auto recos = edm4hep::ReconstructedParticleCollection();
-    for (int i = 1; i < 5; ++i) {
+    for (int i = 0; i < 5; ++i) {
       auto reco = recos.create();
       reco.setPDG(i);
     }
 
+    auto links = edm4hep::RecoMCParticleLinkCollection();
+    for (size_t i = 0; i < 2; ++i) {
+      auto link = links.create();
+      link.setFrom(recos[i]);
+      link.setTo(particles[i]);
+    }
+
     return std::make_tuple(std::move(floatVector), std::move(particles), edm4hep::MCParticleCollection(),
-                           std::move(simTrackerHits), std::move(trackerHits), std::move(tracks), std::move(recos));
+                           std::move(simTrackerHits), std::move(trackerHits), std::move(tracks), std::move(recos),
+                           std::move(links));
   }
 
 private:
