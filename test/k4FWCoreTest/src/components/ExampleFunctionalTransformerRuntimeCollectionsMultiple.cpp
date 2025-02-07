@@ -200,7 +200,8 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
       auto coll = edm4hep::ReconstructedParticleCollection();
       if (recoColl->size() != 5 || recoColl->at(1).getPDG() != 1) {
         std::stringstream error;
-        error << "Wrong data in reco collection " << ", expected 5, 1 got " << recoColl->size();
+        error << "Wrong data in reco collection "
+              << ", expected 5, 1 got " << recoColl->size();
         if (recoColl->size() > 1) {
           error << ", expected PDG 1, got " << recoColl->at(1).getPDG();
         }
