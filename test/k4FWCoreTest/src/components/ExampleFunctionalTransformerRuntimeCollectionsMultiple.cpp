@@ -198,12 +198,14 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
     }
     for (auto& recoColl : recoVec) {
       auto coll = edm4hep::ReconstructedParticleCollection();
-      // if (recoColl->size() != 5 || recoColl->at(1).getPDG() != 1) {
-      //   std::stringstream error;
-      //   // error << "Wrong data in reco collection, expected 0, 1, 2, 3, 4 got " << coll[0].getPDG() << ", "
-      //   //       << coll[1].getPDG() << ", " << coll[2].getPDG() << ", " << coll[3].getPDG() << ", " << coll[4].getPDG();
-      //   throw std::runtime_error(error.str());
-      // }
+      if (recoColl->size() != 5 || recoColl->at(1).getPDG() != 1) {
+        std::stringstream error;
+        error << "Wrong data in reco collection " << ", expected 5, 1 got " << recoColl->size();
+        if (recoColl->size() > 1) {
+          error << ", expected PDG 1, got " << recoColl->at(1).getPDG();
+        }
+        throw std::runtime_error(error.str());
+      }
       for (const auto& reco : *recoColl) {
         coll.push_back(reco.clone());
       }
@@ -217,14 +219,11 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
     for (size_t i = 0; i < linkVec.size(); ++i) {
       const auto& linkColl = linkVec[i];
       auto        coll     = edm4hep::RecoMCParticleLinkCollection();
-      // if (linkColl->size() != 2) {
-      //   std::stringstream error;
-      //   error << "Wrong data in link collection, expected 0, 1, 2, 3, 4 got " << coll[0].getObjectID() << ", "
-      //         << coll[1].getObjectID() << ", " << coll[2].getObjectID() << ", " << coll[3].getObjectID() << ", "
-      //         << coll[4].getObjectID();
-      //   throw std::runtime_error(error.str());
-      // }
-      // coll.push_back(linkColl->at(0).clone());
+      if (linkColl->size() != 2) {
+        std::stringstream error;
+        error << "Wrong data in link collection " << i << ", expected 2, got " << linkColl->size();
+        throw std::runtime_error(error.str());
+      }
       for (size_t j = 0; j < linkColl->size(); j++) {
         auto link = coll.create();
         link.setFrom(recoVecOut[i].at(j));

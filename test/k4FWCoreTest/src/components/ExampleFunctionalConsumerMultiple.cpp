@@ -118,8 +118,8 @@ struct ExampleFunctionalConsumerMultiple final
     for (size_t j = 0; j < links.size(); j++) {
       if (links[j].getFrom() != recos[j] || links[j].getTo() != particles[j]) {
         std::stringstream error;
-        error << "Wrong data in links collection, link" << j << " expected " << recos[0] << ", " << particles[j]
-              << " got " << links[j].getFrom() << ", " << links[j].getTo();
+        error << "Wrong data in links collection, link" << j << " expected " << recos[j].id() << ", " << particles[j].id()
+              << " got " << links[j].getFrom().id() << ", " << links[j].getTo().id();
         throw std::runtime_error(error.str());
       }
     }
