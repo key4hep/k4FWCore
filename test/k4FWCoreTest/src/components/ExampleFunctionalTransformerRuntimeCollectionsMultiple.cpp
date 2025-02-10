@@ -214,8 +214,7 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
     }
 
     if (linkVec.size() != 3) {
-      throw std::runtime_error("Wrong size of the link vector, expected 3, got " + std::to_string(linkVecOut.size()) +
-                               "");
+      throw std::runtime_error("Wrong size of the link vector, expected 3, got " + std::to_string(linkVecOut.size()));
     }
     for (size_t i = 0; i < linkVec.size(); ++i) {
       const auto& linkColl = linkVec[i];
