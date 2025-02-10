@@ -114,7 +114,7 @@ private:
   Gaudi::Property<bool>        m_randomBX{this, "RandomBx", false,
                                    "Place the physics event at an random position in the train: overrides PhysicsBX"};
   mutable Gaudi::Property<int> m_physBX{this, "PhysicsBX", 1, "Number of the Bunch crossing of the physics event"};
-  Gaudi::Property<int>         _nBunchTrain{this, "NBunchtrain", 1, "Number of bunches in a bunch train"};
+  Gaudi::Property<int>         m_NBunchTrain{this, "NBunchtrain", 1, "Number of bunches in a bunch train"};
   // Gaudi::Property<int>         m_startWithBackgroundFile{this, "StartBackgroundFileIndex", -1,
   //                                                "Which background file to startWith"};
   Gaudi::Property<int> m_startWithBackgroundEvent{this, "StartBackgroundEventIndex", -1,
@@ -132,11 +132,11 @@ private:
       {},
       "Draw random number of Events to overlay from Poisson distribution with mean value NumberBackground"};
 
-  Gaudi::Property<std::string> _mcParticleCollectionName{
+  Gaudi::Property<std::string> m_MCParticleCollectionName{
       this, "BackgroundMCParticleCollectionName", "MCParticle",
       "The name of the MCParticle collection in the background files"};
 
-  Gaudi::Property<float> _T_diff{this, "Delta_t", float(0.5), "Time difference between BXs in the BXtrain"};
+  Gaudi::Property<float> m_deltaT{this, "Delta_t", float(0.5), "Time difference between BXs in the BXtrain"};
 
   mutable std::unique_ptr<EventHolder> m_bkgEvents{};
 

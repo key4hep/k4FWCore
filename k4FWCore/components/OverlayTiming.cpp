@@ -186,7 +186,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection&         
   // Iterate over each group of files and parameters
   for (size_t groupIndex = 0; groupIndex < m_bkgEvents->size(); groupIndex++) {
     if (m_randomBX) {
-      m_physBX = std::uniform_int_distribution<int>(0, _nBunchTrain - 1)(m_engine);
+      m_physBX = std::uniform_int_distribution<int>(0, m_NBunchTrain - 1)(m_engine);
       debug() << "Physics Event was placed in the " << m_physBX << " bunch crossing!" << endmsg;
     }
 
@@ -195,7 +195,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection&         
 
     // Permutation has negative values and the last one is 0
     // if (!m_randomBX) then m_physBX (default = 1)
-    for (int i = -(m_physBX - 1); i < _nBunchTrain - (m_physBX - 1); ++i) {
+    for (int i = -(m_physBX - 1); i < m_NBunchTrain - (m_physBX - 1); ++i) {
       permutation.push_back(i);
     }
     std::shuffle(permutation.begin(), permutation.end(), m_engine);
@@ -213,7 +213,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection&         
     }
 
     // Overlay the background events to each bunchcrossing in the bunch train
-    for (int bxInTrain = 0; bxInTrain < _nBunchTrain; ++bxInTrain) {
+    for (int bxInTrain = 0; bxInTrain < m_NBunchTrain; ++bxInTrain) {
       const int BX_number_in_train = permutation.at(bxInTrain);
 
       int NOverlay_to_this_BX = 0;
@@ -241,18 +241,18 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection&         
         const auto availableCollections = backgroundEvent.getAvailableCollections();
 
         // Either 0 or negative
-        const auto timeOffset = BX_number_in_train * _T_diff;
+        const auto timeOffset = BX_number_in_train * m_deltaT;
 
-        if (std::find(availableCollections.begin(), availableCollections.end(), _mcParticleCollectionName) ==
+        if (std::find(availableCollections.begin(), availableCollections.end(), m_MCParticleCollectionName) ==
             availableCollections.end()) {
-          warning() << "Collection " << _mcParticleCollectionName << " not found in background event" << endmsg;
+          warning() << "Collection " << m_MCParticleCollectionName << " not found in background event" << endmsg;
         }
 
         // To fix the relations we will need to have a map from old to new particle index
         std::map<int, int>                                           oldToNewMap;
         std::map<int, std::pair<std::vector<int>, std::vector<int>>> parentDaughterMap;
 
-        const auto& bgParticles = backgroundEvent.get<edm4hep::MCParticleCollection>(_mcParticleCollectionName);
+        const auto& bgParticles = backgroundEvent.get<edm4hep::MCParticleCollection>(m_MCParticleCollectionName);
         int         j           = oparticles.size();
         for (size_t i = 0; i < bgParticles.size(); ++i) {
           auto npart = bgParticles[i].clone(false);
@@ -297,7 +297,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection&         
           }
           const auto [this_start, this_stop] = define_time_windows(name);
           // There are only contributions to the readout if the hits are in the integration window
-          if (this_stop <= (BX_number_in_train - m_physBX) * _T_diff) {
+          if (this_stop <= (BX_number_in_train - m_physBX) * m_deltaT) {
             info() << "Skipping collection " << name << " as it is not in the integration window" << endmsg;
             continue;
           }
@@ -327,7 +327,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection&         
           }
           const auto [this_start, this_stop] = define_time_windows(name);
           // There are only contributions to the readout if the hits are in the integration window
-          if (this_stop <= (BX_number_in_train - m_physBX) * _T_diff) {
+          if (this_stop <= (BX_number_in_train - m_physBX) * m_deltaT) {
             info() << "Skipping collection " << name << " as it is not in the integration window" << endmsg;
             continue;
           }
