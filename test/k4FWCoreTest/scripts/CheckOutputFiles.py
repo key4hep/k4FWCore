@@ -84,6 +84,8 @@ check_collections(
         "Counter",
         "NewMCParticles",
         "RecoParticles",
+        "Links",
+        "NewLinks",
     ],
 )
 check_collections(
@@ -95,6 +97,7 @@ check_collections(
         "SimTrackerHits",
         "TrackerHits",
         "RecoParticles",
+        "Links",
     ],
 )
 check_collections("/tmp/a/b/c/functional_producer.root", ["MCParticles"])
@@ -113,6 +116,7 @@ check_collections(
         "Tracks",
         "NewMCParticles",
         "RecoParticles",
+        "Links",
     ],
 )
 
@@ -126,6 +130,7 @@ mix_collections = [
     "TrackerHits",
     "Tracks",
     "RecoParticles",
+    "Links",
     # Produced by functional
     "FunctionalVectorFloat",
     "FunctionalMCParticles",
@@ -134,15 +139,19 @@ mix_collections = [
     "FunctionalTrackerHits",
     "FunctionalTracks",
     "FunctionalRecos",
+    "FunctionalLinks",
     # Produced by an old algorithm
     "OldAlgorithmMCParticles",
     "OldAlgorithmSimTrackerHits",
     "OldAlgorithmTrackerHits",
     "OldAlgorithmTracks",
     "OldAlgorithmVectorFloat",
+    "OldAlgorithmRecoParticles",
+    "OldAlgorithmLinks",
     # Produced by the last transformer
     "Counter",
     "TransformedFunctionalMCParticles1",
+    "NewLinks",
 ]
 
 

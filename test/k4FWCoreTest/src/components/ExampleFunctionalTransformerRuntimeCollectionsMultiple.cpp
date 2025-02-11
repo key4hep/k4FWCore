@@ -20,6 +20,8 @@
 #include "Gaudi/Property.h"
 
 #include "edm4hep/MCParticleCollection.h"
+#include "edm4hep/RecoMCParticleLinkCollection.h"
+#include "edm4hep/ReconstructedParticleCollection.h"
 #include "edm4hep/SimTrackerHitCollection.h"
 #include "edm4hep/TrackCollection.h"
 #include "edm4hep/TrackerHit3DCollection.h"
@@ -36,14 +38,18 @@ using ParticleColl      = std::vector<const edm4hep::MCParticleCollection*>;
 using SimTrackerHitColl = std::vector<const edm4hep::SimTrackerHitCollection*>;
 using TrackerHitColl    = std::vector<const edm4hep::TrackerHit3DCollection*>;
 using TrackColl         = std::vector<const edm4hep::TrackCollection*>;
+using RecoColl          = std::vector<const edm4hep::ReconstructedParticleCollection*>;
+using LinkColl          = std::vector<const edm4hep::RecoMCParticleLinkCollection*>;
 
 using retType = std::tuple<std::vector<podio::UserDataCollection<float>>, std::vector<edm4hep::MCParticleCollection>,
                            std::vector<edm4hep::MCParticleCollection>, std::vector<edm4hep::SimTrackerHitCollection>,
-                           std::vector<edm4hep::TrackerHit3DCollection>, std::vector<edm4hep::TrackCollection>>;
+                           std::vector<edm4hep::TrackerHit3DCollection>, std::vector<edm4hep::TrackCollection>,
+                           std::vector<edm4hep::ReconstructedParticleCollection>,
+                           std::vector<edm4hep::RecoMCParticleLinkCollection>>;
 
 struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
     : k4FWCore::MultiTransformer<retType(const FloatColl&, const ParticleColl&, const SimTrackerHitColl&,
-                                         const TrackerHitColl&, const TrackColl&)> {
+                                         const TrackerHitColl&, const TrackColl&, const RecoColl&, const LinkColl&)> {
   // The pairs in KeyValue can be changed from python and they correspond
   // to the names of the input collections
   ExampleFunctionalTransformerRuntimeCollectionsMultiple(const std::string& name, ISvcLocator* svcLoc)
@@ -54,6 +60,8 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
                              KeyValues("InputCollectionSimTrackerHits", {"SimTrackerHits"}),
                              KeyValues("InputCollectionTrackerHits", {"TrackerHits"}),
                              KeyValues("InputCollectionTracks", {"Tracks"}),
+                             KeyValues("InputCollectionRecoParticles", {"Recos"}),
+                             KeyValues("InputCollectionLinks", {"Links"}),
                          },
                          {
                              KeyValues("OutputCollectionFloat", {"VectorFloat"}),
@@ -62,6 +70,8 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
                              KeyValues("OutputCollectionSimTrackerHits", {"SimTrackerHits"}),
                              KeyValues("OutputCollectionTrackerHits", {"TrackerHits"}),
                              KeyValues("OutputCollectionTracks", {"Tracks"}),
+                             KeyValues("OutputCollectionRecos", {"Recos"}),
+                             KeyValues("OutputCollectionLinks", {"Links"}),
                          }) {}
 
   // This is the function that will be called to transform the data
@@ -69,13 +79,15 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
   // we get from the input
   retType operator()(const FloatColl& floatVec, const ParticleColl& particlesVec,
                      const SimTrackerHitColl& simTrackerHitVec, const TrackerHitColl& trackerHitVec,
-                     const TrackColl& trackVec) const override {
+                     const TrackColl& trackVec, const RecoColl& recoVec, const LinkColl& linkVec) const override {
     auto floatVecOut         = std::vector<podio::UserDataCollection<float>>();
     auto particleVecOut      = std::vector<edm4hep::MCParticleCollection>();
     auto particle2VecOut     = std::vector<edm4hep::MCParticleCollection>();
     auto simTrackerHitVecOut = std::vector<edm4hep::SimTrackerHitCollection>();
     auto trackerHitVecOut    = std::vector<edm4hep::TrackerHit3DCollection>();
     auto trackVecOut         = std::vector<edm4hep::TrackCollection>();
+    auto recoVecOut          = std::vector<edm4hep::ReconstructedParticleCollection>();
+    auto linkVecOut          = std::vector<edm4hep::RecoMCParticleLinkCollection>();
 
     if (floatVec.size() != 3) {
       throw std::runtime_error("Wrong size of the float vector, expected 3, got " + std::to_string(floatVec.size()) +
@@ -118,8 +130,8 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
                 << particle.getSimulatorStatus() << ", " << particle.getCharge() << ", " << particle.getTime() << ", "
                 << particle.getMass();
           throw std::runtime_error(error.str());
-          coll.push_back(particle.clone());
         }
+        coll.push_back(particle.clone());
         i++;
       }
       particleVecOut.emplace_back(std::move(coll));
@@ -180,8 +192,49 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
       trackVecOut.emplace_back(std::move(coll));
     }
 
+    if (recoVec.size() != 3) {
+      throw std::runtime_error("Wrong size of the reco vector, expected 3, got " + std::to_string(recoVecOut.size()) +
+                               "");
+    }
+    for (auto& recoColl : recoVec) {
+      auto coll = edm4hep::ReconstructedParticleCollection();
+      if (recoColl->size() != 5 || recoColl->at(1).getPDG() != 1) {
+        std::stringstream error;
+        error << "Wrong data in reco collection "
+              << ", expected 5, 1 got " << recoColl->size();
+        if (recoColl->size() > 1) {
+          error << ", expected PDG 1, got " << recoColl->at(1).getPDG();
+        }
+        throw std::runtime_error(error.str());
+      }
+      for (const auto& reco : *recoColl) {
+        coll.push_back(reco.clone());
+      }
+      recoVecOut.emplace_back(std::move(coll));
+    }
+
+    if (linkVec.size() != 3) {
+      throw std::runtime_error("Wrong size of the link vector, expected 3, got " + std::to_string(linkVecOut.size()));
+    }
+    for (size_t i = 0; i < linkVec.size(); ++i) {
+      const auto& linkColl = linkVec[i];
+      auto        coll     = edm4hep::RecoMCParticleLinkCollection();
+      if (linkColl->size() != 2) {
+        std::stringstream error;
+        error << "Wrong data in link collection " << i << ", expected 2, got " << linkColl->size();
+        throw std::runtime_error(error.str());
+      }
+      for (size_t j = 0; j < linkColl->size(); j++) {
+        auto link = coll.create();
+        link.setFrom(recoVecOut[i].at(j));
+        link.setTo(particleVecOut[i].at(j));
+      }
+      linkVecOut.emplace_back(std::move(coll));
+    }
+
     return std::make_tuple(std::move(floatVecOut), std::move(particleVecOut), std::move(particle2VecOut),
-                           std::move(simTrackerHitVecOut), std::move(trackerHitVecOut), std::move(trackVecOut));
+                           std::move(simTrackerHitVecOut), std::move(trackerHitVecOut), std::move(trackVecOut),
+                           std::move(recoVecOut), std::move(linkVecOut));
   }
 
 private:

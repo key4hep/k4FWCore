@@ -57,6 +57,8 @@ if not args.iosvc:
         "SimTrackerHits",
         "TrackerHits",
         "Tracks",
+        "RecoParticles",
+        "Links",
     ]
 
     out = PodioOutput()
@@ -91,16 +93,18 @@ producer_functional = ExampleFunctionalProducerMultiple(
     OutputCollectionTrackerHits=["FunctionalTrackerHits"],
     OutputCollectionTracks=["FunctionalTracks"],
     OutputCollectionRecoParticles=["FunctionalRecos"],
+    OutputCollectionLinks=["FunctionalLinks"],
     ExampleInt=5,
 )
 
 # Check the functional-produced collections with functional and old algorithms
 
-# Here we check the new FunctionalMCParticles and the others that are
-# read from the file
+# Here we check a few new classes and others that are read from the file
 consumer_producerfun_functional = ExampleFunctionalConsumerMultiple(
     "FunctionalConsumerFromFunctional",
     InputCollectionParticles=["FunctionalMCParticles"],
+    InputCollectionRecoParticles=["FunctionalRecos"],
+    InputCollectionLinks=["FunctionalLinks"],
     Offset=0,
 )
 consumer_producerfun_algorithm = k4FWCoreTest_CheckExampleEventData(
@@ -118,12 +122,16 @@ producer_algorithm.simtrackhits = "OldAlgorithmSimTrackerHits"
 producer_algorithm.trackhits = "OldAlgorithmTrackerHits"
 producer_algorithm.tracks = "OldAlgorithmTracks"
 producer_algorithm.vectorfloat = "OldAlgorithmVectorFloat"
+producer_algorithm.recoparticles = "OldAlgorithmRecoParticles"
+producer_algorithm.links = "OldAlgorithmLinks"
 
 # Check the functional-produced collections with functional and old algorithms
 
 consumer_produceralg_functional = ExampleFunctionalConsumerMultiple(
     "FunctionalConsumerFromAlgorithm",
     InputCollectionParticles=["OldAlgorithmMCParticles"],
+    InputCollectionRecoParticles=["OldAlgorithmRecoParticles"],
+    InputCollectionLinks=["OldAlgorithmLinks"],
     Offset=0,
 )
 consumer_produceralg_algorithm = k4FWCoreTest_CheckExampleEventData("CheckAlgorithm")

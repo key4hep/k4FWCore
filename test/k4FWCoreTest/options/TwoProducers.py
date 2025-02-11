@@ -45,6 +45,8 @@ producer2.trackhits.Path = "trackhits2"
 producer2.simtrackhits.Path = "simtrackhits2"
 producer2.tracks.Path = "tracks2"
 producer2.vectorfloat.Path = "vectorfloat2"
+producer2.recoparticles.Path = "recoparticles2"
+producer2.links.Path = "links"
 ApplicationMgr().TopAlg += [producer2]
 
 
