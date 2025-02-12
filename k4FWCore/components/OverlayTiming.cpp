@@ -32,7 +32,6 @@
 
 #include <TMath.h>
 
-#include <limits>
 #include <random>
 #include <utility>
 #include <vector>
@@ -302,19 +301,17 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection&         
             continue;
           }
           auto& ocoll = osimTrackerHits[i];
-          if (std::abs(timeOffset) < std::numeric_limits<float>::epsilon()) {
-            for (const auto&& simTrackerHit : backgroundEvent.get<edm4hep::SimTrackerHitCollection>(name)) {
-              const float tof = time_of_flight(simTrackerHit.getPosition());
+          for (const auto&& simTrackerHit : backgroundEvent.get<edm4hep::SimTrackerHitCollection>(name)) {
+            const float tof = time_of_flight(simTrackerHit.getPosition());
 
-              if (!((simTrackerHit.getTime() + timeOffset > this_start + tof) &&
-                    (simTrackerHit.getTime() + timeOffset < this_stop + tof)))
-                continue;
-              auto nhit = simTrackerHit.clone(false);
-              nhit.setOverlay(true);
-              nhit.setTime(simTrackerHit.getTime() + timeOffset);
-              nhit.setParticle(oparticles[oldToNewMap[simTrackerHit.getParticle().getObjectID().index]]);
-              ocoll->push_back(nhit);
-            }
+            if (!((simTrackerHit.getTime() + timeOffset > this_start + tof) &&
+                  (simTrackerHit.getTime() + timeOffset < this_stop + tof)))
+              continue;
+            auto nhit = simTrackerHit.clone(false);
+            nhit.setOverlay(true);
+            nhit.setTime(simTrackerHit.getTime() + timeOffset);
+            nhit.setParticle(oparticles[oldToNewMap[simTrackerHit.getParticle().getObjectID().index]]);
+            ocoll->push_back(nhit);
           }
         }
 
