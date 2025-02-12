@@ -1,4 +1,4 @@
-# k4FWCore (key4hep FrameWork Core)
+ # k4FWCore (key4hep FrameWork Core)
 
 k4FWCore is a Gaudi package that provides the IOSvc, which allows to
 use EDM4hep in Gaudi workflows.
