@@ -18,7 +18,7 @@ limitations under the License.
 ]]
 CMAKE_MINIMUM_REQUIRED(VERSION 3.15)
 
-project(k4FWCore)
+project(k4FWCore LANGUAGES CXX)
 
 set(${PROJECT_NAME}_VERSION_MAJOR 1)
 set(${PROJECT_NAME}_VERSION_MINOR 2)
