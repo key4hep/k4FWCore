@@ -32,8 +32,10 @@
  */
 
 struct GAUDI_API IUniqueIDGenSvc : extend_interfaces<IInterface> {
+  using event_num_t = uint32_t;
+  using run_num_t   = uint32_t;
   DeclareInterfaceID(IUniqueIDGenSvc, 2, 0);
-  virtual size_t getUniqueID(uint32_t evt_num, uint32_t run_num, const std::string& name) const = 0;
+  virtual size_t getUniqueID(event_num_t evt_num, run_num_t run_num, const std::string& name) const = 0;
 };
 
 #endif
