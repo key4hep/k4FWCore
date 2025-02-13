@@ -17,8 +17,8 @@
  * limitations under the License.
  */
 #include "TestUniqueIDGenSvc.h"
-
 #include <cstdint>
+#include "edm4hep/MutableEventHeader.h"
 
 DECLARE_COMPONENT(TestUniqueIDGenSvc)
 
@@ -40,12 +40,14 @@ StatusCode TestUniqueIDGenSvc::initialize() {
 // For the second event, the service throws when trying to get the same ID twice
 StatusCode TestUniqueIDGenSvc::execute(const EventContext&) const {
   ++m_counter;
-  uint32_t    evt_num = 4;
-  uint32_t    run_num = 3 + m_counter.sum();
-  std::string name    = "Some algorithm name";
+  auto evt_header = edm4hep::MutableEventHeader{};
+  evt_header.setEventNumber(4);
+  evt_header.setRunNumber(3 + m_counter.sum());
+  std::string name = "Some algorithm name";
 
-  auto uid       = m_service->getUniqueID(evt_num, run_num, name);
-  auto uid_again = m_service->getUniqueID(evt_num + (m_counter.sum() % 2), run_num, name);
+  auto uid = m_service->getUniqueID(evt_header.getEventNumber(), evt_header.getRunNumber(), name);
+  auto uid_again =
+      m_service->getUniqueID(evt_header.getEventNumber() + (m_counter.sum() % 2), evt_header.getRunNumber(), name);
   if (uid == uid_again) {
     throw std::runtime_error("Unique IDs are the same");
   }

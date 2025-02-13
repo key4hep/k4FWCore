@@ -19,7 +19,9 @@
 #ifndef FWCORE_IUNIQUEIDGENSVC_H
 #define FWCORE_IUNIQUEIDGENSVC_H
 
-#include <cstdint>
+#include "edm4hep/EventHeader.h"
+
+#include <cstddef>
 #include <string>
 
 #include <GaudiKernel/IInterface.h>
@@ -32,8 +34,8 @@
  */
 
 struct GAUDI_API IUniqueIDGenSvc : extend_interfaces<IInterface> {
-  using event_num_t = uint32_t;
-  using run_num_t   = uint32_t;
+  using event_num_t = decltype(std::declval<edm4hep::EventHeader>().getEventNumber());
+  using run_num_t   = decltype(std::declval<edm4hep::EventHeader>().getRunNumber());
   DeclareInterfaceID(IUniqueIDGenSvc, 2, 0);
   virtual size_t getUniqueID(event_num_t evt_num, run_num_t run_num, const std::string& name) const = 0;
 };
