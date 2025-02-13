@@ -16,20 +16,40 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-# How to use UniqueIDGenSvc
 
-A Service to generate unique identifiers can be used with the following inputs:
-- Event number, Run number and Algorithm name
-- Seed number: set in the options python file
+# Seeding algorithm PRNG
 
-To set a seed for the UniqueIDGenSvc, add the following to an options file:
+Correctly seeding pseudo-random number generators (PRNG) is important to ensuring reproducible and good-quality randomness. A common pattern is to reinitialize each algorithm’s PRNG with a unique seed for each processed event.
+
+## UniqueIDGenSvc service
+
+The `UniqueIDGenSvc` Gaudi service can generate unique `size_t` values that can be used as PRNG seeds, based on an event number, run number, and algorithm.
+
+The service can be included in a steering file by:
 
 ```python
 from Configurables import UniqueIDGenSvc
-UniqueIDGenSvc().Seed = 987654321
+uidgen_svc = UniqueIDGenSvc()
 ```
 
-Declare the service in the header file:
+The service can be configured with a central seed from which the unique values will be derived. This seed can be configured with the `Seed` property:
+
+::::{tab-set}
+:::{tab-item} Python
+```python
+uidgen_svc.Seed = 987654321
+```
+:::
+:::{tab-item} CLI
+```sh
+k4run <steering-file> --UniqueIDGenSvc.Seed 987654321
+```
+:::
+::::
+
+## Using UniqueIDGenSvc in algorithms
+
+To use the `UniqueIDGenSvc` in a Gaudi algorithm first include the header file and declare a member variable:
 
 ```cpp
 #include <k4FWCore/IUniqueIDGenSvc.h>
@@ -37,17 +57,73 @@ Declare the service in the header file:
 SmartIF<IUniqueIDGenSvc> m_service;
 ```
 
-Initialize the service:
+Then, initialize the service in:
 
 ```cpp
 StatusCode SomeGaudiAlgorithm::initialize() {
-  m_service = serviceLocator()->service("UniqueIDGenSvc");
+  m_service = service("UniqueIDGenSvc");
 ```
 
-Then use the service during execution:
+Then, use the service during execution:
 
 ```cpp
 StatusCode MarlinProcessorWrapper::execute(const EventContext&) const {
   m_service->getUniqueID(1, 2, name());
 }
 ```
+
+## Seeding functional algorithm example
+
+In the EDM4hep data model, the event number and run number can be obtained from an `EventHeaderCollection`.
+The following is an example of a functional algorithm using `EventHeaderCollection` and `UniqueIDGenSvc` service to seed a PRNG.
+
+To begin, some boilerplate code is needed to declare the `EventHeaderCollection` as an algorithm input. In this example, the algorithm will also generate and produce a `podio::UserDataCollection<double>` containing random numbers generated during its execution.
+The name of input `EventHeaderCollection` object can be customized using the `EventHeaderCollection` property, with `EventHeader` set as the default name. Similarly, the name of the output `podio::UserDataCollection<double>`object can be adjusted via the `OutputCollection` property, which defaults to `RandomNumbers`.
+
+
+```cpp
+class ExampleRNGSeedingAlg final
+    : public k4FWCore::Transformer<podio::UserDataCollection<double>(const edm4hep::EventHeaderCollection&)> {
+public:
+  ExampleRNGSeedingAlg(const std::string& name, ISvcLocator* svcLoc)
+      : Transformer(name, svcLoc, {KeyValues("EventHeaderCollection", {"EventHeader"})},
+                    {KeyValues("OutputCollection", {"RandomNumbers"})}) {}
+```
+
+Then, declare a member variable for the service interface and locate the service during algorithm initialization:
+
+```cpp
+private:
+  SmartIF<IUniqueIDGenSvc> m_uniqueIDSvc{nullptr};
+
+public:
+  StatusCode initialize() final {
+    m_uniqueIDSvc = service("UniqueIDGenSvc");
+    if (!m_uniqueIDSvc) {
+      error() << "Unable to locate the UniqueIDGenSvc" << endmsg;
+      return StatusCode::FAILURE;
+    }
+    return StatusCode::SUCCESS;
+  }
+```
+
+During algorithm execution the `EventHeaderCollection` can be used to obtain a unique value from the `UniqueIDSvc`, then the value can be used as a seed for PRNG. In this example the PRNG is then used to generate a random value and push it to an output collection.
+
+```cpp
+public:
+  podio::UserDataCollection<double> operator()(const edm4hep::EventHeaderCollection& evtHeader) const final {
+    const auto evt = evtHeader[0];
+
+    // obtain  unique value
+    auto uid = m_uniqueIDSvc->getUniqueID(evt.getEventNumber(), evt.getRunNumber(), name());
+
+    // seed TRandom3 or some other PRNG of your choice
+    auto prng = TRandom3(uid);
+
+    auto coll = podio::UserDataCollection<double>();
+    coll.push_back(a);
+    return coll;
+  }
+```
+
+A complete code example can be found [here](https://github.com/key4hep/k4FWCore/blob/main/test/k4FWCoreTest/src/components/ExampleRNGSeedingAlg.cpp).
