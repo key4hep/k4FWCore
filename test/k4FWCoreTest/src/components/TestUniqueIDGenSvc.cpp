@@ -45,7 +45,7 @@ StatusCode TestUniqueIDGenSvc::execute(const EventContext&) const {
   evt_header.setRunNumber(3 + m_counter.sum());
   std::string name = "Some algorithm name";
 
-  auto uid = m_service->getUniqueID(evt_header.getEventNumber(), evt_header.getRunNumber(), name);
+  auto uid = m_service->getUniqueID(evt_header, name);
   auto uid_again =
       m_service->getUniqueID(evt_header.getEventNumber() + (m_counter.sum() % 2), evt_header.getRunNumber(), name);
   if (uid == uid_again) {
