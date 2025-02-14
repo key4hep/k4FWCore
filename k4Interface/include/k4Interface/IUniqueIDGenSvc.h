@@ -19,7 +19,7 @@
 #ifndef FWCORE_IUNIQUEIDGENSVC_H
 #define FWCORE_IUNIQUEIDGENSVC_H
 
-#include "edm4hep/EventHeader.h"
+#include "edm4hep/EventHeaderCollection.h"
 
 #include <cstddef>
 #include <string>
@@ -40,6 +40,10 @@ struct GAUDI_API IUniqueIDGenSvc : extend_interfaces<IInterface> {
   virtual size_t getUniqueID(event_num_t evt_num, run_num_t run_num, const std::string& name) const = 0;
   size_t         getUniqueID(const edm4hep::EventHeader& evt_header, const std::string& name) const {
     return getUniqueID(evt_header.getEventNumber(), evt_header.getRunNumber(), name);
+  }
+  // calculate a unique id from name and the first element of collection
+  size_t getUniqueID(const edm4hep::EventHeaderCollection& evt_headers, const std::string& name) const {
+    return getUniqueID(evt_headers.at(0), name);
   }
 };
 
