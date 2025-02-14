@@ -60,14 +60,14 @@ SmartIF<IUniqueIDGenSvc> m_service;
 Then, initialize the service in:
 
 ```cpp
-StatusCode SomeGaudiAlgorithm::initialize() {
+StatusCode ExampleAlgorithm::initialize() {
   m_service = service("UniqueIDGenSvc");
 ```
 
 Then, use the service during execution:
 
 ```cpp
-StatusCode MarlinProcessorWrapper::execute(const EventContext&) const {
+StatusCode ExampleAlgorithm::execute(const EventContext&) const {
   m_service->getUniqueID(1, 2, name());
 }
 ```
