@@ -23,7 +23,7 @@ Correctly seeding pseudo-random number generators (PRNG) is important to ensurin
 
 ## UniqueIDGenSvc service
 
-The `UniqueIDGenSvc` Gaudi service can generate unique `size_t` values that can be used as PRNG seeds, based on an event number, run number, and algorithm.
+The `UniqueIDGenSvc` Gaudi service can generate unique `size_t` values that can be used as PRNG seeds, based on an event number, run number, and algorithm name.
 
 The service can be included in a steering file by:
 
