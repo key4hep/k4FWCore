@@ -52,7 +52,7 @@ k4run <steering-file> --UniqueIDGenSvc.Seed 987654321
 To use the `UniqueIDGenSvc` in a Gaudi algorithm first include the header file and declare a member variable:
 
 ```cpp
-#include <k4FWCore/IUniqueIDGenSvc.h>
+#include <k4Interface/IUniqueIDGenSvc.h>
 
 SmartIF<IUniqueIDGenSvc> m_service;
 ```
