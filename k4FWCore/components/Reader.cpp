@@ -117,8 +117,6 @@ public:
       error() << "Unable to locate IIOSvc interface" << endmsg;
       return StatusCode::FAILURE;
     }
-    debug() << "Initializing IOSvc to read collections: " << m_inputCollections << endmsg;
-    m_iosvc->setReadingCollectionNames(m_inputCollections);
 
     return StatusCode::SUCCESS;
   }

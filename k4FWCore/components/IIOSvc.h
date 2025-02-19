@@ -39,9 +39,8 @@ public:
    * @brief Read the next event from the input file
    * @return A tuple containing the collections read, the collection names and the frame that owns the collections
    */
-  virtual std::tuple<std::vector<podio::CollectionBase*>, std::vector<std::string>, podio::Frame> next()       = 0;
-  virtual std::shared_ptr<std::vector<std::string>> getCollectionNames() const                                 = 0;
-  virtual void                                      setReadingCollectionNames(const std::vector<std::string>&) = 0;
+  virtual std::tuple<std::vector<podio::CollectionBase*>, std::vector<std::string>, podio::Frame> next() = 0;
+  virtual std::shared_ptr<std::vector<std::string>> getCollectionNames() const                           = 0;
 
   virtual podio::Writer& getWriter()                                         = 0;
   virtual void           deleteWriter()                                      = 0;

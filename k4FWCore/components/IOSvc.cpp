@@ -198,10 +198,6 @@ void IOSvc::handle(const Incident& incident) {
   }
 }
 
-void IOSvc::setReadingCollectionNames(const std::vector<std::string>& names) { m_collectionNames = names; }
-
-void IOSvc::setReadingFileNames(const std::vector<std::string>& names) { m_readingFileNames = names; }
-
 bool IOSvc::checkIfWriteCollection(const std::string& collName) { return m_switch.isOn(collName); }
 
 DECLARE_COMPONENT(IOSvc)
