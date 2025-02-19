@@ -40,7 +40,9 @@ class CollectionPusher : public Gaudi::Functional::details::BaseClass_t<Gaudi::F
 
   template <typename T>
   using OutputHandle_t = Gaudi::Functional::details::OutputHandle_t<Traits_, std::remove_pointer_t<T>>;
-  std::vector<OutputHandle_t<Out>>          m_outputs;
+  std::vector<OutputHandle_t<Out>> m_outputs;
+
+protected:
   Gaudi::Property<std::vector<std::string>> m_inputCollections{
       this, "InputCollections", {"First collection"}, "List of input collections"};
   // Gaudi::Property<std::string>                                        m_input{this, "Input", "Event", "Input file"};
@@ -106,12 +108,12 @@ public:
   // Gaudi doesn't run the destructor of the Services so we have to
   // manually ask for the reader to be deleted so it will call finish()
   // See https://gitlab.cern.ch/gaudi/Gaudi/-/issues/169
-  ~Reader() override { iosvc->deleteReader(); }
+  ~Reader() override { m_iosvc->deleteReader(); }
 
-  ServiceHandle<IIOSvc> iosvc{this, "IOSvc", "IOSvc"};
+  ServiceHandle<IIOSvc> m_iosvc{this, "IOSvc", "IOSvc"};
 
   StatusCode initialize() override {
-    if (!iosvc.isValid()) {
+    if (!m_iosvc.isValid()) {
       error() << "Unable to locate IIOSvc interface" << endmsg;
       return StatusCode::FAILURE;
     }
@@ -120,8 +122,8 @@ public:
   }
 
   StatusCode finalize() override {
-    if (iosvc) {
-      iosvc->deleteReader();
+    if (m_iosvc) {
+      m_iosvc->deleteReader();
     }
     return StatusCode::SUCCESS;
   }
@@ -130,7 +132,7 @@ public:
   // By convention the Frame is pushed to the store
   // so that it's deleted at the right time
   std::tuple<std::vector<podio::CollectionBase*>, std::vector<std::string>> operator()() const override {
-    auto val = iosvc->next();
+    auto val = m_iosvc->next();
 
     auto eds   = eventSvc().as<IDataProviderSvc>();
     auto frame = std::move(std::get<podio::Frame>(val));
