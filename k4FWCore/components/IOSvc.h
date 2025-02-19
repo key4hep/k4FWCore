@@ -49,7 +49,7 @@ public:
     return std::make_shared<std::vector<std::string>>(m_collectionNames);
   }
 
-  void setReadingCollectionNames(const std::vector<std::string>& names);
+  void setReadingCollectionNames(const std::vector<std::string>& names) override;
   void setReadingFileNames(const std::vector<std::string>& names);
 
 protected:

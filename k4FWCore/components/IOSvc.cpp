@@ -114,7 +114,9 @@ std::tuple<std::vector<podio::CollectionBase*>, std::vector<std::string>, podio:
   {
     std::lock_guard<std::mutex> lock(m_changeBufferLock);
     if (m_nextEntry < m_entries) {
-      frame = podio::Frame(m_reader->readEvent(m_nextEntry));
+      debug() << "Reading event " << m_nextEntry << endmsg;
+      debug() << "Reading collections " << m_collectionNames << endmsg;
+      frame = podio::Frame(m_reader->readEvent(m_nextEntry, m_collectionNames));
     } else {
       return std::make_tuple(std::vector<podio::CollectionBase*>(), std::vector<std::string>(), std::move(frame));
     }

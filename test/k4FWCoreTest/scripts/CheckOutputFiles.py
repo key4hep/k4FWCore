@@ -120,6 +120,7 @@ check_collections(
     ],
 )
 
+check_collections("functional_limited_input.root", ["MCParticles", "Links"])
 
 mix_collections = [
     # From file

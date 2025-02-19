@@ -40,7 +40,9 @@ class CollectionPusher : public Gaudi::Functional::details::BaseClass_t<Gaudi::F
 
   template <typename T>
   using OutputHandle_t = Gaudi::Functional::details::OutputHandle_t<Traits_, std::remove_pointer_t<T>>;
-  std::vector<OutputHandle_t<Out>>          m_outputs;
+  std::vector<OutputHandle_t<Out>> m_outputs;
+
+protected:
   Gaudi::Property<std::vector<std::string>> m_inputCollections{
       this, "InputCollections", {"First collection"}, "List of input collections"};
   // Gaudi::Property<std::string>                                        m_input{this, "Input", "Event", "Input file"};
@@ -115,6 +117,8 @@ public:
       error() << "Unable to locate IIOSvc interface" << endmsg;
       return StatusCode::FAILURE;
     }
+    debug() << "Initializing IOSvc to read collections: " << m_inputCollections << endmsg;
+    m_iosvc->setReadingCollectionNames(m_inputCollections);
 
     return StatusCode::SUCCESS;
   }
