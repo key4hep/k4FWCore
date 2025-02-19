@@ -28,6 +28,7 @@ svc.Input = "output_k4test_exampledata.root"
 # the output file contain them
 svc.CollectionNames = ["MCParticles", "Links"]
 svc.Output = "functional_limited_input.root"
+svc.OutputLevel = DEBUG
 
 mgr = ApplicationMgr(
     TopAlg=[],
