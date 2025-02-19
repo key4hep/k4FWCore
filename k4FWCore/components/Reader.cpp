@@ -106,12 +106,12 @@ public:
   // Gaudi doesn't run the destructor of the Services so we have to
   // manually ask for the reader to be deleted so it will call finish()
   // See https://gitlab.cern.ch/gaudi/Gaudi/-/issues/169
-  ~Reader() override { iosvc->deleteReader(); }
+  ~Reader() override { m_iosvc->deleteReader(); }
 
-  ServiceHandle<IIOSvc> iosvc{this, "IOSvc", "IOSvc"};
+  ServiceHandle<IIOSvc> m_iosvc{this, "IOSvc", "IOSvc"};
 
   StatusCode initialize() override {
-    if (!iosvc.isValid()) {
+    if (!m_iosvc.isValid()) {
       error() << "Unable to locate IIOSvc interface" << endmsg;
       return StatusCode::FAILURE;
     }
@@ -120,8 +120,8 @@ public:
   }
 
   StatusCode finalize() override {
-    if (iosvc) {
-      iosvc->deleteReader();
+    if (m_iosvc) {
+      m_iosvc->deleteReader();
     }
     return StatusCode::SUCCESS;
   }
@@ -130,7 +130,7 @@ public:
   // By convention the Frame is pushed to the store
   // so that it's deleted at the right time
   std::tuple<std::vector<podio::CollectionBase*>, std::vector<std::string>> operator()() const override {
-    auto val = iosvc->next();
+    auto val = m_iosvc->next();
 
     auto eds   = eventSvc().as<IDataProviderSvc>();
     auto frame = std::move(std::get<podio::Frame>(val));
