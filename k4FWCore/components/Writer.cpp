@@ -164,7 +164,9 @@ public:
       //   info() << "Leaf " << pReg->name() << " has no object" << endmsg;
       //   continue;
       // }
-      m_availableCollections.insert(pReg->name().substr(1, pReg->name().size() - 1));
+      auto collName = pReg->name().substr(1, pReg->name().size() - 1);
+      debug() << "Adding " << collName << " to the list of available collections" << endmsg;
+      m_availableCollections.insert(std::move(collName));
     }
   }
 
@@ -206,9 +208,12 @@ public:
       // and cache them
       getOutputCollections();
       for (const auto& coll : m_availableCollections) {
-        if (iosvc->checkIfWriteCollection(coll)) {
+        const auto doWrite = iosvc->checkIfWriteCollection(coll);
+        debug() << "Checking if " << coll << " should be written: " << (doWrite ? "yes" : "no") << endmsg;
+        if (doWrite) {
           m_collectionsToSave.push_back(coll);
           if (std::find(frameCollections.begin(), frameCollections.end(), coll) == frameCollections.end()) {
+            debug() << coll << " has to be added to the Frame" << endmsg;
             m_collectionsToAdd.push_back(coll);
           }
         }
@@ -220,15 +225,16 @@ public:
     // deleted by the store (and later deleted by the Frame, triggering a double
     // delete)
     for (const auto& coll : frameCollections) {
+      debug() << "Taking ownership of collection " << coll << " from the IOSvc as it belongs to a Frame" << endmsg;
       DataObject* storeCollection;
       if (m_dataSvc->retrieveObject("/Event/" + coll, storeCollection).isFailure()) {
-        error() << "Failed to retrieve collection " << coll << endmsg;
-        return;
+        debug() << "Failed to retrieve collection " << coll << " from data service" << endmsg;
+        continue;
       }
       // We take ownership back from the store
       if (m_dataSvc->unregisterObject(storeCollection).isFailure()) {
-        error() << "Failed to unregister collection " << coll << endmsg;
-        return;
+        debug() << "Failed to unregister collection " << coll << " from data service" << endmsg;
+        continue;
       }
       // We still have to delete the AnyDataWrapper to avoid a leak
       const auto storePtr = dynamic_cast<AnyDataWrapper<std::unique_ptr<podio::CollectionBase>>*>(storeCollection);
@@ -240,15 +246,16 @@ public:
 
     std::vector<std::string_view> collectionsToRemove;
     for (const auto& coll : m_collectionsToAdd) {
+      debug() << "Adding collection " << coll << " to the IOSvc Frame" << endmsg;
       DataObject* storeCollection;
       if (m_dataSvc->retrieveObject("/Event/" + coll, storeCollection).isFailure()) {
-        error() << "Failed to retrieve collection " << coll << endmsg;
-        return;
+        debug() << "Failed to retrieve collection " << coll << " from the data service" << endmsg;
+        continue;
       }
       // We take ownership back from the store
       if (m_dataSvc->unregisterObject(storeCollection).isFailure()) {
-        error() << "Failed to unregister collection " << coll << endmsg;
-        return;
+        debug() << "Failed to unregister collection " << coll << " from the data service" << endmsg;
+        continue;
       }
       const auto collection = dynamic_cast<AnyDataWrapper<std::unique_ptr<podio::CollectionBase>>*>(storeCollection);
       if (collection) {
