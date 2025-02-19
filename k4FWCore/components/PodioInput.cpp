@@ -166,6 +166,9 @@ StatusCode PodioInput::initialize() {
     m_collectionNames.clear();
   }
 
+  debug() << "Setting collections to read to: " << m_collectionNames.value() << endmsg;
+  m_podioDataSvc->setCollsToRead(m_collectionNames);
+
   return StatusCode::SUCCESS;
 }
 

@@ -120,6 +120,7 @@ check_collections(
     ],
 )
 
+check_collections("output_k4test_exampledata_limited.root", ["MCParticles", "Links"])
 check_collections("functional_limited_input.root", ["MCParticles", "Links"])
 
 mix_collections = [
