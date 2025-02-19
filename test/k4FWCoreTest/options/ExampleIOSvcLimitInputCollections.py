@@ -24,6 +24,8 @@ from k4FWCore import ApplicationMgr, IOSvc
 
 svc = IOSvc("IOSvc")
 svc.Input = "output_k4test_exampledata.root"
+# This will limit the collections to be read to only these two collections and
+# the output file contain them
 svc.CollectionNames = ["MCParticles", "Links"]
 svc.Output = "functional_limited_input.root"
 
