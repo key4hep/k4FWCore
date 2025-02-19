@@ -90,6 +90,8 @@ public:
   /// TODO: Make this private again after conversions have been properly solved
   podio::Frame& getMetaDataFrame() { return m_metadataframe; }
 
+  void setCollsToRead(const std::vector<std::string>& collsToRead) { m_collsToRead = collsToRead; }
+
 private:
   /// PODIO reader for ROOT files
   podio::ROOTReader m_reader;
@@ -109,6 +111,8 @@ private:
 
   // Registry of data wrappers; needed for memory management
   std::vector<DataWrapperBase*> m_podio_datawrappers;
+  /// The names of the collections to read (set externally)
+  std::vector<std::string> m_collsToRead{};
 
 protected:
   /// ROOT file name the input is read from. Set by option filename

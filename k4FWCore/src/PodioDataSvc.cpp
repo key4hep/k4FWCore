@@ -103,7 +103,8 @@ StatusCode PodioDataSvc::clearStore() {
 StatusCode PodioDataSvc::i_setRoot(std::string root_path, IOpaqueAddress* pRootAddr) {
   // create a new frame
   if (m_reading_from_file) {
-    m_eventframe = podio::Frame(m_reader.readEntry("events", m_eventNum + m_1stEvtEntry));
+    debug() << "Reading event " << m_eventNum + m_1stEvtEntry << ", using collections: " << m_collsToRead << endmsg;
+    m_eventframe = podio::Frame(m_reader.readEntry("events", m_eventNum + m_1stEvtEntry, m_collsToRead));
   } else {
     m_eventframe = podio::Frame();
   }
@@ -113,7 +114,8 @@ StatusCode PodioDataSvc::i_setRoot(std::string root_path, IOpaqueAddress* pRootA
 StatusCode PodioDataSvc::i_setRoot(std::string root_path, DataObject* pRootObj) {
   // create a new frame
   if (m_reading_from_file) {
-    m_eventframe = podio::Frame(m_reader.readEntry("events", m_eventNum + m_1stEvtEntry));
+    debug() << "Reading event " << m_eventNum + m_1stEvtEntry << ", using collections: " << m_collsToRead << endmsg;
+    m_eventframe = podio::Frame(m_reader.readEntry("events", m_eventNum + m_1stEvtEntry, m_collsToRead));
   } else {
     m_eventframe = podio::Frame();
   }
