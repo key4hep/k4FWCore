@@ -22,6 +22,7 @@
 #include "podio/Frame.h"
 #include "podio/FrameCategories.h"
 #include "podio/Reader.h"
+#include "podio/podioVersion.h"
 
 #include "k4FWCore/FunctionalUtils.h"
 #include "k4FWCore/KeepDropSwitch.h"
@@ -116,7 +117,15 @@ std::tuple<std::vector<podio::CollectionBase*>, std::vector<std::string>, podio:
     if (m_nextEntry < m_entries) {
       debug() << "Reading event " << m_nextEntry << endmsg;
       debug() << "Reading collections " << m_collectionNames << endmsg;
-      frame = podio::Frame(m_reader->readEvent(m_nextEntry, m_collectionNames));
+#if PODIO_BUILD_VERSION <= PODIO_VERSION(1, 2, 0)
+      if (!m_collectionNames.empty()) {
+        warning() << "Trying to limit collections that are read, but podio does only support this with version > 1.2"
+                  << endmsg;
+      }
+      frame = m_reader->readEvent(m_nextEntry);
+#else
+      frame = m_reader->readEvent(m_nextEntry, m_collectionNames);
+#endif
     } else {
       return std::make_tuple(std::vector<podio::CollectionBase*>(), std::vector<std::string>(), std::move(frame));
     }
