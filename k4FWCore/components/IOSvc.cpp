@@ -118,10 +118,6 @@ std::tuple<std::vector<podio::CollectionBase*>, std::vector<std::string>, podio:
       debug() << "Reading event " << m_nextEntry << endmsg;
       debug() << "Reading collections " << m_collectionNames << endmsg;
 #if PODIO_BUILD_VERSION <= PODIO_VERSION(1, 2, 0)
-      if (!m_collectionNames.empty()) {
-        warning() << "Trying to limit collections that are read, but podio does only support this with version > 1.2"
-                  << endmsg;
-      }
       frame = m_reader->readEvent(m_nextEntry);
 #else
       frame = m_reader->readEvent(m_nextEntry, m_collectionNames);
