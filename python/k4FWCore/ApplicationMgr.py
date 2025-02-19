@@ -16,9 +16,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import os
+import logging
+
 from Configurables import ApplicationMgr as AppMgr
 from Configurables import Reader, Writer, IOSvc, Gaudi__Sequencer, EventLoopMgr
+
+logger = logging.getLogger()
 
 
 class ApplicationMgr:
@@ -101,7 +104,16 @@ class ApplicationMgr:
                 except IndexError:
                     print("Warning, the events category wasn't found in the input file")
                     raise
-                collections = list(frame.getAvailableCollections())
+                # We have to carry over the desired input collections from the IOSvc
+                if props["CollectionNames"][0]:
+                    logger.debug(
+                        "CollectionNames has been set on IOSvc to select collections to read"
+                    )
+                    collections = props["CollectionNames"][0]
+                else:
+                    logger.debug("Using the first frame to determine collections to read")
+                    collections = list(frame.getAvailableCollections())
+                logger.info(f"Passing {collections} as collections to read to the Reader")
                 reader.InputCollections = collections
         self._mgr.TopAlg = ([reader] if add_reader else []) + self._mgr.TopAlg
         # Assume the writer is at the end
