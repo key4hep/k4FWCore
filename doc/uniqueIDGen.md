@@ -64,7 +64,7 @@ StatusCode ExampleAlgorithm::initialize() {
   m_service = service("UniqueIDGenSvc");
 ```
 
-Then, use the service during execution:
+Then, use the service during execution (`execute` member function for the algorithms derived from `Gaudi::Algorithm` or `operator()` for functional algorithms):
 
 ```cpp
 StatusCode ExampleAlgorithm::execute(const EventContext&) const {
@@ -114,14 +114,14 @@ public:
   podio::UserDataCollection<double> operator()(const edm4hep::EventHeaderCollection& evtHeader) const final {
     const auto evt = evtHeader[0];
 
-    // obtain  unique value
+    // obtain unique value
     auto uid = m_uniqueIDSvc->getUniqueID(evt.getEventNumber(), evt.getRunNumber(), name());
 
     // seed TRandom3 or some other PRNG of your choice
     auto prng = TRandom3(uid);
 
     auto coll = podio::UserDataCollection<double>();
-    coll.push_back(a);
+    coll.push_back(prng.Rndm());
     return coll;
   }
 ```
