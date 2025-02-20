@@ -53,11 +53,12 @@ public:
   podio::UserDataCollection<double> operator()(const edm4hep::EventHeaderCollection& evtHeader) const final {
     const auto evt = evtHeader[0];
 
-    // obtain  unique value
+    // obtain unique value
     auto uid = m_uniqueIDSvc->getUniqueID(evt.getEventNumber(), evt.getRunNumber(), name());
 
     // seed TRandom3 or some other PRNG of your choice
     auto prng = TRandom3(uid);
+
     auto coll = podio::UserDataCollection<double>();
     coll.push_back(prng.Rndm());
     return coll;
