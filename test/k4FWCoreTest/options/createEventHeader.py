@@ -21,12 +21,15 @@ from Gaudi.Configuration import *
 from Configurables import EventHeaderCreator
 from Configurables import k4DataSvc
 from Configurables import PodioOutput
+from Configurables import ExampleRNGSeedingAlg
 from k4FWCore import ApplicationMgr
 
 eventHeaderCreator = EventHeaderCreator(
     "eventHeaderCreator", runNumber=42, eventNumberOffset=42, OutputLevel=DEBUG
 )
 
+# algorithm using the header to seed a prng
+rngAlg = ExampleRNGSeedingAlg("ExampleRNGSeedingAlg")
 
 podioevent = k4DataSvc("EventDataSvc")
 
@@ -38,6 +41,7 @@ out.filename = "eventHeader.root"
 ApplicationMgr(
     TopAlg=[
         eventHeaderCreator,
+        rngAlg,
         out,
     ],
     EvtSel="NONE",
