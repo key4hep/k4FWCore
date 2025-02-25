@@ -216,7 +216,7 @@ alg = SelectorAlg(
 -oup.filename = "example_output.root"
 -oup.outputCommands = ["drop MCParticles"]
 +io_svc.Output = "example_output.root"
-+oup.outputCommands = ["drop MCParticles"]
++io_svc.outputCommands = ["drop MCParticles"]
 
 
 ApplicationMgr(
