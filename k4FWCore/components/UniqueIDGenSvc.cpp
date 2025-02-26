@@ -18,6 +18,8 @@
  */
 #include "UniqueIDGenSvc.h"
 
+#include <fmt/core.h>
+
 #include <cstddef>
 #include <stdexcept>
 #include <string>
@@ -51,17 +53,15 @@ size_t UniqueIDGenSvc::getUniqueID(event_num_t evt_num, run_num_t run_num, const
   }
 
   auto hash = std::hash<std::bitset<seed_digits + event_num_digits + run_num_digits + name_digits>>{}(combined_bits);
-  bool inserted = false;
-  {
-    std::lock_guard<std::mutex> lock(m_mutex);
-    std::tie(std::ignore, inserted) = m_uniqueIDs.insert(hash);
-  }
-  if (!inserted) {
-    error() << "Event number " << evt_num << ", run number " << run_num << " and algorithm name \"" << name
-            << "\" have already been used. Please check the uniqueness of the event number, run number and name."
-            << endmsg;
-    if (m_throwIfDuplicate) {
-      throw std::runtime_error("Duplicate event number, run number and algorithm name");
+
+  if (m_checkDuplicates) {
+    bool inserted = [this, hash]() {
+      std::lock_guard<std::mutex> lock(m_mutex);
+      return m_uniqueIDs.insert(hash).second;
+    }();
+    if (!inserted) {
+      throw std::runtime_error(
+          fmt::format("Duplicate event number, run number and algorithm name: {}, {}, {}", evt_num, run_num, name));
     }
   }
 

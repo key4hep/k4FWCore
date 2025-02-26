@@ -44,7 +44,14 @@ private:
   Gaudi::Property<seed_t>                           m_seed{this, "Seed", {123456789}};
   mutable std::unordered_set<size_t, std::identity> m_uniqueIDs;
   mutable std::mutex                                m_mutex;
-  Gaudi::Property<bool>                             m_throwIfDuplicate{this, "ThrowIfDuplicate", {true}};
+  Gaudi::Property<bool>                             m_checkDuplicates{
+      this, "CheckDuplicates", m_isDebugBuild,
+      "Caches obtained ID and throws an exception if a duplicate would be returned"};
+#ifdef NDEBUG
+  constexpr static bool m_isDebugBuild = false;
+#else
+  constexpr static bool m_isDebugBuild = true;
+#endif
 };
 
 #endif
