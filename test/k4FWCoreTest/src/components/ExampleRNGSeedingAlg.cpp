@@ -51,10 +51,10 @@ public:
   }
 
   podio::UserDataCollection<double> operator()(const edm4hep::EventHeaderCollection& evtHeader) const final {
-    const auto evt = evtHeader[0];
-
-    // obtain unique value
-    auto uid = m_uniqueIDSvc->getUniqueID(evt.getEventNumber(), evt.getRunNumber(), name());
+    // obtain unique value from the first header in a collection
+    auto uid = m_uniqueIDSvc->getUniqueID(evtHeader, name());
+    // or from a given EventHeader object
+    // auto uid = m_uniqueIDSvc->getUniqueID(evtHeader[0], name());
 
     // seed TRandom3 or some other PRNG of your choice
     auto prng = TRandom3(uid);

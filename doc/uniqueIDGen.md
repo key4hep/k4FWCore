@@ -68,6 +68,9 @@ Then, use the service during execution (`execute` member function for the algori
 
 ```cpp
 StatusCode ExampleAlgorithm::execute(const EventContext&) const {
+  // Instead of passing event number and run number separately,
+  // an overload accepting EventHeader or EventHeaderCollection can be also used.
+  StatusCode sc = m_service->getUniqueID(1, 2, name());
   m_service->getUniqueID(1, 2, name());
 }
 ```
@@ -112,10 +115,10 @@ During algorithm execution the `EventHeaderCollection` can be used to obtain a u
 ```cpp
 public:
   podio::UserDataCollection<double> operator()(const edm4hep::EventHeaderCollection& evtHeader) const final {
-    const auto evt = evtHeader[0];
-
-    // obtain unique value
-    auto uid = m_uniqueIDSvc->getUniqueID(evt.getEventNumber(), evt.getRunNumber(), name());
+    // obtain unique value from the first header in a collection
+    auto uid = m_uniqueIDSvc->getUniqueID(evtHeader, name());
+    // or from a given EventHeader object
+    // auto uid = m_uniqueIDSvc->getUniqueID(evtHeader[0], name());
 
     // seed TRandom3 or some other PRNG of your choice
     auto prng = TRandom3(uid);
