@@ -35,11 +35,13 @@
  */
 class UniqueIDGenSvc : public extends<Service, IUniqueIDGenSvc> {
 public:
+  using seed_t = uint64_t;
+
   UniqueIDGenSvc(const std::string& name, ISvcLocator* svcLoc);
-  size_t getUniqueID(uint32_t evt_num, uint32_t run_num, const std::string& name) const override;
+  size_t getUniqueID(const event_num_t evt_num, const run_num_t run_num, const std::string& name) const override;
 
 private:
-  Gaudi::Property<uint64_t>                         m_seed{this, "Seed", {123456789}};
+  Gaudi::Property<seed_t>                           m_seed{this, "Seed", {123456789}};
   mutable std::unordered_set<size_t, std::identity> m_uniqueIDs;
   mutable std::mutex                                m_mutex;
   Gaudi::Property<bool>                             m_throwIfDuplicate{this, "ThrowIfDuplicate", {true}};
