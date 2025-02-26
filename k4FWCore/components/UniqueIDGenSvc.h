@@ -38,7 +38,7 @@ public:
   using seed_t = uint64_t;
 
   UniqueIDGenSvc(const std::string& name, ISvcLocator* svcLoc);
-  size_t getUniqueID(event_num_t evt_num, run_num_t run_num, const std::string& name) const override;
+  size_t getUniqueID(const event_num_t evt_num, const run_num_t run_num, const std::string& name) const override;
 
 private:
   Gaudi::Property<seed_t>                           m_seed{this, "Seed", {123456789}};
