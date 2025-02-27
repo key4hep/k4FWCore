@@ -55,13 +55,16 @@ size_t UniqueIDGenSvc::getUniqueID(event_num_t evt_num, run_num_t run_num, const
   auto hash = std::hash<std::bitset<seed_digits + event_num_digits + run_num_digits + name_digits>>{}(combined_bits);
 
   if (m_checkDuplicates) {
-    bool inserted = [this, hash]() {
+    auto [it, inserted] = [=, this, &name]() {
       std::lock_guard<std::mutex> lock(m_mutex);
-      return m_uniqueIDs.insert(hash).second;
+      return m_uniqueIDs.insert({hash, {evt_num, run_num, name}});
     }();
     if (!inserted) {
+      const auto& [id_evt, id_run, id_name] = it->second;
       throw std::runtime_error(
-          fmt::format("Duplicate event number, run number and algorithm name: {}, {}, {}", evt_num, run_num, name));
+          fmt::format("Duplicate ID for event number, run number and algorithm name: {}, {}, \"{}\". "
+                      "ID already assigned to: {}, {}, \"{}\"",
+                      evt_num, run_num, name, id_evt, id_run, id_name));
     }
   }
 
