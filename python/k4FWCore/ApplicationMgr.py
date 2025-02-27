@@ -74,11 +74,14 @@ class ApplicationMgr:
         collections = iosvc_props["CollectionNames"][0] or None
         n_events = self._mgr.EvtMax
 
-        if collections and n_events != -1:
-            # We know everything we need
-            logger.info(f"Initializing reader to read {n_events} events and read: {collections}")
+        # Check if we can get by without peeking into the file
+        if collections:
+            logger.info(f"Setting the reader to read the collections: {collections}")
             reader.InputCollections = collections
-            return
+            if n_events != -1:
+                # We know everything we need
+                logger.info(f"Initializing reader to read {n_events} events")
+                return
 
         # We need to peek into the file because we lack information.
         # Import here to avoid always importing ROOT which is slow
