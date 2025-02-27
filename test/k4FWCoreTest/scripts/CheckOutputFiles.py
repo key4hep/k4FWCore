@@ -125,6 +125,7 @@ check_collections("functional_limited_input_all_events.root", ["MCParticles", "L
 
 if podio.version.build_version > podio.version.parse("1.2.0"):
     check_collections("output_k4test_exampledata_limited.root", ["MCParticles", "Links"])
+    check_collections("output_k4test_exampledata_limited_allevents.root", ["MCParticles", "Links"])
 
 mix_collections = [
     # From file
