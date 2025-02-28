@@ -96,7 +96,7 @@ class ApplicationMgr:
                 logger.debug("Using the first frame to determine collections to read")
                 collections = list(frame.getAvailableCollections())
             except IndexError:
-                print("Warning, the events category wasn't found in the input file")
+                logger.warning("Warning, the events category wasn't found in the input file")
                 raise
             logger.info(f"Passing {collections} as collections to read to the Reader")
             reader.InputCollections = collections
