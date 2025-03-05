@@ -24,6 +24,7 @@
 #include "k4FWCore/DataWrapper.h"
 
 #include "podio/CollectionBase.h"
+#include "podio/podioVersion.h"
 
 /// Service initialisation
 StatusCode PodioDataSvc::initialize() {
@@ -103,7 +104,16 @@ StatusCode PodioDataSvc::clearStore() {
 StatusCode PodioDataSvc::i_setRoot(std::string root_path, IOpaqueAddress* pRootAddr) {
   // create a new frame
   if (m_reading_from_file) {
+    debug() << "Reading event " << m_eventNum + m_1stEvtEntry << ", using collections: " << m_collsToRead << endmsg;
+#if PODIO_BUILD_VERSION <= PODIO_VERSION(1, 2, 0)
+    if (!m_collsToRead.empty()) {
+      warning() << "Trying to limit collections that are read, but podio does only support this with version > 1.2"
+                << endmsg;
+    }
     m_eventframe = podio::Frame(m_reader.readEntry("events", m_eventNum + m_1stEvtEntry));
+#else
+    m_eventframe = podio::Frame(m_reader.readEntry("events", m_eventNum + m_1stEvtEntry, m_collsToRead));
+#endif
   } else {
     m_eventframe = podio::Frame();
   }
@@ -113,7 +123,16 @@ StatusCode PodioDataSvc::i_setRoot(std::string root_path, IOpaqueAddress* pRootA
 StatusCode PodioDataSvc::i_setRoot(std::string root_path, DataObject* pRootObj) {
   // create a new frame
   if (m_reading_from_file) {
+    debug() << "Reading event " << m_eventNum + m_1stEvtEntry << ", using collections: " << m_collsToRead << endmsg;
+#if PODIO_BUILD_VERSION <= PODIO_VERSION(1, 2, 0)
+    if (!m_collsToRead.empty()) {
+      warning() << "Trying to limit collections that are read, but podio does only support this with version > 1.2"
+                << endmsg;
+    }
     m_eventframe = podio::Frame(m_reader.readEntry("events", m_eventNum + m_1stEvtEntry));
+#else
+    m_eventframe = podio::Frame(m_reader.readEntry("events", m_eventNum + m_1stEvtEntry, m_collsToRead));
+#endif
   } else {
     m_eventframe = podio::Frame();
   }

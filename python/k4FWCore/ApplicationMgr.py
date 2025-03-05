@@ -16,9 +16,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import os
+import logging
+
 from Configurables import ApplicationMgr as AppMgr
 from Configurables import Reader, Writer, IOSvc, Gaudi__Sequencer, EventLoopMgr
+
+logger = logging.getLogger()
 
 
 class ApplicationMgr:
@@ -36,6 +39,67 @@ class ApplicationMgr:
 
     def __init__(self, **kwargs):
         self._mgr = AppMgr(**kwargs)
+
+    def _setup_reader(self, reader, iosvc_props):
+        """Setup the reader consistently such that it has sane defaults
+
+        In some cases we have to peek into the files to obtain some information
+        to set sane default values if they are not set by the user. We need to
+        obtain
+        - The number of events in case EvtMax is set to -1
+        - The collection names in case the CollectionNames are not provided
+
+        Knowing the number of events is necessary to avoid errors when running
+        multithreaded since if we have, for example, 10 events and we are
+        running 9 at the same time, then (possibly) the first 9 complete and 9
+        more are scheduled, out of which only one will be finished without
+        errors. If we know the number of events in advance then we can just
+        schedule those.
+
+        We need the collection names to read to feed them to the Reader. Either
+        we take the user provided ones or we get them from the first event in
+        the file we peek into.
+        """
+        # First we determine whether we need to peek at all
+        inp = None
+        if iosvc_props["input"][0]:
+            inp = "input"
+        elif iosvc_props["Input"][0]:
+            inp = "Input"
+
+        if not inp:
+            # We have got nothing to do here, since there is no input
+            return
+
+        collections = iosvc_props["CollectionNames"][0] or None
+        n_events = self._mgr.EvtMax
+
+        # Check if we can get by without peeking into the file
+        if collections:
+            logger.info(f"Setting the reader to read the collections: {collections}")
+            reader.InputCollections = collections
+            if n_events != -1:
+                # We know everything we need
+                logger.info(f"Initializing reader to read {n_events} events")
+                return
+
+        # We need to peek into the file because we lack information.
+        # Import here to avoid always importing ROOT which is slow
+        from podio.root_io import Reader as PodioReader
+
+        podio_reader = PodioReader(iosvc_props[inp][0])
+        if n_events == -1:
+            self._mgr.EvtMax = len(podio_reader.get("events"))
+        if not collections:
+            try:
+                frame = podio_reader.get("events")[0]
+                logger.debug("Using the first frame to determine collections to read")
+                collections = list(frame.getAvailableCollections())
+            except IndexError:
+                logger.warning("Warning, the events category wasn't found in the input file")
+                raise
+            logger.info(f"Passing {collections} as collections to read to the Reader")
+            reader.InputCollections = collections
 
     def fix_properties(self):
         # If there isn't an EventLoopMgr then it's the default
@@ -75,34 +139,12 @@ class ApplicationMgr:
             or (props["Output"][0] and props["Output"][0] != "<no value>")
         ):
             writer = Writer("k4FWCore__Writer")
+
         # Let's tell the Reader one of the input files so it can
         # know which collections it's going to read
         if reader is not None:
-            # Open the files and get the number of events. This is necessary to
-            # avoid errors when running multithreaded since if we have, for
-            # example, 10 events and we are running 9 at the same time, then
-            # (possibly) the first 9 complete and 9 more are scheduled, out of
-            # which only one will be finished without errors. If we know the
-            # number of events in advance then we can just schedule those.
-            inp = None
-            if props["input"][0]:
-                inp = "input"
-            elif props["Input"][0]:
-                inp = "Input"
-            if inp:
-                # Import here to avoid always importing ROOT which is slow
-                from podio.root_io import Reader as PodioReader
+            self._setup_reader(reader, props)
 
-                podio_reader = PodioReader(props[inp][0])
-                if self._mgr.EvtMax == -1:
-                    self._mgr.EvtMax = podio_reader._reader.getEntries("events")
-                try:
-                    frame = podio_reader.get("events")[0]
-                except IndexError:
-                    print("Warning, the events category wasn't found in the input file")
-                    raise
-                collections = list(frame.getAvailableCollections())
-                reader.InputCollections = collections
         self._mgr.TopAlg = ([reader] if add_reader else []) + self._mgr.TopAlg
         # Assume the writer is at the end
         # Algorithms are wrapped with Sequential=False so that they can run in parallel
