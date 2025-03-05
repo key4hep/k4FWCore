@@ -110,7 +110,7 @@ public:
   }
 ```
 
-During algorithm execution the `EventHeaderCollection` can be used to obtain a unique value from the `UniqueIDSvc`, then the value can be used as a seed for PRNG. In this example the PRNG is then used to generate a random value and push it to an output collection.
+During algorithm execution the `EventHeaderCollection` can be used to obtain a unique value from the `m_uniqueIDSvc`, then the value can be used as a seed for PRNG. In this example the PRNG is then used to generate a random value and push it to an output collection.
 
 ```cpp
 public:
