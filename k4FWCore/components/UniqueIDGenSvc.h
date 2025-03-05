@@ -49,11 +49,10 @@ private:
       this, "CheckDuplicates",
   // Default value for release and debug builds
 #ifdef NDEBUG
-      false
+      false,
 #else
-      true
+      true,
 #endif
-      ,
       "Caches obtained ID and throws an exception if a duplicate would be returned"};
 };
 
