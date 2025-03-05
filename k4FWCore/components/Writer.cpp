@@ -233,8 +233,8 @@ public:
       }
       // We take ownership back from the store
       if (m_dataSvc->unregisterObject(storeCollection).isFailure()) {
-        debug() << "Failed to unregister collection " << coll << " from data service" << endmsg;
-        continue;
+        error() << "Failed to unregister collection " << coll << " from data service" << endmsg;
+        return;
       }
       // We still have to delete the AnyDataWrapper to avoid a leak
       const auto storePtr = dynamic_cast<AnyDataWrapper<std::unique_ptr<podio::CollectionBase>>*>(storeCollection);
