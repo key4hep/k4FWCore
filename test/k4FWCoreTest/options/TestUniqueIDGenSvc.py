@@ -23,7 +23,7 @@ from k4FWCore import ApplicationMgr
 from Configurables import k4DataSvc
 from Configurables import TestUniqueIDGenSvc
 
-UniqueIDGenSvc().Seed = 987
+uid_svc = UniqueIDGenSvc(Seed=987, CheckDuplicates=True)
 
 ApplicationMgr().EvtSel = "NONE"
 ApplicationMgr().EvtMax = 5

@@ -22,10 +22,11 @@
 #include "GaudiKernel/Service.h"
 #include "k4Interface/IUniqueIDGenSvc.h"
 
+#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <string>
-#include <unordered_set>
+#include <unordered_map>
 
 /** @class UniqueIDGenSvc
  *  Generate unique, reproducible numbers using
@@ -41,10 +42,18 @@ public:
   size_t getUniqueID(const event_num_t evt_num, const run_num_t run_num, const std::string& name) const override;
 
 private:
-  Gaudi::Property<seed_t>                           m_seed{this, "Seed", {123456789}};
-  mutable std::unordered_set<size_t, std::identity> m_uniqueIDs;
-  mutable std::mutex                                m_mutex;
-  Gaudi::Property<bool>                             m_throwIfDuplicate{this, "ThrowIfDuplicate", {true}};
+  mutable std::unordered_map<size_t, std::tuple<event_num_t, run_num_t, std::string>, std::identity> m_uniqueIDs;
+  mutable std::mutex                                                                                 m_mutex;
+  Gaudi::Property<seed_t> m_seed{this, "Seed", {123456789}};
+  Gaudi::Property<bool>   m_checkDuplicates{
+      this, "CheckDuplicates",
+  // Default value for release and debug builds
+#ifdef NDEBUG
+      false,
+#else
+      true,
+#endif
+      "Caches obtained ID and throws an exception if a duplicate would be returned"};
 };
 
 #endif
