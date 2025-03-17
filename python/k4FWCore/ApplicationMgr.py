@@ -131,10 +131,7 @@ class ApplicationMgr:
         # It seems for a single string the default without a value is '<no value>'
         # while for a list it's an empty list
         # Remove "output" when the corresponding property is removed from IOSvc
-        if (
-            writer is None
-            and (props["Output"][0] and props["Output"][0] != "<no value>")
-        ):
+        if writer is None and (props["Output"][0] and props["Output"][0] != "<no value>"):
             writer = Writer("k4FWCore__Writer")
 
         # Let's tell the Reader one of the input files so it can
