@@ -49,10 +49,6 @@ StatusCode IOSvc::initialize() {
     return StatusCode::FAILURE;
   }
 
-  if (!m_readingFileNamesDeprecated.empty()) {
-    warning() << ".input is deprecated, use .Input instead in the steering file" << endmsg;
-    m_readingFileNames = m_readingFileNamesDeprecated;
-  }
   if (!m_readingFileNames.empty()) {
     try {
       m_reader = podio::makeReader(m_readingFileNames.value());
@@ -68,10 +64,6 @@ StatusCode IOSvc::initialize() {
     return StatusCode::FAILURE;
   }
 
-  if (!m_writingFileNameDeprecated.empty()) {
-    warning() << ".output is deprecated, use .Output instead in the steering file" << endmsg;
-    m_writingFileName = m_writingFileNameDeprecated;
-  }
   m_nextEntry = m_firstEventEntry;
 
   m_switch = KeepDropSwitch(m_outputCommands);

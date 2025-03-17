@@ -62,9 +62,7 @@ class ApplicationMgr:
         """
         # First we determine whether we need to peek at all
         inp = None
-        if iosvc_props["input"][0]:
-            inp = "input"
-        elif iosvc_props["Input"][0]:
+        if iosvc_props["Input"][0]:
             inp = "Input"
 
         if not inp:
@@ -127,7 +125,7 @@ class ApplicationMgr:
             elif isinstance(alg, Writer):
                 writer = alg
         # Remove "input" when the corresponding property is removed from IOSvc
-        if reader is None and (props["input"][0] or props["Input"][0]):
+        if reader is None and props["Input"][0]:
             reader = Reader("k4FWCore__Reader")
             add_reader = True
         # It seems for a single string the default without a value is '<no value>'
@@ -135,8 +133,7 @@ class ApplicationMgr:
         # Remove "output" when the corresponding property is removed from IOSvc
         if (
             writer is None
-            and (props["output"][0] and props["output"][0] != "<no value>")
-            or (props["Output"][0] and props["Output"][0] != "<no value>")
+            and (props["Output"][0] and props["Output"][0] != "<no value>")
         ):
             writer = Writer("k4FWCore__Writer")
 
