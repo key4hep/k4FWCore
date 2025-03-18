@@ -91,7 +91,7 @@ namespace k4FWCore {
       requires std::is_base_of_v<podio::CollectionBase, std::remove_cv_t<Value>>
     struct isVectorLike<std::vector<Value>> : std::true_type {};
 
-    template <class T> inline constexpr bool isVectorLike_v = isVectorLike<T>::value;
+    template <class T> constexpr bool isVectorLike_v = isVectorLike<T>::value;
 
     template <typename T> auto convertToUniquePtr(T&& arg) {
       // This is the case for CollectionMerger.cpp, where a raw pointer is
