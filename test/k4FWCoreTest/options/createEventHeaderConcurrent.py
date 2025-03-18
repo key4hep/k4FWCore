@@ -46,7 +46,7 @@ eventHeaderCreator = EventHeaderCreator(
 )
 
 svc = IOSvc("IOSvc")
-svc.output = "eventHeaderConcurrent.root"
+svc.Output = "eventHeaderConcurrent.root"
 
 ApplicationMgr(
     TopAlg=[eventHeaderCreator],
