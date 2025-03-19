@@ -29,7 +29,6 @@ id_service = UniqueIDGenSvc("UniqueIDGenSvc")
 eds = EventDataSvc("EventDataSvc")
 
 iosvc = IOSvc()
-# iosvc.input = "input.root"
 iosvc.Input = "input.root"
 iosvc.Output = "output_overlay.root"
 
