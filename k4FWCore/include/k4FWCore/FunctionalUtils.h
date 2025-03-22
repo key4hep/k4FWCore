@@ -175,7 +175,8 @@ namespace k4FWCore {
                 } else {
                   // std::get<Index>(inputTuple) =
                   //     dynamic_cast<EDM4hepType*>(const_cast<podio::CollectionBase*>(marlinWrp->getData()));
-                  inputMap.push_back(dynamic_cast<EDM4hepType*>(const_cast<podio::CollectionBase*>(marlinWrp->getData())));
+                  inputMap.push_back(
+                      dynamic_cast<EDM4hepType*>(const_cast<podio::CollectionBase*>(marlinWrp->getData())));
                 }
               } else {
                 throw e;
