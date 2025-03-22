@@ -24,6 +24,7 @@ from Gaudi.Configuration import INFO
 from Configurables import (
     ExampleFunctionalConsumerMultiple,
     ExampleFunctionalTransformerMultiple,
+    TrackReaderMultiple
 )
 from Configurables import (
     ExampleFunctionalProducerMultiple,
@@ -138,6 +139,10 @@ consumer_produceralg_algorithm = k4FWCoreTest_CheckExampleEventData("CheckAlgori
 consumer_produceralg_algorithm.mcparticles = "OldAlgorithmMCParticles"
 consumer_produceralg_algorithm.vectorfloat = "OldAlgorithmVectorFloat"
 
+consumer_vectorinput_functional = TrackReaderMultiple("TrackReaderMultiple",
+                                                      InputCollections=["OldAlgorithmTracks"],
+                                                      OutputLevel=INFO)
+
 ###############################
 
 # Let's also run the transformer on collections that are either read, produced by a functional or an algorithm
@@ -166,6 +171,7 @@ ApplicationMgr(
         producer_algorithm,
         consumer_produceralg_functional,
         consumer_produceralg_algorithm,
+        consumer_vectorinput_functional,
         transformer_functional,
     ]
     + ([out] if not args.iosvc else []),
