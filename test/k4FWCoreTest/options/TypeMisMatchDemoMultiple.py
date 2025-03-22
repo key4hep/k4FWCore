@@ -19,13 +19,13 @@
 #
 
 from Gaudi.Configuration import INFO, DEBUG
-from Configurables import ExampleFunctionalProducerMultiple, TypeMisMatchDemoMultiple, EventDataSvc
+from Configurables import ExampleFunctionalProducerMultiple, TrackReaderMultiple, EventDataSvc
 
 from k4FWCore import ApplicationMgr
 
 producer = ExampleFunctionalProducerMultiple("Producer")
 
-mismatch = TypeMisMatchDemoMultiple(InputCollections=["Tracks", "MCParticles1"], OutputLevel=DEBUG)
+mismatch = TrackReaderMultiple(InputCollections=["Tracks", "MCParticles1"], OutputLevel=DEBUG)
 
 ApplicationMgr(
     TopAlg=[producer, mismatch],
