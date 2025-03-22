@@ -24,7 +24,7 @@ from Gaudi.Configuration import INFO
 from Configurables import (
     ExampleFunctionalConsumerMultiple,
     ExampleFunctionalTransformerMultiple,
-    TrackReaderMultiple
+    TrackReaderMultiple,
 )
 from Configurables import (
     ExampleFunctionalProducerMultiple,
@@ -139,9 +139,9 @@ consumer_produceralg_algorithm = k4FWCoreTest_CheckExampleEventData("CheckAlgori
 consumer_produceralg_algorithm.mcparticles = "OldAlgorithmMCParticles"
 consumer_produceralg_algorithm.vectorfloat = "OldAlgorithmVectorFloat"
 
-consumer_vectorinput_functional = TrackReaderMultiple("TrackReaderMultiple",
-                                                      InputCollections=["OldAlgorithmTracks"],
-                                                      OutputLevel=INFO)
+consumer_vectorinput_functional = TrackReaderMultiple(
+    "TrackReaderMultiple", InputCollections=["OldAlgorithmTracks"], OutputLevel=INFO
+)
 
 ###############################
 
