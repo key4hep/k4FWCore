@@ -25,17 +25,17 @@
 #include <string>
 
 constexpr size_t event_num_digits = std::numeric_limits<UniqueIDGenSvc::event_num_t>::digits;
-constexpr size_t run_num_digits   = std::numeric_limits<UniqueIDGenSvc::run_num_t>::digits;
-constexpr size_t seed_digits      = std::numeric_limits<UniqueIDGenSvc::seed_t>::digits;
-constexpr size_t name_digits      = std::numeric_limits<size_t>::digits;
+constexpr size_t run_num_digits = std::numeric_limits<UniqueIDGenSvc::run_num_t>::digits;
+constexpr size_t seed_digits = std::numeric_limits<UniqueIDGenSvc::seed_t>::digits;
+constexpr size_t name_digits = std::numeric_limits<size_t>::digits;
 
 UniqueIDGenSvc::UniqueIDGenSvc(const std::string& name, ISvcLocator* svcLoc) : base_class(name, svcLoc) {}
 
 size_t UniqueIDGenSvc::getUniqueID(event_num_t evt_num, run_num_t run_num, const std::string& name) const {
-  std::bitset<seed_digits>      seed_bits      = m_seed.value();
+  std::bitset<seed_digits> seed_bits = m_seed.value();
   std::bitset<event_num_digits> event_num_bits = evt_num;
-  std::bitset<run_num_digits>   run_num_bits   = run_num;
-  std::bitset<name_digits>      name_bits      = std::hash<std::string>{}(name);
+  std::bitset<run_num_digits> run_num_bits = run_num;
+  std::bitset<name_digits> name_bits = std::hash<std::string>{}(name);
 
   std::bitset<seed_digits + event_num_digits + run_num_digits + name_digits> combined_bits;
 

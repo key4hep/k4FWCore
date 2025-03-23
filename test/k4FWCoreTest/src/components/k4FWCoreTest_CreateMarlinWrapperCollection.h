@@ -35,7 +35,7 @@ public:
   StatusCode execute(const EventContext&) const final;
 
 private:
-  SmartIF<IDataProviderSvc>    m_eventDataSvc;
+  SmartIF<IDataProviderSvc> m_eventDataSvc;
   Gaudi::Property<std::string> m_outputCollectionName{this, "OutputCollection", "MCParticles",
                                                       "Name of the output collection"};
 };

@@ -56,7 +56,7 @@ StatusCode PodioOutput::initialize() {
   }
 
   m_framewriter = std::make_unique<podio::ROOTWriter>(m_filename);
-  m_switch      = KeepDropSwitch(m_outputCommands);
+  m_switch = KeepDropSwitch(m_outputCommands);
 
   return StatusCode::SUCCESS;
 }
@@ -100,11 +100,11 @@ StatusCode PodioOutput::execute(const EventContext&) const {
 }
 
 /** PodioOutput::finalize
-* has to happen after all algorithms that touch the data store finish.
-* Here the job options are retrieved and stored to disk as a branch
-* in the metadata tree.
-*
-*/
+ * has to happen after all algorithms that touch the data store finish.
+ * Here the job options are retrieved and stored to disk as a branch
+ * in the metadata tree.
+ *
+ */
 StatusCode PodioOutput::finalize() {
   if (Gaudi::Algorithm::finalize().isFailure())
     return StatusCode::FAILURE;
@@ -112,8 +112,8 @@ StatusCode PodioOutput::finalize() {
   // retrieve the configuration of the job
   // and write it to file as vector of strings
   std::vector<std::string> config_data;
-  const auto&              jobOptionsSvc         = Gaudi::svcLocator()->getOptsSvc();
-  const auto&              configured_properties = jobOptionsSvc.items();
+  const auto& jobOptionsSvc = Gaudi::svcLocator()->getOptsSvc();
+  const auto& configured_properties = jobOptionsSvc.items();
   for (const auto& per_property : configured_properties) {
     std::stringstream config_stream;
     // sample output:
@@ -128,7 +128,7 @@ StatusCode PodioOutput::finalize() {
   // and have to be traversed like this. Note that Gaudi!577 will improve this.
   for (const auto* name : {"ApplicationMgr", "MessageSvc", "NTupleSvc"}) {
     std::stringstream config_stream;
-    auto              svc = service<IProperty>(name);
+    auto svc = service<IProperty>(name);
     if (!svc.isValid())
       continue;
     for (const auto* property : svc->getProperties()) {

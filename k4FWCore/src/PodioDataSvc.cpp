@@ -17,11 +17,11 @@
  * limitations under the License.
  */
 #include "k4FWCore/PodioDataSvc.h"
-#include <GaudiKernel/StatusCode.h>
 #include "GaudiKernel/IEventProcessor.h"
 #include "GaudiKernel/IProperty.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "k4FWCore/DataWrapper.h"
+#include <GaudiKernel/StatusCode.h>
 
 #include "podio/CollectionBase.h"
 #include "podio/podioVersion.h"
@@ -29,12 +29,12 @@
 /// Service initialisation
 StatusCode PodioDataSvc::initialize() {
   // Nothing to do: just call base class initialisation
-  StatusCode   status  = DataSvc::initialize();
+  StatusCode status = DataSvc::initialize();
   ISvcLocator* svc_loc = serviceLocator();
 
   // Attach data loader facility
   m_cnvSvc = svc_loc->service("EventPersistencySvc");
-  status   = setDataLoader(m_cnvSvc);
+  status = setDataLoader(m_cnvSvc);
 
   if (!m_filename.empty()) {
     m_filenames.push_back(m_filename);
@@ -84,7 +84,7 @@ StatusCode PodioDataSvc::reinitialize() {
 }
 /// Service finalization
 StatusCode PodioDataSvc::finalize() {
-  m_cnvSvc = nullptr;  // release
+  m_cnvSvc = nullptr; // release
   DataSvc::finalize().ignore();
   return StatusCode::SUCCESS;
 }
@@ -179,7 +179,7 @@ StatusCode PodioDataSvc::registerObject(std::string_view parentPath, std::string
   if (wrapper != nullptr) {
     podio::CollectionBase* coll = wrapper->collectionBase();
     if (coll != nullptr) {
-      size_t      pos = fullPath.find_last_of("/");
+      size_t pos = fullPath.find_last_of("/");
       std::string shortPath(fullPath.substr(pos + 1, fullPath.length()));
       // Attention: this passes the ownership of the data to the frame
       m_eventframe.put(std::unique_ptr<podio::CollectionBase>(coll), shortPath);

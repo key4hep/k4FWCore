@@ -32,7 +32,8 @@
  * Specialisation of the Gaudi DataHandle
  * for use with podio collections.
  */
-template <typename T> class DataHandle : public DataObjectHandle<DataWrapper<T>> {
+template <typename T>
+class DataHandle : public DataObjectHandle<DataWrapper<T>> {
 public:
   friend class Algorithm;
   friend class AlgTool;
@@ -46,7 +47,7 @@ public:
 
   DataHandle(const std::string& k, Gaudi::DataHandle::Mode a, IDataHandleHolder* fatherAlg);
 
-  ///Retrieve object from transient data store
+  /// Retrieve object from transient data store
   const T* get();
 
   /**
@@ -60,16 +61,17 @@ public:
   T* put(std::unique_ptr<T> object);
 
   /**
-  * Create and register object in transient store
-  */
+   * Create and register object in transient store
+   */
   T* createAndPut();
 
 private:
   ServiceHandle<IDataProviderSvc> m_eds;
-  T*                              m_dataPtr;
+  T* m_dataPtr;
 };
 
-template <typename T> DataHandle<T>::~DataHandle() {
+template <typename T>
+DataHandle<T>::~DataHandle() {
   // release memory allocated for primitive types (see comments in ctor)
   if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
     delete m_dataPtr;
@@ -86,7 +88,7 @@ DataHandle<T>::DataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode
     : DataObjectHandle<DataWrapper<T>>(descriptor, a, fatherAlg), m_eds("EventDataSvc", "DataHandle") {
   if (a == Gaudi::DataHandle::Writer) {
     m_eds.retrieve().ignore();
-    m_dataPtr                = nullptr;
+    m_dataPtr = nullptr;
     auto* podio_data_service = dynamic_cast<PodioDataSvc*>(m_eds.get());
     if (nullptr != podio_data_service) {
       if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
@@ -103,9 +105,10 @@ DataHandle<T>::DataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode
  * If this is not the first time we cast and the cast worked, just use the
  * static cast: we do not need the checks of the dynamic cast for every access!
  */
-template <typename T> const T* DataHandle<T>::get() {
+template <typename T>
+const T* DataHandle<T>::get() {
   DataObject* dataObjectp;
-  auto        sc = m_eds->retrieveObject(DataObjectHandle<DataWrapper<T>>::fullKey().key(), dataObjectp);
+  auto sc = m_eds->retrieveObject(DataObjectHandle<DataWrapper<T>>::fullKey().key(), dataObjectp);
 
   if (sc.isFailure()) {
     std::string msg("Could not retrieve product " + DataObjectHandle<DataWrapper<T>>::pythonRepr());
@@ -129,7 +132,8 @@ template <typename T> const T* DataHandle<T>::get() {
 }
 
 //---------------------------------------------------------------------------
-template <typename T> void DataHandle<T>::put(T* objectp) {
+template <typename T>
+void DataHandle<T>::put(T* objectp) {
   std::unique_ptr<DataWrapper<T>> dw = std::make_unique<DataWrapper<T>>();
   // in case T is of primitive type, we must not change the pointer address
   // (see comments in ctor) instead copy the value of T into allocated memory
@@ -143,7 +147,8 @@ template <typename T> void DataHandle<T>::put(T* objectp) {
 }
 
 //---------------------------------------------------------------------------
-template <typename T> T* DataHandle<T>::put(std::unique_ptr<T> objectp) {
+template <typename T>
+T* DataHandle<T>::put(std::unique_ptr<T> objectp) {
   put(objectp.get());
   return objectp.release();
 }
@@ -154,7 +159,8 @@ template <typename T> T* DataHandle<T>::put(std::unique_ptr<T> objectp) {
  * pointer to the data. Call this function if you create a collection and
  * want to save it.
  */
-template <typename T> T* DataHandle<T>::createAndPut() {
+template <typename T>
+T* DataHandle<T>::createAndPut() {
   T* objectp = new T();
   this->put(objectp);
   return objectp;
@@ -162,10 +168,11 @@ template <typename T> T* DataHandle<T>::createAndPut() {
 
 // temporary to allow property declaration
 namespace Gaudi {
-  template <class T> class Property<::DataHandle<T>&> : public ::DataHandleProperty {
-  public:
-    Property(const std::string& name, ::DataHandle<T>& value) : ::DataHandleProperty(name, value) {}
-  };
-}  // namespace Gaudi
+template <class T>
+class Property<::DataHandle<T>&> : public ::DataHandleProperty {
+public:
+  Property(const std::string& name, ::DataHandle<T>& value) : ::DataHandleProperty(name, value) {}
+};
+} // namespace Gaudi
 
 #endif

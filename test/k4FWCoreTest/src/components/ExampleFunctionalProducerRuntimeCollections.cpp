@@ -32,7 +32,7 @@ struct ExampleFunctionalProducerRuntimeCollections final
 
   // This is the function that will be called to produce the data
   std::vector<edm4hep::MCParticleCollection> operator()() const override {
-    const auto                                 locs = outputLocations();
+    const auto locs = outputLocations();
     std::vector<edm4hep::MCParticleCollection> outputCollections;
     for (size_t i = 0; i < locs.size(); ++i) {
       if (locs[i] != "MCParticles" + std::to_string(i)) {

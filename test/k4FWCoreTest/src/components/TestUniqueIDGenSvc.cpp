@@ -17,8 +17,8 @@
  * limitations under the License.
  */
 #include "TestUniqueIDGenSvc.h"
-#include <cstdint>
 #include "edm4hep/MutableEventHeader.h"
+#include <cstdint>
 
 DECLARE_COMPONENT(TestUniqueIDGenSvc)
 

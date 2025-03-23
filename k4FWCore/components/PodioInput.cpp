@@ -27,7 +27,8 @@
 
 DECLARE_COMPONENT(PodioInput)
 
-template <typename T> inline void PodioInput::maybeRead(std::string_view collName) const {
+template <typename T>
+inline void PodioInput::maybeRead(std::string_view collName) const {
   if (m_podioDataSvc->readCollection<T>(std::string(collName)).isFailure()) {
     error() << "Failed to register collection " << collName << endmsg;
   }

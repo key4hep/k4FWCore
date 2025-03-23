@@ -24,7 +24,7 @@
 #include "k4FWCore/DataWrapper.h"
 
 k4FWCoreTest_CreateMarlinWrapperCollection::k4FWCoreTest_CreateMarlinWrapperCollection(const std::string& aName,
-                                                                                       ISvcLocator*       aSvcLoc)
+                                                                                       ISvcLocator* aSvcLoc)
     : Gaudi::Algorithm(aName, aSvcLoc) {}
 
 StatusCode k4FWCoreTest_CreateMarlinWrapperCollection::initialize() {
@@ -38,7 +38,7 @@ StatusCode k4FWCoreTest_CreateMarlinWrapperCollection::initialize() {
 
 StatusCode k4FWCoreTest_CreateMarlinWrapperCollection::execute(const EventContext&) const {
   auto wrapper = new DataWrapper<podio::CollectionBase>();
-  auto coll    = new edm4hep::MCParticleCollection();
+  auto coll = new edm4hep::MCParticleCollection();
 
   coll->create(1, 2, 3, 4.f, 5.f, 6.f);
   // We can also set the fields of the particle manually

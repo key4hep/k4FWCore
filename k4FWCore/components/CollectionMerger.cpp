@@ -49,7 +49,7 @@ struct CollectionMerger final
     if (System::cmdLineArgs()[0].find("genconf") != std::string::npos) {
       return;
     }
-    m_map["edm4hep::MCParticleCollection"]    = &CollectionMerger::mergeCollections<edm4hep::MCParticleCollection>;
+    m_map["edm4hep::MCParticleCollection"] = &CollectionMerger::mergeCollections<edm4hep::MCParticleCollection>;
     m_map["edm4hep::SimTrackerHitCollection"] = &CollectionMerger::mergeCollections<edm4hep::SimTrackerHitCollection>;
     m_map["edm4hep::CaloHitContributionCollection"] =
         &CollectionMerger::mergeCollections<edm4hep::CaloHitContributionCollection>;
@@ -58,14 +58,14 @@ struct CollectionMerger final
     m_map["edm4hep::RawCalorimeterHitCollection"] =
         &CollectionMerger::mergeCollections<edm4hep::RawCalorimeterHitCollection>;
     m_map["edm4hep::CalorimeterHitCollection"] = &CollectionMerger::mergeCollections<edm4hep::CalorimeterHitCollection>;
-    m_map["edm4hep::ParticleIDCollection"]     = &CollectionMerger::mergeCollections<edm4hep::ParticleIDCollection>;
-    m_map["edm4hep::ClusterCollection"]        = &CollectionMerger::mergeCollections<edm4hep::ClusterCollection>;
-    m_map["edm4hep::TrackerHit3DCollection"]   = &CollectionMerger::mergeCollections<edm4hep::TrackerHit3DCollection>;
+    m_map["edm4hep::ParticleIDCollection"] = &CollectionMerger::mergeCollections<edm4hep::ParticleIDCollection>;
+    m_map["edm4hep::ClusterCollection"] = &CollectionMerger::mergeCollections<edm4hep::ClusterCollection>;
+    m_map["edm4hep::TrackerHit3DCollection"] = &CollectionMerger::mergeCollections<edm4hep::TrackerHit3DCollection>;
     m_map["edm4hep::TrackerHitPlaneCollection"] =
         &CollectionMerger::mergeCollections<edm4hep::TrackerHitPlaneCollection>;
     m_map["edm4hep::RawTimeSeriesCollection"] = &CollectionMerger::mergeCollections<edm4hep::RawTimeSeriesCollection>;
-    m_map["edm4hep::TrackCollection"]         = &CollectionMerger::mergeCollections<edm4hep::TrackCollection>;
-    m_map["edm4hep::VertexCollection"]        = &CollectionMerger::mergeCollections<edm4hep::VertexCollection>;
+    m_map["edm4hep::TrackCollection"] = &CollectionMerger::mergeCollections<edm4hep::TrackCollection>;
+    m_map["edm4hep::VertexCollection"] = &CollectionMerger::mergeCollections<edm4hep::VertexCollection>;
     m_map["edm4hep::ReconstructedParticleCollection"] =
         &CollectionMerger::mergeCollections<edm4hep::ReconstructedParticleCollection>;
     m_map["edm4hep::RecoMCParticleLinkCollection"] =
@@ -83,7 +83,7 @@ struct CollectionMerger final
     m_map["edm4hep::VertexRecoParticleLinkCollection"] =
         &CollectionMerger::mergeCollections<edm4hep::VertexRecoParticleLinkCollection>;
     m_map["edm4hep::TimeSeriesCollection"] = &CollectionMerger::mergeCollections<edm4hep::TimeSeriesCollection>;
-    m_map["edm4hep::RecDqdxCollection"]    = &CollectionMerger::mergeCollections<edm4hep::RecDqdxCollection>;
+    m_map["edm4hep::RecDqdxCollection"] = &CollectionMerger::mergeCollections<edm4hep::RecDqdxCollection>;
     m_map["edm4hep::GeneratorEventParametersCollection"] =
         &CollectionMerger::mergeCollections<edm4hep::GeneratorEventParametersCollection>;
     m_map["edm4hep::GeneratorPdfInfoCollection"] =
@@ -110,17 +110,18 @@ struct CollectionMerger final
 private:
   using MergeType = void (CollectionMerger::*)(const podio::CollectionBase*, podio::CollectionBase*&) const;
   std::map<std::string_view, MergeType> m_map;
-  Gaudi::Property<bool>                 m_copy{this, "Copy", false,
+  Gaudi::Property<bool> m_copy{this, "Copy", false,
                                "Copy the elements of the collections instead of creating a subset collection"};
 
-  template <typename T> void mergeCollections(const podio::CollectionBase* source, podio::CollectionBase*& ret) const {
+  template <typename T>
+  void mergeCollections(const podio::CollectionBase* source, podio::CollectionBase*& ret) const {
     if (!ret) {
       ret = new T();
       if (!m_copy) {
         ret->setSubsetCollection();
       }
     }
-    const auto ptr        = static_cast<T*>(ret);
+    const auto ptr = static_cast<T*>(ret);
     const auto sourceColl = static_cast<const T*>(source);
     if (m_copy) {
       for (const auto& elem : *sourceColl) {

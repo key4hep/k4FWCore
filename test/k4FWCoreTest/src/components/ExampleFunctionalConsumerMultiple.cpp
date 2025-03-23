@@ -34,13 +34,13 @@
 #include <string>
 
 // Which type of collection we are reading
-using FloatColl         = podio::UserDataCollection<float>;
-using ParticleColl      = edm4hep::MCParticleCollection;
+using FloatColl = podio::UserDataCollection<float>;
+using ParticleColl = edm4hep::MCParticleCollection;
 using SimTrackerHitColl = edm4hep::SimTrackerHitCollection;
-using TrackerHitColl    = edm4hep::TrackerHit3DCollection;
-using TrackColl         = edm4hep::TrackCollection;
-using RecoColl          = edm4hep::ReconstructedParticleCollection;
-using LinkColl          = edm4hep::RecoMCParticleLinkCollection;
+using TrackerHitColl = edm4hep::TrackerHit3DCollection;
+using TrackColl = edm4hep::TrackCollection;
+using RecoColl = edm4hep::ReconstructedParticleCollection;
+using LinkColl = edm4hep::RecoMCParticleLinkCollection;
 
 struct ExampleFunctionalConsumerMultiple final
     : k4FWCore::Consumer<void(const FloatColl&, const ParticleColl&, const SimTrackerHitColl&, const TrackerHitColl&,

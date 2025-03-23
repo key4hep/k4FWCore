@@ -43,9 +43,9 @@ public:
 
 private:
   mutable std::unordered_map<size_t, std::tuple<event_num_t, run_num_t, std::string>, std::identity> m_uniqueIDs;
-  mutable std::mutex                                                                                 m_mutex;
+  mutable std::mutex m_mutex;
   Gaudi::Property<seed_t> m_seed{this, "Seed", {123456789}};
-  Gaudi::Property<bool>   m_checkDuplicates{
+  Gaudi::Property<bool> m_checkDuplicates{
       this, "CheckDuplicates",
   // Default value for release and debug builds
 #ifdef NDEBUG

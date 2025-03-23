@@ -42,8 +42,8 @@ struct ExampleFunctionalTransformerRuntimeEmpty final
                     {KeyValues("OutputCollections", {"MCParticles"})}) {}
 
   // This is the function that will be called to produce the data
-  std::vector<edm4hep::MCParticleCollection> operator()(
-      const std::vector<const edm4hep::MCParticleCollection*>&) const override {
+  std::vector<edm4hep::MCParticleCollection>
+  operator()(const std::vector<const edm4hep::MCParticleCollection*>&) const override {
     // Return an empty vector to make sure that also works
     std::vector<edm4hep::MCParticleCollection> outputCollections;
     return outputCollections;

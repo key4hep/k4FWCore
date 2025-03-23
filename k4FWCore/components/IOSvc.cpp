@@ -124,7 +124,7 @@ std::tuple<std::vector<podio::CollectionBase*>, std::vector<std::string>, podio:
   }
 
   if (m_nextEntry >= m_entries) {
-    auto       ep = serviceLocator()->as<IEventProcessor>();
+    auto ep = serviceLocator()->as<IEventProcessor>();
     StatusCode sc = ep->stopRun();
     if (sc.isFailure()) {
       error() << "Error when stopping run" << endmsg;
@@ -176,7 +176,7 @@ void IOSvc::handle(const Incident& incident) {
     code = m_dataSvc->retrieveObject("/Event/" + coll, collPtr);
     if (code.isSuccess()) {
       debug() << "Removing the collection: " << coll << " from the store" << endmsg;
-      code          = m_dataSvc->unregisterObject(collPtr);
+      code = m_dataSvc->unregisterObject(collPtr);
       auto storePtr = dynamic_cast<AnyDataWrapper<std::unique_ptr<podio::CollectionBase>>*>(collPtr);
       storePtr->getData().release();
       delete storePtr;

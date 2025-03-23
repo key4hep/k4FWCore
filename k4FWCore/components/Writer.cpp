@@ -54,11 +54,11 @@ public:
   // These are the collections we want to save to the frame
   mutable std::vector<std::string> m_collectionsToSave;
 
-  ServiceHandle<IIOSvc>     iosvc{this, "IOSvc", "IOSvc"};
-  SmartIF<IHiveWhiteBoard>  m_hiveWhiteBoard;
+  ServiceHandle<IIOSvc> iosvc{this, "IOSvc", "IOSvc"};
+  SmartIF<IHiveWhiteBoard> m_hiveWhiteBoard;
   SmartIF<IDataProviderSvc> m_dataSvc;
-  SmartIF<IMetadataSvc>     m_metadataSvc;
-  mutable bool              m_first{true};
+  SmartIF<IMetadataSvc> m_metadataSvc;
+  mutable bool m_first{true};
 
   StatusCode initialize() override {
     if (!iosvc.isValid()) {
@@ -105,7 +105,7 @@ public:
     // and have to be traversed like this. Note that Gaudi!577 will improve this.
     for (const auto* name : {"ApplicationMgr", "MessageSvc", "NTupleSvc"}) {
       std::stringstream config_stream;
-      auto              svc = service<IProperty>(name);
+      auto svc = service<IProperty>(name);
       if (!svc.isValid())
         continue;
       for (const auto* property : svc->getProperties()) {
@@ -149,7 +149,7 @@ public:
       return;
     }
     std::vector<IRegistry*> leaves;
-    StatusCode              sc = mgr->objectLeaves(pObj, leaves);
+    StatusCode sc = mgr->objectLeaves(pObj, leaves);
     if (!sc.isSuccess()) {
       error() << "Failed to retrieve object leaves" << endmsg;
       return;
@@ -185,7 +185,7 @@ public:
     }
 
     DataObject* p;
-    StatusCode  code = m_dataSvc->retrieveObject("/Event" + k4FWCore::frameLocation, p);
+    StatusCode code = m_dataSvc->retrieveObject("/Event" + k4FWCore::frameLocation, p);
     std::unique_ptr<AnyDataWrapper<podio::Frame>> ptr;
     // This is the case when we are reading from a file
     // Putting it into a unique_ptr will make sure it's deleted

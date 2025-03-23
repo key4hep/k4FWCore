@@ -24,7 +24,7 @@
 
 // CLHEP
 namespace CLHEP {
-  class Hep3Vector;
+class Hep3Vector;
 }
 
 /** @class ISimG4ParticleSmearTool SimG4Interface/SimG4Interface/ISimG4ParticleSmearTool.h ISimG4ParticleSmearTool.h

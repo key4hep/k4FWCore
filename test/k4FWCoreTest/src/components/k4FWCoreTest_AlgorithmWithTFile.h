@@ -31,10 +31,10 @@
 
 // datamodel
 namespace edm4hep {
-  class MCParticleCollection;
-  class SimTrackerHitCollection;
-  class SimCaloHit;
-}  // namespace edm4hep
+class MCParticleCollection;
+class SimTrackerHitCollection;
+class SimCaloHit;
+} // namespace edm4hep
 
 /** @class k4FWCoreTest_AlgorithmWithTFile
  *  Test producer to check that data can still be written to
@@ -72,7 +72,7 @@ private:
 
   /// for testing: write a second TFile by user in an algorithm
   mutable Float_t m_value;
-  TFile*          m_file;
-  TTree*          m_tree;
+  TFile* m_file;
+  TTree* m_tree;
 };
 #endif /* K4FWCORE_K4FWCORETEST_ALGORITHMWITHTFILE */

@@ -33,16 +33,16 @@
 #include <string>
 
 // Which type of collection we are reading
-using FloatColl         = podio::UserDataCollection<float>;
-using ParticleColl      = edm4hep::MCParticleCollection;
+using FloatColl = podio::UserDataCollection<float>;
+using ParticleColl = edm4hep::MCParticleCollection;
 using SimTrackerHitColl = edm4hep::SimTrackerHitCollection;
-using TrackerHitColl    = edm4hep::TrackerHit3DCollection;
-using TrackColl         = edm4hep::TrackCollection;
-using RecoColl          = edm4hep::ReconstructedParticleCollection;
-using LinkColl          = edm4hep::RecoMCParticleLinkCollection;
+using TrackerHitColl = edm4hep::TrackerHit3DCollection;
+using TrackColl = edm4hep::TrackCollection;
+using RecoColl = edm4hep::ReconstructedParticleCollection;
+using LinkColl = edm4hep::RecoMCParticleLinkCollection;
 
 // As a simple example, we'll write an integer and a collection of MCParticles
-using Counter  = podio::UserDataCollection<int>;
+using Counter = podio::UserDataCollection<int>;
 using Particle = edm4hep::MCParticleCollection;
 
 struct ExampleFunctionalTransformerMultiple final
@@ -50,17 +50,17 @@ struct ExampleFunctionalTransformerMultiple final
           const FloatColl&, const ParticleColl&, const SimTrackerHitColl&, const TrackerHitColl&, const TrackColl&,
           const RecoColl&, const LinkColl&)> {
   ExampleFunctionalTransformerMultiple(const std::string& name, ISvcLocator* svcLoc)
-      : MultiTransformer(
-            name, svcLoc,
-            {KeyValues("InputCollectionFloat", {"VectorFloat"}),
-             KeyValues("InputCollectionParticles", {"MCParticles1"}),
-             KeyValues("InputCollectionSimTrackerHits", {"SimTrackerHits"}),
-             KeyValues("InputCollectionTrackerHits", {"TrackerHits"}), KeyValues("InputCollectionTracks", {"Tracks"}),
-             KeyValues("InputCollectionRecoParticles", {"RecoParticles"}),
-             KeyValues("InputCollectionLinks", {"Links"})},
-            {KeyValues("OutputCollectionCounter", {"Counter"}),
-             KeyValues("OutputCollectionParticles", {"NewMCParticles"}),
-             KeyValues("OutputLinkCollection", {"NewLinks"})}) {}
+      : MultiTransformer(name, svcLoc,
+                         {KeyValues("InputCollectionFloat", {"VectorFloat"}),
+                          KeyValues("InputCollectionParticles", {"MCParticles1"}),
+                          KeyValues("InputCollectionSimTrackerHits", {"SimTrackerHits"}),
+                          KeyValues("InputCollectionTrackerHits", {"TrackerHits"}),
+                          KeyValues("InputCollectionTracks", {"Tracks"}),
+                          KeyValues("InputCollectionRecoParticles", {"RecoParticles"}),
+                          KeyValues("InputCollectionLinks", {"Links"})},
+                         {KeyValues("OutputCollectionCounter", {"Counter"}),
+                          KeyValues("OutputCollectionParticles", {"NewMCParticles"}),
+                          KeyValues("OutputLinkCollection", {"NewLinks"})}) {}
 
   // This is the function that will be called to transform the data
   // Note that the function has to be const, as well as the collections

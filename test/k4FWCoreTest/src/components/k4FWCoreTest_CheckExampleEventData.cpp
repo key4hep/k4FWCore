@@ -42,7 +42,7 @@ StatusCode k4FWCoreTest_CheckExampleEventData::execute(const EventContext&) cons
   }
 
   auto particles = m_mcParticleHandle.get();
-  auto particle  = (*particles)[0];
+  auto particle = (*particles)[0];
   if ((particle.getMomentum().x != m_magicNumberOffset + m_event + 0) ||
       (particle.getMass() != m_magicNumberOffset + 6)) {
     std::stringstream error;

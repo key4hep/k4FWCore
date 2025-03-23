@@ -103,9 +103,9 @@ struct ExampleFunctionalMetadataConsumer final : k4FWCore::Consumer<void(const e
   }
 
 private:
-  int              m_particleNum;
-  float            m_particleTime;
-  std::string      m_metadataString;
+  int m_particleNum;
+  float m_particleTime;
+  std::string m_metadataString;
   std::vector<int> m_PDGValues;
 };
 

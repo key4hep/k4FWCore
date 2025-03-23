@@ -19,16 +19,16 @@
 #ifndef K4FWCORE_EVENTHEADERCREATOR
 #define K4FWCORE_EVENTHEADERCREATOR
 
-#include <edm4hep/Constants.h>
-#include <edm4hep/EventHeaderCollection.h>
 #include "Gaudi/Algorithm.h"
 #include "k4FWCore/DataHandle.h"
+#include <edm4hep/Constants.h>
+#include <edm4hep/EventHeaderCollection.h>
 /***
  * Algorithm that creates an EventHeader collection and fills it with eventNumber and runNumber
  */
 
 namespace edm4hep {
-  class EventHeaderCollection;
+class EventHeaderCollection;
 }
 
 class EventHeaderCreator : public Gaudi::Algorithm {

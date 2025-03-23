@@ -17,9 +17,9 @@
  * limitations under the License.
  */
 
-#include <edm4hep/ReconstructedParticleCollection.h>
 #include "k4FWCore/Consumer.h"
 #include "k4FWCore/MetadataUtils.h"
+#include <edm4hep/ReconstructedParticleCollection.h>
 
 #include "edm4hep/ParticleIDCollection.h"
 #include "edm4hep/utils/ParticleIDUtils.h"
@@ -71,7 +71,7 @@ struct ExampleParticleIDConsumer final
       throw std::runtime_error(
           fmt::format("Could net retrieve the {} PID object for reco particle {}", pidMeta.algoName, reco.id().index));
     }
-    auto pid      = maybePID.value();
+    auto pid = maybePID.value();
     auto paramVal = pid.getParameters()[paramIndex];
 
     // As set in the producer

@@ -53,7 +53,7 @@ protected:
   Gaudi::Property<std::vector<std::string>> m_collectionNames{
       this, "CollectionNames", {}, "List of collections to read"};
   Gaudi::Property<std::vector<std::string>> m_readingFileNames{this, "Input", {}, "List of files to read"};
-  Gaudi::Property<std::string>              m_writingFileName{this, "Output", {}, "List of files to write output to"};
+  Gaudi::Property<std::string> m_writingFileName{this, "Output", {}, "List of files to write output to"};
   Gaudi::Property<std::vector<std::string>> m_outputCommands{
       this, "outputCommands", {"keep *"}, "A set of commands to declare which collections to keep or drop."};
   Gaudi::Property<std::string> m_outputType{this, "OutputType", "default",
@@ -84,10 +84,10 @@ protected:
   void deleteReader() override { m_reader.reset(); }
 
   SmartIF<IDataProviderSvc> m_dataSvc;
-  SmartIF<IIncidentSvc>     m_incidentSvc;
-  SmartIF<IHiveWhiteBoard>  m_hiveWhiteBoard;
-  SmartIF<IMetadataSvc>     m_metadataSvc;
-  void                      handle(const Incident& incident) override;
+  SmartIF<IIncidentSvc> m_incidentSvc;
+  SmartIF<IHiveWhiteBoard> m_hiveWhiteBoard;
+  SmartIF<IMetadataSvc> m_metadataSvc;
+  void handle(const Incident& incident) override;
 
   int m_entries{0};
   int m_nextEntry{0};
