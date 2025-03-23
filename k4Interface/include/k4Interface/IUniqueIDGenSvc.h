@@ -35,10 +35,10 @@
 
 struct GAUDI_API IUniqueIDGenSvc : extend_interfaces<IInterface> {
   using event_num_t = decltype(std::declval<edm4hep::EventHeader>().getEventNumber());
-  using run_num_t   = decltype(std::declval<edm4hep::EventHeader>().getRunNumber());
+  using run_num_t = decltype(std::declval<edm4hep::EventHeader>().getRunNumber());
   DeclareInterfaceID(IUniqueIDGenSvc, 2, 0);
   virtual size_t getUniqueID(const event_num_t evt_num, const run_num_t run_num, const std::string& name) const = 0;
-  size_t         getUniqueID(const edm4hep::EventHeader& evt_header, const std::string& name) const {
+  size_t getUniqueID(const edm4hep::EventHeader& evt_header, const std::string& name) const {
     return getUniqueID(evt_header.getEventNumber(), evt_header.getRunNumber(), name);
   }
   // calculate a unique id from name and the first element of collection

@@ -38,7 +38,7 @@ public:
 
 private:
   mutable Gaudi::Accumulators::Counter<> m_count{this, "count"};
-  Gaudi::Property<unsigned int>          m_frequency{this, "Frequency", 1, "How often to print the event number"};
+  Gaudi::Property<unsigned int> m_frequency{this, "Frequency", 1, "How often to print the event number"};
 };
 
 DECLARE_COMPONENT(EventCounter)

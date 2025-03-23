@@ -36,9 +36,9 @@ public:
   bool isOn(const std::string& astring) const;
 
 private:
-  bool                                getFlag(const std::string& astring) const;
-  Cmd                                 extractCommand(const std::string& cmdLine) const;
-  CommandLines                        m_commandlines;
+  bool getFlag(const std::string& astring) const;
+  Cmd extractCommand(const std::string& cmdLine) const;
+  CommandLines m_commandlines;
   mutable std::map<std::string, bool> m_cache;
 };
 

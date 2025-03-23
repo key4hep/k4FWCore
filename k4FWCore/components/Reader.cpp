@@ -33,8 +33,8 @@
 #include <memory>
 
 class CollectionPusher : public Gaudi::Functional::details::BaseClass_t<Gaudi::Functional::Traits::useDefaults> {
-  using Traits_    = Gaudi::Functional::Traits::useDefaults;
-  using Out        = std::unique_ptr<podio::CollectionBase>;
+  using Traits_ = Gaudi::Functional::Traits::useDefaults;
+  using Out = std::unique_ptr<podio::CollectionBase>;
   using base_class = Gaudi::Functional::details::BaseClass_t<Traits_>;
   static_assert(std::is_base_of_v<Algorithm, base_class>, "BaseClass must inherit from Algorithm");
 
@@ -73,7 +73,7 @@ public:
     try {
       auto out = (*this)();
 
-      auto outColls        = std::get<std::vector<podio::CollectionBase*>>(out);
+      auto outColls = std::get<std::vector<podio::CollectionBase*>>(out);
       auto outputLocations = std::get<std::vector<std::string>>(out);
 
       // if (out.size() != m_outputs.size()) {
@@ -134,7 +134,7 @@ public:
   std::tuple<std::vector<podio::CollectionBase*>, std::vector<std::string>> operator()() const override {
     auto val = m_iosvc->next();
 
-    auto eds   = eventSvc().as<IDataProviderSvc>();
+    auto eds = eventSvc().as<IDataProviderSvc>();
     auto frame = std::move(std::get<podio::Frame>(val));
 
     auto tmp = new AnyDataWrapper<podio::Frame>(std::move(frame));

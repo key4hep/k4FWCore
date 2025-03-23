@@ -32,7 +32,8 @@
  *  Abstract interface to tower building tool.
  *
  *  @author Anna Zaborowska
- *  @Modified by Tong Li (t.li at cern.ch), for sliding-window clustering at FCCee where the CaloTower is created from Theta-Phi
+ *  @Modified by Tong Li (t.li at cern.ch), for sliding-window clustering at FCCee where the CaloTower is created from
+ * Theta-Phi
  */
 
 class ITowerToolThetaModule : virtual public IAlgTool {
@@ -77,7 +78,8 @@ public:
   /**  Find cells belonging to a cluster.
    *   @param[in] aTheta Position of the middle tower of a cluster in theta
    *   @param[in] aPhi Position of the middle tower of a cluster in phi
-   *   @param[in] aHalfThetaFinal Half size of cluster in theta (in units of tower size). Cluster size is 2*aHalfThetaFinal+1
+   *   @param[in] aHalfThetaFinal Half size of cluster in theta (in units of tower size). Cluster size is
+   * 2*aHalfThetaFinal+1
    *   @param[in] aHalfPhiFinal Half size of cluster in phi (in units of tower size). Cluster size is 2*aHalfPhiFinal+1
    *   @param[out] aEdmCluster Cluster of interest
    *   @param[out] aEdmClusterCells Cluster cells which belong to the cluster of interest

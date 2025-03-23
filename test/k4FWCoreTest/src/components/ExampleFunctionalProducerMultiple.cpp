@@ -42,15 +42,15 @@ struct ExampleFunctionalProducerMultiple final : k4FWCore::Producer<retType()> {
   // The pairs in KeyValue can be changed from python and they correspond
   // to the names of the output collections
   ExampleFunctionalProducerMultiple(const std::string& name, ISvcLocator* svcLoc)
-      : Producer(
-            name, svcLoc, {},
-            {KeyValues("OutputCollectionFloat", {"VectorFloat"}),
-             KeyValues("OutputCollectionParticles1", {"MCParticles1"}),
-             KeyValues("OutputCollectionParticles2", {"MCParticles2"}),
-             KeyValues("OutputCollectionSimTrackerHits", {"SimTrackerHits"}),
-             KeyValues("OutputCollectionTrackerHits", {"TrackerHits"}), KeyValues("OutputCollectionTracks", {"Tracks"}),
-             KeyValues("OutputCollectionRecoParticles", {"RecoParticles"}),
-             KeyValues("OutputCollectionLinks", {"Links"})}) {}
+      : Producer(name, svcLoc, {},
+                 {KeyValues("OutputCollectionFloat", {"VectorFloat"}),
+                  KeyValues("OutputCollectionParticles1", {"MCParticles1"}),
+                  KeyValues("OutputCollectionParticles2", {"MCParticles2"}),
+                  KeyValues("OutputCollectionSimTrackerHits", {"SimTrackerHits"}),
+                  KeyValues("OutputCollectionTrackerHits", {"TrackerHits"}),
+                  KeyValues("OutputCollectionTracks", {"Tracks"}),
+                  KeyValues("OutputCollectionRecoParticles", {"RecoParticles"}),
+                  KeyValues("OutputCollectionLinks", {"Links"})}) {}
 
   // This is the function that will be called to produce the data
   retType operator()() const override {
@@ -62,21 +62,21 @@ struct ExampleFunctionalProducerMultiple final : k4FWCore::Producer<retType()> {
     floatVector.push_back(25.);
     floatVector.push_back(m_event);
 
-    auto              particles = edm4hep::MCParticleCollection();
+    auto particles = edm4hep::MCParticleCollection();
     edm4hep::Vector3d v{0, 0, 0};
-    auto              part1 = particles.create(1, 2, 3, 4.f, 5.f, 6.f, v, v, v);
-    auto              part2 = particles.create(2, 3, 4, 5.f, 6.f, 7.f);
+    auto part1 = particles.create(1, 2, 3, 4.f, 5.f, 6.f, v, v, v);
+    auto part2 = particles.create(2, 3, 4, 5.f, 6.f, 7.f);
 
     auto simTrackerHits = edm4hep::SimTrackerHitCollection();
-    auto hit            = simTrackerHits.create();
+    auto hit = simTrackerHits.create();
     hit.setPosition({3, 4, 5});
 
     auto trackerHits = edm4hep::TrackerHit3DCollection();
-    auto trackerHit  = trackerHits.create();
+    auto trackerHit = trackerHits.create();
     trackerHit.setPosition({3, 4, 5});
 
     auto tracks = edm4hep::TrackCollection();
-    auto track  = tracks.create();
+    auto track = tracks.create();
     auto track2 = tracks.create();
     // set members
     track.setType(1);
@@ -114,7 +114,7 @@ private:
   // integer to add to the dummy values written to the edm
   Gaudi::Property<int> m_magicNumberOffset{this, "magicNumberOffset", 0,
                                            "Integer to add to the dummy values written to the edm"};
-  int                  m_event{0};
+  int m_event{0};
 };
 
 DECLARE_COMPONENT(ExampleFunctionalProducerMultiple)

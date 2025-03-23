@@ -34,6 +34,6 @@ public:
   DeclareInterfaceID(ICaloReadCrosstalkMap, 1, 0);
 
   virtual std::vector<uint64_t> const& getNeighbours(uint64_t cellID) = 0;
-  virtual std::vector<double> const&   getCrosstalks(uint64_t cellID) = 0;
+  virtual std::vector<double> const& getCrosstalks(uint64_t cellID) = 0;
 };
 #endif /* RECINTERFACE_ICALOREADCROSSTALKMAP_H */

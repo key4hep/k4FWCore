@@ -38,8 +38,8 @@ public:
   StatusCode execute(const EventContext&) const final;
 
 private:
-  SmartIF<IUniqueIDGenSvc>               m_service;
+  SmartIF<IUniqueIDGenSvc> m_service;
   mutable Gaudi::Accumulators::Counter<> m_counter{this, "EventCounter"};
 };
 
-#endif  // TEST_UNIQUEIDGENSVC_H
+#endif // TEST_UNIQUEIDGENSVC_H

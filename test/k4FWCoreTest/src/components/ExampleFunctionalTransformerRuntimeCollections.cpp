@@ -42,13 +42,13 @@ struct ExampleFunctionalTransformerRuntimeCollections final
                     {KeyValues("OutputCollections", {"MCParticles"})}) {}
 
   // This is the function that will be called to produce the data
-  std::vector<edm4hep::MCParticleCollection> operator()(
-      const std::vector<const edm4hep::MCParticleCollection*>& input) const override {
+  std::vector<edm4hep::MCParticleCollection>
+  operator()(const std::vector<const edm4hep::MCParticleCollection*>& input) const override {
     std::vector<edm4hep::MCParticleCollection> outputCollections;
     for (size_t i = 0; i < input.size(); ++i) {
-      std::string name     = "NewMCParticles" + std::to_string(i);
-      auto&       old_coll = input.at(i);
-      auto        coll     = edm4hep::MCParticleCollection();
+      std::string name = "NewMCParticles" + std::to_string(i);
+      auto& old_coll = input.at(i);
+      auto coll = edm4hep::MCParticleCollection();
       coll->push_back(old_coll->at(0).clone());
       coll->push_back(old_coll->at(1).clone());
       outputCollections.emplace_back(std::move(coll));

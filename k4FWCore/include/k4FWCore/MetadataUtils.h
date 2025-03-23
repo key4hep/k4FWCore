@@ -19,56 +19,60 @@
 #ifndef FWCORE_METADATAUTILS_H
 #define FWCORE_METADATAUTILS_H
 
-#include <GaudiKernel/Service.h>
 #include "Gaudi/Algorithm.h"
+#include <GaudiKernel/Service.h>
 
 #include "k4FWCore/IMetadataSvc.h"
 
 namespace k4FWCore {
 
-  /// @brief Save a metadata parameter in the metadata frame
-  /// @param name The name of the parameter
-  /// @param value The value of the parameter
-  /// @param alg The algorithm that is saving the parameter, typically "this"
-  template <typename T> void putParameter(const std::string& name, const T& value, const Gaudi::Algorithm* alg) {
-    auto metadataSvc = alg->service<IMetadataSvc>("MetadataSvc", false);
-    if (!metadataSvc) {
-      alg->error() << "MetadataSvc not found" << endmsg;
-      return;
-    }
-    metadataSvc->put<T>(name, value);
+/// @brief Save a metadata parameter in the metadata frame
+/// @param name The name of the parameter
+/// @param value The value of the parameter
+/// @param alg The algorithm that is saving the parameter, typically "this"
+template <typename T>
+void putParameter(const std::string& name, const T& value, const Gaudi::Algorithm* alg) {
+  auto metadataSvc = alg->service<IMetadataSvc>("MetadataSvc", false);
+  if (!metadataSvc) {
+    alg->error() << "MetadataSvc not found" << endmsg;
+    return;
   }
-  /// @brief Save a metadata parameter in the metadata frame. Overload for compatibility
-  /// with the MetadataHandle, don't use!
-  template <typename T> void putParameter(const std::string& name, const T& value) {
-    auto metadataSvc = Gaudi::svcLocator()->service<IMetadataSvc>("MetadataSvc", false);
-    if (!metadataSvc) {
-      std::cout << "MetadataSvc not found" << std::endl;
-      return;
-    }
-    return metadataSvc->put<T>(name, value);
+  metadataSvc->put<T>(name, value);
+}
+/// @brief Save a metadata parameter in the metadata frame. Overload for compatibility
+/// with the MetadataHandle, don't use!
+template <typename T>
+void putParameter(const std::string& name, const T& value) {
+  auto metadataSvc = Gaudi::svcLocator()->service<IMetadataSvc>("MetadataSvc", false);
+  if (!metadataSvc) {
+    std::cout << "MetadataSvc not found" << std::endl;
+    return;
   }
-  /// @brief Get a metadata parameter from the metadata frame
-  /// @param name The name of the parameter
-  /// @param alg The algorithm that is saving the parameter, typically "this"
-  /// @return std::optional<T> The value of the parameter, if it exists or std::nullopt
-  template <typename T> std::optional<T> getParameter(const std::string& name, const Gaudi::Algorithm* alg) {
-    auto metadataSvc = alg->service<IMetadataSvc>("MetadataSvc", false);
-    if (!metadataSvc) {
-      alg->error() << "MetadataSvc not found" << endmsg;
-      return std::nullopt;
-    }
-    return metadataSvc->get<T>(name);
+  return metadataSvc->put<T>(name, value);
+}
+/// @brief Get a metadata parameter from the metadata frame
+/// @param name The name of the parameter
+/// @param alg The algorithm that is saving the parameter, typically "this"
+/// @return std::optional<T> The value of the parameter, if it exists or std::nullopt
+template <typename T>
+std::optional<T> getParameter(const std::string& name, const Gaudi::Algorithm* alg) {
+  auto metadataSvc = alg->service<IMetadataSvc>("MetadataSvc", false);
+  if (!metadataSvc) {
+    alg->error() << "MetadataSvc not found" << endmsg;
+    return std::nullopt;
   }
-  /// @brief Get a metadata parameter from the metadata frame. Overload for compatibility
-  /// with the MetadataHandle, don't use!
-  template <typename T> std::optional<T> getParameter(const std::string& name) {
-    auto metadataSvc = Gaudi::svcLocator()->service<IMetadataSvc>("MetadataSvc", false);
-    if (!metadataSvc) {
-      return std::nullopt;
-    }
-    return metadataSvc->get<T>(name);
+  return metadataSvc->get<T>(name);
+}
+/// @brief Get a metadata parameter from the metadata frame. Overload for compatibility
+/// with the MetadataHandle, don't use!
+template <typename T>
+std::optional<T> getParameter(const std::string& name) {
+  auto metadataSvc = Gaudi::svcLocator()->service<IMetadataSvc>("MetadataSvc", false);
+  if (!metadataSvc) {
+    return std::nullopt;
   }
-}  // namespace k4FWCore
+  return metadataSvc->get<T>(name);
+}
+} // namespace k4FWCore
 
-#endif  // FWCORE_METADATAUTILS_H
+#endif // FWCORE_METADATAUTILS_H

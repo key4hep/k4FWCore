@@ -34,7 +34,7 @@ bool checkPIDForAlgo(const edm4hep::utils::PIDHandler& pidHandler, const edm4hep
     fmt::print("Could not retrieve the {} PID object for reco particle {}", pidMeta.algoName, reco.id().index);
     return false;
   }
-  auto pid      = maybePID.value();
+  auto pid = maybePID.value();
   auto paramVal = pid.getParameters()[paramIndex];
 
   // As set in the producer
@@ -58,10 +58,9 @@ bool checkAlgoMetadata(const edm4hep::utils::ParticleIDMeta& pidMeta, const std:
   }
 
   if (!std::ranges::equal(pidMeta.paramNames, paramNames)) {
-    fmt::print(
-        "The PID parameter names retrieved from metadata does not match the expected ones from the properties: "
-        "(expected {}, actual {})\n",
-        paramNames, pidMeta.paramNames);
+    fmt::print("The PID parameter names retrieved from metadata does not match the expected ones from the properties: "
+               "(expected {}, actual {})\n",
+               paramNames, pidMeta.paramNames);
     return false;
   }
 
@@ -70,17 +69,17 @@ bool checkAlgoMetadata(const edm4hep::utils::ParticleIDMeta& pidMeta, const std:
 
 // Test configuration (this needs to match the settings in
 // options/ExampleParticleIDMetadata.py)
-constexpr auto                 pidCollectionName1 = "RecoParticlesPIDs_1";
-constexpr auto                 pidCollectionName2 = "RecoParticlesPIDs_2";
-constexpr auto                 pidAlgo1           = "PIDAlgo1";
-constexpr auto                 pidAlgo2           = "PIDAlgo2";
-constexpr auto                 pidParam1          = "single_param";
-constexpr auto                 pidParam2          = "param_2";
-const std::vector<std::string> paramNames1        = {"single_param"};
-const std::vector<std::string> paramNames2        = {"param_1", "param_2", "param_3"};
+constexpr auto pidCollectionName1 = "RecoParticlesPIDs_1";
+constexpr auto pidCollectionName2 = "RecoParticlesPIDs_2";
+constexpr auto pidAlgo1 = "PIDAlgo1";
+constexpr auto pidAlgo2 = "PIDAlgo2";
+constexpr auto pidParam1 = "single_param";
+constexpr auto pidParam2 = "param_2";
+const std::vector<std::string> paramNames1 = {"single_param"};
+const std::vector<std::string> paramNames2 = {"param_1", "param_2", "param_3"};
 
 int main(int, char* argv[]) {
-  auto       reader   = podio::makeReader(argv[1]);
+  auto reader = podio::makeReader(argv[1]);
   const auto metadata = reader.readFrame(podio::Category::Metadata, 0);
 
   const auto pidMeta1 = edm4hep::utils::PIDHandler::getAlgoInfo(metadata, pidCollectionName1).value();
@@ -97,7 +96,7 @@ int main(int, char* argv[]) {
                pidParam2, paramIndex2);
   }
 
-  const auto event      = reader.readEvent(0);
+  const auto event = reader.readEvent(0);
   const auto pidHandler = edm4hep::utils::PIDHandler::from(event, metadata);
 
   const auto& recos = event.get<edm4hep::ReconstructedParticleCollection>("RecoParticles");

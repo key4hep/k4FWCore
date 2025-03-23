@@ -28,8 +28,8 @@
 
 // datamodel
 namespace edm4hep {
-  class MCParticleCollection;
-}  // namespace edm4hep
+class MCParticleCollection;
+} // namespace edm4hep
 
 class k4FWCoreTest_CheckExampleEventData : public Gaudi::Algorithm {
 public:
@@ -42,7 +42,7 @@ public:
 
 private:
   /// integer to add to the dummy values written to the edm
-  Gaudi::Property<int>  m_magicNumberOffset{this, "magicNumberOffset", 0,
+  Gaudi::Property<int> m_magicNumberOffset{this, "magicNumberOffset", 0,
                                            "Integer to add to the dummy values written to the edm"};
   Gaudi::Property<bool> m_keepEventNumberZero{this, "keepEventNumberZero", false,
                                               "Don't add the event number to the dummy values written"};
@@ -54,4 +54,4 @@ private:
   mutable int m_event{0};
 };
 
-#endif  // K4FWCORE_K4FWCORETEST_CHECKEEXAMPLEEVENTDATA
+#endif // K4FWCORE_K4FWCORETEST_CHECKEEXAMPLEEVENTDATA

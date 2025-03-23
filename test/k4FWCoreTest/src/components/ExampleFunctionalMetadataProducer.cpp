@@ -57,23 +57,23 @@ struct ExampleFunctionalMetadataProducer final : k4FWCore::Producer<edm4hep::MCP
   }
 
 private:
-  Gaudi::Property<int>         m_particleNum{this, "NumberOfParticles", 3, "How many particles will be produced"};
-  Gaudi::Property<float>       m_particleTime{this, "ParticleTime", 1.5, "Which time will be set for the particles"};
+  Gaudi::Property<int> m_particleNum{this, "NumberOfParticles", 3, "How many particles will be produced"};
+  Gaudi::Property<float> m_particleTime{this, "ParticleTime", 1.5, "Which time will be set for the particles"};
   Gaudi::Property<std::string> m_metadataString{this, "MetadataString", "hello", "Example of a string"};
   Gaudi::Property<std::vector<int>> m_PDGValues{
       this, "PDGValues", {1, 2, 3, 4}, "Values of the PDG used for the particles"};
 
   // Some properties for the configuration metadata
-  Gaudi::Property<int>                m_intProp{this, "intProp", 42, "An integer property"};
-  Gaudi::Property<int>                m_intProp2{this, "intProp2", 42, "An integer property"};
-  Gaudi::Property<float>              m_floatProp{this, "floatProp", 3.14, "A float property"};
-  Gaudi::Property<float>              m_floatProp2{this, "floatProp2", 3.14, "A float property"};
-  Gaudi::Property<double>             m_doubleProp{this, "doubleProp", 3.14, "A double property"};
-  Gaudi::Property<double>             m_doubleProp2{this, "doubleProp2", 3.14, "A double property"};
-  Gaudi::Property<std::string>        m_stringProp{this, "stringProp", "Hello", "A string property"};
-  Gaudi::Property<std::string>        m_stringProp2{this, "stringProp2", "Hello", "A string property"};
-  Gaudi::Property<std::vector<int>>   m_vectorIntProp{this, "vectorIntProp", {1, 2, 3}, "A vector of integers"};
-  Gaudi::Property<std::vector<int>>   m_vectorIntProp2{this, "vectorIntProp2", {1, 2, 3}, "A vector of integers"};
+  Gaudi::Property<int> m_intProp{this, "intProp", 42, "An integer property"};
+  Gaudi::Property<int> m_intProp2{this, "intProp2", 42, "An integer property"};
+  Gaudi::Property<float> m_floatProp{this, "floatProp", 3.14, "A float property"};
+  Gaudi::Property<float> m_floatProp2{this, "floatProp2", 3.14, "A float property"};
+  Gaudi::Property<double> m_doubleProp{this, "doubleProp", 3.14, "A double property"};
+  Gaudi::Property<double> m_doubleProp2{this, "doubleProp2", 3.14, "A double property"};
+  Gaudi::Property<std::string> m_stringProp{this, "stringProp", "Hello", "A string property"};
+  Gaudi::Property<std::string> m_stringProp2{this, "stringProp2", "Hello", "A string property"};
+  Gaudi::Property<std::vector<int>> m_vectorIntProp{this, "vectorIntProp", {1, 2, 3}, "A vector of integers"};
+  Gaudi::Property<std::vector<int>> m_vectorIntProp2{this, "vectorIntProp2", {1, 2, 3}, "A vector of integers"};
   Gaudi::Property<std::vector<float>> m_vectorFloatProp{this, "vectorFloatProp", {1.1, 2.2, 3.3}, "A vector of floats"};
   Gaudi::Property<std::vector<float>> m_vectorFloatProp2{
       this, "vectorFloatProp2", {1.1, 2.2, 3.3}, "A vector of floats"};
