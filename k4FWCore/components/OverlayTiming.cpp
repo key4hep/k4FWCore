@@ -36,7 +36,8 @@
 #include <utility>
 #include <vector>
 
-template <typename T> inline float time_of_flight(const T& pos) {
+template <typename T>
+inline float time_of_flight(const T& pos) {
   // Returns the time of flight to the radius in ns
   // Assumming positions in mm, then mm/m/s = 10^-3 s = 10^6 ns
   return std::sqrt((pos[0] * pos[0]) + (pos[1] * pos[1]) + (pos[2] * pos[2])) / TMath::C() * 1e6;
@@ -60,7 +61,8 @@ StatusCode OverlayTiming::initialize() {
   std::vector<std::vector<std::string>> inputFiles;
   inputFiles = m_inputFileNames.value();
   // if (m_startWithBackgroundFile >= 0) {
-  //   inputFiles = std::vector<std::string>(m_inputFileNames.begin() + m_startWithBackgroundFile, m_inputFileNames.end());
+  //   inputFiles = std::vector<std::string>(m_inputFileNames.begin() + m_startWithBackgroundFile,
+  //   m_inputFileNames.end());
   // } else {
   //   inputFiles = m_inputFileNames;
   // }
@@ -102,17 +104,17 @@ StatusCode OverlayTiming::initialize() {
   return StatusCode::SUCCESS;
 }
 
-retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection&                           headers,
-                                  const edm4hep::MCParticleCollection&                            particles,
-                                  const std::vector<const edm4hep::SimTrackerHitCollection*>&     simTrackerHits,
+retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
+                                  const edm4hep::MCParticleCollection& particles,
+                                  const std::vector<const edm4hep::SimTrackerHitCollection*>& simTrackerHits,
                                   const std::vector<const edm4hep::SimCalorimeterHitCollection*>& simCaloHits) const {
   const auto seed = m_uidSvc->getUniqueID(headers[0].getEventNumber(), headers[0].getRunNumber(), this->name());
   m_engine.seed(seed);
 
   // Output collections
-  auto oparticles       = edm4hep::MCParticleCollection();
-  auto osimTrackerHits  = std::vector<edm4hep::SimTrackerHitCollection>();
-  auto osimCaloHits     = std::vector<edm4hep::SimCalorimeterHitCollection>();
+  auto oparticles = edm4hep::MCParticleCollection();
+  auto osimTrackerHits = std::vector<edm4hep::SimTrackerHitCollection>();
+  auto osimCaloHits = std::vector<edm4hep::SimCalorimeterHitCollection>();
   auto ocaloHitContribs = std::vector<edm4hep::CaloHitContributionCollection>();
   for (size_t i = 0; i < simCaloHits.size(); ++i) {
     ocaloHitContribs.emplace_back(edm4hep::CaloHitContributionCollection());
@@ -134,10 +136,10 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection&         
 
   // Copy the SimTrackerHits and crop them
   for (size_t i = 0; i < simTrackerHits.size(); ++i) {
-    const auto& coll                   = simTrackerHits[i];
-    const auto  name                   = inputLocations(SIMTRACKERHIT_INDEX_POSITION)[i];
+    const auto& coll = simTrackerHits[i];
+    const auto name = inputLocations(SIMTRACKERHIT_INDEX_POSITION)[i];
     const auto [this_start, this_stop] = define_time_windows(name);
-    auto ocoll                         = edm4hep::SimTrackerHitCollection();
+    auto ocoll = edm4hep::SimTrackerHitCollection();
     for (const auto&& simTrackerHit : *coll) {
       const float tof = time_of_flight(simTrackerHit.getPosition());
       if ((simTrackerHit.getTime() > this_start + tof) && (simTrackerHit.getTime() < this_stop + tof)) {
@@ -153,14 +155,14 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection&         
   // Copy the SimCalorimeterHits and crop them together with the contributions
   std::map<int, std::map<uint64_t, edm4hep::MutableSimCalorimeterHit>> cellIDsMap;
   for (size_t i = 0; i < simCaloHits.size(); ++i) {
-    const auto& coll                   = simCaloHits[i];
-    const auto  name                   = inputLocations(SIMCALOHIT_INDEX_POSITION)[i];
+    const auto& coll = simCaloHits[i];
+    const auto name = inputLocations(SIMCALOHIT_INDEX_POSITION)[i];
     const auto [this_start, this_stop] = define_time_windows(name);
-    auto& calHitMap                    = cellIDsMap[i];
-    auto& caloHitContribs              = ocaloHitContribs[i];
+    auto& calHitMap = cellIDsMap[i];
+    auto& caloHitContribs = ocaloHitContribs[i];
     for (const auto&& simCaloHit : *coll) {
-      const float      tof                = time_of_flight(simCaloHit.getPosition());
-      bool             within_time_window = false;
+      const float tof = time_of_flight(simCaloHit.getPosition());
+      bool within_time_window = false;
       std::vector<int> thisContribs;
       for (const auto& contrib : simCaloHit.getContributions()) {
         if (!((contrib.getTime() > this_start + tof) && (contrib.getTime() < this_stop + tof)))
@@ -248,11 +250,11 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection&         
         }
 
         // To fix the relations we will need to have a map from old to new particle index
-        std::map<int, int>                                           oldToNewMap;
+        std::map<int, int> oldToNewMap;
         std::map<int, std::pair<std::vector<int>, std::vector<int>>> parentDaughterMap;
 
         const auto& bgParticles = backgroundEvent.get<edm4hep::MCParticleCollection>(m_MCParticleCollectionName);
-        int         j           = oparticles.size();
+        int j = oparticles.size();
         for (size_t i = 0; i < bgParticles.size(); ++i) {
           auto npart = bgParticles[i].clone(false);
 
@@ -329,13 +331,13 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection&         
             continue;
           }
 
-          auto& calHitMap      = cellIDsMap[i];
+          auto& calHitMap = cellIDsMap[i];
           auto& calHitContribs = ocaloHitContribs[i];
           for (const auto&& simCaloHit : backgroundEvent.get<edm4hep::SimCalorimeterHitCollection>(name)) {
             if (calHitMap.find(simCaloHit.getCellID()) == calHitMap.end()) {
               // There is no hit at this position. The new hit can be added, if it is not outside the window
               auto calhit = edm4hep::MutableSimCalorimeterHit();
-              bool add    = false;
+              bool add = false;
               for (const auto& contrib : simCaloHit.getContributions()) {
                 if ((contrib.getTime() + timeOffset > this_start) && (contrib.getTime() + timeOffset < this_stop)) {
                   add = true;
