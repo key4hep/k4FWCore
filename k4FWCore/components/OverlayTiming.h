@@ -114,7 +114,7 @@ private:
 
   Gaudi::Property<bool> m_randomBX{this, "RandomBx", false,
                                    "Place the physics event at an random position in the train: overrides PhysicsBX"};
-  mutable Gaudi::Property<int> m_physBX{this, "PhysicsBX", 1, "Number of the Bunch crossing of the physics event"};
+  Gaudi::Property<int> m_physBX{this, "PhysicsBX", 1, "Number of the Bunch crossing of the physics event"};
   Gaudi::Property<int> m_NBunchTrain{this, "NBunchtrain", 1, "Number of bunches in a bunch train"};
   // Gaudi::Property<int>         m_startWithBackgroundFile{this, "StartBackgroundFileIndex", -1,
   //                                                "Which background file to startWith"};
@@ -153,6 +153,5 @@ private:
   //   this, "MaxCachedFrames", 0, "Maximum number of frames cached from background files"};
 
 private:
-  inline static thread_local std::mt19937 m_engine;
   SmartIF<IUniqueIDGenSvc> m_uidSvc;
 };

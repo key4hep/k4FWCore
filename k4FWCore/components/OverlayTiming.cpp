@@ -67,7 +67,7 @@ StatusCode OverlayTiming::initialize() {
   //   inputFiles = m_inputFileNames;
   // }
   // TODO:: shuffle input files
-  // std::shuffle(inputFiles.begin(), inputFiles.end(), m_engine);
+  // std::shuffle(inputFiles.begin(), inputFiles.end(), rng_engine);
 
   m_bkgEvents = make_unique<EventHolder>(inputFiles);
   for (auto& val : m_bkgEvents->m_totalNumberOfEvents) {
@@ -109,7 +109,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
                                   const std::vector<const edm4hep::SimTrackerHitCollection*>& simTrackerHits,
                                   const std::vector<const edm4hep::SimCalorimeterHitCollection*>& simCaloHits) const {
   const auto seed = m_uidSvc->getUniqueID(headers[0].getEventNumber(), headers[0].getRunNumber(), this->name());
-  m_engine.seed(seed);
+  auto rng_engine = std::mt19937(seed);
 
   // Output collections
   auto oparticles = edm4hep::MCParticleCollection();
@@ -184,22 +184,23 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
     }
   }
 
+  auto physBX = m_physBX.value();
   // Iterate over each group of files and parameters
   for (size_t groupIndex = 0; groupIndex < m_bkgEvents->size(); groupIndex++) {
     if (m_randomBX) {
-      m_physBX = std::uniform_int_distribution<int>(0, m_NBunchTrain - 1)(m_engine);
-      debug() << "Physics Event was placed in the " << m_physBX << " bunch crossing!" << endmsg;
+      physBX = std::uniform_int_distribution<int>(0, m_NBunchTrain - 1)(rng_engine);
+      debug() << "Physics Event was placed in the " << physBX << " bunch crossing!" << endmsg;
     }
 
     // define a permutation for the events to overlay -- the physics event is per definition at position 0
     std::vector<int> permutation;
 
     // Permutation has negative values and the last one is 0
-    // if (!m_randomBX) then m_physBX (default = 1)
-    for (int i = -(m_physBX - 1); i < m_NBunchTrain - (m_physBX - 1); ++i) {
+    // if (!m_randomBX) then physBX (default = 1)
+    for (int i = -(physBX - 1); i < m_NBunchTrain - (physBX - 1); ++i) {
       permutation.push_back(i);
     }
-    std::shuffle(permutation.begin(), permutation.end(), m_engine);
+    std::shuffle(permutation.begin(), permutation.end(), rng_engine);
 
     // TODO: Check that there is anything to overlay
 
@@ -220,12 +221,12 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
       int NOverlay_to_this_BX = 0;
 
       if (m_Poisson[groupIndex]) {
-        NOverlay_to_this_BX = std::poisson_distribution<>(m_Noverlay[groupIndex])(m_engine);
+        NOverlay_to_this_BX = std::poisson_distribution<>(m_Noverlay[groupIndex])(rng_engine);
       } else {
         NOverlay_to_this_BX = m_Noverlay[groupIndex];
       }
 
-      debug() << "Will overlay " << NOverlay_to_this_BX << " events to BX number " << BX_number_in_train + m_physBX
+      debug() << "Will overlay " << NOverlay_to_this_BX << " events to BX number " << BX_number_in_train + physBX
               << endmsg;
 
       for (int k = 0; k < NOverlay_to_this_BX; ++k) {
@@ -298,7 +299,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
           }
           const auto [this_start, this_stop] = define_time_windows(name);
           // There are only contributions to the readout if the hits are in the integration window
-          if (this_stop <= (BX_number_in_train - m_physBX) * m_deltaT) {
+          if (this_stop <= (BX_number_in_train - physBX) * m_deltaT) {
             info() << "Skipping collection " << name << " as it is not in the integration window" << endmsg;
             continue;
           }
@@ -326,7 +327,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
           }
           const auto [this_start, this_stop] = define_time_windows(name);
           // There are only contributions to the readout if the hits are in the integration window
-          if (this_stop <= (BX_number_in_train - m_physBX) * m_deltaT) {
+          if (this_stop <= (BX_number_in_train - physBX) * m_deltaT) {
             info() << "Skipping collection " << name << " as it is not in the integration window" << endmsg;
             continue;
           }
