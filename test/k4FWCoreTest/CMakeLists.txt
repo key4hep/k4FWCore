@@ -180,7 +180,7 @@ add_test_with_env(FunctionalMetadataOldAlgorithm options/ExampleFunctionalMetada
 add_test_with_env(createEventHeaderConcurrent options/createEventHeaderConcurrent.py ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalMetadataReadOldAlgorithm options/ExampleFunctionalMetadataReadOldAlgorithm.py PROPERTIES DEPENDS FunctionalMetadataOldAlgorithm ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalNonExistingFile options/ExampleFunctionalNonExistingFile.py)
-set_tests_properties(FunctionalNonExistingFile PROPERTIES PASS_REGULAR_EXPRESSION "File.*couldn't be found")
+set_tests_properties(FunctionalNonExistingFile PROPERTIES PASS_REGULAR_EXPRESSION "Failed to open file")
 add_test_with_env(FunctionalNonExistingFileOverwritten options/ExampleFunctionalNonExistingFile.py --IOSvc.Input functional_producer.root PROPERTIES FIXTURES_REQUIRED ProducerFile)
 add_test_with_env(FunctionalFileTooLong options/ExampleFunctionalFile.py -n 999 --IOSvc.Output toolong.root PROPERTIES FIXTURES_REQUIRED ProducerFile PASS_REGULAR_EXPRESSION
                   "Application Manager Terminated successfully with a user requested ScheduledStop")
@@ -193,7 +193,8 @@ set_tests_properties(FunctionalFileCLIMultiple PROPERTIES FIXTURES_REQUIRED Prod
 add_test_with_env(FunctionalWrongImport options/ExampleFunctionalWrongImport.py)
 set_tests_properties(FunctionalWrongImport PROPERTIES PASS_REGULAR_EXPRESSION "ImportError: Importing ApplicationMgr or IOSvc from Configurables is not allowed.")
 add_test_with_env(FunctionalReadNthEvent options/ExampleFunctionalReadNthEvent.py PROPERTIES FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalProducerRNTuple options/ExampleFunctionalProducerRNTuple.py ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalProducerRNTuple options/ExampleFunctionalProducer.py --IOSvc.OutputType RNTuple --IOSvc.Output functional_producer_rntuple.root ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalFileRNTuple options/ExampleFunctionalFile.py --IOSvc.Input functional_producer_rntuple.root --IOSvc.Output functional_producer_rntuple_converted.root PROPERTIES DEPENDS FunctionalProducerRNTuple ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalTTreeToRNTuple options/ExampleFunctionalTTreeToRNTuple.py PROPERTIES FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
 add_test_with_env(GaudiFunctional options/ExampleGaudiFunctional.py PROPERTIES FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
 add_test_with_env(ReadLimitedInputsIOSvc options/ExampleIOSvcLimitInputCollections.py PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile ADD_TO_CHECK_FILES)
