@@ -19,13 +19,13 @@
 #
 
 from Gaudi.Configuration import INFO, DEBUG
-from Configurables import ExampleFunctionalProducer, TypeMisMatchDemo, EventDataSvc
+from Configurables import ExampleFunctionalProducer, TrackReader, EventDataSvc
 
 from k4FWCore import ApplicationMgr
 
 producer = ExampleFunctionalProducer("Producer", OutputCollection=["MCParticles"])
 
-mismatch = TypeMisMatchDemo(InputCollection=["MCParticles"], OutputLevel=DEBUG)
+mismatch = TrackReader(InputCollection=["MCParticles"], OutputLevel=DEBUG)
 
 ApplicationMgr(
     TopAlg=[producer, mismatch],
