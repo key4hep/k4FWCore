@@ -49,45 +49,8 @@ struct CollectionMerger final
     if (System::cmdLineArgs()[0].find("genconf") != std::string::npos) {
       return;
     }
-    m_map["edm4hep::MCParticleCollection"] = &CollectionMerger::mergeCollections<edm4hep::MCParticleCollection>;
-    m_map["edm4hep::SimTrackerHitCollection"] = &CollectionMerger::mergeCollections<edm4hep::SimTrackerHitCollection>;
-    m_map["edm4hep::CaloHitContributionCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::CaloHitContributionCollection>;
-    m_map["edm4hep::SimCalorimeterHitCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::SimCalorimeterHitCollection>;
-    m_map["edm4hep::RawCalorimeterHitCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::RawCalorimeterHitCollection>;
-    m_map["edm4hep::CalorimeterHitCollection"] = &CollectionMerger::mergeCollections<edm4hep::CalorimeterHitCollection>;
-    m_map["edm4hep::ParticleIDCollection"] = &CollectionMerger::mergeCollections<edm4hep::ParticleIDCollection>;
-    m_map["edm4hep::ClusterCollection"] = &CollectionMerger::mergeCollections<edm4hep::ClusterCollection>;
-    m_map["edm4hep::TrackerHit3DCollection"] = &CollectionMerger::mergeCollections<edm4hep::TrackerHit3DCollection>;
-    m_map["edm4hep::TrackerHitPlaneCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::TrackerHitPlaneCollection>;
-    m_map["edm4hep::RawTimeSeriesCollection"] = &CollectionMerger::mergeCollections<edm4hep::RawTimeSeriesCollection>;
-    m_map["edm4hep::TrackCollection"] = &CollectionMerger::mergeCollections<edm4hep::TrackCollection>;
-    m_map["edm4hep::VertexCollection"] = &CollectionMerger::mergeCollections<edm4hep::VertexCollection>;
-    m_map["edm4hep::ReconstructedParticleCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::ReconstructedParticleCollection>;
-    m_map["edm4hep::RecoMCParticleLinkCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::RecoMCParticleLinkCollection>;
-    m_map["edm4hep::CaloHitSimCaloHitLinkCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::CaloHitSimCaloHitLinkCollection>;
-    m_map["edm4hep::TrackerHitSimTrackerHitLinkCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::TrackerHitSimTrackerHitLinkCollection>;
-    m_map["edm4hep::CaloHitMCParticleLinkCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::CaloHitMCParticleLinkCollection>;
-    m_map["edm4hep::ClusterMCParticleLinkCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::ClusterMCParticleLinkCollection>;
-    m_map["edm4hep::TrackMCParticleLinkCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::TrackMCParticleLinkCollection>;
-    m_map["edm4hep::VertexRecoParticleLinkCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::VertexRecoParticleLinkCollection>;
-    m_map["edm4hep::TimeSeriesCollection"] = &CollectionMerger::mergeCollections<edm4hep::TimeSeriesCollection>;
-    m_map["edm4hep::RecDqdxCollection"] = &CollectionMerger::mergeCollections<edm4hep::RecDqdxCollection>;
-    m_map["edm4hep::GeneratorEventParametersCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::GeneratorEventParametersCollection>;
-    m_map["edm4hep::GeneratorPdfInfoCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::GeneratorPdfInfoCollection>;
+
+    addToMapAll(edm4hep::edm4hepDataTypes{});
   }
 
   podio::CollectionBase* operator()(const std::vector<const podio::CollectionBase*>& input) const override {
@@ -112,6 +75,16 @@ private:
   std::map<std::string_view, MergeType> m_map;
   Gaudi::Property<bool> m_copy{this, "Copy", false,
                                "Copy the elements of the collections instead of creating a subset collection"};
+
+  template <typename T>
+  void addToMap() {
+    m_map[T::collection_type::typeName] = &CollectionMerger::mergeCollections<typename T::collection_type>;
+  }
+
+  template <typename... T>
+  void addToMapAll(podio::utils::TypeList<T...>&&) {
+    (addToMap<T>(), ...);
+  }
 
   template <typename T>
   void mergeCollections(const podio::CollectionBase* source, podio::CollectionBase*& ret) const {
