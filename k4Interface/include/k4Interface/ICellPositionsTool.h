@@ -43,10 +43,10 @@ public:
   DeclareInterfaceID(ICellPositionsTool, 1, 0);
 
   virtual void getPositions(const edm4hep::CalorimeterHitCollection& aCells,
-                            edm4hep::CalorimeterHitCollection& outputColl) = 0;
+                            edm4hep::CalorimeterHitCollection& outputColl) const = 0;
 
   virtual dd4hep::Position xyzPosition(const uint64_t& aCellId) const = 0;
-  virtual int layerId(const uint64_t& aCellId) = 0;
+  virtual int layerId(const uint64_t& aCellId) const = 0;
 };
 
 #endif /* RECINTERFACE_ICELLPOSITIONSTOOL_H */
