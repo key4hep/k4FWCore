@@ -33,6 +33,8 @@
  *  The output collection is specified in the OutputCollection property.
  */
 
+#include <podio/utilities/TypeHelpers.h>
+
 #include "edm4hep/edm4hep.h"
 
 #include "k4FWCore/Transformer.h"
@@ -40,6 +42,7 @@
 #include <map>
 #include <string>
 #include <string_view>
+#include <vector>
 
 struct CollectionMerger final
     : k4FWCore::Transformer<podio::CollectionBase*(const std::vector<const podio::CollectionBase*>&)> {
