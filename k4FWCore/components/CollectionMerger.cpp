@@ -54,6 +54,7 @@ struct CollectionMerger final
     }
 
     addToMapAll(edm4hep::edm4hepDataTypes{});
+    addToMapAll(edm4hep::edm4hepLinkTypes{});
   }
 
   podio::CollectionBase* operator()(const std::vector<const podio::CollectionBase*>& input) const override {
