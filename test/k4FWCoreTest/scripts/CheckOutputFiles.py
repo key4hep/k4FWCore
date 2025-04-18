@@ -184,7 +184,15 @@ for i in range(2):
 
 check_collections(
     "functional_merged_collections.root",
-    ["MCParticles1", "MCParticles2", "MCParticles3", "NewMCParticles", "SimTrackerHits"],
+    [
+        "MCParticles1",
+        "MCParticles2",
+        "MCParticles3",
+        "NewMCParticles",
+        "SimTrackerHits",
+        "Links",
+        "NewLinks",
+    ],
 )
 
 podio_reader = podio.root_io.Reader("functional_merged_collections.root")
@@ -195,11 +203,21 @@ merged_mc_colls = [ev.get(f"MCParticles{i}") for i in range(1, 4)]
 merged_mcs = [mcc[i] for mcc in merged_mc_colls for i in range(len(mcc))]
 if len(new_mcs) != len(merged_mcs):
     raise RuntimeError(f"Expected {len(merged_mcs)} NewMCParticles but got {len(new_mcs)}")
-
 for new_mc, orig_mc in zip(new_mcs, merged_mcs):
     if new_mc.id() != orig_mc.id():
         raise RuntimeError(
             f"merged mcs do not match, expected [{new_mc.id().collectionID}, {new_mc.id().index}], actual [{orig_mc.id().collectionID}, {orig_mc.id().index}]"
+        )
+links = ev.get("Links")
+merged_links = ev.get("NewLinks")
+if len(links) * 2 != len(merged_links):
+    raise RuntimeError(f"Expected {len(links)} NewLinks but got {len(merged_links)}")
+for i in range(len(merged_links)):
+    link = links[i % len(links)]
+    merged_link = merged_links[i]
+    if link.id() != merged_link.id():
+        raise RuntimeError(
+            f"merged links do not match, expected [{link.id().collectionID}, {link.id().index}], actual [{merged_link.id().collectionID}, {merged_link.id().index}]"
         )
 
 
