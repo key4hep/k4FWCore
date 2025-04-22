@@ -101,13 +101,9 @@ private:
     const auto ptr = static_cast<T*>(ret);
     const auto sourceColl = static_cast<const T*>(source);
     if (m_copy) {
-      for (const auto& elem : *sourceColl) {
-        ptr->push_back(elem.clone());
-      }
+      std::ranges::transform(*sourceColl, std::back_inserter(*ptr), [](const auto& elem) { return elem.clone(); });
     } else {
-      for (const auto& elem : *sourceColl) {
-        ptr->push_back(elem);
-      }
+      std::ranges::copy(*sourceColl, std::back_inserter(*ptr));
     }
   }
 };
