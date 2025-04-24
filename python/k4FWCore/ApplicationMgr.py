@@ -40,7 +40,12 @@ class ApplicationMgr:
 
     def __init__(self, **kwargs):
         self._mgr = AppMgr(**kwargs)
-        self._mgr.OutputLevel = getattr(Configuration, logging.getLevelName(logger.level))
+        try:
+            self._mgr.OutputLevel = getattr(Configuration, logging.getLevelName(logger.level))
+        except AttributeError:
+            logger.warning(
+                f"{logging.getLevelName(logger.level)} (from log level {logger.level}) is not a valid OutputLevel for Gaudi"
+            )
 
     def _setup_reader(self, reader, iosvc_props):
         """Setup the reader consistently such that it has sane defaults
