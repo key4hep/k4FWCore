@@ -19,6 +19,8 @@
 #
 import os
 import re
+import logging
+import sys
 from io import TextIOWrapper
 from typing import Union
 
@@ -83,3 +85,25 @@ def load_file(opt_file: Union[TextIOWrapper, str, os.PathLike]) -> None:
     check_wrong_imports(str(code))
 
     exec(code, globals())
+
+
+class LoggingHandler(logging.StreamHandler):
+    def handleError(self, record):
+        # Re-raise SIGPIPE generated exception
+        excp = sys.exc_info()[1]  # from Python 3.11 can be replaced with sys.exception()
+        if isinstance(excp, BrokenPipeError):
+            raise excp
+
+        super().handleError(record)
+
+
+def get_logger() -> logging.Logger:
+    """Get a logger with the passed name"""
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    formatter = logging.Formatter("[k4run - %(levelname)s] %(module)s.%(funcName)s: %(message)s")
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setFormatter(formatter)
+    logger.handlers = [handler]
+
+    return logger
