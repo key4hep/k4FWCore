@@ -97,13 +97,19 @@ class LoggingHandler(logging.StreamHandler):
         super().handleError(record)
 
 
+_logger = None
+
+
 def get_logger() -> logging.Logger:
     """Get a logger with the passed name"""
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
+    global _logger
+    if _logger is not None:
+        return _logger
+    _logger = logging.getLogger()
+    _logger.setLevel(logging.INFO)
     formatter = logging.Formatter("[k4run - %(levelname)s] %(module)s.%(funcName)s: %(message)s")
     handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(formatter)
-    logger.handlers = [handler]
+    _logger.handlers = [handler]
 
-    return logger
+    return _logger
