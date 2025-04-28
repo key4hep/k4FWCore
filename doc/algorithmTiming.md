@@ -148,3 +148,11 @@ each line has
 The event number is a sequential number inside Gaudi and does not necessarily
 correspond with the event number that can be obtained from the `EventHeader`
 ```
+
+### Visualization using `hivetimeline.py`
+
+The `hivetimeline.py` tool that comes with Gaudi can be used to visualize the
+output of the `TimelineSvc`. It has some limitations, e.g. the number of
+algorithms it supports for visualization, but it might be useful to have a first
+quick look.
+
