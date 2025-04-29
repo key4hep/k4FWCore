@@ -116,17 +116,6 @@ def add_arguments(parser, app_mgr):
     return option_db
 
 
-def parse_log_level(level_str):
-    """Parse and validate the log level to be one that is understood by Gaudi
-    and the python logging library"""
-    level = level_str.upper()
-    if level not in LOG_LEVELS:
-        raise argparse.ArgumentTypeError(
-            f"'{level_str}' is not a valid log level. Valid levels: {LOG_LEVELS} (and lowercase versions)"
-        )
-    return level
-
-
 class DeprecatedStoreTrueAction(argparse.Action):
     def __init__(self, option_strings, dest, nargs=0, **kwargs):
         super().__init__(option_strings, dest, nargs=nargs, **kwargs)
@@ -186,7 +175,7 @@ def main():
         "--log-level",
         help="Set the log (output) level for python and the ApplicationMgr",
         default="INFO",
-        type=parse_log_level,
+        choices=LOG_LEVELS + tuple(ll.lower() for ll in LOG_LEVELS),
     )
 
     # Once to parse the files and another time below to have the new parameters
