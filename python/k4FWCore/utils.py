@@ -23,6 +23,9 @@ import logging
 import sys
 from io import TextIOWrapper
 from typing import Union
+from importlib.machinery import SourceFileLoader
+import importlib.util
+from pathlib import Path
 
 
 def check_wrong_imports(code: str) -> None:
@@ -77,17 +80,35 @@ def load_file(opt_file: Union[TextIOWrapper, str, os.PathLike]) -> None:
         Exception: Any exception raised by the executed code will be propagated.
 
     """
+    # Cannot simply deepcopy globals. Hence, populate the necessary stuff
+    namespace = {
+        "__file__": __file__,
+        "__builtins__": __builtins__,
+        "__loader__": __loader__,
+    }
+
     if isinstance(opt_file, (str, os.PathLike)):
         with open(opt_file, "r") as file:
             code = file.read()
             filename = file.name
+
+        module_name = Path(opt_file).stem
+        loader = SourceFileLoader(module_name, str(opt_file))
+
+        namespace.update(
+            {
+                "__file__": os.path.realpath(opt_file),
+                "__spec__": importlib.util.spec_from_loader(loader.name, loader),
+            }
+        )
+
     else:
         code = opt_file.read()
         filename = opt_file.name
     check_wrong_imports(str(code))
     code = compile(code, filename, "exec")
 
-    exec(code, globals())
+    exec(code, namespace)
 
 
 _logger = None
