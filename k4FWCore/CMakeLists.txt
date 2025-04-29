@@ -20,7 +20,7 @@ limitations under the License.
 gaudi_install(SCRIPTS)
 
 gaudi_add_library(k4FWCore
-		  SOURCES src/PodioDataSvc.cpp
+                  SOURCES src/PodioDataSvc.cpp
                           src/KeepDropSwitch.cpp
                   LINK Gaudi::GaudiKernel podio::podioIO ROOT::Core ROOT::RIO ROOT::Tree EDM4HEP::utils
                   )
