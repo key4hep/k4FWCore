@@ -33,7 +33,7 @@ the following
 
 ```python
 from Configurables import AuditorSvc, AlgTimingAuditor, EventDataSvc
-from k4FWCore import AppliationMgr
+from k4FWCore import ApplicationMgr
 
 # List of your algorithms that you want to run
 algList = []
