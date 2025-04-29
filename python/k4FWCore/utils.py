@@ -80,9 +80,12 @@ def load_file(opt_file: Union[TextIOWrapper, str, os.PathLike]) -> None:
     if isinstance(opt_file, (str, os.PathLike)):
         with open(opt_file, "r") as file:
             code = file.read()
+            filename = file.name
     else:
         code = opt_file.read()
+        filename = opt_file.name
     check_wrong_imports(str(code))
+    code = compile(code, filename, "exec")
 
     exec(code, globals())
 
