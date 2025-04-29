@@ -118,7 +118,7 @@ class DeprecatedStoreTrueAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         warnings.warn(
             f"Argument '{self.dest}' is deprecated and will be removed in a future version.",
-            DeprecationWarning,
+            FutureWarning,
         )
         setattr(namespace, self.dest, True)
 
