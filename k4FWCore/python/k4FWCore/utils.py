@@ -106,9 +106,9 @@ LOG_LEVELS = ("VERBOSE", "DEBUG", "INFO", "WARNING", "ERROR")
 
 def set_log_level(level: str):
     """Set the passed log level to the k4run logger"""
-    logger = get_logger()
     if level not in LOG_LEVELS:
         raise ValueError(f"{level} is not a valid log level name")
+    logger = get_logger()
     logger.setLevel(getattr(logging, level))
 
 
