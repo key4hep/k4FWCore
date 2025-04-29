@@ -27,6 +27,8 @@ from importlib.machinery import SourceFileLoader
 import importlib.util
 from pathlib import Path
 
+import warnings
+
 
 def check_wrong_imports(code: str) -> None:
     """Check for wrong imports in the given code.
@@ -101,8 +103,11 @@ def load_file(opt_file: Union[TextIOWrapper, str, os.PathLike]) -> None:
                 "__spec__": importlib.util.spec_from_loader(loader.name, loader),
             }
         )
-
     else:
+        warnings.warn(
+            "load_file will remove support for handling TextIOWrapper. Please switch to pasing os.PathLike",
+            FutureWarning,
+        )
         code = opt_file.read()
         filename = opt_file.name
     check_wrong_imports(str(code))
