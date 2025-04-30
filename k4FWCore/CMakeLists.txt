@@ -17,20 +17,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ]]
 
-################################################################################
-# Package: k4FWCore
-################################################################################
-
-find_package(podio REQUIRED)
-find_package(EDM4HEP)
-
 gaudi_install(SCRIPTS)
-gaudi_install(PYTHON)
-
 
 gaudi_add_library(k4FWCore
-		  SOURCES src/PodioDataSvc.cpp
-              src/KeepDropSwitch.cpp
+                  SOURCES src/PodioDataSvc.cpp
+                          src/KeepDropSwitch.cpp
                   LINK Gaudi::GaudiKernel podio::podioIO ROOT::Core ROOT::RIO ROOT::Tree EDM4HEP::utils
                   )
 target_include_directories(k4FWCore PUBLIC
@@ -47,19 +38,5 @@ target_include_directories(k4FWCorePlugins PUBLIC
 
 install(TARGETS k4FWCore k4FWCorePlugins
   EXPORT k4FWCoreTargets
-  RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT bin
   LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT shlib
   COMPONENT dev)
-
-# Copy python parsing file to genConfDir in Gaudi
-add_custom_command(
-        TARGET k4FWCore POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-                ${PROJECT_SOURCE_DIR}/k4FWCore/python/k4FWCore
-                ${CMAKE_CURRENT_BINARY_DIR}/genConfDir/k4FWCore)
-
-# This is needed to overwrite the __init__.py, see a long comment in the
-# CMakeLists.txt in the test folder
-add_custom_command(TARGET k4FWCorePlugins POST_BUILD
-                   COMMAND ${CMAKE_COMMAND} -E copy
-                   ${PROJECT_SOURCE_DIR}/python/k4FWCore/__init__.py ${PROJECT_BINARY_DIR}/k4FWCore/genConfDir/k4FWCore/__init__.py)

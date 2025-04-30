@@ -24,7 +24,7 @@ set(${PROJECT_NAME}_VERSION_MAJOR 1)
 set(${PROJECT_NAME}_VERSION_MINOR 2)
 set(${PROJECT_NAME}_VERSION_PATCH 0)
 
-set( ${PROJECT_NAME}_VERSION  "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH}" )
+set(${PROJECT_NAME}_VERSION "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH}")
 
 find_package(ROOT COMPONENTS RIO Tree REQUIRED)
 find_package(Gaudi REQUIRED)
@@ -37,18 +37,12 @@ include(cmake/Key4hepConfig.cmake)
 include(GNUInstallDirs)
 include(CTest)
 
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/InstallArea/ CACHE PATH
-    "Install path prefix, prepended onto install directories." FORCE )
-endif()
-
 add_subdirectory(k4FWCore)
 add_subdirectory(k4Interface)
 add_subdirectory(python)
 if(BUILD_TESTING)
   add_subdirectory(test/k4FWCoreTest)
 endif()
-
 
 option(ENABLE_CPACK "Whether or not to use cpack config" OFF)
 if(ENABLE_CPACK)
