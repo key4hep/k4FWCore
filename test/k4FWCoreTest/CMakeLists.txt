@@ -231,7 +231,7 @@ add_test_fwcore(CheckLoadedFilesHaveCorrectDunderFile options/checkLoadedFilePro
 # appear in the output
 add_test_fwcore(CheckLoadedFileCorrectPathOnError options/checkLoadedFileProperties.py --with-error)
 set_tests_properties(CheckLoadedFileCorrectPathOnError
-  PROPERTIES PASS_REGULAR_EXPRESSION [=[  File ".*/test/k4FWCoreTest/options/checkLoadedFileProperties.py", line 18, in <module>]=]
+  PROPERTIES PASS_REGULAR_EXPRESSION [=[  File ".*/test/k4FWCoreTest/options/checkLoadedFileProperties.py", line 36, in <module>]=]
 )
 
 add_test_fwcore(ParticleIDMetadataFramework options/ExampleParticleIDMetadata.py)
