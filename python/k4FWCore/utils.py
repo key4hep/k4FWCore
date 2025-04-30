@@ -108,6 +108,7 @@ def load_file(opt_file: Union[str, os.PathLike]) -> None:
         )
         code = opt_file.read()
         filename = opt_file.name
+        namespace.update({"__file__": filename})
     check_wrong_imports(str(code))
     code = compile(code, filename, "exec")
 
