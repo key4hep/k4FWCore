@@ -23,7 +23,10 @@ repos:
         "-x", ".github/*", ".pre-commit-config.yaml", "README.md",
               "doc/ReleaseNotes.md", ".k4fwcore-ci.d/*",
         "-f"]
-  - repo: https://github.com/psf/black
-    rev: 23.11.0
+  - repo: local
     hooks:
-      - id: black
+      - id: ruff-format
+        name: ruff-format
+        entry: ruff format --force-exclude
+        types: [python]
+        language: system
