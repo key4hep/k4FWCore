@@ -158,6 +158,8 @@ mix_collections = [
     "Counter",
     "TransformedFunctionalMCParticles1",
     "NewLinks",
+    # Produced by the TrackReaderMultiple (originally used to check type mismatches)
+    "OutputMCParticles",
 ]
 
 
