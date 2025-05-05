@@ -83,9 +83,9 @@ class ApplicationMgr:
 
         # We need to peek into the file because we lack information.
         # Import here to avoid always importing ROOT which is slow
-        from podio.root_io import Reader as PodioReader
+        from podio.reading import get_reader
 
-        podio_reader = PodioReader(iosvc_props[inp][0])
+        podio_reader = get_reader(iosvc_props[inp][0])
         if n_events == -1:
             self._mgr.EvtMax = len(podio_reader.get("events"))
         if not collections:

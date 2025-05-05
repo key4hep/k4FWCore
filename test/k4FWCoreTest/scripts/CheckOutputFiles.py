@@ -232,7 +232,11 @@ for key, value in zip(
         raise RuntimeError(
             f"Metadata parameter {key} does not match the expected value, got {metadata.get_parameter(key)} but expected {value}"
         )
-for rntuple in ["functional_producer_rntuple.root", "functional_producer_rntuple_converted.root"]:
+for rntuple in [
+    "functional_producer_rntuple.root",
+    "functional_producer_rntuple_file.root",
+    "functional_producer_rntuple_converted.root",
+]:
     reader = podio.root_io.RNTupleReader(f"{rntuple}")
     frames = podio_reader.get("events")
     if len(frames) != 10:
