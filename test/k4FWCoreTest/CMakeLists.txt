@@ -202,6 +202,7 @@ add_test_with_env(ReadLimitedInputsAllEventsIOSvc options/ExampleIOSvcLimitInput
 
 add_test_with_env(ParticleIDMetadataFramework options/ExampleParticleIDMetadata.py)
 
+add_test_with_env(CollectionIDAssignment options/TestCollectionIDAssignment.py)
 
 # The following is done to make the tests work without installing the files in
 # the installation directory. The k4FWCore in the build directory is populated by
