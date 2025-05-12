@@ -29,6 +29,7 @@
 #include <GaudiKernel/GaudiException.h>
 
 #include "podio/CollectionBase.h"
+#include <podio/CollectionIDTable.h>
 
 #include "k4FWCore/DataWrapper.h"
 
@@ -208,6 +209,21 @@ namespace details {
     }
   }
 
+  inline auto getCollectionID(const std::string& name) {
+    podio::CollectionIDTable tbl;
+    return tbl.add(name);
+  }
+
+  void putCollectionSetID(std::unique_ptr<podio::CollectionBase> coll,
+                          const DataObjectWriteHandle<std::unique_ptr<podio::CollectionBase>>& handle, auto thisClass) {
+    podio::CollectionIDTable tbl;
+    coll->setID(getCollectionID(handle.objKey()));
+    thisClass->verbose() << fmt::format("Assigning collection id {:0>8x} to collection '{}'", coll->getID(),
+                                        handle.objKey())
+                         << endmsg;
+    Gaudi::Functional::details::put(handle, std::move(coll));
+  }
+
   template <size_t Index, typename... Out, typename... Handles>
   void putVectorOutputs(std::tuple<Handles...>&& handles, const auto& m_outputs, auto thisClass) {
     if constexpr (Index < sizeof...(Handles)) {
@@ -221,12 +237,12 @@ namespace details {
           throw GaudiException(thisClass->name(), msg, StatusCode::FAILURE);
         }
         for (auto& val : std::get<Index>(handles)) {
-          Gaudi::Functional::details::put(std::get<Index>(m_outputs)[i], convertToUniquePtr(std::move(val)));
+          putCollectionSetID(convertToUniquePtr(std::move(val)), std::get<Index>(m_outputs)[i], thisClass);
           i++;
         }
       } else {
-        Gaudi::Functional::details::put(std::get<Index>(m_outputs)[0],
-                                        convertToUniquePtr(std::move(std::get<Index>(handles))));
+        putCollectionSetID(convertToUniquePtr(std::move(std::get<Index>(handles))), std::get<Index>(m_outputs)[0],
+                           thisClass);
       }
 
       // Recursive call for the next index
