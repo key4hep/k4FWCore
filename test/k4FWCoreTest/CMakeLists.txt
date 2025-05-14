@@ -228,4 +228,4 @@ add_test(NAME check_broken_pipe
        )
 
 set_tests_properties(check_broken_pipe PROPERTIES PASS_REGULAR_EXPRESSION "^2")
-set_test_env(check_ParticleIDOutputs)
+set_test_env(check_broken_pipe)
