@@ -262,7 +262,7 @@ def main():
     gaudi = gaudimain()
     if not opts.dry_run:
         if not opts.interactive_root:
-            os.environ.pop("DISPLAY")
+            os.environ.pop("DISPLAY", None)
 
         # Do the real processing
         retcode = gaudi.run(opts.gdb)
