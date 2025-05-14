@@ -114,6 +114,7 @@ def add_arguments(parser, app_mgr):
             )
     return option_db
 
+
 def main():
     # ensure that we (and the subprocesses) use the C standard localization
     os.environ["LC_ALL"] = "C"

@@ -223,7 +223,7 @@ add_test_with_env(TypeMisMatchDemoMultiple options/TypeMisMatchDemoMultiple.py P
 add_test_with_env(ReadMarlinWrapperCollection options/readMarlinWrapperCollection.py)
 
 add_test(NAME check_broken_pipe
-         COMMAND bash -c "k4run options/ExampleFunctionalProducer.py | head -n 2 | wc -l"
+         COMMAND bash -c "${K4RUN} options/ExampleFunctionalProducer.py | head -n 2 | wc -l"
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
        )
 
