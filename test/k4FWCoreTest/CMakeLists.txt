@@ -221,3 +221,11 @@ add_test_with_env(TypeMisMatchDemo options/TypeMisMatchDemo.py PROPERTIES PASS_R
 
 add_test_with_env(TypeMisMatchDemoMultiple options/TypeMisMatchDemoMultiple.py PROPERTIES PASS_REGULAR_EXPRESSION "Failed to cast collection MCParticles1 to the required type")
 add_test_with_env(ReadMarlinWrapperCollection options/readMarlinWrapperCollection.py)
+
+add_test(NAME check_broken_pipe
+         COMMAND bash -c "k4run options/ExampleFunctionalProducer.py | head -n 2 | wc -l"
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+       )
+
+set_tests_properties(check_broken_pipe PROPERTIES PASS_REGULAR_EXPRESSION "^2")
+set_test_env(check_ParticleIDOutputs)
