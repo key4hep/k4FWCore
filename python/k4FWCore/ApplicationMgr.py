@@ -105,7 +105,7 @@ class ApplicationMgr:
         try:
             self._mgr.EventLoop
         except AttributeError:
-            self._mgr.EventLoop = EventLoopMgr(Warnings=False)
+            self._mgr.EventLoop = EventLoopMgr()
 
         if "MetadataSvc" in self._mgr.allConfigurables:
             self._mgr.ExtSvc.append(self._mgr.allConfigurables["MetadataSvc"])
