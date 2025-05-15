@@ -223,9 +223,7 @@ add_test_with_env(TypeMisMatchDemoMultiple options/TypeMisMatchDemoMultiple.py P
 add_test_with_env(ReadMarlinWrapperCollection options/readMarlinWrapperCollection.py)
 
 add_test(NAME check_broken_pipe
-         COMMAND bash -c "${K4RUN} options/ExampleFunctionalProducer.py | head -n 2 | wc -l"
+         COMMAND bash -c "[ $(${K4RUN} options/ExampleFunctionalProducer.py | head -n 2 | wc -l) = 2 ]"
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
        )
-
-set_tests_properties(check_broken_pipe PROPERTIES PASS_REGULAR_EXPRESSION "^2")
 set_test_env(check_broken_pipe)
