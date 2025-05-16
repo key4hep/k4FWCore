@@ -116,9 +116,9 @@ namespace details {
           std::tuple<Out> tmp = filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs);
           putVectorOutputs<0, Out>(std::move(tmp), m_outputs, this);
         } else {
-          Gaudi::Functional::details::put(
-              std::get<0>(this->m_outputs)[0],
-              convertToUniquePtr(std::move(filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs))));
+          putCollectionSetID(
+              convertToUniquePtr(std::move(filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs))),
+              std::get<0>(this->m_outputs)[0], this);
         }
         return Gaudi::Functional::FilterDecision::PASSED;
       } catch (GaudiException& e) {
