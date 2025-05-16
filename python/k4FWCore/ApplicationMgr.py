@@ -18,6 +18,7 @@
 #
 import logging
 
+from Gaudi import Configuration
 from Configurables import ApplicationMgr as AppMgr
 from Configurables import Reader, Writer, IOSvc, Gaudi__Sequencer, EventLoopMgr
 
@@ -39,6 +40,7 @@ class ApplicationMgr:
 
     def __init__(self, **kwargs):
         self._mgr = AppMgr(**kwargs)
+        self._mgr.OutputLevel = getattr(Configuration, logging.getLevelName(logger.level))
 
     def _setup_reader(self, reader, iosvc_props):
         """Setup the reader consistently such that it has sane defaults
