@@ -175,7 +175,8 @@ def main():
         "--log-level",
         help="Set the log (output) level for python and the ApplicationMgr",
         default="INFO",
-        choices=LOG_LEVELS + tuple(ll.lower() for ll in LOG_LEVELS),
+        type=lambda x: x.upper(),
+        choices=LOG_LEVELS,
     )
 
     # Once to parse the files and another time below to have the new parameters
