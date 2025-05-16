@@ -19,6 +19,8 @@
 #
 import os
 import re
+import logging
+import sys
 from io import TextIOWrapper
 from typing import Union
 
@@ -83,3 +85,36 @@ def load_file(opt_file: Union[TextIOWrapper, str, os.PathLike]) -> None:
     check_wrong_imports(str(code))
 
     exec(code, globals())
+
+
+_logger = None
+logging.VERBOSE = 5
+logging.addLevelName("VERBOSE", logging.VERBOSE)
+
+LOG_LEVELS = ("VERBOSE", "DEBUG", "INFO", "WARNING", "ERROR")
+
+
+def set_log_level(level: str):
+    """Set the passed log level to the k4run logger"""
+    level_up = level.upper()
+    if level_up not in LOG_LEVELS:
+        raise ValueError(
+            f"{level} is not a valid log level. Valid levels: {LOG_LEVELS} (and lowercase versions)"
+        )
+    logger = get_logger()
+    logger.setLevel(getattr(logging, level_up))
+
+
+def get_logger() -> logging.Logger:
+    """Get the logger also used by k4run"""
+    global _logger
+    if _logger is not None:
+        return _logger
+    _logger = logging.getLogger()
+    _logger.setLevel(logging.INFO)
+    formatter = logging.Formatter("[k4run - %(levelname)s] %(module)s.%(funcName)s: %(message)s")
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setFormatter(formatter)
+    _logger.handlers = [handler]
+
+    return _logger

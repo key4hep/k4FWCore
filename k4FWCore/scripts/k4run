@@ -5,8 +5,9 @@ import sys
 import argparse
 import logging
 import signal
+import warnings
 
-from k4FWCore.utils import load_file
+from k4FWCore.utils import load_file, get_logger, set_log_level, LOG_LEVELS
 
 # Terminate the process if a SIGPIPE is received
 signal.signal(signal.SIGPIPE, signal.SIG_DFL)
@@ -115,13 +116,25 @@ def add_arguments(parser, app_mgr):
     return option_db
 
 
+class DeprecatedStoreTrueAction(argparse.Action):
+    def __init__(self, option_strings, dest, nargs=0, **kwargs):
+        super().__init__(option_strings, dest, nargs=nargs, **kwargs)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        warnings.warn(
+            f"Argument '{self.dest}' is deprecated and will be removed in a future version.",
+            DeprecationWarning,
+        )
+        setattr(namespace, self.dest, True)
+
+
 def main():
     # ensure that we (and the subprocesses) use the C standard localization
     os.environ["LC_ALL"] = "C"
 
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
-    formatter = logging.Formatter("[k4run] %(message)s")
+    formatter = logging.Formatter("[k4run - %(levelname)s] %(module)s.%(funcName)s: %(message)s")
     logger.handlers[0].setFormatter(formatter)
 
     from k4FWCore.parseArgs import parser
@@ -138,7 +151,12 @@ def main():
         action="store_true",
         help="Do not actually run the job, just parse the config files",
     )
-    parser.add_argument("-v", "--verbose", action="store_true", help="Run job with verbose output")
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action=DeprecatedStoreTrueAction,
+        help="[deprecated: use --log-level=verbose] Run job with verbose output",
+    )
     parser.add_argument("-n", "--num-events", type=int, help="Number of events to run")
     parser.add_argument(
         "-l",
@@ -153,11 +171,22 @@ def main():
         help="Run with ROOT in interactive mode (e.g. to see plots)",
         default=False,
     )
+    parser.add_argument(
+        "--log-level",
+        help="Set the log (output) level for python and the ApplicationMgr",
+        default="INFO",
+        type=lambda x: x.upper(),
+        choices=LOG_LEVELS,
+    )
 
     # Once to parse the files and another time below to have the new parameters
     # in the namespace since parsing of the file happens when the namespace
     # has already been filled
     opts = parser.parse_known_args()
+    if opts[0].verbose:
+        opts[0].log_level = "VERBOSE"
+    logger = get_logger()
+    set_log_level(opts[0].log_level)
 
     if opts[0].list:
         from Gaudi import Configuration
