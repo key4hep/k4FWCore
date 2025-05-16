@@ -21,8 +21,9 @@ import logging
 from Gaudi import Configuration
 from Configurables import ApplicationMgr as AppMgr
 from Configurables import Reader, Writer, IOSvc, Gaudi__Sequencer, EventLoopMgr
+from k4FWCore.utils import get_logger
 
-logger = logging.getLogger()
+logger = get_logger()
 
 
 class ApplicationMgr:
