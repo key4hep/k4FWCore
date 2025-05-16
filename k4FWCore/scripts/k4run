@@ -6,7 +6,7 @@ import argparse
 import logging
 import signal
 
-from k4FWCore.utils import load_file
+from k4FWCore.utils import load_file, get_logger
 
 # Terminate the process if a SIGPIPE is received
 signal.signal(signal.SIGPIPE, signal.SIG_DFL)
@@ -132,7 +132,7 @@ def main():
 
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
-    formatter = logging.Formatter("[k4run] %(module)s.%(funcName)s: %(message)s")
+    formatter = logging.Formatter("[k4run - %(levelname)s] %(module)s.%(funcName)s: %(message)s")
     logger.handlers[0].setFormatter(formatter)
 
     from k4FWCore.parseArgs import parser
@@ -175,6 +175,8 @@ def main():
     # in the namespace since parsing of the file happens when the namespace
     # has already been filled
     opts = parser.parse_known_args()
+    logger = get_logger()
+    logger.setLevel(getattr(logging, opts[0].log_level))
 
     if opts[0].list:
         from Gaudi import Configuration
@@ -191,8 +193,6 @@ def main():
 
     for file in opts[0].config_files:
         load_file(file)
-
-    logger.setLevel(getattr(logging, opts[0].log_level))
 
     from Configurables import ApplicationMgr
 
