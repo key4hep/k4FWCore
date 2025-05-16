@@ -115,6 +115,17 @@ def add_arguments(parser, app_mgr):
     return option_db
 
 
+def parse_log_level(level_str):
+    """Parse and validate the log level to be one that is understood by Gaudi
+    and the python logging library"""
+    level = level_str.upper()
+    if level not in ("INFO", "DEBUG", "WARNING", "ERROR"):
+        raise argparse.ArgumentTypeError(
+            f"'{level_str}' is not a valid log level. Valid levels: info, debug, warning, error (or uppercase versions thereof)"
+        )
+    return level
+
+
 def main():
     # ensure that we (and the subprocesses) use the C standard localization
     os.environ["LC_ALL"] = "C"
@@ -153,6 +164,12 @@ def main():
         help="Run with ROOT in interactive mode (e.g. to see plots)",
         default=False,
     )
+    parser.add_argument(
+        "--log-level",
+        help="Set the log (output) level for python and the ApplicationMgr",
+        default="INFO",
+        type=parse_log_level,
+    )
 
     # Once to parse the files and another time below to have the new parameters
     # in the namespace since parsing of the file happens when the namespace
@@ -174,6 +191,8 @@ def main():
 
     for file in opts[0].config_files:
         load_file(file)
+
+    logger.setLevel(getattr(logging, opts[0].log_level))
 
     from Configurables import ApplicationMgr
 
