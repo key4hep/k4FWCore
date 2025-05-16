@@ -87,16 +87,6 @@ def load_file(opt_file: Union[TextIOWrapper, str, os.PathLike]) -> None:
     exec(code, globals())
 
 
-class LoggingHandler(logging.StreamHandler):
-    def handleError(self, record):
-        # Re-raise SIGPIPE generated exception
-        excp = sys.exc_info()[1]  # from Python 3.11 can be replaced with sys.exception()
-        if isinstance(excp, BrokenPipeError):
-            raise excp
-
-        super().handleError(record)
-
-
 _logger = None
 logging.VERBOSE = 5
 logging.addLevelName("VERBOSE", logging.VERBOSE)
