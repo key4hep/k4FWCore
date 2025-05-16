@@ -121,7 +121,7 @@ def main():
 
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
-    formatter = logging.Formatter("[k4run] %(message)s")
+    formatter = logging.Formatter("[k4run] %(module)s.%(funcName)s: %(message)s")
     logger.handlers[0].setFormatter(formatter)
 
     from k4FWCore.parseArgs import parser
