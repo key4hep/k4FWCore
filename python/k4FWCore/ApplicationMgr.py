@@ -105,7 +105,7 @@ class ApplicationMgr:
         # This will suppress two warnings about not using external input
         if not hasattr(self._mgr, "EventLoop"):
             self._mgr.EventLoop = EventLoopMgr()
-            if hasattr(self._mgr, "Warnings"):
+            if hasattr(self._mgr.EventLoop, "Warnings"):
                 self._mgr.EventLoop.Warnings = False
             else:
                 self._mgr.EventLoop.OutputLevel = WARNING
