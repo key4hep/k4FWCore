@@ -39,7 +39,7 @@ whiteboard = HiveWhiteBoard(
 )
 
 slimeventloopmgr = HiveSlimEventLoopMgr(
-    SchedulerName="AvalancheSchedulerSvc", Warnings=False, OutputLevel=WARNING
+    SchedulerName="AvalancheSchedulerSvc", OutputLevel=WARNING
 )
 
 scheduler = AvalancheSchedulerSvc(ThreadPoolSize=threads, OutputLevel=WARNING)

@@ -20,6 +20,7 @@ import logging
 
 from Configurables import ApplicationMgr as AppMgr
 from Configurables import Reader, Writer, IOSvc, Gaudi__Sequencer, EventLoopMgr
+from Gaudi.Configuration import WARNING
 
 logger = logging.getLogger()
 
@@ -102,10 +103,12 @@ class ApplicationMgr:
     def fix_properties(self):
         # If there isn't an EventLoopMgr then it's the default
         # This will suppress two warnings about not using external input
-        try:
-            self._mgr.EventLoop
-        except AttributeError:
-            self._mgr.EventLoop = EventLoopMgr(Warnings=False)
+        if not hasattr(self._mgr, "EventLoop"):
+            self._mgr.EventLoop = EventLoopMgr()
+            if hasattr(self._mgr, "Warnings"):
+                self._mgr.EventLoop.Warnings = False
+            else:
+                self._mgr.EventLoop.OutputLevel = WARNING
 
         if "MetadataSvc" in self._mgr.allConfigurables:
             self._mgr.ExtSvc.append(self._mgr.allConfigurables["MetadataSvc"])
