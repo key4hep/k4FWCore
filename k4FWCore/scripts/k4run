@@ -5,8 +5,9 @@ import sys
 import argparse
 import logging
 import signal
+import warnings
 
-from k4FWCore.utils import load_file, get_logger
+from k4FWCore.utils import load_file, get_logger, set_log_level, LOG_LEVELS
 
 # Terminate the process if a SIGPIPE is received
 signal.signal(signal.SIGPIPE, signal.SIG_DFL)
@@ -119,11 +120,23 @@ def parse_log_level(level_str):
     """Parse and validate the log level to be one that is understood by Gaudi
     and the python logging library"""
     level = level_str.upper()
-    if level not in ("INFO", "DEBUG", "WARNING", "ERROR"):
+    if level not in LOG_LEVELS:
         raise argparse.ArgumentTypeError(
-            f"'{level_str}' is not a valid log level. Valid levels: info, debug, warning, error (or uppercase versions thereof)"
+            f"'{level_str}' is not a valid log level. Valid levels: {LOG_LEVELS} (and lowercase versions)"
         )
     return level
+
+
+class DeprecatedStoreTrueAction(argparse.Action):
+    def __init__(self, option_strings, dest, nargs=0, **kwargs):
+        super().__init__(option_strings, dest, nargs=nargs, **kwargs)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        warnings.warn(
+            f"Argument '{self.dest}' is deprecated and will be removed in a future version.",
+            DeprecationWarning,
+        )
+        setattr(namespace, self.dest, True)
 
 
 def main():
@@ -149,7 +162,12 @@ def main():
         action="store_true",
         help="Do not actually run the job, just parse the config files",
     )
-    parser.add_argument("-v", "--verbose", action="store_true", help="Run job with verbose output")
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action=DeprecatedStoreTrueAction,
+        help="[deprecated: use --log-level=verbose] Run job with verbose output",
+    )
     parser.add_argument("-n", "--num-events", type=int, help="Number of events to run")
     parser.add_argument(
         "-l",
@@ -175,8 +193,10 @@ def main():
     # in the namespace since parsing of the file happens when the namespace
     # has already been filled
     opts = parser.parse_known_args()
+    if opts[0].verbose:
+        opts[0].log_level = "VERBOSE"
     logger = get_logger()
-    logger.setLevel(getattr(logging, opts[0].log_level))
+    set_log_level(opts[0].log_level)
 
     if opts[0].list:
         from Gaudi import Configuration
