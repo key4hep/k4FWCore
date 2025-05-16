@@ -98,10 +98,22 @@ class LoggingHandler(logging.StreamHandler):
 
 
 _logger = None
+logging.VERBOSE = 5
+logging.addLevelName("VERBOSE", logging.VERBOSE)
+
+LOG_LEVELS = ("VERBOSE", "DEBUG", "INFO", "WARNING", "ERROR")
+
+
+def set_log_level(level: str):
+    """Set the passed log level to the k4run logger"""
+    logger = get_logger()
+    if level not in LOG_LEVELS:
+        raise ValueError(f"{level} is not a valid log level name")
+    logger.setLevel(getattr(logging, level))
 
 
 def get_logger() -> logging.Logger:
-    """Get a logger with the passed name"""
+    """Get the logger also used by k4run"""
     global _logger
     if _logger is not None:
         return _logger
