@@ -50,8 +50,8 @@ public:
 
 private:
   /// Handle for the SimTrackerHits to be written
-  mutable DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitWriterHandle{"SimTrackerHits",
-                                                                                   Gaudi::DataHandle::Writer, this};
+  mutable k4FWCore::DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitWriterHandle{
+      "SimTrackerHits", Gaudi::DataHandle::Writer, this};
   MetaDataHandle<std::string> m_cellIDHandle{m_simTrackerHitWriterHandle, edm4hep::labels::CellIDEncoding,
                                              Gaudi::DataHandle::Writer};
 
