@@ -47,9 +47,10 @@ private:
   Gaudi::Property<bool> m_keepEventNumberZero{this, "keepEventNumberZero", false,
                                               "Don't add the event number to the dummy values written"};
   /// Handle for the MCParticles to be written
-  mutable DataHandle<edm4hep::MCParticleCollection> m_mcParticleHandle{"MCParticles", Gaudi::DataHandle::Reader, this};
-  mutable DataHandle<podio::UserDataCollection<float>> m_vectorFloatHandle{"VectorFloat", Gaudi::DataHandle::Reader,
-                                                                           this};
+  mutable k4FWCore::DataHandle<edm4hep::MCParticleCollection> m_mcParticleHandle{"MCParticles",
+                                                                                 Gaudi::DataHandle::Reader, this};
+  mutable k4FWCore::DataHandle<podio::UserDataCollection<float>> m_vectorFloatHandle{"VectorFloat",
+                                                                                     Gaudi::DataHandle::Reader, this};
 
   mutable int m_event{0};
 };
