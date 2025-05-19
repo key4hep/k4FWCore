@@ -28,6 +28,7 @@
 #include <stdexcept>
 #include <type_traits>
 
+namespace k4FWCore {
 /**
  * Specialisation of the Gaudi DataHandle
  * for use with podio collections.
@@ -165,13 +166,17 @@ T* DataHandle<T>::createAndPut() {
   this->put(objectp);
   return objectp;
 }
+} // namespace k4FWCore
+
+template <typename T>
+using DataHandle [[deprecated("Use k4FWCore::DataHandle instead")]] = k4FWCore::DataHandle<T>;
 
 // temporary to allow property declaration
 namespace Gaudi {
 template <class T>
-class Property<::DataHandle<T>&> : public ::DataHandleProperty {
+class Property<k4FWCore::DataHandle<T>&> : public ::DataHandleProperty {
 public:
-  Property(const std::string& name, ::DataHandle<T>& value) : ::DataHandleProperty(name, value) {}
+  Property(const std::string& name, k4FWCore::DataHandle<T>& value) : ::DataHandleProperty(name, value) {}
 };
 } // namespace Gaudi
 
