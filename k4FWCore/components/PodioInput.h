@@ -37,12 +37,14 @@ class PodioDataSvc;
 
 using BaseClass_t = Gaudi::Functional::Traits::BaseClass_t<Gaudi::Algorithm>;
 
-class PodioInput final : public Gaudi::Functional::Consumer<void(), BaseClass_t> {
+class [[deprecated("Use the IOSvc instead")]] PodioInput final
+    : public Gaudi::Functional::Consumer<void(), BaseClass_t> {
 public:
   PodioInput(const std::string& name, ISvcLocator* svcLoc);
   void operator()() const override;
 
   StatusCode initialize() final;
+  StatusCode finalize() final;
 
 private:
   template <typename T>
