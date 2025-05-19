@@ -23,7 +23,7 @@
 #include "k4FWCore/PodioDataSvc.h"
 
 /// an alias to k4DataSvc for backwards compatibility
-class FCCDataSvc : public PodioDataSvc {
+class [[deprecated("Use the IOSvc instead")]] FCCDataSvc : public PodioDataSvc {
 public:
   /// Standard Constructor
   FCCDataSvc(const std::string& name, ISvcLocator* svc);
