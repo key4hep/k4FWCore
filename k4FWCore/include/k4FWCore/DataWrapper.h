@@ -25,8 +25,10 @@
 #include "podio/CollectionBase.h"
 
 // forward declaration
+namespace k4FWCore {
 template <typename T>
 class DataHandle;
+}
 
 class GAUDI_API DataWrapperBase : public DataObject {
 public:
@@ -40,7 +42,7 @@ template <class T>
 class GAUDI_API DataWrapper : public DataWrapperBase {
 public:
   template <class T2>
-  friend class DataHandle;
+  friend class k4FWCore::DataHandle;
 
 public:
   DataWrapper() : m_data(nullptr) {}
