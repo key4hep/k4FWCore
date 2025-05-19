@@ -22,11 +22,13 @@
 #include <type_traits>
 
 #include "GaudiKernel/DataObject.h"
+
 #include "podio/CollectionBase.h"
+#include "podio/utilities/TypeHelpers.h"
 
 // forward declaration
 namespace k4FWCore {
-template <typename T>
+template <podio::CollectionType T>
 class DataHandle;
 }
 
@@ -41,7 +43,7 @@ public:
 template <class T>
 class GAUDI_API DataWrapper : public DataWrapperBase {
 public:
-  template <class T2>
+  template <podio::CollectionType T2>
   friend class k4FWCore::DataHandle;
 
 public:

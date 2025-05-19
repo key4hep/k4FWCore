@@ -19,6 +19,8 @@
 #ifndef K4FWCORE_DATAHANDLE_H
 #define K4FWCORE_DATAHANDLE_H
 
+#include <podio/utilities/TypeHelpers.h>
+
 #include "k4FWCore/DataWrapper.h"
 #include "k4FWCore/PodioDataSvc.h"
 
@@ -33,7 +35,7 @@ namespace k4FWCore {
  * Specialisation of the Gaudi DataHandle
  * for use with podio collections.
  */
-template <typename T>
+template <podio::CollectionType T>
 class DataHandle : public DataObjectHandle<DataWrapper<T>> {
 public:
   friend class Algorithm;
@@ -71,7 +73,7 @@ private:
   T* m_dataPtr;
 };
 
-template <typename T>
+template <podio::CollectionType T>
 DataHandle<T>::~DataHandle() {
   // release memory allocated for primitive types (see comments in ctor)
   if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
@@ -80,11 +82,11 @@ DataHandle<T>::~DataHandle() {
 }
 
 //---------------------------------------------------------------------------
-template <typename T>
+template <podio::CollectionType T>
 DataHandle<T>::DataHandle(DataObjID& descriptor, Gaudi::DataHandle::Mode a, IDataHandleHolder* fatherAlg)
     : DataObjectHandle<DataWrapper<T>>(descriptor, a, fatherAlg), m_eds("EventDataSvc", "DataHandle") {}
 
-template <typename T>
+template <podio::CollectionType T>
 DataHandle<T>::DataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode a, IDataHandleHolder* fatherAlg)
     : DataObjectHandle<DataWrapper<T>>(descriptor, a, fatherAlg), m_eds("EventDataSvc", "DataHandle") {
   if (a == Gaudi::DataHandle::Writer) {
@@ -106,7 +108,7 @@ DataHandle<T>::DataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode
  * If this is not the first time we cast and the cast worked, just use the
  * static cast: we do not need the checks of the dynamic cast for every access!
  */
-template <typename T>
+template <podio::CollectionType T>
 const T* DataHandle<T>::get() {
   DataObject* dataObjectp;
   auto sc = m_eds->retrieveObject(DataObjectHandle<DataWrapper<T>>::fullKey().key(), dataObjectp);
@@ -133,7 +135,7 @@ const T* DataHandle<T>::get() {
 }
 
 //---------------------------------------------------------------------------
-template <typename T>
+template <podio::CollectionType T>
 void DataHandle<T>::put(T* objectp) {
   std::unique_ptr<DataWrapper<T>> dw = std::make_unique<DataWrapper<T>>();
   // in case T is of primitive type, we must not change the pointer address
@@ -148,7 +150,7 @@ void DataHandle<T>::put(T* objectp) {
 }
 
 //---------------------------------------------------------------------------
-template <typename T>
+template <podio::CollectionType T>
 T* DataHandle<T>::put(std::unique_ptr<T> objectp) {
   put(objectp.get());
   return objectp.release();
@@ -160,7 +162,7 @@ T* DataHandle<T>::put(std::unique_ptr<T> objectp) {
  * pointer to the data. Call this function if you create a collection and
  * want to save it.
  */
-template <typename T>
+template <podio::CollectionType T>
 T* DataHandle<T>::createAndPut() {
   T* objectp = new T();
   this->put(objectp);
@@ -168,7 +170,7 @@ T* DataHandle<T>::createAndPut() {
 }
 } // namespace k4FWCore
 
-template <typename T>
+template <podio::CollectionType T>
 using DataHandle [[deprecated("Use k4FWCore::DataHandle instead")]] = k4FWCore::DataHandle<T>;
 
 // temporary to allow property declaration

@@ -26,10 +26,7 @@
 
 #include "podio/UserDataCollection.h"
 
-// datamodel
-namespace edm4hep {
-class MCParticleCollection;
-} // namespace edm4hep
+#include "edm4hep/MCParticleCollection.h"
 
 class k4FWCoreTest_CheckExampleEventData : public Gaudi::Algorithm {
 public:

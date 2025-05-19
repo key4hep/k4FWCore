@@ -29,12 +29,8 @@
 
 #include "podio/UserDataCollection.h"
 
-// datamodel
-namespace edm4hep {
-class MCParticleCollection;
-class SimTrackerHitCollection;
-class SimCaloHit;
-} // namespace edm4hep
+#include "edm4hep/MCParticleCollection.h"
+#include "edm4hep/SimTrackerHitCollection.h"
 
 /** @class k4FWCoreTest_AlgorithmWithTFile
  *  Test producer to check that data can still be written to
