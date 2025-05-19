@@ -62,13 +62,14 @@ private:
   Gaudi::Property<int> m_magicNumberOffset{this, "magicNumberOffset", 0,
                                            "Integer to add to the dummy values written to the edm"};
   /// Handle for the genparticles to be written
-  mutable DataHandle<edm4hep::MCParticleCollection> m_mcParticleHandle{"MCParticles", Gaudi::DataHandle::Writer, this};
+  mutable k4FWCore::DataHandle<edm4hep::MCParticleCollection> m_mcParticleHandle{"MCParticles",
+                                                                                 Gaudi::DataHandle::Writer, this};
   /// Handle for the genvertices to be written
-  mutable DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitHandle{"SimTrackerHit", Gaudi::DataHandle::Writer,
-                                                                             this};
+  mutable k4FWCore::DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitHandle{"SimTrackerHit",
+                                                                                       Gaudi::DataHandle::Writer, this};
 
-  mutable DataHandle<podio::UserDataCollection<float>> m_vectorFloatHandle{"VectorFloat", Gaudi::DataHandle::Writer,
-                                                                           this};
+  mutable k4FWCore::DataHandle<podio::UserDataCollection<float>> m_vectorFloatHandle{"VectorFloat",
+                                                                                     Gaudi::DataHandle::Writer, this};
 
   /// for testing: write a second TFile by user in an algorithm
   mutable Float_t m_value;

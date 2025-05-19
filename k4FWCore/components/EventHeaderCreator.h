@@ -49,8 +49,8 @@ private:
       "Event number offset, eventNumber will be filled with 'event_index + eventNumberOffset'"};
 
   // datahandle for the EventHeader
-  mutable DataHandle<edm4hep::EventHeaderCollection> m_headerCol{edm4hep::labels::EventHeader,
-                                                                 Gaudi::DataHandle::Writer, this};
+  mutable k4FWCore::DataHandle<edm4hep::EventHeaderCollection> m_headerCol{edm4hep::labels::EventHeader,
+                                                                           Gaudi::DataHandle::Writer, this};
 };
 
 #endif

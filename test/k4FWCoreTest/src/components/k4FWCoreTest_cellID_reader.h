@@ -43,8 +43,8 @@ public:
 
 private:
   /// Handle for the SimTrackerHits to be read
-  mutable DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitReaderHandle{"SimTrackerHits",
-                                                                                   Gaudi::DataHandle::Reader, this};
+  mutable k4FWCore::DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitReaderHandle{
+      "SimTrackerHits", Gaudi::DataHandle::Reader, this};
   mutable MetaDataHandle<std::string> m_cellIDHandle{m_simTrackerHitReaderHandle, edm4hep::labels::CellIDEncoding,
                                                      Gaudi::DataHandle::Reader};
 };
