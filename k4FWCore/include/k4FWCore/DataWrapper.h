@@ -30,7 +30,7 @@ template <typename T>
 class DataHandle;
 }
 
-class GAUDI_API DataWrapperBase : public DataObject {
+class GAUDI_API [[deprecated("Will be removed")]] DataWrapperBase : public DataObject {
 public:
   // ugly hack to circumvent the usage of boost::any yet
   // DataSvc would need a templated register method
@@ -39,7 +39,7 @@ public:
 };
 
 template <class T>
-class GAUDI_API DataWrapper : public DataWrapperBase {
+class GAUDI_API [[deprecated("Will be removed")]] DataWrapper : public DataWrapperBase {
 public:
   template <class T2>
   friend class k4FWCore::DataHandle;
