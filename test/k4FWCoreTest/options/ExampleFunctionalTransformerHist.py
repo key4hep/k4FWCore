@@ -19,7 +19,7 @@
 
 # This is an example using two producers that create histograms and persist them to a ROOT file
 
-from Gaudi.Configuration import INFO
+from Gaudi.Configuration import INFO, WARNING
 from Configurables import ExampleFunctionalProducer, ExampleFunctionalTransformerHist
 from k4FWCore import ApplicationMgr
 from Configurables import RootHistSvc
@@ -39,8 +39,7 @@ if multithreaded:
     slimeventloopmgr = HiveSlimEventLoopMgr(
         "HiveSlimEventLoopMgr",
         SchedulerName="AvalancheSchedulerSvc",
-        Warnings=False,
-        OutputLevel=INFO,
+        OutputLevel=WARNING,
     )
 
     scheduler = AvalancheSchedulerSvc(ThreadPoolSize=threads, OutputLevel=INFO)
