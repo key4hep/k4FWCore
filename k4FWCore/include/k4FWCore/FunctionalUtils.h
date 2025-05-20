@@ -210,8 +210,7 @@ namespace details {
     }
   }
 
-  podio::CollectionIDTable& getTESCollectionIDTable(auto thisClass) {
-    auto eds = thisClass->eventSvc().template as<IDataProviderSvc>();
+  podio::CollectionIDTable& getTESCollectionIDTable(IDataProviderSvc* eds, auto thisClass) {
     DataObject* p;
     auto sc = eds->retrieveObject("/Event" + k4FWCore::idTableLocation, p);
     if (!sc.isSuccess()) {
@@ -233,6 +232,11 @@ namespace details {
     }
 
     throw std::runtime_error("Could neither retrieve an existing nor place an empty CollectionIDTable in the TES");
+  }
+
+  podio::CollectionIDTable& getTESCollectionIDTable(auto thisClass) {
+    auto eds = thisClass->eventSvc().template as<IDataProviderSvc>();
+    return getTESCollectionIDTable(eds, thisClass);
   }
 
   void putCollectionSetID(std::unique_ptr<podio::CollectionBase> coll,
