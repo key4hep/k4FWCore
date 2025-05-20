@@ -55,9 +55,6 @@ public:
    */
   void put(T* object);
 
-  // Temporary workaround for k4MarlinWrapper
-  const std::string getCollMetadataCellID(const unsigned int id);
-
   T* put(std::unique_ptr<T> object);
 
   /**
