@@ -44,6 +44,7 @@
 namespace k4FWCore {
 
 static const std::string frameLocation = "/_Frame";
+static const std::string idTableLocation = "/_CollectionIDTable";
 
 namespace details {
 
@@ -209,15 +210,39 @@ namespace details {
     }
   }
 
-  inline auto getCollectionID(const std::string& name) {
-    podio::CollectionIDTable tbl;
-    return tbl.add(name);
+  podio::CollectionIDTable& getTESCollectionIDTable(auto thisClass) {
+    auto eds = thisClass->eventSvc().template as<IDataProviderSvc>();
+    DataObject* p;
+    auto sc = eds->retrieveObject("/Event" + k4FWCore::idTableLocation, p);
+    if (!sc.isSuccess()) {
+      // We are not reading from file so we create one on the fly
+      thisClass->debug() << "Could not retrieve CollectionIDTable for assigning a collection id" << endmsg;
+      auto idTableWrapper = new AnyDataWrapper<podio::CollectionIDTable>(podio::CollectionIDTable{});
+      if (eds->registerObject("/Event" + k4FWCore::idTableLocation, idTableWrapper).isFailure()) {
+        thisClass->error() << "Failed to place an empty CollectionIDTable into the TES" << endmsg;
+      } else {
+        return idTableWrapper->getData();
+      }
+    } else {
+      auto idTableWrapper = dynamic_cast<AnyDataWrapper<podio::CollectionIDTable>*>(p);
+      if (!idTableWrapper) {
+        thisClass->error() << "Object at /Event" << k4FWCore::idTableLocation
+                           << " is not the expected CollectionIDTable" << endmsg;
+      }
+      return idTableWrapper->getData();
+    }
+
+    throw std::runtime_error("Could neither retrieve an existing nor place an empty CollectionIDTable in the TES");
   }
 
   void putCollectionSetID(std::unique_ptr<podio::CollectionBase> coll,
                           const DataObjectWriteHandle<std::unique_ptr<podio::CollectionBase>>& handle, auto thisClass) {
-    podio::CollectionIDTable tbl;
-    coll->setID(getCollectionID(handle.objKey()));
+    auto& idTable = getTESCollectionIDTable(thisClass);
+    if (idTable.present(handle.objKey())) {
+      thisClass->error() << "Collection with name " << handle.objKey() << " is already stored in the TES" << endmsg;
+    }
+    const auto id = idTable.add(handle.objKey());
+    coll->setID(id);
     thisClass->verbose() << fmt::format("Assigning collection id {:0>8x} to collection '{}'", coll->getID(),
                                         handle.objKey())
                          << endmsg;
