@@ -43,7 +43,17 @@ struct TestCollectionFromObjectRetrieval final : k4FWCore::Consumer<void(const e
       throw std::runtime_error("Could not get the expected collection from the object");
     }
 
+    const auto name = m_collFromObjSvc->getCollectionNameFor(mc);
+    if (name.value() != inputLocations(0)[0]) {
+      throw std::runtime_error("Collection name retrieved via object of collection is not as expected");
+    }
+
     auto newMCParticle = edm4hep::MutableMCParticle{};
+    const auto invalidName = m_collFromObjSvc->getCollectionNameFor(newMCParticle);
+    if (invalidName.has_value()) {
+      throw std::runtime_error("Retrieved a name for an object that is not known to the TES");
+    }
+
     const auto* invalidColl = m_collFromObjSvc->getCollectionFor(newMCParticle);
     if (invalidColl) {
       throw std::runtime_error("Could get a collection for an object that is not in a collection");

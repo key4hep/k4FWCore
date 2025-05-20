@@ -44,6 +44,17 @@ StatusCode CollectionFromObjectSvc::initialize() {
   return StatusCode::SUCCESS;
 }
 
+const std::optional<std::string> CollectionFromObjectSvc::getCollectionNameFor(const podio::ObjectID id) const {
+  debug() << "Trying to retrieve collection name for object " << id << endmsg;
+  const auto& idTable = k4FWCore::details::getTESCollectionIDTable(m_dataSvc, this);
+  auto name = idTable.name(id.collectionID);
+  if (!name.has_value()) {
+    error() << "Could not get a collection name for object " << id << endmsg;
+    return std::nullopt;
+  }
+  return name.value();
+}
+
 const podio::CollectionBase* CollectionFromObjectSvc::getCollectionFor(const podio::ObjectID id) const {
   debug() << "Trying to retrieve collection for object " << id << endmsg;
   const auto& idTable = k4FWCore::details::getTESCollectionIDTable(m_dataSvc, this);

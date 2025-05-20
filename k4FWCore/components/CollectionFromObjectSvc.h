@@ -35,6 +35,7 @@ public:
 
 protected:
   const podio::CollectionBase* getCollectionFor(const podio::ObjectID id) const override;
+  const std::optional<std::string> getCollectionNameFor(const podio::ObjectID id) const override;
 
 private:
   SmartIF<IDataProviderSvc> m_dataSvc;

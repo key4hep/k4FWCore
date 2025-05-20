@@ -25,7 +25,8 @@
 #include <podio/ObjectID.h>
 #include <podio/utilities/TypeHelpers.h>
 
-#include <fmt/format.h>
+#include <optional>
+#include <string>
 
 class ICollectionFromObjectSvc : virtual public IInterface {
 public:
@@ -36,8 +37,15 @@ public:
     return dynamic_cast<const typename O::collection_type*>(getCollectionFor(object.id()));
   }
 
+  // TODO: return string_view? Some form of DataHandle?
+  template <podio::ObjectType O>
+  const std::optional<std::string> getCollectionNameFor(const O& object) const {
+    return getCollectionNameFor(object.id());
+  }
+
 protected:
   virtual const podio::CollectionBase* getCollectionFor(const podio::ObjectID) const = 0;
+  virtual const std::optional<std::string> getCollectionNameFor(const podio::ObjectID) const = 0;
 };
 
 #endif
