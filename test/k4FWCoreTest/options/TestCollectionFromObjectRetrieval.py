@@ -26,23 +26,27 @@
 # before writing.
 
 from Gaudi.Configuration import VERBOSE
-from Configurables import TestCollectionIDAssignment, ExampleFunctionalProducerMultiple
+from Configurables import (
+    TestCollectionFromObjectRetrieval,
+    ExampleFunctionalProducerMultiple,
+    CollectionFromObjectSvc,
+)
 
 from k4FWCore import ApplicationMgr
 from Configurables import EventDataSvc
 
 producer = ExampleFunctionalProducerMultiple(
-    "Producer", OutputCollectionParticles2=["CrazyNamesForCrazyHashes"], OutputLevel=VERBOSE
+    "Producer", OutputCollectionParticles1=["UnconventionalCollName"], OutputLevel=VERBOSE
 )
 
 
-collid_checker = TestCollectionIDAssignment(
-    "CollectionIDChecker", InputCollection=["CrazyNamesForCrazyHashes"], OutputLevel=VERBOSE
+collid_checker = TestCollectionFromObjectRetrieval(
+    "CollectionIDChecker", InputCollection=["UnconventionalCollName"], OutputLevel=VERBOSE
 )
 
 ApplicationMgr(
     TopAlg=[producer, collid_checker],
     EvtSel="NONE",
     EvtMax=1,
-    ExtSvc=[EventDataSvc()],
+    ExtSvc=[EventDataSvc(), CollectionFromObjectSvc("CollectionFromObjSvc")],
 )

@@ -49,7 +49,7 @@ const podio::CollectionBase* CollectionFromObjectSvc::getCollectionFor(const pod
   const auto& idTable = k4FWCore::details::getTESCollectionIDTable(m_dataSvc, this);
   auto name = idTable.name(id.collectionID);
   if (!name.has_value()) {
-    error() << "Could not get a collection name for object" << id << endmsg;
+    error() << "Could not get a collection name for object " << id << endmsg;
     return nullptr;
   }
 
@@ -66,3 +66,5 @@ const podio::CollectionBase* CollectionFromObjectSvc::getCollectionFor(const pod
 
   return collWrapper->getData().get();
 }
+
+DECLARE_COMPONENT(CollectionFromObjectSvc)
