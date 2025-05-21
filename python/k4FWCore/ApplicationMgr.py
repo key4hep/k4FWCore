@@ -20,7 +20,14 @@ import logging
 
 from Gaudi import Configuration
 from Configurables import ApplicationMgr as AppMgr
-from Configurables import Reader, Writer, IOSvc, Gaudi__Sequencer, EventLoopMgr
+from Configurables import (
+    Reader,
+    Writer,
+    IOSvc,
+    Gaudi__Sequencer,
+    EventLoopMgr,
+    CollectionFromObjectSvc,
+)
 from k4FWCore.utils import get_logger
 
 logger = get_logger()
@@ -117,6 +124,9 @@ class ApplicationMgr:
 
         if "MetadataSvc" in self._mgr.allConfigurables:
             self._mgr.ExtSvc.append(self._mgr.allConfigurables["MetadataSvc"])
+
+        # Always attach the CollectionFromObjectSvc
+        self._mgr.ExtSvc.append(CollectionFromObjectSvc("CollectionFromObjectSvc"))
 
         if "IOSvc" not in self._mgr.allConfigurables:
             return
