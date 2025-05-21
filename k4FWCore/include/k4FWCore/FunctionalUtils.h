@@ -29,6 +29,7 @@
 #include <GaudiKernel/GaudiException.h>
 
 #include "podio/CollectionBase.h"
+#include <podio/CollectionIDTable.h>
 
 #include "k4FWCore/DataWrapper.h"
 
@@ -43,6 +44,7 @@
 namespace k4FWCore {
 
 static const std::string frameLocation = "/_Frame";
+static const std::string idTableLocation = "/_CollectionIDTable";
 
 namespace details {
 
@@ -208,6 +210,49 @@ namespace details {
     }
   }
 
+  podio::CollectionIDTable& getTESCollectionIDTable(IDataProviderSvc* eds, auto thisClass) {
+    DataObject* p;
+    auto sc = eds->retrieveObject("/Event" + k4FWCore::idTableLocation, p);
+    if (!sc.isSuccess()) {
+      // We are not reading from file so we create one on the fly
+      thisClass->debug() << "Could not retrieve CollectionIDTable for assigning a collection id" << endmsg;
+      auto idTableWrapper = new AnyDataWrapper<podio::CollectionIDTable>(podio::CollectionIDTable{});
+      if (eds->registerObject("/Event" + k4FWCore::idTableLocation, idTableWrapper).isFailure()) {
+        thisClass->error() << "Failed to place an empty CollectionIDTable into the TES" << endmsg;
+      } else {
+        return idTableWrapper->getData();
+      }
+    } else {
+      auto idTableWrapper = dynamic_cast<AnyDataWrapper<podio::CollectionIDTable>*>(p);
+      if (!idTableWrapper) {
+        thisClass->error() << "Object at /Event" << k4FWCore::idTableLocation
+                           << " is not the expected CollectionIDTable" << endmsg;
+      }
+      return idTableWrapper->getData();
+    }
+
+    throw std::runtime_error("Could neither retrieve an existing nor place an empty CollectionIDTable in the TES");
+  }
+
+  podio::CollectionIDTable& getTESCollectionIDTable(auto thisClass) {
+    auto eds = thisClass->eventSvc().template as<IDataProviderSvc>();
+    return getTESCollectionIDTable(eds, thisClass);
+  }
+
+  void putCollectionSetID(std::unique_ptr<podio::CollectionBase> coll,
+                          const DataObjectWriteHandle<std::unique_ptr<podio::CollectionBase>>& handle, auto thisClass) {
+    auto& idTable = getTESCollectionIDTable(thisClass);
+    if (idTable.present(handle.objKey())) {
+      thisClass->error() << "Collection with name " << handle.objKey() << " is already stored in the TES" << endmsg;
+    }
+    const auto id = idTable.add(handle.objKey());
+    coll->setID(id);
+    thisClass->verbose() << fmt::format("Assigning collection id {:0>8x} to collection '{}'", coll->getID(),
+                                        handle.objKey())
+                         << endmsg;
+    Gaudi::Functional::details::put(handle, std::move(coll));
+  }
+
   template <size_t Index, typename... Out, typename... Handles>
   void putVectorOutputs(std::tuple<Handles...>&& handles, const auto& m_outputs, auto thisClass) {
     if constexpr (Index < sizeof...(Handles)) {
@@ -221,12 +266,12 @@ namespace details {
           throw GaudiException(thisClass->name(), msg, StatusCode::FAILURE);
         }
         for (auto& val : std::get<Index>(handles)) {
-          Gaudi::Functional::details::put(std::get<Index>(m_outputs)[i], convertToUniquePtr(std::move(val)));
+          putCollectionSetID(convertToUniquePtr(std::move(val)), std::get<Index>(m_outputs)[i], thisClass);
           i++;
         }
       } else {
-        Gaudi::Functional::details::put(std::get<Index>(m_outputs)[0],
-                                        convertToUniquePtr(std::move(std::get<Index>(handles))));
+        putCollectionSetID(convertToUniquePtr(std::move(std::get<Index>(handles))), std::get<Index>(m_outputs)[0],
+                           thisClass);
       }
 
       // Recursive call for the next index

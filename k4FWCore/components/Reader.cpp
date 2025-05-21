@@ -25,6 +25,7 @@
 #include "GaudiKernel/StatusCode.h"
 
 #include "podio/CollectionBase.h"
+#include "podio/CollectionIDTable.h"
 #include "podio/Frame.h"
 
 #include "IIOSvc.h"
@@ -136,10 +137,17 @@ public:
 
     auto eds = eventSvc().as<IDataProviderSvc>();
     auto frame = std::move(std::get<podio::Frame>(val));
+    auto idTable = frame.getCollectionIDTableForWrite();
 
     auto tmp = new AnyDataWrapper<podio::Frame>(std::move(frame));
     if (eds->registerObject("/Event" + k4FWCore::frameLocation, tmp).isFailure()) {
       error() << "Failed to register Frame object" << endmsg;
+    }
+
+    // We also store the collection id table to make sure we can detect collisions
+    auto idTableWrapper = new AnyDataWrapper<podio::CollectionIDTable>(std::move(idTable));
+    if (eds->registerObject("/Event" + k4FWCore::idTableLocation, idTableWrapper).isFailure()) {
+      error() << "Failed to register CollectionIDTable object" << endmsg;
     }
 
     return std::make_tuple(std::get<0>(val), std::get<1>(val));
