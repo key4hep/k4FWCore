@@ -39,7 +39,6 @@ public:
   friend class AlgTool;
 
 public:
-  DataHandle();
   ~DataHandle() override;
 
   /// Initialises mother class
