@@ -20,14 +20,15 @@
 #define K4FWCORE_DATAHANDLE_H
 
 #include "k4FWCore/DataWrapper.h"
-#include "k4FWCore/PodioDataSvc.h"
-
-#include "GaudiKernel/DataObjectHandle.h"
 
 #include <GaudiKernel/AnyDataWrapper.h>
+#include <GaudiKernel/DataObjectHandle.h>
+#include <GaudiKernel/ServiceHandle.h>
+
 #include <stdexcept>
 #include <type_traits>
 
+namespace k4FWCore {
 /**
  * Specialisation of the Gaudi DataHandle
  * for use with podio collections.
@@ -39,7 +40,6 @@ public:
   friend class AlgTool;
 
 public:
-  DataHandle();
   ~DataHandle() override;
 
   /// Initialises mother class
@@ -64,7 +64,7 @@ public:
 
 private:
   ServiceHandle<IDataProviderSvc> m_eds;
-  T* m_dataPtr;
+  T* m_dataPtr{nullptr};
 };
 
 template <typename T>
@@ -78,19 +78,20 @@ DataHandle<T>::~DataHandle() {
 //---------------------------------------------------------------------------
 template <typename T>
 DataHandle<T>::DataHandle(DataObjID& descriptor, Gaudi::DataHandle::Mode a, IDataHandleHolder* fatherAlg)
-    : DataObjectHandle<DataWrapper<T>>(descriptor, a, fatherAlg), m_eds("EventDataSvc", "DataHandle") {}
+    : DataObjectHandle<DataWrapper<T>>(descriptor, a, fatherAlg), m_eds("EventDataSvc", "DataHandle") {
+  if (a == Gaudi::DataHandle::Writer) {
+    if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
+      m_dataPtr = new T();
+    }
+  }
+}
 
 template <typename T>
 DataHandle<T>::DataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode a, IDataHandleHolder* fatherAlg)
     : DataObjectHandle<DataWrapper<T>>(descriptor, a, fatherAlg), m_eds("EventDataSvc", "DataHandle") {
   if (a == Gaudi::DataHandle::Writer) {
-    m_eds.retrieve().ignore();
-    m_dataPtr = nullptr;
-    auto* podio_data_service = dynamic_cast<PodioDataSvc*>(m_eds.get());
-    if (nullptr != podio_data_service) {
-      if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
-        m_dataPtr = new T();
-      }
+    if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
+      m_dataPtr = new T();
     }
   }
 }
@@ -162,13 +163,17 @@ T* DataHandle<T>::createAndPut() {
   this->put(objectp);
   return objectp;
 }
+} // namespace k4FWCore
+
+template <typename T>
+using DataHandle [[deprecated("Use k4FWCore::DataHandle instead")]] = k4FWCore::DataHandle<T>;
 
 // temporary to allow property declaration
 namespace Gaudi {
 template <class T>
-class Property<::DataHandle<T>&> : public ::DataHandleProperty {
+class Property<k4FWCore::DataHandle<T>&> : public ::DataHandleProperty {
 public:
-  Property(const std::string& name, ::DataHandle<T>& value) : ::DataHandleProperty(name, value) {}
+  Property(const std::string& name, k4FWCore::DataHandle<T>& value) : ::DataHandleProperty(name, value) {}
 };
 } // namespace Gaudi
 

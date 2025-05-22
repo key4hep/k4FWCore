@@ -31,8 +31,10 @@
 #include "k4FWCore/DataWrapper.h"
 class DataWrapperBase;
 class PodioOutput;
+namespace k4FWCore {
 template <typename T>
 class MetaDataHandle;
+}
 
 /** @class PodioEvtSvc EvtDataSvc.h
  *
@@ -40,9 +42,9 @@ class MetaDataHandle;
  *
  *  @author B. Hegner
  */
-class PodioDataSvc : public DataSvc {
+class [[deprecated("Use the IOSvc instead")]] PodioDataSvc : public DataSvc {
   template <typename T>
-  friend class MetaDataHandle;
+  friend class k4FWCore::MetaDataHandle;
   friend class PodioOutput;
   friend class Lcio2EDM4hepTool;
 

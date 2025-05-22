@@ -28,6 +28,7 @@
 
 /// Service initialisation
 StatusCode PodioDataSvc::initialize() {
+  warning() << "The PodioDataSvc is deprecated and will be removed. Use the IOSvc instead" << endmsg;
   // Nothing to do: just call base class initialisation
   StatusCode status = DataSvc::initialize();
   ISvcLocator* svc_loc = serviceLocator();
@@ -84,6 +85,7 @@ StatusCode PodioDataSvc::reinitialize() {
 }
 /// Service finalization
 StatusCode PodioDataSvc::finalize() {
+  warning() << "The PodioDataSvc is deprecated and will be removed. Use the IOSvc instead" << endmsg;
   m_cnvSvc = nullptr; // release
   DataSvc::finalize().ignore();
   return StatusCode::SUCCESS;

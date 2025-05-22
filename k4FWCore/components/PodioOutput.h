@@ -28,7 +28,7 @@
 // forward declarations
 class PodioDataSvc;
 
-class PodioOutput : public Gaudi::Algorithm {
+class [[deprecated("Use the IOSvc instead")]] PodioOutput : public Gaudi::Algorithm {
 public:
   /// Constructor.
   PodioOutput(const std::string& name, ISvcLocator* svcLoc);

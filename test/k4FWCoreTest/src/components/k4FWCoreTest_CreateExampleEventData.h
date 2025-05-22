@@ -51,19 +51,21 @@ private:
   /// integer to add to the dummy values written to the edm
   Gaudi::Property<int> m_magicNumberOffset{this, "magicNumberOffset", 0,
                                            "Integer to add to the dummy values written to the edm"};
-  mutable DataHandle<edm4hep::MCParticleCollection> m_mcParticleHandle{"MCParticles", Gaudi::DataHandle::Writer, this};
-  mutable DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitHandle{"SimTrackerHits",
-                                                                             Gaudi::DataHandle::Writer, this};
-  mutable DataHandle<edm4hep::TrackerHit3DCollection> m_TrackerHitHandle{"TrackerHits", Gaudi::DataHandle::Writer,
-                                                                         this};
+  mutable k4FWCore::DataHandle<edm4hep::MCParticleCollection> m_mcParticleHandle{"MCParticles",
+                                                                                 Gaudi::DataHandle::Writer, this};
+  mutable k4FWCore::DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitHandle{"SimTrackerHits",
+                                                                                       Gaudi::DataHandle::Writer, this};
+  mutable k4FWCore::DataHandle<edm4hep::TrackerHit3DCollection> m_TrackerHitHandle{"TrackerHits",
+                                                                                   Gaudi::DataHandle::Writer, this};
 
-  mutable DataHandle<edm4hep::TrackCollection> m_trackHandle{"Tracks", Gaudi::DataHandle::Writer, this};
+  mutable k4FWCore::DataHandle<edm4hep::TrackCollection> m_trackHandle{"Tracks", Gaudi::DataHandle::Writer, this};
 
-  mutable DataHandle<podio::UserDataCollection<float>> m_vectorFloatHandle{"VectorFloat", Gaudi::DataHandle::Writer,
-                                                                           this};
-  mutable DataHandle<edm4hep::ReconstructedParticleCollection> m_recoHandle{"RecoParticles", Gaudi::DataHandle::Writer,
-                                                                            this};
-  mutable DataHandle<edm4hep::RecoMCParticleLinkCollection> m_linkHandle{"Links", Gaudi::DataHandle::Writer, this};
+  mutable k4FWCore::DataHandle<podio::UserDataCollection<float>> m_vectorFloatHandle{"VectorFloat",
+                                                                                     Gaudi::DataHandle::Writer, this};
+  mutable k4FWCore::DataHandle<edm4hep::ReconstructedParticleCollection> m_recoHandle{"RecoParticles",
+                                                                                      Gaudi::DataHandle::Writer, this};
+  mutable k4FWCore::DataHandle<edm4hep::RecoMCParticleLinkCollection> m_linkHandle{"Links", Gaudi::DataHandle::Writer,
+                                                                                   this};
 
   mutable int m_event{0};
 };
