@@ -78,7 +78,13 @@ DataHandle<T>::~DataHandle() {
 //---------------------------------------------------------------------------
 template <typename T>
 DataHandle<T>::DataHandle(DataObjID& descriptor, Gaudi::DataHandle::Mode a, IDataHandleHolder* fatherAlg)
-    : DataObjectHandle<DataWrapper<T>>(descriptor, a, fatherAlg), m_eds("EventDataSvc", "DataHandle") {}
+    : DataObjectHandle<DataWrapper<T>>(descriptor, a, fatherAlg), m_eds("EventDataSvc", "DataHandle") {
+  if (a == Gaudi::DataHandle::Writer) {
+    if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
+      m_dataPtr = new T();
+    }
+  }
+}
 
 template <typename T>
 DataHandle<T>::DataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode a, IDataHandleHolder* fatherAlg)
