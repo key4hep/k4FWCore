@@ -25,7 +25,9 @@
 #include <GaudiKernel/DataObjectHandle.h>
 #include <GaudiKernel/ServiceHandle.h>
 
+#include <memory>
 #include <stdexcept>
+#include <string>
 #include <type_traits>
 
 /**
