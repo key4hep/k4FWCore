@@ -21,7 +21,7 @@ try:
 except ImportError:
     import os
 
-    print(f'PYTHONPATH={os.environ["PYTHONPATH"]}')
+    print(f"PYTHONPATH={os.environ['PYTHONPATH']}")
     raise
 import ROOT
 
@@ -176,7 +176,7 @@ f = ROOT.TFile.Open("functional_transformer_hist.root")
 for i in range(2):
     if (
         str(f.GetListOfKeys()[i])
-        != f"Name: ExampleFunctionalTransformerHist{i+1} Title: ExampleFunctionalTransformerHist{i+1}"
+        != f"Name: ExampleFunctionalTransformerHist{i + 1} Title: ExampleFunctionalTransformerHist{i + 1}"
     ):
         raise RuntimeError(
             "Directory structure does not match expected for functional_transformer_hist.root"
@@ -357,3 +357,20 @@ for i, filename in enumerate(
             raise RuntimeError(
                 f"Property {prop} has value {configuration_metadata[f'CellIDWriter.{prop} ']}, expected {value}"
             )
+
+
+reader = podio.root_io.Reader("functional_random_filter.root")
+frames = reader.get("events")
+for frame in frames:
+    filtered = frame.get("FilteredMCParticles")
+    if len(filtered) != 16:
+        raise RuntimeError(f"Expected 16 particles in FilteredMCParticles, got {len(filtered)}")
+    filtered_not_exact = frame.get("FilteredNotExactMCParticles")
+    # Approximate number of particles in FilteredNotExactMCParticles
+    if not 14 <= len(filtered_not_exact) <= 18:
+        raise RuntimeError(
+            f"Expected between 14 and 18 particles in FilteredNotExactMCParticles, got {len(filtered_not_exact)}"
+        )
+    filtered_links = frame.get("FilteredLinks")
+    if len(filtered_links) != 16:
+        raise RuntimeError(f"Expected 16 links in FilteredLinks, got {len(filtered_links)}")

@@ -67,6 +67,13 @@ namespace details {
     return static_cast<const T&>(*arg);
   }
 
+  // This is used by the EfficiencyFilter
+  template <typename T, typename P>
+    requires std::same_as<P, podio::CollectionBase* const>
+  const auto& maybeTransformToEDM4hep(P& arg) {
+    return static_cast<const podio::CollectionBase&>(*arg);
+  }
+
   // This is used in all the remaining cases
   template <typename T, typename P>
     requires(std::is_base_of_v<podio::CollectionBase, P> && !std::same_as<podio::CollectionBase, P>)
