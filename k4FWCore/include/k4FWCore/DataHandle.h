@@ -20,12 +20,14 @@
 #define K4FWCORE_DATAHANDLE_H
 
 #include "k4FWCore/DataWrapper.h"
-#include "k4FWCore/PodioDataSvc.h"
-
-#include "GaudiKernel/DataObjectHandle.h"
 
 #include <GaudiKernel/AnyDataWrapper.h>
+#include <GaudiKernel/DataObjectHandle.h>
+#include <GaudiKernel/ServiceHandle.h>
+
+#include <memory>
 #include <stdexcept>
+#include <string>
 #include <type_traits>
 
 /**
@@ -39,11 +41,12 @@ public:
   friend class AlgTool;
 
 public:
-  DataHandle();
+  DataHandle() = delete;
+  DataHandle(const DataHandle&) = delete;
+  DataHandle& operator=(const DataHandle&) = delete;
+  DataHandle(DataHandle&&) = default;
+  DataHandle& operator=(DataHandle&&) = default;
   ~DataHandle() override;
-
-  /// Initialises mother class
-  DataHandle(DataObjID& descriptor, Gaudi::DataHandle::Mode a, IDataHandleHolder* fatherAlg);
 
   DataHandle(const std::string& k, Gaudi::DataHandle::Mode a, IDataHandleHolder* fatherAlg);
 
@@ -64,7 +67,7 @@ public:
 
 private:
   ServiceHandle<IDataProviderSvc> m_eds;
-  T* m_dataPtr;
+  T* m_dataPtr{nullptr};
 };
 
 template <typename T>
@@ -75,22 +78,12 @@ DataHandle<T>::~DataHandle() {
   }
 }
 
-//---------------------------------------------------------------------------
-template <typename T>
-DataHandle<T>::DataHandle(DataObjID& descriptor, Gaudi::DataHandle::Mode a, IDataHandleHolder* fatherAlg)
-    : DataObjectHandle<DataWrapper<T>>(descriptor, a, fatherAlg), m_eds("EventDataSvc", "DataHandle") {}
-
 template <typename T>
 DataHandle<T>::DataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode a, IDataHandleHolder* fatherAlg)
     : DataObjectHandle<DataWrapper<T>>(descriptor, a, fatherAlg), m_eds("EventDataSvc", "DataHandle") {
   if (a == Gaudi::DataHandle::Writer) {
-    m_eds.retrieve().ignore();
-    m_dataPtr = nullptr;
-    auto* podio_data_service = dynamic_cast<PodioDataSvc*>(m_eds.get());
-    if (nullptr != podio_data_service) {
-      if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
-        m_dataPtr = new T();
-      }
+    if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
+      m_dataPtr = new T();
     }
   }
 }
