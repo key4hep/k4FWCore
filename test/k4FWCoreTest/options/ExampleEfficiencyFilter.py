@@ -37,7 +37,7 @@ iosvc = IOSvc("IOSvc")
 iosvc.Output = "functional_random_filter.root"
 
 producer = ExampleFunctionalProducerMultiple(
-        "Producer",
+    "Producer",
 )
 
 header_producer = EventHeaderCreator("EventHeaderCreator")
@@ -78,7 +78,15 @@ filter_links = EfficiencyFilter(
 )
 
 ApplicationMgr(
-    TopAlg=[header_producer, producer, merger, merger_links, filter, filter_not_exact, filter_links],
+    TopAlg=[
+        header_producer,
+        producer,
+        merger,
+        merger_links,
+        filter,
+        filter_not_exact,
+        filter_links,
+    ],
     EvtSel="NONE",
     EvtMax=3,
     ExtSvc=[EventDataSvc("EventDataSvc"), uid_svc],
