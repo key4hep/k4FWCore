@@ -43,9 +43,6 @@ public:
 public:
   ~DataHandle() override;
 
-  /// Initialises mother class
-  DataHandle(DataObjID& descriptor, Gaudi::DataHandle::Mode a, IDataHandleHolder* fatherAlg);
-
   DataHandle(const std::string& k, Gaudi::DataHandle::Mode a, IDataHandleHolder* fatherAlg);
 
   /// Retrieve object from transient data store
@@ -73,17 +70,6 @@ DataHandle<T>::~DataHandle() {
   // release memory allocated for primitive types (see comments in ctor)
   if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
     delete m_dataPtr;
-  }
-}
-
-//---------------------------------------------------------------------------
-template <typename T>
-DataHandle<T>::DataHandle(DataObjID& descriptor, Gaudi::DataHandle::Mode a, IDataHandleHolder* fatherAlg)
-    : DataObjectHandle<DataWrapper<T>>(descriptor, a, fatherAlg), m_eds("EventDataSvc", "DataHandle") {
-  if (a == Gaudi::DataHandle::Writer) {
-    if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
-      m_dataPtr = new T();
-    }
   }
 }
 
