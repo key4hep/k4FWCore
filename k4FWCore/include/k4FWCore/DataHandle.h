@@ -41,6 +41,11 @@ public:
   friend class AlgTool;
 
 public:
+  DataHandle() = delete;
+  DataHandle(const DataHandle&) = delete;
+  DataHandle& operator=(const DataHandle&) = delete;
+  DataHandle(DataHandle&&) = default;
+  DataHandle& operator=(DataHandle&&) = default;
   ~DataHandle() override;
 
   DataHandle(const std::string& k, Gaudi::DataHandle::Mode a, IDataHandleHolder* fatherAlg);
