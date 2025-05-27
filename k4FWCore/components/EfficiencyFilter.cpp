@@ -72,7 +72,7 @@ struct EfficiencyFilter final : k4FWCore::Transformer<podio::CollectionBase*(con
     }
     if (!ptr) {
       throw std::runtime_error(
-          fmt::format("EfficiencyFilter: No merge function found for collection type '{}'", coll.getTypeName()));
+          fmt::format("EfficiencyFilter: No createSubsetCollection function found for collection type '{}'", coll.getTypeName()));
     }
     return ptr;
   }
@@ -87,7 +87,7 @@ private:
       this, "Exact", true,
       "If true, the output collection will have exactly the number of elements given by the efficiency. For example, "
       "if the efficiency is 0.5 and the input collection has 10 elements, the output collection will have exactly 5 "
-      "elements. "
+      "elements. The result is floored."
       "If false, the output collection will have a random number of elements, with the average number of elements "
       "given by the efficiency."};
 
