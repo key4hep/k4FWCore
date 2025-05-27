@@ -101,8 +101,7 @@ private:
   template <typename T>
   podio::CollectionBase* createSubsetCollection(const podio::CollectionBase* source, const size_t uid) const {
 
-    std::mt19937 randomGen(std::random_device{}());
-    randomGen.seed(uid);
+    std::mt19937 randomGen(uid);
     std::uniform_real_distribution<double> uniformDist(0.0, 1.0);
 
     auto ret = new T();
