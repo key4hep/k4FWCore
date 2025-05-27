@@ -118,8 +118,8 @@ private:
       std::iota(indexes.begin(), indexes.end(), 0);
       std::ranges::shuffle(indexes, randomGen);
       // Preserve the original ordering
-      std::vector<size_t> sortedIndexes(indexes.begin(), indexes.begin() + nToKeep);
-      std::ranges::sort(sortedIndexes);
+      indexes.resize(nToKeep);
+      std::ranges::sort(indexes);
       for (const auto index : indexes) {
         ptr->push_back((*sourceColl)[index]);
       }
