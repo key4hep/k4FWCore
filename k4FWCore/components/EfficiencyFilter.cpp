@@ -30,12 +30,7 @@ struct EfficiencyFilter final : k4FWCore::Transformer<podio::CollectionBase*(con
                                                                              const edm4hep::EventHeaderCollection&)> {
   EfficiencyFilter(const std::string& name, ISvcLocator* svcLoc)
       : Transformer(name, svcLoc, {KeyValues("InputCollection", {""}), KeyValues("EventHeader", {"EventHeader"})},
-                    {KeyValues("OutputCollection", {""})}) {
-
-    if (System::cmdLineArgs()[0].find("genconf") != std::string::npos) {
-      return;
-    }
-  }
+                    {KeyValues("OutputCollection", {""})}) {}
 
   StatusCode initialize() final {
     StatusCode sc = Transformer::initialize();
@@ -65,14 +60,15 @@ struct EfficiencyFilter final : k4FWCore::Transformer<podio::CollectionBase*(con
 
     const auto uid = m_uniqueIDSvc->getUniqueID(evtHeader, name());
 
-    auto ptr =
-        dispatchByType(coll, uid, edm4hep::edm4hepDataTypes{}); // Dispatch to the correct merge function based on type
+    auto ptr = dispatchByType(
+        coll, uid,
+        edm4hep::edm4hepDataTypes{}); // Dispatch to the correct createSubsetCollection template function based on type
     if (!ptr) {
       ptr = dispatchByType(coll, uid, edm4hep::edm4hepLinkTypes{}); // Try link types if not found in data types
     }
     if (!ptr) {
-      throw std::runtime_error(
-          fmt::format("EfficiencyFilter: No createSubsetCollection function found for collection type '{}'", coll.getTypeName()));
+      throw std::runtime_error(fmt::format(
+          "EfficiencyFilter: No createSubsetCollection function found for collection type '{}'", coll.getTypeName()));
     }
     return ptr;
   }
@@ -121,8 +117,11 @@ private:
       std::vector<size_t> indexes(sourceColl->size());
       std::iota(indexes.begin(), indexes.end(), 0);
       std::ranges::shuffle(indexes, randomGen);
-      for (size_t i = 0; i < nToKeep; ++i) {
-        ptr->push_back((*sourceColl)[indexes[i]]);
+      // Preserve the original ordering
+      std::vector<size_t> sortedIndexes(indexes.begin(), indexes.begin() + nToKeep);
+      std::ranges::sort(sortedIndexes);
+      for (const auto index : indexes) {
+        ptr->push_back((*sourceColl)[index]);
       }
     } else {
       for (const auto& item : *sourceColl) {
