@@ -24,6 +24,8 @@
 #include "k4FWCore/MetadataUtils.h"
 #include "k4FWCore/PodioDataSvc.h"
 
+namespace k4FWCore {
+
 template <typename T>
 class MetaDataHandle {
 public:
@@ -164,5 +166,9 @@ void MetaDataHandle<T>::checkPodioDataSvc() {
     std::cout << "Warning: MetaDataHandles require the PodioDataSvc or for compatibility the MetadataSvc" << std::endl;
   }
 }
+} // namespace k4FWCore
+
+template <typename T>
+using MetaDataHandle [[deprecated("Use k4FWCore::MetaDataHandle instead")]] = k4FWCore::MetaDataHandle<T>;
 
 #endif
