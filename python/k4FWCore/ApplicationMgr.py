@@ -105,10 +105,12 @@ class ApplicationMgr:
         # This will suppress two warnings about not using external input
         if not hasattr(self._mgr, "EventLoop"):
             self._mgr.EventLoop = EventLoopMgr()
-            if hasattr(self._mgr.EventLoop, "Warnings"):
-                self._mgr.EventLoop.Warnings = False
-            else:
+            try:
+                # Only available in Gaudi >= 40.0.0, when the Warnings attribute is removed
+                from Gaudi import __version__  # noqa: F401
                 self._mgr.EventLoop.OutputLevel = WARNING
+            except ImportError:
+                self._mgr.EventLoop.Warnings = False
 
         if "MetadataSvc" in self._mgr.allConfigurables:
             self._mgr.ExtSvc.append(self._mgr.allConfigurables["MetadataSvc"])
