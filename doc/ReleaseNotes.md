@@ -1,3 +1,84 @@
+# v01-03
+
+* 2025-05-27 Thomas Madlener ([PR#317](https://github.com/key4hep/k4FWCore/pull/317))
+  - Move the `DataHandle` and `MetaDataHandle` into the `k4FWCore` namespace to make origins more obvious
+    - Keep deprecated `DataHandle` and `MetaDataHandle` aliases in global namespace for compatibility to allow for a smoother migration
+
+* 2025-05-26 Thomas Madlener ([PR#321](https://github.com/key4hep/k4FWCore/pull/321))
+  - Remove the usage of `PodioDataSvc` from the `DataHandle` as it's not necessary
+  - Harmonize the behavior of the constructors
+  - Remove the declaration of the unimplemented default constructor
+
+* 2025-05-21 jmcarcell ([PR#306](https://github.com/key4hep/k4FWCore/pull/306))
+  - Add a `--log-level` flag to `k4run` to make it possible to configure the log level at runtime via the command line
+    - accpeted values are `verbose`, `debug`, `info`, `warning` and `error`
+    - The log level will apply to the python logging facilities and will also be set in the `ApplicationMgr.OutputLevel`
+  - Make the python logging a bit more informative by adding the log level as well as some module and function information to the message
+  - Deprecate the `--verbose` option in favor of `--log-level=verbose`
+
+* 2025-05-20 Thomas Madlener ([PR#320](https://github.com/key4hep/k4FWCore/pull/320))
+  - Remove the declaration of `DataHandle::getCollMetadataCellID` since the implementation has been removed long ago
+
+* 2025-05-20 jmcarcell ([PR#315](https://github.com/key4hep/k4FWCore/pull/315))
+  - Bump the required version of podio. 1.3 is needed since https://github.com/key4hep/k4FWCore/pull/305 because of `edm4hep::DataTypes` and `edm4hep::LinkTypes`
+
+* 2025-05-15 jmcarcell ([PR#313](https://github.com/key4hep/k4FWCore/pull/313))
+  - Use signal to stop immediately after receiving a SIGPIPE. Before, the output from k4run itself would always print and the pipe command (for example `| head`) would only be applied to the output from Gaudi.
+  - Add a test that uses pipes
+
+* 2025-05-13 jmcarcell ([PR#305](https://github.com/key4hep/k4FWCore/pull/305))
+  - Remove the hardcoded collections in the CollectionMerger, using https://github.com/AIDASoft/podio/pull/761. This applies to all collections that are available in EDM4hep.
+  - Fix link collections that are currently not working since the data type name is not `edm4hep::...LinkCollection` but `podio::LinkCollection...`
+  - Require a newer version of podio in the CMakeLists.txt
+
+* 2025-05-05 jmcarcell ([PR#304](https://github.com/key4hep/k4FWCore/pull/304))
+  - Fix running algorithms with RNTuples as their input and add tests, not working before because the TTRee reader in podio was being used
+  - Add two tests to create an rntuple and read it
+  - Bump the required version of podio to 1.3 since the function `get_reader` in podio only has support for lists of files as an input after https://github.com/AIDASoft/podio/pull/729
+
+* 2025-04-30 jmcarcell ([PR#307](https://github.com/key4hep/k4FWCore/pull/307))
+  - Clean up several CMakeLists.txt files. For example, remove redundant calls to `find_package`.
+  - Move python files that will be installed to a single place
+
+* 2025-04-29 Thomas Madlener ([PR#308](https://github.com/key4hep/k4FWCore/pull/308))
+  - Add some documentation about the `AlgTimingAuditor` and the `TimelineSvc` to show how timing information can be obtained from Gaudi at different levels of details.
+
+* 2025-03-27 Giovanni Marchiori ([PR#299](https://github.com/key4hep/k4FWCore/pull/299))
+  - Remove ICaloReadCellNoisMap interface since it provides the same functionality as INoiseConstTool
+
+* 2025-03-18 jmcarcell ([PR#297](https://github.com/key4hep/k4FWCore/pull/297))
+  - Remove the deprecated `input` and `output` properties for IOSvc
+
+* 2025-03-07 Mateusz Jakub Fila ([PR#288](https://github.com/key4hep/k4FWCore/pull/288))
+  - Update`UniqueIDGenSvc`documentation and add example usage with a functional algorithm
+
+* 2025-03-05 Mateusz Jakub Fila ([PR#295](https://github.com/key4hep/k4FWCore/pull/295))
+  - Replace `UniqueIDGenSvc` property `ThrowIfDuplicate` with `CheckDuplicates`. The service will cache ids and check duplicates only if `CheckDuplicates` is set to `true`. It's enabled by default for the Debug builds.
+
+* 2025-03-05 Thomas Madlener ([PR#290](https://github.com/key4hep/k4FWCore/pull/290))
+  - Make the `PodioInput.collections`, `IOSvc.CollectionNames` and `Reader.InputCollections` properties actually work like expected. They now properly limit the collections that are read and no other collections will be available. **This requires building against podio > v1.2`**, otherwiset the current behavior will be used, where collections that are not requested will still be available.
+
+* 2025-02-26 Mateusz Jakub Fila ([PR#287](https://github.com/key4hep/k4FWCore/pull/287))
+  - Use the same event and run type in `UniqueIDGenSvc` as in `edm4hep::EventHeader`. Add generating id directly from `edm4hep::EventHeader`. **This changes the ID values !**
+
+* 2025-02-25 Mateusz Jakub Fila ([PR#293](https://github.com/key4hep/k4FWCore/pull/293))
+  - Fix typo in docs about migrating from `k4DataSvc`
+
+* 2025-02-23 Mateusz Jakub Fila ([PR#291](https://github.com/key4hep/k4FWCore/pull/291))
+  - Fix fixture used in FunctionalMTFile test
+
+* 2025-02-17 Thomas Madlener ([PR#289](https://github.com/key4hep/k4FWCore/pull/289))
+  - Bump the `cvmfs-contrib` github action to lastet version `v5` to fix caching issues.
+
+* 2025-02-13 jmcarcell ([PR#286](https://github.com/key4hep/k4FWCore/pull/286))
+  - Add a dev3 workflow using the key4hep-build action
+
+* 2025-02-12 jmcarcell ([PR#284](https://github.com/key4hep/k4FWCore/pull/284))
+  - Add LANGUAGES CXX to CMakeLists.txt to disable checks for a C compiler
+
+* 2025-02-11 jmcarcell ([PR#283](https://github.com/key4hep/k4FWCore/pull/283))
+  - Add a Link collection to the tests
+
 # v01-02-00
 
 * 2025-02-04 jmcarcell ([PR#282](https://github.com/key4hep/k4FWCore/pull/282))
