@@ -115,7 +115,7 @@ class ApplicationMgr:
             self._mgr.EventLoop = EventLoopMgr()
             try:
                 self._mgr.EventLoop.Warnings = False
-            # Warnings doesn't exist after v40
+            # Warnings doesn't exist after Gaudi v40
             except AttributeError:
                 self._mgr.EventLoop.OutputLevel = WARNING
 
