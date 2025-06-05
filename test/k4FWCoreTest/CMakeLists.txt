@@ -27,7 +27,6 @@ set(k4fwcoretest_plugin_sources
   src/components/ExampleFunctionalMetadataConsumer.cpp
   src/components/ExampleFunctionalMetadataProducer.cpp
   src/components/ExampleFunctionalProducer.cpp
-  src/components/ExampleFunctionalProducerInt.cpp
   src/components/ExampleFunctionalProducerMultiple.cpp
   src/components/ExampleFunctionalProducerRuntimeCollections.cpp
   src/components/ExampleFunctionalTransformer.cpp
