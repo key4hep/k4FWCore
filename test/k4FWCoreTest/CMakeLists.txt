@@ -17,7 +17,39 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ]]
 
-file(GLOB k4fwcoretest_plugin_sources src/components/*.cpp)
+set(k4fwcoretest_plugin_sources
+  src/components/ExampleEventHeaderConsumer.cpp
+  src/components/ExampleFunctionalConsumer.cpp
+  src/components/ExampleFunctionalConsumerMultiple.cpp
+  src/components/ExampleFunctionalConsumerRuntimeCollections.cpp
+  src/components/ExampleFunctionalConsumerRuntimeCollectionsMultiple.cpp
+  src/components/ExampleFunctionalFilter.cpp
+  src/components/ExampleFunctionalMetadataConsumer.cpp
+  src/components/ExampleFunctionalMetadataProducer.cpp
+  src/components/ExampleFunctionalProducer.cpp
+  src/components/ExampleFunctionalProducerInt.cpp
+  src/components/ExampleFunctionalProducerMultiple.cpp
+  src/components/ExampleFunctionalProducerRuntimeCollections.cpp
+  src/components/ExampleFunctionalTransformer.cpp
+  src/components/ExampleFunctionalTransformerHist.cpp
+  src/components/ExampleFunctionalTransformerMultiple.cpp
+  src/components/ExampleFunctionalTransformerRuntimeCollections.cpp
+  src/components/ExampleFunctionalTransformerRuntimeCollectionsMultiple.cpp
+  src/components/ExampleFunctionalTransformerRuntimeEmpty.cpp
+  src/components/ExampleGaudiFunctionalProducer.cpp
+  src/components/ExampleParticleIDConsumer.cpp
+  src/components/ExampleParticleIDProducer.cpp
+  src/components/ExampleRNGSeedingAlg.cpp
+  src/components/k4FWCoreTest_AlgorithmWithTFile.cpp
+  src/components/k4FWCoreTest_cellID_reader.cpp
+  src/components/k4FWCoreTest_cellID_writer.cpp
+  src/components/k4FWCoreTest_CheckExampleEventData.cpp
+  src/components/k4FWCoreTest_CreateExampleEventData.cpp
+  src/components/k4FWCoreTest_CreateMarlinWrapperCollection.cpp
+  src/components/k4FWCoreTest_HelloWorldAlg.cpp
+  src/components/TestUniqueIDGenSvc.cpp
+  src/components/TypeMisMatchDemo.cpp
+)
 
 gaudi_add_module(k4FWCoreTestPlugins
                  SOURCES ${k4fwcoretest_plugin_sources}
