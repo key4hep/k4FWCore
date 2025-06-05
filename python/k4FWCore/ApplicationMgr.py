@@ -21,6 +21,7 @@ import logging
 from Gaudi import Configuration
 from Configurables import ApplicationMgr as AppMgr
 from Configurables import Reader, Writer, IOSvc, Gaudi__Sequencer, EventLoopMgr
+from Gaudi.Configuration import WARNING
 from k4FWCore.utils import get_logger
 
 logger = get_logger()
@@ -110,10 +111,13 @@ class ApplicationMgr:
     def fix_properties(self):
         # If there isn't an EventLoopMgr then it's the default
         # This will suppress two warnings about not using external input
-        try:
-            self._mgr.EventLoop
-        except AttributeError:
-            self._mgr.EventLoop = EventLoopMgr(Warnings=False)
+        if not hasattr(self._mgr, "EventLoop"):
+            self._mgr.EventLoop = EventLoopMgr()
+            try:
+                self._mgr.EventLoop.Warnings = False
+            # Warnings doesn't exist after Gaudi v40
+            except AttributeError:
+                self._mgr.EventLoop.OutputLevel = WARNING
 
         if "MetadataSvc" in self._mgr.allConfigurables:
             self._mgr.ExtSvc.append(self._mgr.allConfigurables["MetadataSvc"])
