@@ -31,6 +31,7 @@ target_include_directories(k4FWCore PUBLIC
 gaudi_add_module(k4FWCorePlugins
                  SOURCES
                    components/CollectionMerger.cpp
+                   components/EfficiencyFilter.cpp
                    components/EventCounter.cpp
                    components/EventHeaderCreator.cpp
                    components/FCCDataSvc.cpp
