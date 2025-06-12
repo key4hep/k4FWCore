@@ -28,8 +28,8 @@
 
 // datamodel
 namespace edm4hep {
-  class MCParticleCollection;
-}  // namespace edm4hep
+class MCParticleCollection;
+} // namespace edm4hep
 
 class k4FWCoreTest_CheckExampleEventData : public Gaudi::Algorithm {
 public:
@@ -42,16 +42,17 @@ public:
 
 private:
   /// integer to add to the dummy values written to the edm
-  Gaudi::Property<int>  m_magicNumberOffset{this, "magicNumberOffset", 0,
+  Gaudi::Property<int> m_magicNumberOffset{this, "magicNumberOffset", 0,
                                            "Integer to add to the dummy values written to the edm"};
   Gaudi::Property<bool> m_keepEventNumberZero{this, "keepEventNumberZero", false,
                                               "Don't add the event number to the dummy values written"};
   /// Handle for the MCParticles to be written
-  mutable DataHandle<edm4hep::MCParticleCollection> m_mcParticleHandle{"MCParticles", Gaudi::DataHandle::Reader, this};
-  mutable DataHandle<podio::UserDataCollection<float>> m_vectorFloatHandle{"VectorFloat", Gaudi::DataHandle::Reader,
-                                                                           this};
+  mutable k4FWCore::DataHandle<edm4hep::MCParticleCollection> m_mcParticleHandle{"MCParticles",
+                                                                                 Gaudi::DataHandle::Reader, this};
+  mutable k4FWCore::DataHandle<podio::UserDataCollection<float>> m_vectorFloatHandle{"VectorFloat",
+                                                                                     Gaudi::DataHandle::Reader, this};
 
   mutable int m_event{0};
 };
 
-#endif  // K4FWCORE_K4FWCORETEST_CHECKEEXAMPLEEVENTDATA
+#endif // K4FWCORE_K4FWCORETEST_CHECKEEXAMPLEEVENTDATA

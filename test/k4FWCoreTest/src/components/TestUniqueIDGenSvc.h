@@ -20,7 +20,8 @@
 #define TEST_UNIQUEIDGENSVC_H
 
 // GAUDI
-#include <Gaudi/Algorithm.h>
+#include "Gaudi/Accumulators.h"
+#include "Gaudi/Algorithm.h"
 
 #include "k4Interface/IUniqueIDGenSvc.h"
 
@@ -38,6 +39,7 @@ public:
 
 private:
   SmartIF<IUniqueIDGenSvc> m_service;
+  mutable Gaudi::Accumulators::Counter<> m_counter{this, "EventCounter"};
 };
 
-#endif  // TEST_UNIQUEIDGENSVC_H
+#endif // TEST_UNIQUEIDGENSVC_H

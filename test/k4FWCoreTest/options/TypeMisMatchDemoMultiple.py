@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 #
 # Copyright (c) 2014-2024 Key4hep-Project.
 #
@@ -17,24 +18,19 @@
 # limitations under the License.
 #
 
-# This is an example using a producer with a single output and saving that to an RNTuple file
+from Gaudi.Configuration import INFO, DEBUG
+from Configurables import ExampleFunctionalProducerMultiple, TypeMisMatchDemoMultiple, EventDataSvc
 
-from Gaudi.Configuration import INFO
-from Configurables import ExampleFunctionalProducer
-from Configurables import EventDataSvc
-from k4FWCore import ApplicationMgr, IOSvc
+from k4FWCore import ApplicationMgr
 
-iosvc = IOSvc("IOSvc")
-iosvc.Output = "functional_producer_rntuple.root"
-iosvc.OutputType = "RNTuple"
+producer = ExampleFunctionalProducerMultiple("Producer")
 
-
-producer = ExampleFunctionalProducer("ExampleFunctionalProducer")
+mismatch = TypeMisMatchDemoMultiple(InputCollections=["Tracks", "MCParticles1"], OutputLevel=DEBUG)
 
 ApplicationMgr(
-    TopAlg=[producer],
+    TopAlg=[producer, mismatch],
     EvtSel="NONE",
-    EvtMax=10,
+    EvtMax=1,
     ExtSvc=[EventDataSvc("EventDataSvc")],
     OutputLevel=INFO,
 )

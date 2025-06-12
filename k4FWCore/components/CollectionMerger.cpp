@@ -33,109 +33,77 @@
  *  The output collection is specified in the OutputCollection property.
  */
 
+#include <podio/utilities/TypeHelpers.h>
+
 #include "edm4hep/edm4hep.h"
 
 #include "k4FWCore/Transformer.h"
 
 #include <map>
-#include <memory>
 #include <string>
 #include <string_view>
+#include <vector>
 
-struct CollectionMerger final : k4FWCore::Transformer<std::shared_ptr<podio::CollectionBase>(
-                                    const std::vector<const std::shared_ptr<podio::CollectionBase>*>&)> {
+struct CollectionMerger final
+    : k4FWCore::Transformer<podio::CollectionBase*(const std::vector<const podio::CollectionBase*>&)> {
   CollectionMerger(const std::string& name, ISvcLocator* svcLoc)
       : Transformer(name, svcLoc, {KeyValues("InputCollections", {"MCParticles"})},
                     {KeyValues("OutputCollection", {"NewMCParticles"})}) {
     if (System::cmdLineArgs()[0].find("genconf") != std::string::npos) {
       return;
     }
-    m_map["edm4hep::MCParticleCollection"]    = &CollectionMerger::mergeCollections<edm4hep::MCParticleCollection>;
-    m_map["edm4hep::SimTrackerHitCollection"] = &CollectionMerger::mergeCollections<edm4hep::SimTrackerHitCollection>;
-    m_map["edm4hep::CaloHitContributionCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::CaloHitContributionCollection>;
-    m_map["edm4hep::SimCalorimeterHitCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::SimCalorimeterHitCollection>;
-    m_map["edm4hep::RawCalorimeterHitCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::RawCalorimeterHitCollection>;
-    m_map["edm4hep::CalorimeterHitCollection"] = &CollectionMerger::mergeCollections<edm4hep::CalorimeterHitCollection>;
-    m_map["edm4hep::ParticleIDCollection"]     = &CollectionMerger::mergeCollections<edm4hep::ParticleIDCollection>;
-    m_map["edm4hep::ClusterCollection"]        = &CollectionMerger::mergeCollections<edm4hep::ClusterCollection>;
-    m_map["edm4hep::TrackerHit3DCollection"]   = &CollectionMerger::mergeCollections<edm4hep::TrackerHit3DCollection>;
-    m_map["edm4hep::TrackerHitPlaneCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::TrackerHitPlaneCollection>;
-    m_map["edm4hep::RawTimeSeriesCollection"] = &CollectionMerger::mergeCollections<edm4hep::RawTimeSeriesCollection>;
-    m_map["edm4hep::TrackCollection"]         = &CollectionMerger::mergeCollections<edm4hep::TrackCollection>;
-    m_map["edm4hep::VertexCollection"]        = &CollectionMerger::mergeCollections<edm4hep::VertexCollection>;
-    m_map["edm4hep::ReconstructedParticleCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::ReconstructedParticleCollection>;
-    m_map["edm4hep::RecoMCParticleLinkCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::RecoMCParticleLinkCollection>;
-    m_map["edm4hep::CaloHitSimCaloHitLinkCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::CaloHitSimCaloHitLinkCollection>;
-    m_map["edm4hep::TrackerHitSimTrackerHitLinkCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::TrackerHitSimTrackerHitLinkCollection>;
-    m_map["edm4hep::CaloHitMCParticleLinkCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::CaloHitMCParticleLinkCollection>;
-    m_map["edm4hep::ClusterMCParticleLinkCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::ClusterMCParticleLinkCollection>;
-    m_map["edm4hep::TrackMCParticleLinkCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::TrackMCParticleLinkCollection>;
-    m_map["edm4hep::VertexRecoParticleLinkCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::VertexRecoParticleLinkCollection>;
-    m_map["edm4hep::TimeSeriesCollection"] = &CollectionMerger::mergeCollections<edm4hep::TimeSeriesCollection>;
-    m_map["edm4hep::RecDqdxCollection"]    = &CollectionMerger::mergeCollections<edm4hep::RecDqdxCollection>;
-    m_map["edm4hep::GeneratorEventParametersCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::GeneratorEventParametersCollection>;
-    m_map["edm4hep::GeneratorPdfInfoCollection"] =
-        &CollectionMerger::mergeCollections<edm4hep::GeneratorPdfInfoCollection>;
+
+    addToMapAll(edm4hep::edm4hepDataTypes{});
+    addToMapAll(edm4hep::edm4hepLinkTypes{});
   }
 
-  std::shared_ptr<podio::CollectionBase> operator()(
-      const std::vector<const std::shared_ptr<podio::CollectionBase>*>& input) const override {
-    std::shared_ptr<podio::CollectionBase> ret;
+  podio::CollectionBase* operator()(const std::vector<const podio::CollectionBase*>& input) const override {
+    podio::CollectionBase* ret = nullptr;
     debug() << "Merging " << input.size() << " collections" << endmsg;
     std::string_view type = "";
     for (const auto& coll : input) {
-      debug() << "Merging collection of type " << (*coll)->getTypeName() << " with " << (*coll)->size() << " elements"
+      debug() << "Merging collection of type " << coll->getTypeName() << " with " << coll->size() << " elements"
               << endmsg;
       if (type.empty()) {
-        type = (*coll)->getTypeName();
-      } else if (type != (*coll)->getTypeName()) {
+        type = coll->getTypeName();
+      } else if (type != coll->getTypeName()) {
         throw std::runtime_error("Different collection types are not supported");
-        return ret;
       }
-      (this->*m_map.at((*coll)->getTypeName()))(*coll, ret);
+      (this->*m_map.at(coll->getTypeName()))(coll, ret);
     }
     return ret;
   }
 
 private:
-  using MergeType = void (CollectionMerger::*)(const std::shared_ptr<podio::CollectionBase>&,
-                                               std::shared_ptr<podio::CollectionBase>&) const;
+  using MergeType = void (CollectionMerger::*)(const podio::CollectionBase*, podio::CollectionBase*&) const;
   std::map<std::string_view, MergeType> m_map;
-  Gaudi::Property<bool>                 m_copy{this, "Copy", false,
+  Gaudi::Property<bool> m_copy{this, "Copy", false,
                                "Copy the elements of the collections instead of creating a subset collection"};
 
   template <typename T>
-  void mergeCollections(const std::shared_ptr<podio::CollectionBase>& source,
-                        std::shared_ptr<podio::CollectionBase>&       ret) const {
+  void addToMap() {
+    m_map[T::collection_type::typeName] = &CollectionMerger::mergeCollections<typename T::collection_type>;
+  }
+
+  template <typename... T>
+  void addToMapAll(podio::utils::TypeList<T...>&&) {
+    (addToMap<T>(), ...);
+  }
+
+  template <typename T>
+  void mergeCollections(const podio::CollectionBase* source, podio::CollectionBase*& ret) const {
     if (!ret) {
-      ret = std::make_shared<T>();
+      ret = new T();
       if (!m_copy) {
         ret->setSubsetCollection();
       }
     }
-    const auto ptr        = std::static_pointer_cast<T>(ret);
-    const auto sourceColl = std::static_pointer_cast<T>(source);
+    const auto ptr = static_cast<T*>(ret);
+    const auto sourceColl = static_cast<const T*>(source);
     if (m_copy) {
-      for (const auto& elem : *sourceColl) {
-        ptr->push_back(elem.clone());
-      }
+      std::ranges::transform(*sourceColl, std::back_inserter(*ptr), [](const auto& elem) { return elem.clone(); });
     } else {
-      for (const auto& elem : *sourceColl) {
-        ptr->push_back(elem);
-      }
+      std::ranges::copy(*sourceColl, std::back_inserter(*ptr));
     }
   }
 };

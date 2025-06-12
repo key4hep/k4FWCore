@@ -28,10 +28,10 @@ EventHeaderCreator::EventHeaderCreator(const std::string& name, ISvcLocator* svc
 
 StatusCode EventHeaderCreator::execute(const EventContext& ctx) const {
   auto eventNumber = ctx.evt();
-  debug() << "Filling EventHeader with runNumber " << int(m_runNumber) << " and eventNumber "
+  debug() << "Filling EventHeader with runNumber " << m_runNumber.value() << " and eventNumber "
           << eventNumber + m_eventNumberOffset << endmsg;
   auto headers = m_headerCol.createAndPut();
-  auto header  = headers->create();
+  auto header = headers->create();
   header.setRunNumber(m_runNumber);
   header.setEventNumber(eventNumber + m_eventNumberOffset);
   return StatusCode::SUCCESS;

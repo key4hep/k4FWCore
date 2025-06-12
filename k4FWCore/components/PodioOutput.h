@@ -53,7 +53,7 @@ private:
                                                 "An optional file path to copy the outputfile to."};
   /// Switch for keeping or dropping outputs
   KeepDropSwitch m_switch;
-  PodioDataSvc*  m_podioDataSvc;
+  PodioDataSvc* m_podioDataSvc;
   /// The actual ROOT frame writer
   std::unique_ptr<podio::ROOTWriter> m_framewriter;
   /// The stored collections

@@ -24,7 +24,10 @@
 #include "k4FWCore/MetadataUtils.h"
 #include "k4FWCore/PodioDataSvc.h"
 
-template <typename T> class MetaDataHandle {
+namespace k4FWCore {
+
+template <typename T>
+class MetaDataHandle {
 public:
   MetaDataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode a);
   MetaDataHandle(const Gaudi::DataHandle& handle, const std::string& descriptor, Gaudi::DataHandle::Mode a);
@@ -61,10 +64,10 @@ private:
 
 private:
   ServiceHandle<IDataProviderSvc> m_eds;
-  std::string                     m_descriptor;
-  PodioDataSvc*                   m_podio_data_service{nullptr};
-  const Gaudi::DataHandle*        m_dataHandle{nullptr};  // holds the identifier in case we do collection metadata
-  Gaudi::DataHandle::Mode         m_mode;
+  std::string m_descriptor;
+  PodioDataSvc* m_podio_data_service{nullptr};
+  const Gaudi::DataHandle* m_dataHandle{nullptr}; // holds the identifier in case we do collection metadata
+  Gaudi::DataHandle::Mode m_mode;
 };
 
 //---------------------------------------------------------------------------
@@ -87,7 +90,8 @@ MetaDataHandle<T>::MetaDataHandle(const Gaudi::DataHandle& handle, const std::st
 }
 
 //---------------------------------------------------------------------------
-template <typename T> std::optional<T> MetaDataHandle<T>::get_optional() const {
+template <typename T>
+std::optional<T> MetaDataHandle<T>::get_optional() const {
   if (m_podio_data_service) {
     return m_podio_data_service->getMetaDataFrame().getParameter<T>(fullDescriptor());
   }
@@ -95,7 +99,8 @@ template <typename T> std::optional<T> MetaDataHandle<T>::get_optional() const {
 }
 
 //---------------------------------------------------------------------------
-template <typename T> const T MetaDataHandle<T>::get() const {
+template <typename T>
+const T MetaDataHandle<T>::get() const {
   auto optional_parameter = get_optional();
   if (!optional_parameter.has_value()) {
     throw GaudiException("MetaDataHandle empty handle access",
@@ -105,12 +110,14 @@ template <typename T> const T MetaDataHandle<T>::get() const {
 }
 
 //---------------------------------------------------------------------------
-template <typename T> const T MetaDataHandle<T>::get(const T& defaultValue) const {
+template <typename T>
+const T MetaDataHandle<T>::get(const T& defaultValue) const {
   return get_optional().value_or(defaultValue);
 }
 
 //---------------------------------------------------------------------------
-template <typename T> void MetaDataHandle<T>::put(T value) {
+template <typename T>
+void MetaDataHandle<T>::put(T value) {
   if (m_mode != Gaudi::DataHandle::Writer)
     throw GaudiException("MetaDataHandle policy violation", "Put for non-writing MetaDataHandle not allowed",
                          StatusCode::FAILURE);
@@ -133,7 +140,8 @@ template <typename T> void MetaDataHandle<T>::put(T value) {
 }
 
 //---------------------------------------------------------------------------
-template <typename T> std::string MetaDataHandle<T>::fullDescriptor() const {
+template <typename T>
+std::string MetaDataHandle<T>::fullDescriptor() const {
   if (nullptr != m_dataHandle) {
     auto full_descriptor = podio::collMetadataParamName(m_dataHandle->objKey(), m_descriptor);
     // remove the "/Event/" part of the collections' object key if in read mode
@@ -147,7 +155,8 @@ template <typename T> std::string MetaDataHandle<T>::fullDescriptor() const {
 }
 
 //---------------------------------------------------------------------------
-template <typename T> void MetaDataHandle<T>::checkPodioDataSvc() {
+template <typename T>
+void MetaDataHandle<T>::checkPodioDataSvc() {
   // do not do this check during the genconf step
   const std::string cmd = System::cmdLineArgs()[0];
   if (cmd.find("genconf") != std::string::npos)
@@ -157,5 +166,9 @@ template <typename T> void MetaDataHandle<T>::checkPodioDataSvc() {
     std::cout << "Warning: MetaDataHandles require the PodioDataSvc or for compatibility the MetadataSvc" << std::endl;
   }
 }
+} // namespace k4FWCore
+
+template <typename T>
+using MetaDataHandle [[deprecated("Use k4FWCore::MetaDataHandle instead")]] = k4FWCore::MetaDataHandle<T>;
 
 #endif

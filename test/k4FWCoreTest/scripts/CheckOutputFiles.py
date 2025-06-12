@@ -70,6 +70,7 @@ def check_metadata(filename, expected_metadata):
 
 
 check_collections("functional_transformer.root", ["MCParticles", "NewMCParticles"])
+check_collections("gaudi_functional.root", ["MCParticles", "NewMCParticles"])
 check_collections("functional_transformer_cli.root", ["MCParticles", "NewMCParticles"])
 check_collections(
     "functional_transformer_multiple.root",
@@ -82,11 +83,22 @@ check_collections(
         "Tracks",
         "Counter",
         "NewMCParticles",
+        "RecoParticles",
+        "Links",
+        "NewLinks",
     ],
 )
 check_collections(
     "functional_transformer_multiple_output_commands.root",
-    ["VectorFloat", "MCParticles1", "MCParticles2", "SimTrackerHits", "TrackerHits"],
+    [
+        "VectorFloat",
+        "MCParticles1",
+        "MCParticles2",
+        "SimTrackerHits",
+        "TrackerHits",
+        "RecoParticles",
+        "Links",
+    ],
 )
 check_collections("/tmp/a/b/c/functional_producer.root", ["MCParticles"])
 check_collections(
@@ -103,9 +115,17 @@ check_collections(
         "TrackerHits",
         "Tracks",
         "NewMCParticles",
+        "RecoParticles",
+        "Links",
     ],
 )
 
+check_collections("functional_limited_input.root", ["MCParticles", "Links"])
+check_collections("functional_limited_input_all_events.root", ["MCParticles", "Links"])
+
+if podio.version.build_version > podio.version.parse("1.2.0"):
+    check_collections("output_k4test_exampledata_limited.root", ["MCParticles", "Links"])
+    check_collections("output_k4test_exampledata_limited_allevents.root", ["MCParticles", "Links"])
 
 mix_collections = [
     # From file
@@ -115,6 +135,8 @@ mix_collections = [
     "SimTrackerHits",
     "TrackerHits",
     "Tracks",
+    "RecoParticles",
+    "Links",
     # Produced by functional
     "FunctionalVectorFloat",
     "FunctionalMCParticles",
@@ -122,15 +144,20 @@ mix_collections = [
     "FunctionalSimTrackerHits",
     "FunctionalTrackerHits",
     "FunctionalTracks",
+    "FunctionalRecos",
+    "FunctionalLinks",
     # Produced by an old algorithm
     "OldAlgorithmMCParticles",
     "OldAlgorithmSimTrackerHits",
     "OldAlgorithmTrackerHits",
     "OldAlgorithmTracks",
     "OldAlgorithmVectorFloat",
+    "OldAlgorithmRecoParticles",
+    "OldAlgorithmLinks",
     # Produced by the last transformer
     "Counter",
     "TransformedFunctionalMCParticles1",
+    "NewLinks",
 ]
 
 
@@ -157,14 +184,42 @@ for i in range(2):
 
 check_collections(
     "functional_merged_collections.root",
-    ["MCParticles1", "MCParticles2", "MCParticles3", "NewMCParticles", "SimTrackerHits"],
+    [
+        "MCParticles1",
+        "MCParticles2",
+        "MCParticles3",
+        "NewMCParticles",
+        "SimTrackerHits",
+        "Links",
+        "NewLinks",
+    ],
 )
 
 podio_reader = podio.root_io.Reader("functional_merged_collections.root")
 frames = podio_reader.get("events")
 ev = frames[0]
-if len(ev.get("NewMCParticles")) != 4:
-    raise RuntimeError(f"Expected 4 NewMCParticles but got {len(ev.get('NewMCParticles'))}")
+new_mcs = ev.get("NewMCParticles")
+merged_mc_colls = [ev.get(f"MCParticles{i}") for i in range(1, 4)]
+merged_mcs = [mcc[i] for mcc in merged_mc_colls for i in range(len(mcc))]
+if len(new_mcs) != len(merged_mcs):
+    raise RuntimeError(f"Expected {len(merged_mcs)} NewMCParticles but got {len(new_mcs)}")
+for new_mc, orig_mc in zip(new_mcs, merged_mcs):
+    if new_mc.id() != orig_mc.id():
+        raise RuntimeError(
+            f"merged mcs do not match, expected [{new_mc.id().collectionID}, {new_mc.id().index}], actual [{orig_mc.id().collectionID}, {orig_mc.id().index}]"
+        )
+links = ev.get("Links")
+merged_links = ev.get("NewLinks")
+if len(links) * 2 != len(merged_links):
+    raise RuntimeError(f"Expected {len(links)} NewLinks but got {len(merged_links)}")
+for i in range(len(merged_links)):
+    link = links[i % len(links)]
+    merged_link = merged_links[i]
+    if link.id() != merged_link.id():
+        raise RuntimeError(
+            f"merged links do not match, expected [{link.id().collectionID}, {link.id().index}], actual [{merged_link.id().collectionID}, {merged_link.id().index}]"
+        )
+
 
 check_collections("functional_metadata.root", ["MCParticles"])
 
@@ -195,7 +250,11 @@ for key, value in zip(
         raise RuntimeError(
             f"Metadata parameter {key} does not match the expected value, got {metadata.get_parameter(key)} but expected {value}"
         )
-for rntuple in ["functional_producer_rntuple.root", "functional_producer_rntuple_converted.root"]:
+for rntuple in [
+    "functional_producer_rntuple.root",
+    "functional_producer_rntuple_file.root",
+    "functional_producer_rntuple_converted.root",
+]:
     reader = podio.root_io.RNTupleReader(f"{rntuple}")
     frames = podio_reader.get("events")
     if len(frames) != 10:
@@ -254,3 +313,47 @@ for name, events in {
     "functional_transformer_cli_multiple.root": 20,
 }.items():
     check_events(name, events)
+
+
+for i, filename in enumerate(
+    [
+        "output_k4test_exampledata_cellid.root",
+        "functional_metadata_old_algorithm.root",
+        "functional_metadata.root",
+    ]
+):
+    reader = podio.root_io.Reader(filename)
+    configuration_metadata = reader.get("configuration_metadata")[0].get_parameter(
+        "gaudiConfigOptions"
+    )
+    configuration_metadata = [elem.strip(" ,;\n") for elem in configuration_metadata]
+    configuration_metadata = {
+        elem.split("=")[0]: elem.split("=")[1] for elem in configuration_metadata
+    }
+
+    props_and_values = {
+        "intProp": '"42"',
+        "intProp2": '"69"',
+        "floatProp": '"3.14000"',
+        "floatProp2": '"2.71828"',
+        "doubleProp": '"3.1400000"',
+        "doubleProp2": '"2.7182818"',
+        "stringProp": "\"'Hello'\"",
+        "stringProp2": "\"'Hello, World!'\"",
+        "vectorIntProp": '"[ 1 , 2 , 3 ]"',
+        "vectorIntProp2": '"[ 1 , 2 , 3 , 4 ]"',
+        "vectorFloatProp": '"[ 1.10000 , 2.20000 , 3.30000 ]"',
+        "vectorFloatProp2": '"[ 1.10000 , 2.20000 , 3.30000 , 4.40000 ]"',
+        "vectorDoubleProp": '"[ 1.1000000 , 2.2000000 , 3.3000000 ]"',
+        "vectorDoubleProp2": '"[ 1.1000000 , 2.2000000 , 3.3000000 , 4.4000000 ]"',
+        "vectorStringProp": "\"[ 'one' , 'two' , 'three' ]\"",
+        "vectorStringProp2": "\"[ 'one' , 'two' , 'three' , 'four' ]\"",
+    }
+
+    alg_name = "CellIDWriter" if i < 2 else "Producer"
+    for prop, value in props_and_values.items():
+        print(prop, value)
+        if configuration_metadata[f"{alg_name}.{prop} "] != f" {value}":
+            raise RuntimeError(
+                f"Property {prop} has value {configuration_metadata[f'CellIDWriter.{prop} ']}, expected {value}"
+            )

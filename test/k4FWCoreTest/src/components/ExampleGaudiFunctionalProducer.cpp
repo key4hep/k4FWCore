@@ -16,24 +16,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef RECINTERFACE_ICALOREADCELLNOISEMAP_H
-#define RECINTERFACE_ICALOREADCELLNOISEMAP_H
 
-// Gaudi
-#include "GaudiKernel/IAlgTool.h"
+#include "Gaudi/Functional/Producer.h"
 
-/** @class ICaloReadCellNoiseMap RecInterface/RecInterface/ICaloReadCellNoiseMap.h ICaloReadCellNoiseMap.h
- *
- *  Abstract interface for tools that read noise values (RMS and offset) per calorimeter cell
- *
- *  @author Coralie Neubueser
- */
+#include <string>
 
-class ICaloReadCellNoiseMap : virtual public IAlgTool {
-public:
-  DeclareInterfaceID(ICaloReadCellNoiseMap, 1, 0);
+using BaseClass_t = Gaudi::Functional::Traits::BaseClass_t<Gaudi::Algorithm>;
 
-  virtual double noiseRMS(uint64_t aCellId)    = 0;
-  virtual double noiseOffset(uint64_t aCellId) = 0;
+struct ExampleGaudiFunctionalProducer final : Gaudi::Functional::Producer<int(), BaseClass_t> {
+  // The pair in KeyValues can be changed from python and it corresponds
+  // to the name of the output collection
+  ExampleGaudiFunctionalProducer(const std::string& name, ISvcLocator* svcLoc)
+      : Producer(name, svcLoc, KeyValue{"OutputCollectionName", "OutputCollection"}) {}
+
+  // This is the function that will be called to produce the data
+  int operator()() const override { return 3; }
 };
-#endif /* RECINTERFACE_ICALOREADCELLNOISEMAP_H */
+
+DECLARE_COMPONENT(ExampleGaudiFunctionalProducer)

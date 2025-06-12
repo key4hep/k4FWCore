@@ -19,8 +19,10 @@
 
 #include "Gaudi/Functional/Consumer.h"
 #include "GaudiKernel/AnyDataWrapper.h"
+#include "GaudiKernel/DataObject.h"
 #include "GaudiKernel/IDataManagerSvc.h"
 #include "GaudiKernel/IDataProviderSvc.h"
+#include "GaudiKernel/IHiveWhiteBoard.h"
 #include "GaudiKernel/SmartDataPtr.h"
 #include "GaudiKernel/StatusCode.h"
 
@@ -32,7 +34,7 @@
 #include "k4FWCore/FunctionalUtils.h"
 #include "k4FWCore/IMetadataSvc.h"
 
-#include <GaudiKernel/IHiveWhiteBoard.h>
+#include <algorithm>
 #include <memory>
 #include <utility>
 
@@ -52,11 +54,11 @@ public:
   // These are the collections we want to save to the frame
   mutable std::vector<std::string> m_collectionsToSave;
 
-  ServiceHandle<IIOSvc>     iosvc{this, "IOSvc", "IOSvc"};
-  SmartIF<IHiveWhiteBoard>  m_hiveWhiteBoard;
+  ServiceHandle<IIOSvc> iosvc{this, "IOSvc", "IOSvc"};
+  SmartIF<IHiveWhiteBoard> m_hiveWhiteBoard;
   SmartIF<IDataProviderSvc> m_dataSvc;
-  SmartIF<IMetadataSvc>     m_metadataSvc;
-  mutable bool              m_first{true};
+  SmartIF<IMetadataSvc> m_metadataSvc;
+  mutable bool m_first{true};
 
   StatusCode initialize() override {
     if (!iosvc.isValid()) {
@@ -83,10 +85,6 @@ public:
       return StatusCode::FAILURE;
     }
 
-    return StatusCode::SUCCESS;
-  }
-
-  StatusCode finalize() override {
     podio::Frame config_metadata_frame;
 
     //// prepare job options metadata ///////////////////////
@@ -105,9 +103,9 @@ public:
     }
     // Some default components are not captured by the job option service
     // and have to be traversed like this. Note that Gaudi!577 will improve this.
-    for (const auto* name : {"NTupleSvc"}) {
+    for (const auto* name : {"ApplicationMgr", "MessageSvc", "NTupleSvc"}) {
       std::stringstream config_stream;
-      auto              svc = service<IProperty>(name);
+      auto svc = service<IProperty>(name);
       if (!svc.isValid())
         continue;
       for (const auto* property : svc->getProperties()) {
@@ -122,6 +120,10 @@ public:
     }
     iosvc->getWriter().writeFrame(config_metadata_frame, "configuration_metadata");
 
+    return StatusCode::SUCCESS;
+  }
+
+  StatusCode finalize() override {
     if (const auto* metadata_frame = m_metadataSvc->getFrame(); metadata_frame) {
       iosvc->getWriter().writeFrame(*metadata_frame, podio::Category::Metadata);
     }
@@ -132,8 +134,8 @@ public:
   }
 
   void getOutputCollections() const {
-    SmartIF<IDataManagerSvc> m_mgr;
-    m_mgr = eventSvc();
+    SmartIF<IDataManagerSvc> mgr;
+    mgr = eventSvc();
 
     SmartDataPtr<DataObject> root(eventSvc(), "/Event");
     if (!root) {
@@ -146,18 +148,13 @@ public:
       error() << "Failed to retrieve the root registry object" << endmsg;
       return;
     }
-    auto mgr = eventSvc().as<IDataManagerSvc>();
-    if (!mgr) {
-      error() << "Failed to retrieve IDataManagerSvc" << endmsg;
-      return;
-    }
     std::vector<IRegistry*> leaves;
-    StatusCode              sc = m_mgr->objectLeaves(pObj, leaves);
+    StatusCode sc = mgr->objectLeaves(pObj, leaves);
     if (!sc.isSuccess()) {
       error() << "Failed to retrieve object leaves" << endmsg;
       return;
     }
-    for (auto& pReg : leaves) {
+    for (const auto& pReg : leaves) {
       if (pReg->name() == k4FWCore::frameLocation) {
         continue;
       }
@@ -167,7 +164,9 @@ public:
       //   info() << "Leaf " << pReg->name() << " has no object" << endmsg;
       //   continue;
       // }
-      m_availableCollections.insert(pReg->name().substr(1, pReg->name().size() - 1));
+      auto collName = pReg->name().substr(1, pReg->name().size() - 1);
+      debug() << "Adding " << collName << " to the list of available collections" << endmsg;
+      m_availableCollections.insert(std::move(collName));
     }
   }
 
@@ -185,18 +184,22 @@ public:
       }
     }
 
-    DataObject*                   p;
-    StatusCode                    code = m_dataSvc->retrieveObject("/Event" + k4FWCore::frameLocation, p);
-    AnyDataWrapper<podio::Frame>* ptr;
+    DataObject* p;
+    StatusCode code = m_dataSvc->retrieveObject("/Event" + k4FWCore::frameLocation, p);
+    std::unique_ptr<AnyDataWrapper<podio::Frame>> ptr;
     // This is the case when we are reading from a file
+    // Putting it into a unique_ptr will make sure it's deleted
     if (code.isSuccess()) {
-      m_dataSvc->unregisterObject(p).ignore();
-      ptr = dynamic_cast<AnyDataWrapper<podio::Frame>*>(p);
+      const auto sc = m_dataSvc->unregisterObject(p);
+      if (!sc.isSuccess()) {
+        error() << "Failed to unregister object" << endmsg;
+        return;
+      }
+      ptr = std::unique_ptr<AnyDataWrapper<podio::Frame>>(dynamic_cast<AnyDataWrapper<podio::Frame>*>(p));
     }
     // This is the case when no reading is being done
-    // Will be deleted by the store
     else {
-      ptr = new AnyDataWrapper<podio::Frame>(podio::Frame());
+      ptr = std::make_unique<AnyDataWrapper<podio::Frame>>(podio::Frame());
     }
 
     const auto& frameCollections = ptr->getData().getAvailableCollections();
@@ -205,9 +208,12 @@ public:
       // and cache them
       getOutputCollections();
       for (const auto& coll : m_availableCollections) {
-        if (iosvc->checkIfWriteCollection(coll)) {
+        const auto doWrite = iosvc->checkIfWriteCollection(coll);
+        debug() << "Checking if " << coll << " should be written: " << (doWrite ? "yes" : "no") << endmsg;
+        if (doWrite) {
           m_collectionsToSave.push_back(coll);
           if (std::find(frameCollections.begin(), frameCollections.end(), coll) == frameCollections.end()) {
+            debug() << coll << " has to be added to the Frame" << endmsg;
             m_collectionsToAdd.push_back(coll);
           }
         }
@@ -218,47 +224,68 @@ public:
     // Remove the collections owned by a Frame (if any) so that they are not
     // deleted by the store (and later deleted by the Frame, triggering a double
     // delete)
-    for (auto& coll : frameCollections) {
+    for (const auto& coll : frameCollections) {
+      debug() << "Taking ownership of collection " << coll << " from the IOSvc as it belongs to a Frame" << endmsg;
       DataObject* storeCollection;
       if (m_dataSvc->retrieveObject("/Event/" + coll, storeCollection).isFailure()) {
-        error() << "Failed to retrieve collection " << coll << endmsg;
-        return;
+        debug() << "Failed to retrieve collection " << coll << " from data service" << endmsg;
+        continue;
       }
       // We take ownership back from the store
       if (m_dataSvc->unregisterObject(storeCollection).isFailure()) {
-        error() << "Failed to unregister collection " << coll << endmsg;
+        error() << "Failed to unregister collection " << coll << " from data service" << endmsg;
         return;
       }
+      // We still have to delete the AnyDataWrapper to avoid a leak
+      const auto storePtr = dynamic_cast<AnyDataWrapper<std::unique_ptr<podio::CollectionBase>>*>(storeCollection);
+      // Assign to an unused variable to silence the warning about not using the
+      // result of release()
+      [[maybe_unused]] auto releasedPtr = storePtr->getData().release();
+      delete storePtr;
     }
 
-    for (auto& coll : m_collectionsToAdd) {
+    std::vector<std::string_view> collectionsToRemove;
+    for (const auto& coll : m_collectionsToAdd) {
+      debug() << "Adding collection " << coll << " to the IOSvc Frame" << endmsg;
       DataObject* storeCollection;
       if (m_dataSvc->retrieveObject("/Event/" + coll, storeCollection).isFailure()) {
-        error() << "Failed to retrieve collection " << coll << endmsg;
-        return;
+        debug() << "Failed to retrieve collection " << coll << " from the data service" << endmsg;
+        continue;
       }
       // We take ownership back from the store
       if (m_dataSvc->unregisterObject(storeCollection).isFailure()) {
-        error() << "Failed to unregister collection " << coll << endmsg;
-        return;
+        debug() << "Failed to unregister collection " << coll << " from the data service" << endmsg;
+        continue;
       }
-      const auto collection = dynamic_cast<AnyDataWrapper<std::shared_ptr<podio::CollectionBase>>*>(storeCollection);
-      if (!collection) {
+      const auto collection = dynamic_cast<AnyDataWrapper<std::unique_ptr<podio::CollectionBase>>*>(storeCollection);
+      if (collection) {
+        ptr->getData().put(std::move(collection->getData()), coll);
+        delete collection;
+      } else {
         // Check the case when the data has been produced using the old DataHandle
         const auto old_collection = dynamic_cast<DataWrapperBase*>(storeCollection);
         if (!old_collection) {
-          error() << "Failed to cast collection " << coll << endmsg;
-          return;
+          // This can happen for objects that are not collections like in the
+          // MarlinWrapper for converter maps or a LCEvent, or, in general,
+          // anything else
+          info() << "Object in the store with name " << coll
+                 << " does not look like a collection so it can not be written to the output file" << endmsg;
+          // Collections to remove in m_collectionsToAdd are saved for later
+          // not to modify the vector while iterating over it
+          collectionsToRemove.push_back(coll);
+          m_collectionsToSave.erase(std::remove(m_collectionsToSave.begin(), m_collectionsToSave.end(), coll),
+                                    m_collectionsToSave.end());
         } else {
           std::unique_ptr<podio::CollectionBase> uptr(
               const_cast<podio::CollectionBase*>(old_collection->collectionBase()));
           ptr->getData().put(std::move(uptr), coll);
         }
-
-      } else {
-        std::unique_ptr<podio::CollectionBase> uptr(collection->getData().get());
-        ptr->getData().put(std::move(uptr), coll);
       }
+    }
+
+    for (const auto& coll : collectionsToRemove) {
+      m_collectionsToAdd.erase(std::remove(m_collectionsToAdd.begin(), m_collectionsToAdd.end(), coll),
+                               m_collectionsToAdd.end());
     }
 
     debug() << "Writing frame" << endmsg;

@@ -22,16 +22,19 @@
 #include "GaudiKernel/DataSvc.h"
 #include "GaudiKernel/IConversionSvc.h"
 // PODIO
-#include <utility>
 #include "podio/CollectionBase.h"
 #include "podio/CollectionIDTable.h"
 #include "podio/Frame.h"
 #include "podio/ROOTReader.h"
+#include <utility>
 // Forward declarations
 #include "k4FWCore/DataWrapper.h"
 class DataWrapperBase;
 class PodioOutput;
-template <typename T> class MetaDataHandle;
+namespace k4FWCore {
+template <typename T>
+class MetaDataHandle;
+}
 
 /** @class PodioEvtSvc EvtDataSvc.h
  *
@@ -40,7 +43,8 @@ template <typename T> class MetaDataHandle;
  *  @author B. Hegner
  */
 class PodioDataSvc : public DataSvc {
-  template <typename T> friend class MetaDataHandle;
+  template <typename T>
+  friend class k4FWCore::MetaDataHandle;
   friend class PodioOutput;
   friend class Lcio2EDM4hepTool;
 
@@ -65,7 +69,8 @@ public:
 
   const std::string_view getCollectionType(const std::string& collName);
 
-  template <typename T> StatusCode readCollection(const std::string& collName) {
+  template <typename T>
+  StatusCode readCollection(const std::string& collName) {
     DataObject* objectPtr = nullptr;
     if (DataSvc::findObject("/Event", "/" + collName, objectPtr)) {
       debug() << "Collection " << collName << " already read, not reading it again" << endmsg;
@@ -90,6 +95,8 @@ public:
   /// TODO: Make this private again after conversions have been properly solved
   podio::Frame& getMetaDataFrame() { return m_metadataframe; }
 
+  void setCollsToRead(const std::vector<std::string>& collsToRead) { m_collsToRead = collsToRead; }
+
 private:
   /// PODIO reader for ROOT files
   podio::ROOTReader m_reader;
@@ -109,14 +116,16 @@ private:
 
   // Registry of data wrappers; needed for memory management
   std::vector<DataWrapperBase*> m_podio_datawrappers;
+  /// The names of the collections to read (set externally)
+  std::vector<std::string> m_collsToRead{};
 
 protected:
   /// ROOT file name the input is read from. Set by option filename
   std::vector<std::string> m_filenames;
-  std::string              m_filename;
+  std::string m_filename;
   /// Jump to nth events at the beginning. Set by option FirstEventEntry
   /// This option is helpful when we want to debug an event in the middle of a file
   unsigned m_1stEvtEntry{0};
-  bool     m_bounds_check_needed{true};
+  bool m_bounds_check_needed{true};
 };
-#endif  // CORE_PODIODATASVC_H
+#endif // CORE_PODIODATASVC_H

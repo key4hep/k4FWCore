@@ -25,7 +25,7 @@
 #include <unordered_map>
 
 namespace edm4hep {
-  class CalorimeterHit;
+class CalorimeterHit;
 }
 /** @class ITopoClusterInputTool RecInterface/RecInterface/ITopoClusterInput.h ITopoClusterInputTool.h
  *

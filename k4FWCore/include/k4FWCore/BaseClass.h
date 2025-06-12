@@ -26,11 +26,12 @@
 
 // Base class used for the Traits template argument of the
 // Gaudi::Functional algorithms
-struct [[deprecated(
-    "Functional algorithms using the BaseClass.h header are deprecated and will be removed in the "
-    "future")]] BaseClass_t {
-  template <typename T> using InputHandle  = DataObjectReadHandle<DataWrapper<T>>;
-  template <typename T> using OutputHandle = DataObjectWriteHandle<DataWrapper<T>>;
+struct [[deprecated("Functional algorithms using the BaseClass.h header are deprecated and will be removed in the "
+                    "future")]] BaseClass_t {
+  template <typename T>
+  using InputHandle = DataObjectReadHandle<DataWrapper<T>>;
+  template <typename T>
+  using OutputHandle = DataObjectWriteHandle<DataWrapper<T>>;
 
   using BaseClass = Gaudi::Algorithm;
 };

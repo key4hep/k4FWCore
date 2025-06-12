@@ -29,8 +29,8 @@
 
 struct ExampleFunctionalConsumerRuntimeCollectionsMultiple final
     : k4FWCore::Consumer<void(const std::vector<const edm4hep::MCParticleCollection*>& particleVec,
-                              const std::vector<const edm4hep::TrackCollection*>&      trackVec,
-                              const edm4hep::SimTrackerHitCollection&                  simTrackerHits)> {
+                              const std::vector<const edm4hep::TrackCollection*>& trackVec,
+                              const edm4hep::SimTrackerHitCollection& simTrackerHits)> {
   // The pair in KeyValues can be changed from python and it corresponds
   // to the name of the input collections
   ExampleFunctionalConsumerRuntimeCollectionsMultiple(const std::string& name, ISvcLocator* svcLoc)
@@ -40,7 +40,7 @@ struct ExampleFunctionalConsumerRuntimeCollectionsMultiple final
 
   // This is the function that will be called to produce the data
   void operator()(const std::vector<const edm4hep::MCParticleCollection*>& particleVec,
-                  const std::vector<const edm4hep::TrackCollection*>&      trackVec,
+                  const std::vector<const edm4hep::TrackCollection*>& trackVec,
                   const edm4hep::SimTrackerHitCollection&) const override {
     info() << "Received " << particleVec.size() << " particle collections and " << trackVec.size()
            << " track collections" << endmsg;

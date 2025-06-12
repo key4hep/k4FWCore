@@ -39,7 +39,7 @@ StatusCode k4FWCoreTest_cellID_writer::initialize() {
 
 StatusCode k4FWCoreTest_cellID_writer::execute(const EventContext&) const {
   edm4hep::SimTrackerHitCollection* simTrackerHits = m_simTrackerHitWriterHandle.createAndPut();
-  auto                              hit            = simTrackerHits->create();
+  auto hit = simTrackerHits->create();
   hit.setPosition({3, 4, 5});
 
   return StatusCode::SUCCESS;

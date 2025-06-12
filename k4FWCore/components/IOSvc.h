@@ -43,22 +43,16 @@ public:
   StatusCode initialize() override;
   StatusCode finalize() override;
 
-  std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, std::vector<std::string>, podio::Frame> next()
-      override;
+  std::tuple<std::vector<podio::CollectionBase*>, std::vector<std::string>, podio::Frame> next() override;
 
   std::shared_ptr<std::vector<std::string>> getCollectionNames() const override {
     return std::make_shared<std::vector<std::string>>(m_collectionNames);
   }
 
-  void setReadingCollectionNames(const std::vector<std::string>& names);
-  void setReadingFileNames(const std::vector<std::string>& names);
-
 protected:
   Gaudi::Property<std::vector<std::string>> m_collectionNames{
       this, "CollectionNames", {}, "List of collections to read"};
-  Gaudi::Property<std::vector<std::string>> m_readingFileNamesDeprecated{this, "input", {}, "List of files to read"};
   Gaudi::Property<std::vector<std::string>> m_readingFileNames{this, "Input", {}, "List of files to read"};
-  Gaudi::Property<std::string> m_writingFileNameDeprecated{this, "output", {}, "List of files to write output to"};
   Gaudi::Property<std::string> m_writingFileName{this, "Output", {}, "List of files to write output to"};
   Gaudi::Property<std::vector<std::string>> m_outputCommands{
       this, "outputCommands", {"keep *"}, "A set of commands to declare which collections to keep or drop."};
@@ -90,10 +84,10 @@ protected:
   void deleteReader() override { m_reader.reset(); }
 
   SmartIF<IDataProviderSvc> m_dataSvc;
-  SmartIF<IIncidentSvc>     m_incidentSvc;
-  SmartIF<IHiveWhiteBoard>  m_hiveWhiteBoard;
-  SmartIF<IMetadataSvc>     m_metadataSvc;
-  void                      handle(const Incident& incident) override;
+  SmartIF<IIncidentSvc> m_incidentSvc;
+  SmartIF<IHiveWhiteBoard> m_hiveWhiteBoard;
+  SmartIF<IMetadataSvc> m_metadataSvc;
+  void handle(const Incident& incident) override;
 
   int m_entries{0};
   int m_nextEntry{0};

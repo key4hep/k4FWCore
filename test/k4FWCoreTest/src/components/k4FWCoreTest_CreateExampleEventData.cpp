@@ -42,6 +42,8 @@ k4FWCoreTest_CreateExampleEventData::k4FWCoreTest_CreateExampleEventData(const s
   declareProperty("trackhits", m_TrackerHitHandle, "Dummy Hit collection (output)");
   declareProperty("tracks", m_trackHandle, "Dummy track collection (output)");
   declareProperty("vectorfloat", m_vectorFloatHandle, "Dummy collection (output)");
+  declareProperty("recoparticles", m_recoHandle, "Dummy collection (output)");
+  declareProperty("links", m_linkHandle, "Dummy collection (output)");
   // Set Cardinality to 1 because this algorithm is not prepared to run in parallel
   setProperty("Cardinality", 1).ignore();
 }
@@ -66,16 +68,16 @@ StatusCode k4FWCoreTest_CreateExampleEventData::execute(const EventContext&) con
   particles->create(2, 3, 4, 5.f, 6.f, 7.f);
 
   edm4hep::SimTrackerHitCollection* simTrackerHits = m_simTrackerHitHandle.createAndPut();
-  auto                              hit            = simTrackerHits->create();
+  auto hit = simTrackerHits->create();
   hit.setPosition({3, 4, 5});
 
   edm4hep::TrackerHit3DCollection* trackerHits = m_TrackerHitHandle.createAndPut();
-  auto                             trackerHit  = trackerHits->create();
+  auto trackerHit = trackerHits->create();
   trackerHit.setPosition({3, 4, 5});
 
   edm4hep::TrackCollection* tracks = m_trackHandle.createAndPut();
-  auto                      track  = tracks->create();
-  auto                      track2 = tracks->create();
+  auto track = tracks->create();
+  auto track2 = tracks->create();
   // set members
   track.setType(1);
   track.setChi2(2.1);
@@ -94,6 +96,19 @@ StatusCode k4FWCoreTest_CreateExampleEventData::execute(const EventContext&) con
   track.addToTracks(track2);
 
   m_event++;
+
+  auto* recos = m_recoHandle.createAndPut();
+  for (int i = 0; i < 5; ++i) {
+    auto reco = recos->create();
+    reco.setPDG(i);
+  }
+
+  auto links = m_linkHandle.createAndPut();
+  for (size_t i = 0; i < 2; ++i) {
+    auto link = links->create();
+    link.setFrom((*recos)[i]);
+    link.setTo((*particles)[i]);
+  }
 
   return StatusCode::SUCCESS;
 }

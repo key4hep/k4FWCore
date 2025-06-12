@@ -38,6 +38,8 @@ producer0 = ExampleFunctionalProducerMultiple(
     OutputCollectionSimTrackerHits=["SimTrackerHits0"],
     OutputCollectionTrackerHits=["TrackerHits0"],
     OutputCollectionTracks=["Tracks0"],
+    OutputCollectionRecoParticles=["Recos0"],
+    OutputCollectionLinks=["Links0"],
     ExampleInt=5,
 )
 producer1 = ExampleFunctionalProducerMultiple(
@@ -48,6 +50,8 @@ producer1 = ExampleFunctionalProducerMultiple(
     OutputCollectionSimTrackerHits=["SimTrackerHits1"],
     OutputCollectionTrackerHits=["TrackerHits1"],
     OutputCollectionTracks=["Tracks1"],
+    OutputCollectionRecoParticles=["Recos1"],
+    OutputCollectionLinks=["Links1"],
     ExampleInt=5,
 )
 producer2 = ExampleFunctionalProducerMultiple(
@@ -58,6 +62,8 @@ producer2 = ExampleFunctionalProducerMultiple(
     OutputCollectionSimTrackerHits=["SimTrackerHits2"],
     OutputCollectionTrackerHits=["TrackerHits2"],
     OutputCollectionTracks=["Tracks2"],
+    OutputCollectionRecoParticles=["Recos2"],
+    OutputCollectionLinks=["Links2"],
     ExampleInt=5,
 )
 
@@ -72,6 +78,8 @@ transformer = ExampleFunctionalTransformerRuntimeCollectionsMultiple(
     ],
     InputCollectionTrackerHits=["TrackerHits0", "TrackerHits1", "TrackerHits2"],
     InputCollectionTracks=["Tracks0", "Tracks1", "Tracks2"],
+    InputCollectionRecoParticles=["Recos0", "Recos1", "Recos2"],
+    InputCollectionLinks=["Links0", "Links1", "Links2"],
     OutputCollectionFloat=["NewVectorFloat0", "NewVectorFloat1", "NewVectorFloat2"],
     OutputCollectionParticles1=[
         "NewMCParticles0",
@@ -92,6 +100,8 @@ transformer = ExampleFunctionalTransformerRuntimeCollectionsMultiple(
         "NewTrackerHits2",
     ],
     OutputCollectionTracks=["NewTracks0", "NewTracks1", "NewTracks2"],
+    OutputCollectionRecos=["NewRecos0", "NewRecos1", "NewRecos2"],
+    OutputCollectionLinks=["NewLinks0", "NewLinks1", "NewLinks2"],
     Offset=0,
 )
 
@@ -102,6 +112,9 @@ consumer0 = ExampleFunctionalConsumerMultiple(
     InputCollectionSimTrackerHits=["NewSimTrackerHits0"],
     InputCollectionTrackerHits=["NewTrackerHits0"],
     InputCollectionTracks=["NewTracks0"],
+    InputCollectionRecoParticles=["NewRecos0"],
+    InputCollectionLinks=["NewLinks0"],
+    Offset=0,
 )
 
 consumer1 = ExampleFunctionalConsumerMultiple(
@@ -111,6 +124,9 @@ consumer1 = ExampleFunctionalConsumerMultiple(
     InputCollectionSimTrackerHits=["NewSimTrackerHits1"],
     InputCollectionTrackerHits=["NewTrackerHits1"],
     InputCollectionTracks=["NewTracks1"],
+    InputCollectionRecoParticles=["NewRecos1"],
+    InputCollectionLinks=["NewLinks1"],
+    Offset=0,
 )
 
 consumer2 = ExampleFunctionalConsumerMultiple(
@@ -120,6 +136,9 @@ consumer2 = ExampleFunctionalConsumerMultiple(
     InputCollectionSimTrackerHits=["NewSimTrackerHits2"],
     InputCollectionTrackerHits=["NewTrackerHits2"],
     InputCollectionTracks=["NewTracks2"],
+    InputCollectionRecoParticles=["NewRecos2"],
+    InputCollectionLinks=["NewLinks2"],
+    Offset=0,
 )
 
 

@@ -1,3 +1,192 @@
+# v01-03
+
+* 2025-05-27 Thomas Madlener ([PR#317](https://github.com/key4hep/k4FWCore/pull/317))
+  - Move the `DataHandle` and `MetaDataHandle` into the `k4FWCore` namespace to make origins more obvious
+    - Keep deprecated `DataHandle` and `MetaDataHandle` aliases in global namespace for compatibility to allow for a smoother migration
+
+* 2025-05-26 Thomas Madlener ([PR#321](https://github.com/key4hep/k4FWCore/pull/321))
+  - Remove the usage of `PodioDataSvc` from the `DataHandle` as it's not necessary
+  - Harmonize the behavior of the constructors
+  - Remove the declaration of the unimplemented default constructor
+
+* 2025-05-21 jmcarcell ([PR#306](https://github.com/key4hep/k4FWCore/pull/306))
+  - Add a `--log-level` flag to `k4run` to make it possible to configure the log level at runtime via the command line
+    - accpeted values are `verbose`, `debug`, `info`, `warning` and `error`
+    - The log level will apply to the python logging facilities and will also be set in the `ApplicationMgr.OutputLevel`
+  - Make the python logging a bit more informative by adding the log level as well as some module and function information to the message
+  - Deprecate the `--verbose` option in favor of `--log-level=verbose`
+
+* 2025-05-20 Thomas Madlener ([PR#320](https://github.com/key4hep/k4FWCore/pull/320))
+  - Remove the declaration of `DataHandle::getCollMetadataCellID` since the implementation has been removed long ago
+
+* 2025-05-20 jmcarcell ([PR#315](https://github.com/key4hep/k4FWCore/pull/315))
+  - Bump the required version of podio. 1.3 is needed since https://github.com/key4hep/k4FWCore/pull/305 because of `edm4hep::DataTypes` and `edm4hep::LinkTypes`
+
+* 2025-05-15 jmcarcell ([PR#313](https://github.com/key4hep/k4FWCore/pull/313))
+  - Use signal to stop immediately after receiving a SIGPIPE. Before, the output from k4run itself would always print and the pipe command (for example `| head`) would only be applied to the output from Gaudi.
+  - Add a test that uses pipes
+
+* 2025-05-13 jmcarcell ([PR#305](https://github.com/key4hep/k4FWCore/pull/305))
+  - Remove the hardcoded collections in the CollectionMerger, using https://github.com/AIDASoft/podio/pull/761. This applies to all collections that are available in EDM4hep.
+  - Fix link collections that are currently not working since the data type name is not `edm4hep::...LinkCollection` but `podio::LinkCollection...`
+  - Require a newer version of podio in the CMakeLists.txt
+
+* 2025-05-05 jmcarcell ([PR#304](https://github.com/key4hep/k4FWCore/pull/304))
+  - Fix running algorithms with RNTuples as their input and add tests, not working before because the TTRee reader in podio was being used
+  - Add two tests to create an rntuple and read it
+  - Bump the required version of podio to 1.3 since the function `get_reader` in podio only has support for lists of files as an input after https://github.com/AIDASoft/podio/pull/729
+
+* 2025-04-30 jmcarcell ([PR#307](https://github.com/key4hep/k4FWCore/pull/307))
+  - Clean up several CMakeLists.txt files. For example, remove redundant calls to `find_package`.
+  - Move python files that will be installed to a single place
+
+* 2025-04-29 Thomas Madlener ([PR#308](https://github.com/key4hep/k4FWCore/pull/308))
+  - Add some documentation about the `AlgTimingAuditor` and the `TimelineSvc` to show how timing information can be obtained from Gaudi at different levels of details.
+
+* 2025-03-27 Giovanni Marchiori ([PR#299](https://github.com/key4hep/k4FWCore/pull/299))
+  - Remove ICaloReadCellNoisMap interface since it provides the same functionality as INoiseConstTool
+
+* 2025-03-18 jmcarcell ([PR#297](https://github.com/key4hep/k4FWCore/pull/297))
+  - Remove the deprecated `input` and `output` properties for IOSvc
+
+* 2025-03-07 Mateusz Jakub Fila ([PR#288](https://github.com/key4hep/k4FWCore/pull/288))
+  - Update`UniqueIDGenSvc`documentation and add example usage with a functional algorithm
+
+* 2025-03-05 Mateusz Jakub Fila ([PR#295](https://github.com/key4hep/k4FWCore/pull/295))
+  - Replace `UniqueIDGenSvc` property `ThrowIfDuplicate` with `CheckDuplicates`. The service will cache ids and check duplicates only if `CheckDuplicates` is set to `true`. It's enabled by default for the Debug builds.
+
+* 2025-03-05 Thomas Madlener ([PR#290](https://github.com/key4hep/k4FWCore/pull/290))
+  - Make the `PodioInput.collections`, `IOSvc.CollectionNames` and `Reader.InputCollections` properties actually work like expected. They now properly limit the collections that are read and no other collections will be available. **This requires building against podio > v1.2`**, otherwiset the current behavior will be used, where collections that are not requested will still be available.
+
+* 2025-02-26 Mateusz Jakub Fila ([PR#287](https://github.com/key4hep/k4FWCore/pull/287))
+  - Use the same event and run type in `UniqueIDGenSvc` as in `edm4hep::EventHeader`. Add generating id directly from `edm4hep::EventHeader`. **This changes the ID values !**
+
+* 2025-02-25 Mateusz Jakub Fila ([PR#293](https://github.com/key4hep/k4FWCore/pull/293))
+  - Fix typo in docs about migrating from `k4DataSvc`
+
+* 2025-02-23 Mateusz Jakub Fila ([PR#291](https://github.com/key4hep/k4FWCore/pull/291))
+  - Fix fixture used in FunctionalMTFile test
+
+* 2025-02-17 Thomas Madlener ([PR#289](https://github.com/key4hep/k4FWCore/pull/289))
+  - Bump the `cvmfs-contrib` github action to lastet version `v5` to fix caching issues.
+
+* 2025-02-13 jmcarcell ([PR#286](https://github.com/key4hep/k4FWCore/pull/286))
+  - Add a dev3 workflow using the key4hep-build action
+
+* 2025-02-12 jmcarcell ([PR#284](https://github.com/key4hep/k4FWCore/pull/284))
+  - Add LANGUAGES CXX to CMakeLists.txt to disable checks for a C compiler
+
+* 2025-02-11 jmcarcell ([PR#283](https://github.com/key4hep/k4FWCore/pull/283))
+  - Add a Link collection to the tests
+
+# v01-02-00
+
+* 2025-02-04 jmcarcell ([PR#282](https://github.com/key4hep/k4FWCore/pull/282))
+  - Use typeid instead of `EDM4hep::typeName` since not every EDM4hep type has `::typeName`.
+
+* 2025-02-04 Mateusz Jakub Fila ([PR#279](https://github.com/key4hep/k4FWCore/pull/279))
+  - Fix algorithm properties related to `eventNumber` and `runNumber` to deduce their type
+
+* 2025-02-03 jmcarcell ([PR#281](https://github.com/key4hep/k4FWCore/pull/281))
+  - Improve the responsiveness of k4run by importing a Reader from podio only when it's needed.
+
+* 2025-02-03 jmcarcell ([PR#280](https://github.com/key4hep/k4FWCore/pull/280))
+  - Make functional algorithms read `DataWrapper<podio::CollectionBase>` 
+  - Add a test producing a collection in a `DataWrapper<podio::CollectionBase>` and reading it in a functional algorithm
+
+* 2025-02-03 jmcarcell ([PR#278](https://github.com/key4hep/k4FWCore/pull/278))
+  - Fix compilation warning about comparing integers with different signs, related to https://github.com/key4hep/EDM4hep/pull/398
+
+* 2025-02-03 jmcarcell ([PR#275](https://github.com/key4hep/k4FWCore/pull/275))
+  - Make sure that the internal casts that happen for functional algorithms do not silently cast to wrong types.
+
+* 2025-01-31 jmcarcell ([PR#277](https://github.com/key4hep/k4FWCore/pull/277))
+  - Use typeid to allow compiling functional algorithms that use Links
+
+* 2025-01-31 Thomas Madlener ([PR#276](https://github.com/key4hep/k4FWCore/pull/276))
+  - Clean up the function that reads inputs in functional algorithms by defining an alias for the EDM4hep type and using that when possible. Remove `const` from this type and add it where needed.
+  - Change `std::remove_cvref_t` to `std::remove_cv_t` since there the former is not needed.
+
+* 2025-01-29 Thomas Madlener ([PR#273](https://github.com/key4hep/k4FWCore/pull/273))
+  - Make it possible to use `edm4hep::utils::ParticleIDMeta` with the `MetadataSvc`
+    - Add template specializations for `get` and `put` that defer to the corresponding utility calls in EDM4hep
+    - Add tests to ensure that metadata is indeed usable this way with the utilities in EDM4hep
+
+* 2025-01-24 jmcarcell ([PR#269](https://github.com/key4hep/k4FWCore/pull/269))
+  - Improve the documentation about extending the parser for k4run
+
+* 2025-01-16 tmadlener ([PR#230](https://github.com/key4hep/k4FWCore/pull/230))
+  - Configure the `k4FWCoreConfig.cmake` to put a bit more information in there
+    - Make sure all dependencies are also found for dependent packages
+    - Make sure dependency versions are discovered again consistently
+    - Make sure to export the current k4FWCore version for downstream consumers
+
+* 2025-01-09 jmcarcell ([PR#270](https://github.com/key4hep/k4FWCore/pull/270))
+  - Use CMake fixtures for tests that require other tests
+    - Tests will now run only if all the setup tests pass, otherwise they will be skipped
+
+* 2024-12-20 Thomas Madlener ([PR#271](https://github.com/key4hep/k4FWCore/pull/271))
+  - Remove an unnecessary r-value reference qualifier for sinking the metadata Frame into the `MetadataSvc`.
+
+* 2024-12-20 Mateusz Jakub Fila ([PR#267](https://github.com/key4hep/k4FWCore/pull/267))
+  - Added documentation for reading and writing EDM4hep files with the `IOSvc`
+  - Moved documentation on `k4DataSvc` to legacy page
+
+* 2024-12-18 jmcarcell ([PR#264](https://github.com/key4hep/k4FWCore/pull/264))
+  - Writer: Ignore objects that are not collections in the store and write an output Frame
+    - Add `const` where possible
+    - Add `[[maybe_unused]]` to avoid a warning about not using the result of a `.release()` (the warning is correct in most cases, in this case it's the Gaudi store who owns it).
+    - Remove some code in the Writer that is not necessary.
+
+* 2024-12-10 jmcarcell ([PR#265](https://github.com/key4hep/k4FWCore/pull/265))
+  - Remove the check for TrackerHit3D from edm4hep
+
+* 2024-12-09 jmcarcell ([PR#263](https://github.com/key4hep/k4FWCore/pull/263))
+  - Mark the DataHandle and DataWrapper destructors with override
+
+* 2024-12-09 jmcarcell ([PR#262](https://github.com/key4hep/k4FWCore/pull/262))
+  - Write the configuration_metadata at initialize() in the Writer, to avoid having properties that are deleted because other algorithms are wrapped in a Sequencer and this Sequencer is deleted before `finalize()` is called for Writer.
+  - Add tests for different combinations of old/functional algorithms and using PodioOutput or IOSvc and Writer.
+
+* 2024-12-04 jmcarcell ([PR#261](https://github.com/key4hep/k4FWCore/pull/261))
+  - Add missing test dependencies
+
+* 2024-11-28 Wouter Deconinck ([PR#257](https://github.com/key4hep/k4FWCore/pull/257))
+  - Require podio 1.0.1 in CMake
+
+* 2024-11-01 jmcarcell ([PR#256](https://github.com/key4hep/k4FWCore/pull/256))
+  - Update service retrieval after deprecations in Gaudi v39.1, see https://gitlab.cern.ch/gaudi/Gaudi/-/merge_requests/1637
+  - Throw when it's not possible to retrieve ApplicationMgr - it should not happen
+
+* 2024-10-30 Mateusz Jakub Fila ([PR#252](https://github.com/key4hep/k4FWCore/pull/252))
+  - Added thread-safe`EventCounter` algorithm
+
+# v01-01-02
+
+* 2024-10-29 jmcarcell ([PR#253](https://github.com/key4hep/k4FWCore/pull/253))
+  - Fix DataHandle::get() for non-collection types and remove dead code. A `reinterpret_cast` was changed to `static_cast` in https://github.com/key4hep/k4FWCore/pull/250 that made it fail at compile time for non-collection types. Now the `static_cast` is properly wrapped around an `if constexpr` and code around it has been deleted since it looked impossible to trigger.
+
+* 2024-10-28 jmcarcell ([PR#254](https://github.com/key4hep/k4FWCore/pull/254))
+  - Don't add duplicated options for ToolSvcs
+
+# v01-01-01
+
+* 2024-10-28 jmcarcell ([PR#250](https://github.com/key4hep/k4FWCore/pull/250))
+  - Use `std::unique_ptr<podio::CollectionBase>` for the collections in the store instead of `std::shared_ptr<podio::CollectionBase>`. 
+  - Fix leak in the `Writer` that otherwise would have been difficult to fix (without the change above)
+  - Clean up `FunctionalUtils.h`: remove some unused overloads and change some names.
+
+* 2024-10-17 jmcarcell ([PR#251](https://github.com/key4hep/k4FWCore/pull/251))
+  - Use size_t in the arguments for getting the input and output locations to remove warnings, and fix some comments
+
+* 2024-10-15 jmcarcell ([PR#247](https://github.com/key4hep/k4FWCore/pull/247))
+  - Overhaul the `UniqueIDGenSvc`:
+    - Use bit manipulation with the `UniqueIDGenSvc` which is about 1000 times faster than the string manipulation that was being done
+    - Add a check for the case where an ID is repeated - trying to catch the case where the event number and run number is always the same, then the same random number sequence will be generated.
+
+* 2024-10-09 jmcarcell ([PR#244](https://github.com/key4hep/k4FWCore/pull/244))
+  - Update README: remove note about GaudiAlg being outdated since it's not there anymore and Use Key4hep instead of Key4HEP
+
 # v01-01-00
 
 * 2024-10-03 jmcarcell ([PR#243](https://github.com/key4hep/k4FWCore/pull/243))

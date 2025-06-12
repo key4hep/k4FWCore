@@ -21,40 +21,44 @@
 
 #include <type_traits>
 
-// Include files
 #include "GaudiKernel/DataObject.h"
 #include "podio/CollectionBase.h"
 
 // forward declaration
-template <typename T> class DataHandle;
+namespace k4FWCore {
+template <typename T>
+class DataHandle;
+}
 
 class GAUDI_API DataWrapperBase : public DataObject {
 public:
   // ugly hack to circumvent the usage of boost::any yet
   // DataSvc would need a templated register method
   virtual podio::CollectionBase* collectionBase() = 0;
-  virtual void                   resetData()      = 0;
+  virtual void resetData() = 0;
 };
 
-template <class T> class GAUDI_API DataWrapper : public DataWrapperBase {
+template <class T>
+class GAUDI_API DataWrapper : public DataWrapperBase {
 public:
-  template <class T2> friend class DataHandle;
+  template <class T2>
+  friend class k4FWCore::DataHandle;
 
 public:
-  DataWrapper() : m_data(nullptr){};
+  DataWrapper() : m_data(nullptr) {}
   DataWrapper(T&& coll) {
-    m_data   = new T(std::move(coll));
+    m_data = new T(std::move(coll));
     is_owner = true;
   }
   DataWrapper(std::unique_ptr<T> uptr) : m_data(uptr.get()) {
     uptr.release();
     is_owner = false;
-  };
-  virtual ~DataWrapper();
+  }
+  ~DataWrapper() override;
 
   const T* getData() const { return m_data; }
-  void     setData(const T* data) { m_data = data; }
-  void     resetData() override { m_data = nullptr; }
+  void setData(const T* data) { m_data = data; }
+  void resetData() override { m_data = nullptr; }
 
   operator const T&() const& { return *m_data; }
 
@@ -64,16 +68,18 @@ private:
 
 private:
   const T* m_data;
-  bool     is_owner{true};
+  bool is_owner{true};
 };
 
-template <class T> DataWrapper<T>::~DataWrapper() {
+template <class T>
+DataWrapper<T>::~DataWrapper() {
   if (is_owner) {
     delete m_data;
   }
 }
 
-template <class T> podio::CollectionBase* DataWrapper<T>::collectionBase() {
+template <class T>
+podio::CollectionBase* DataWrapper<T>::collectionBase() {
   if constexpr (std::is_base_of<podio::CollectionBase, T>::value) {
     return const_cast<T*>(m_data);
   }

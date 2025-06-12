@@ -43,7 +43,7 @@ int wildcmp(const char* wild, const char* string) {
       wild++;
       string++;
     } else {
-      wild   = mp;
+      wild = mp;
       string = cp++;
     }
   }
@@ -55,8 +55,8 @@ int wildcmp(const char* wild, const char* string) {
 
 std::vector<std::string> split(const std::string& s, char delim) {
   std::vector<std::string> elems;
-  std::stringstream        ss(s);
-  std::string              item;
+  std::stringstream ss(s);
+  std::string item;
   while (std::getline(ss, item, delim)) {
     if (!item.empty())
       elems.push_back(item);
@@ -84,9 +84,9 @@ bool KeepDropSwitch::getFlag(const std::string& astring) const {
       msg << "malformed command string : " << cmdline;
       throw std::invalid_argument(msg.str());
     }
-    std::string cmd     = words[0];
+    std::string cmd = words[0];
     std::string pattern = words[1];
-    Cmd         theCmd  = UNKNOWN;
+    Cmd theCmd = UNKNOWN;
     if (cmd == "keep")
       theCmd = KEEP;
     else if (cmd == "drop")

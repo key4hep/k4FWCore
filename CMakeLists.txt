@@ -18,26 +18,24 @@ limitations under the License.
 ]]
 CMAKE_MINIMUM_REQUIRED(VERSION 3.15)
 
-project(k4FWCore)
+project(k4FWCore LANGUAGES CXX)
+
+set(${PROJECT_NAME}_VERSION_MAJOR 1)
+set(${PROJECT_NAME}_VERSION_MINOR 3)
+set(${PROJECT_NAME}_VERSION_PATCH 0)
+
+set(${PROJECT_NAME}_VERSION "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH}")
 
 find_package(ROOT COMPONENTS RIO Tree REQUIRED)
 find_package(Gaudi REQUIRED)
-  find_package(podio 0.16.3)  # this will not find 1.0 and newer
-  if(NOT podio_FOUND)
-    # we try to find a newer version now
-    find_package(podio 1.0 REQUIRED)
-  endif()
-find_package(EDM4HEP REQUIRED)
+find_package(podio 1.3 REQUIRED)
+find_package(EDM4HEP 0.99 REQUIRED)
+find_package(fmt REQUIRED)
 
 include(cmake/Key4hepConfig.cmake)
 
 include(GNUInstallDirs)
 include(CTest)
-
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/InstallArea/ CACHE PATH
-    "Install path prefix, prepended onto install directories." FORCE )
-endif()
 
 add_subdirectory(k4FWCore)
 add_subdirectory(k4Interface)
@@ -46,18 +44,9 @@ if(BUILD_TESTING)
   add_subdirectory(test/k4FWCoreTest)
 endif()
 
-
 option(ENABLE_CPACK "Whether or not to use cpack config" OFF)
 if(ENABLE_CPACK)
   include(cmake/${PROJECT_NAME}CPack.cmake)
 endif()
 
-
-install(EXPORT ${PROJECT_NAME}Targets
-  NAMESPACE ${PROJECT_NAME}::
-  FILE "${PROJECT_NAME}Targets.cmake"
-  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}/"
-  )
-
-gaudi_install(CMAKE cmake/${PROJECT_NAME}Config.cmake)
-
+include(cmake/k4FWCoreCreateConfig.cmake)

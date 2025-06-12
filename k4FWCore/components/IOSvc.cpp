@@ -22,6 +22,7 @@
 #include "podio/Frame.h"
 #include "podio/FrameCategories.h"
 #include "podio/Reader.h"
+#include "podio/podioVersion.h"
 
 #include "k4FWCore/FunctionalUtils.h"
 #include "k4FWCore/KeepDropSwitch.h"
@@ -48,10 +49,6 @@ StatusCode IOSvc::initialize() {
     return StatusCode::FAILURE;
   }
 
-  if (!m_readingFileNamesDeprecated.empty()) {
-    warning() << ".input is deprecated, use .Input instead in the steering file" << endmsg;
-    m_readingFileNames = m_readingFileNamesDeprecated;
-  }
   if (!m_readingFileNames.empty()) {
     try {
       m_reader = podio::makeReader(m_readingFileNames.value());
@@ -67,10 +64,6 @@ StatusCode IOSvc::initialize() {
     return StatusCode::FAILURE;
   }
 
-  if (!m_writingFileNameDeprecated.empty()) {
-    warning() << ".output is deprecated, use .Output instead in the steering file" << endmsg;
-    m_writingFileName = m_writingFileNameDeprecated;
-  }
   m_nextEntry = m_firstEventEntry;
 
   m_switch = KeepDropSwitch(m_outputCommands);
@@ -109,15 +102,20 @@ StatusCode IOSvc::initialize() {
 
 StatusCode IOSvc::finalize() { return Service::finalize(); }
 
-std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, std::vector<std::string>, podio::Frame> IOSvc::next() {
+std::tuple<std::vector<podio::CollectionBase*>, std::vector<std::string>, podio::Frame> IOSvc::next() {
   podio::Frame frame;
   {
-    std::scoped_lock<std::mutex> lock(m_changeBufferLock);
+    std::lock_guard<std::mutex> lock(m_changeBufferLock);
     if (m_nextEntry < m_entries) {
-      frame = podio::Frame(m_reader->readEvent(m_nextEntry));
+      debug() << "Reading event " << m_nextEntry << endmsg;
+#if PODIO_BUILD_VERSION <= PODIO_VERSION(1, 2, 0)
+      frame = m_reader->readEvent(m_nextEntry);
+#else
+      debug() << "Reading collections " << m_collectionNames.value() << endmsg;
+      frame = m_reader->readEvent(m_nextEntry, m_collectionNames);
+#endif
     } else {
-      return std::make_tuple(std::vector<std::shared_ptr<podio::CollectionBase>>(), std::vector<std::string>(),
-                             std::move(frame));
+      return std::make_tuple(std::vector<podio::CollectionBase*>(), std::vector<std::string>(), std::move(frame));
     }
     m_nextEntry++;
     if (m_collectionNames.empty()) {
@@ -126,7 +124,7 @@ std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, std::vector<std:
   }
 
   if (m_nextEntry >= m_entries) {
-    auto       ep = serviceLocator()->as<IEventProcessor>();
+    auto ep = serviceLocator()->as<IEventProcessor>();
     StatusCode sc = ep->stopRun();
     if (sc.isFailure()) {
       error() << "Error when stopping run" << endmsg;
@@ -134,11 +132,11 @@ std::tuple<std::vector<std::shared_ptr<podio::CollectionBase>>, std::vector<std:
     }
   }
 
-  std::vector<std::shared_ptr<podio::CollectionBase>> collections;
+  std::vector<podio::CollectionBase*> collections;
 
   for (const auto& name : m_collectionNames) {
     auto ptr = const_cast<podio::CollectionBase*>(frame.get(name));
-    collections.push_back(std::shared_ptr<podio::CollectionBase>(ptr));
+    collections.push_back(ptr);
   }
 
   return std::make_tuple(collections, m_collectionNames, std::move(frame));
@@ -179,15 +177,14 @@ void IOSvc::handle(const Incident& incident) {
     if (code.isSuccess()) {
       debug() << "Removing the collection: " << coll << " from the store" << endmsg;
       code = m_dataSvc->unregisterObject(collPtr);
+      auto storePtr = dynamic_cast<AnyDataWrapper<std::unique_ptr<podio::CollectionBase>>*>(collPtr);
+      storePtr->getData().release();
+      delete storePtr;
     } else {
       error() << "Expected collection " << coll << " in the store but it was not found" << endmsg;
     }
   }
 }
-
-void IOSvc::setReadingCollectionNames(const std::vector<std::string>& names) { m_collectionNames = names; }
-
-void IOSvc::setReadingFileNames(const std::vector<std::string>& names) { m_readingFileNames = names; }
 
 bool IOSvc::checkIfWriteCollection(const std::string& collName) { return m_switch.isOn(collName); }
 

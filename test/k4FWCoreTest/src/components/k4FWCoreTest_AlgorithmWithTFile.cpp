@@ -39,8 +39,8 @@ StatusCode k4FWCoreTest_AlgorithmWithTFile::initialize() {
 
   /// for testing
   m_value = 0.1;
-  m_file  = TFile::Open("output_TestAlgorithmWithTFile_myTFile.root", "RECREATE");
-  m_tree  = new TTree("mytree", "testing");
+  m_file = TFile::Open("output_TestAlgorithmWithTFile_myTFile.root", "RECREATE");
+  m_tree = new TTree("mytree", "testing");
 
   m_tree->Branch("value", &m_value, "value/F");
 
@@ -59,7 +59,7 @@ StatusCode k4FWCoreTest_AlgorithmWithTFile::execute(const EventContext&) const {
   particle.setMass(m_magicNumberOffset + 8);
 
   auto* hits = m_simTrackerHitHandle.createAndPut();
-  auto  hit  = hits->create();
+  auto hit = hits->create();
   hit.setPosition({3, 4, 5});
 
   /// for testing

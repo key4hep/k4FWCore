@@ -17,7 +17,38 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ]]
 
-file(GLOB k4fwcoretest_plugin_sources src/components/*.cpp)
+set(k4fwcoretest_plugin_sources
+  src/components/ExampleEventHeaderConsumer.cpp
+  src/components/ExampleFunctionalConsumer.cpp
+  src/components/ExampleFunctionalConsumerMultiple.cpp
+  src/components/ExampleFunctionalConsumerRuntimeCollections.cpp
+  src/components/ExampleFunctionalConsumerRuntimeCollectionsMultiple.cpp
+  src/components/ExampleFunctionalFilter.cpp
+  src/components/ExampleFunctionalMetadataConsumer.cpp
+  src/components/ExampleFunctionalMetadataProducer.cpp
+  src/components/ExampleFunctionalProducer.cpp
+  src/components/ExampleFunctionalProducerMultiple.cpp
+  src/components/ExampleFunctionalProducerRuntimeCollections.cpp
+  src/components/ExampleFunctionalTransformer.cpp
+  src/components/ExampleFunctionalTransformerHist.cpp
+  src/components/ExampleFunctionalTransformerMultiple.cpp
+  src/components/ExampleFunctionalTransformerRuntimeCollections.cpp
+  src/components/ExampleFunctionalTransformerRuntimeCollectionsMultiple.cpp
+  src/components/ExampleFunctionalTransformerRuntimeEmpty.cpp
+  src/components/ExampleGaudiFunctionalProducer.cpp
+  src/components/ExampleParticleIDConsumer.cpp
+  src/components/ExampleParticleIDProducer.cpp
+  src/components/ExampleRNGSeedingAlg.cpp
+  src/components/k4FWCoreTest_AlgorithmWithTFile.cpp
+  src/components/k4FWCoreTest_cellID_reader.cpp
+  src/components/k4FWCoreTest_cellID_writer.cpp
+  src/components/k4FWCoreTest_CheckExampleEventData.cpp
+  src/components/k4FWCoreTest_CreateExampleEventData.cpp
+  src/components/k4FWCoreTest_CreateMarlinWrapperCollection.cpp
+  src/components/k4FWCoreTest_HelloWorldAlg.cpp
+  src/components/TestUniqueIDGenSvc.cpp
+  src/components/TypeMisMatchDemo.cpp
+)
 
 gaudi_add_module(k4FWCoreTestPlugins
                  SOURCES ${k4fwcoretest_plugin_sources}
@@ -63,9 +94,7 @@ function(add_test_with_env testname)
     if(arg STREQUAL "PROPERTIES")
       set(TEST_PROPERTIES_FOUND TRUE)
     elseif(arg STREQUAL "ADD_TO_CHECK_FILES")
-      get_property(CheckOutputFilesTest TEST FunctionalCheckFiles PROPERTY DEPENDS)
-      list(APPEND CheckOutputFilesTest ${testname})
-      set_property(TEST FunctionalCheckFiles PROPERTY DEPENDS ${CheckOutputFilesTest})
+      set(ADD_TO_CHECK_FILES TRUE)
     else()
       # For tests that depend on multiple tests and the original cmake way is to
       # add a colon between them this should make it work
@@ -83,23 +112,30 @@ function(add_test_with_env testname)
   if(TEST_PROPERTIES_FOUND)
     set_tests_properties(${testname} PROPERTIES ${TEST_PROPERTIES})
   endif()
+  if(ADD_TO_CHECK_FILES)
+    set_tests_properties(${testname} PROPERTIES FIXTURES_SETUP TestFiles)
+  endif()
   set_test_env(${testname})
 endfunction()
 
 add_test(NAME FunctionalCheckFiles COMMAND python3 ${CMAKE_CURRENT_LIST_DIR}/scripts/CheckOutputFiles.py)
+set_tests_properties(FunctionalCheckFiles PROPERTIES FIXTURES_REQUIRED TestFiles)
 
 add_test_with_env(CreateExampleEventData options/createExampleEventData.py)
+set_tests_properties(CreateExampleEventData PROPERTIES FIXTURES_SETUP ExampleEventDataFile)
 add_test_with_env(CreateExampleEventDataInDirectory options/createExampleEventDataInDirectory.py)
 
-add_test_with_env(CheckExampleEventData options/checkExampleEventData.py PROPERTIES DEPENDS CreateExampleEventData)
-add_test_with_env(CheckExampleEventData_noCollections options/checkExampleEventData.py --collections= PROPERTIES DEPENDS CreateExampleEventData)
+add_test_with_env(CheckExampleEventData options/checkExampleEventData.py PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile)
+add_test_with_env(CheckExampleEventData_noCollections options/checkExampleEventData.py --collections= PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile)
 add_test_with_env(CheckExampleEventData_toolong options/checkExampleEventData.py -n 999 PROPERTIES PASS_REGULAR_EXPRESSION
-                  "Application Manager Terminated successfully with a user requested ScheduledStop" DEPENDS CreateExampleEventData)
+                  "Application Manager Terminated successfully with a user requested ScheduledStop" FIXTURES_REQUIRED ExampleEventDataFile)
 add_test_with_env(CheckExampleEventData_unbounded options/checkExampleEventData.py -n -1 PROPERTIES PASS_REGULAR_EXPRESSION
-                  "Application Manager Terminated successfully with a user requested ScheduledStop" DEPENDS CreateExampleEventData)
+                  "Application Manager Terminated successfully with a user requested ScheduledStop" FIXTURES_REQUIRED ExampleEventDataFile)
 add_test_with_env(ReadExampleEventData options/readExampleEventData.py)
-set_property(TEST ReadExampleEventData APPEND PROPERTY DEPENDS CreateExampleEventData)
-add_test_with_env(ReadExampleDataFromNthEvent options/readExampleDataFromNthEvent.py PROPERTIES DEPENDS CreateExampleEventData)
+set_property(TEST ReadExampleEventData APPEND PROPERTY FIXTURES_REQUIRED ExampleEventDataFile)
+add_test_with_env(ReadExampleDataFromNthEvent options/readExampleDataFromNthEvent.py PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile)
+add_test_with_env(ReadLimitedInputsk4DataSvc options/readLimitedSetOfCollectionsk4DataSvc.py ADD_TO_CHECK_FILES PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile)
+add_test_with_env(ReadLimitedInputsAllEventsk4DataSvc options/readLimitedSetOfCollectionsk4DataSvc.py -n -1 --PodioOutput.filename "output_k4test_exampledata_limited_allevents.root" ADD_TO_CHECK_FILES PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile)
 
 add_test_with_env(AlgorithmWithTFile options/TestAlgorithmWithTFile.py)
 set_property(TEST AlgorithmWithTFile PROPERTY WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
@@ -114,7 +150,7 @@ add_test(NAME AlgorithmWithTFileCheckMyTFileOutput
 set_property(TEST AlgorithmWithTFileCheckMyTFileOutput APPEND PROPERTY DEPENDS AlgorithmWithTFile)
 set_test_env(AlgorithmWithTFileCheckMyTFileOutput)
 
-add_test_with_env(CreateExampleEventData_cellID options/createExampleEventData_cellID.py)
+add_test_with_env(CreateExampleEventData_cellID options/createExampleEventData_cellID.py ADD_TO_CHECK_FILES)
 add_test_with_env(TwoProducers options/TwoProducers.py --filename output_k4fwcore_test_twoproducer.root
                   --magicNumberOffset.Producer2 12345 --Producer1.magicNumberOffset 54321)
 add_test_with_env(CheckCommandLineArguments options/createHelloWorld.py --HelloWorldAlg1.PerEventPrintMessage TwasBrilligAndTheSlithyToves
@@ -125,7 +161,8 @@ add_test(NAME checkKeepDropSwitch
          COMMAND python scripts/check_KeepDropSwitch.py ${PROJECT_BINARY_DIR}/test/k4FWCoreTest/output_k4test_exampledata_2.root)
 set_test_env(checkKeepDropSwitch)
 set_property(TEST checkKeepDropSwitch APPEND PROPERTY DEPENDS ReadExampleEventData)
-add_test_with_env(TestUniqueIDGenSvc options/TestUniqueIDGenSvc.py)
+add_test_with_env(TestUniqueIDGenSvc options/TestUniqueIDGenSvc.py -n 1)
+add_test_with_env(TestUniqueIDGenSvcRepeated options/TestUniqueIDGenSvc.py -n 2 PROPERTIES PASS_REGULAR_EXPRESSION "Duplicate ID for event number, run number and algorithm name")
 add_test_with_env(TestEventHeaderFiller options/createEventHeader.py)
 add_test_with_env(EventHeaderCheck options/runEventHeaderCheck.py PROPERTIES DEPENDS TestEventHeaderFiller)
 add_test(NAME TestExec WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR} COMMAND python options/TestExec.py)
@@ -135,25 +172,30 @@ add_test(NAME Testk4runNoArgumentsHelp COMMAND ${K4RUN})
 set_test_env(Testk4runNoArgumentsHelp)
 set_tests_properties(Testk4runNoArgumentsHelp PROPERTIES PASS_REGULAR_EXPRESSION "Usage: k4run <options_file.py>, use --help to get a complete list of arguments")
 add_test_with_env(Testk4runCustomArguments options/TestArgs.py --foo=42 PROPERTIES PASS_REGULAR_EXPRESSION "The answer is 42")
-add_test_with_env(Testk4runVerboseOutput options/TestArgs.py --verbose PROPERTIES PASS_REGULAR_EXPRESSION " VERBOSE ")
+add_test_with_env(Testk4runVerboseOutput options/TestArgs.py --log-level=verbose PROPERTIES PASS_REGULAR_EXPRESSION " VERBOSE ")
 add_test_with_env(Testk4runHelpOnly options/TestArgs.py --help PROPERTIES PASS_REGULAR_EXPRESSION "show this help message and exit")
 
+add_test_with_env(TestEventCounter options/TestEventCounter.py)
+set_tests_properties(TestEventCounter PROPERTIES FAIL_REGULAR_EXPRESSION "Processing event 1;Processing event 3"
+                     PASS_REGULAR_EXPRESSION "(Processing event 0.*Processing event 2|Processing event 2.*Processing event 0).*Processed 4 events.*Processed 4 events")
 
 add_test_with_env(FunctionalMemory options/ExampleFunctionalMemory.py)
 add_test_with_env(FunctionalMTMemory options/ExampleFunctionalMTMemory.py)
 add_test_with_env(FunctionalMultipleMemory options/ExampleFunctionalMultipleMemory.py)
 add_test_with_env(FunctionalProducer options/ExampleFunctionalProducer.py)
+set_tests_properties(FunctionalProducer PROPERTIES FIXTURES_SETUP ProducerFile)
 add_test_with_env(FunctionalProducerAnother options/ExampleFunctionalProducer.py --second)
 add_test_with_env(FunctionalProducerMultiple options/ExampleFunctionalProducerMultiple.py)
+set_tests_properties(FunctionalProducerMultiple PROPERTIES FIXTURES_SETUP ProducerMultipleFile)
 add_test_with_env(FunctionalProducerAbsolutePath options/ExampleFunctionalProducerAbsolutePath.py ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalFile options/ExampleFunctionalFile.py PROPERTIES DEPENDS FunctionalProducer ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalFile options/ExampleFunctionalFile.py PROPERTIES FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalSeveralInputFiles options/ExampleFunctionalSeveralInputFiles.py)
 set_tests_properties(FunctionalSeveralInputFiles PROPERTIES DEPENDS "FunctionalProducer;FunctionalProducerAnother")
-add_test_with_env(FunctionalMTFile options/ExampleFunctionalMTFile.py PROPERTIES DEPENDS FunctionalProducer ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalMultipleFile options/ExampleFunctionalFileMultiple.py PROPERTIES DEPENDS FunctionalProducerMultiple ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalMix options/runFunctionalMix.py PROPERTIES DEPENDS FunctionalProducerMultiple ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalMixIOSvc options/runFunctionalMix.py --iosvc PROPERTIES DEPENDS FunctionalProducerMultiple ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalOutputCommands options/ExampleFunctionalOutputCommands.py PROPERTIES DEPENDS FunctionalProducerMultiple ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalMTFile options/ExampleFunctionalMTFile.py PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalMultipleFile options/ExampleFunctionalFileMultiple.py PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalMix options/runFunctionalMix.py PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalMixIOSvc options/runFunctionalMix.py --iosvc PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalOutputCommands options/ExampleFunctionalOutputCommands.py PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalConsumerRuntimeCollections options/ExampleFunctionalConsumerRuntimeCollections.py)
 add_test_with_env(FunctionalConsumerRuntimeCollectionsMultiple options/ExampleFunctionalConsumerRuntimeCollectionsMultiple.py)
 add_test_with_env(FunctionalProducerRuntimeCollections options/ExampleFunctionalProducerRuntimeCollections.py)
@@ -161,29 +203,35 @@ add_test_with_env(FunctionalTransformerRuntimeCollections options/ExampleFunctio
 add_test_with_env(FunctionalTransformerRuntimeEmpty options/ExampleFunctionalTransformerRuntimeEmpty.py ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalTransformerRuntimeCollectionsMultiple options/ExampleFunctionalTransformerRuntimeCollectionsMultiple.py)
 add_test_with_env(FunctionalTransformerHist options/ExampleFunctionalTransformerHist.py ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalCollectionMerger options/ExampleFunctionalCollectionMerger.py ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalCollectionMerger options/ExampleFunctionalCollectionMerger.py PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalFilterFile options/ExampleFunctionalFilterFile.py ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalMetadata options/ExampleFunctionalMetadata.py ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalMetadataRead options/ExampleFunctionalMetadataRead.py PROPERTIES DEPENDS FunctionalMetadata ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalMetadataOldAlgorithm options/ExampleFunctionalMetadataOldAlgorithm.py ADD_TO_CHECK_FILES)
 add_test_with_env(createEventHeaderConcurrent options/createEventHeaderConcurrent.py ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalMetadataReadOldAlgorithm options/ExampleFunctionalMetadataReadOldAlgorithm.py PROPERTIES DEPENDS ExampleFunctionalMetadataOldAlgorithm ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalMetadataReadOldAlgorithm options/ExampleFunctionalMetadataReadOldAlgorithm.py PROPERTIES DEPENDS FunctionalMetadataOldAlgorithm ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalNonExistingFile options/ExampleFunctionalNonExistingFile.py)
-set_tests_properties(FunctionalNonExistingFile PROPERTIES PASS_REGULAR_EXPRESSION "File.*couldn't be found")
-add_test_with_env(FunctionalNonExistingFileOverwritten options/ExampleFunctionalNonExistingFile.py --IOSvc.Input functional_producer.root)
-add_test_with_env(FunctionalFileTooLong options/ExampleFunctionalFile.py -n 999 --IOSvc.Output toolong.root PROPERTIES PASS_REGULAR_EXPRESSION
+set_tests_properties(FunctionalNonExistingFile PROPERTIES PASS_REGULAR_EXPRESSION "Failed to open file")
+add_test_with_env(FunctionalNonExistingFileOverwritten options/ExampleFunctionalNonExistingFile.py --IOSvc.Input functional_producer.root PROPERTIES FIXTURES_REQUIRED ProducerFile)
+add_test_with_env(FunctionalFileTooLong options/ExampleFunctionalFile.py -n 999 --IOSvc.Output toolong.root PROPERTIES FIXTURES_REQUIRED ProducerFile PASS_REGULAR_EXPRESSION
                   "Application Manager Terminated successfully with a user requested ScheduledStop")
-add_test_with_env(FunctionalFileTooShort options/ExampleFunctionalFile.py -n 2 --IOSvc.Output two_events.root ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalFileTooShort options/ExampleFunctionalFile.py -n 2 --IOSvc.Output two_events.root PROPERTIES FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalFileCLI options/ExampleFunctionalNoFile.py --IOSvc.Input functional_producer.root --IOSvc.Output functional_transformer_cli.root ADD_TO_CHECK_FILES)
-set_tests_properties(FunctionalFileCLI PROPERTIES DEPENDS FunctionalProducer)
+set_tests_properties(FunctionalFileCLI PROPERTIES FIXTURES_REQUIRED ProducerFile)
 add_test_with_env(FunctionalFileCLIMultiple options/ExampleFunctionalNoFile.py --IOSvc.Input functional_producer.root functional_producer.root --IOSvc.Output functional_transformer_cli_multiple.root -n -1 ADD_TO_CHECK_FILES)
-set_tests_properties(FunctionalFileCLIMultiple PROPERTIES DEPENDS FunctionalProducer)
+set_tests_properties(FunctionalFileCLIMultiple PROPERTIES FIXTURES_REQUIRED ProducerFile)
 
 add_test_with_env(FunctionalWrongImport options/ExampleFunctionalWrongImport.py)
 set_tests_properties(FunctionalWrongImport PROPERTIES PASS_REGULAR_EXPRESSION "ImportError: Importing ApplicationMgr or IOSvc from Configurables is not allowed.")
-add_test_with_env(FunctionalReadNthEvent options/ExampleFunctionalReadNthEvent.py ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalProducerRNTuple options/ExampleFunctionalProducerRNTuple.py ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalTTreeToRNTuple options/ExampleFunctionalTTreeToRNTuple.py ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalReadNthEvent options/ExampleFunctionalReadNthEvent.py PROPERTIES FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalProducerRNTuple options/ExampleFunctionalProducer.py --IOSvc.OutputType RNTuple --IOSvc.Output functional_producer_rntuple.root ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalFileRNTuple options/ExampleFunctionalFile.py --IOSvc.OutputType RNTuple --IOSvc.Input functional_producer_rntuple.root --IOSvc.Output functional_producer_rntuple_file.root PROPERTIES DEPENDS FunctionalProducerRNTuple ADD_TO_CHECK_FILES)
+add_test_with_env(FunctionalTTreeToRNTuple options/ExampleFunctionalTTreeToRNTuple.py PROPERTIES FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
+add_test_with_env(GaudiFunctional options/ExampleGaudiFunctional.py PROPERTIES FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
+add_test_with_env(ReadLimitedInputsIOSvc options/ExampleIOSvcLimitInputCollections.py PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile ADD_TO_CHECK_FILES)
+add_test_with_env(ReadLimitedInputsAllEventsIOSvc options/ExampleIOSvcLimitInputCollections.py --IOSvc.Output "functional_limited_input_all_events.root" -n -1 PROPERTIES FIXTURES_REQUIRED ExampleEventData ADD_TO_CHECK_FILES)
+
+add_test_with_env(ParticleIDMetadataFramework options/ExampleParticleIDMetadata.py)
 
 
 # The following is done to make the tests work without installing the files in
@@ -194,3 +242,19 @@ add_test_with_env(FunctionalTTreeToRNTuple options/ExampleFunctionalTTreeToRNTup
 add_custom_command(TARGET k4FWCoreTestPlugins POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
                    ${PROJECT_SOURCE_DIR}/python/k4FWCore/ ${PROJECT_BINARY_DIR}/k4FWCore/genConfDir/k4FWCore)
+
+add_executable(check_ParticleIDOutputs src/check_ParticleIDOutputs.cpp)
+target_link_libraries(check_ParticleIDOutputs PRIVATE podio::podioIO EDM4HEP::edm4hep EDM4HEP::utils fmt::fmt)
+add_test(NAME check_ParticleIDOutputs COMMAND check_ParticleIDOutputs example_with_particleids.root)
+set_test_env(check_ParticleIDOutputs)
+set_tests_properties(check_ParticleIDOutputs PROPERTIES DEPENDS ParticleIDMetadataFramework)
+add_test_with_env(TypeMisMatchDemo options/TypeMisMatchDemo.py PROPERTIES PASS_REGULAR_EXPRESSION "Failed to cast collection MCParticles to the required type")
+
+add_test_with_env(TypeMisMatchDemoMultiple options/TypeMisMatchDemoMultiple.py PROPERTIES PASS_REGULAR_EXPRESSION "Failed to cast collection MCParticles1 to the required type")
+add_test_with_env(ReadMarlinWrapperCollection options/readMarlinWrapperCollection.py)
+
+add_test(NAME check_broken_pipe
+         COMMAND bash -c "[ $(${K4RUN} options/ExampleFunctionalProducer.py | head -n 2 | wc -l) = 2 ]"
+         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+       )
+set_test_env(check_broken_pipe)

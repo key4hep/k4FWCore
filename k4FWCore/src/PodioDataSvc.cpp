@@ -17,23 +17,24 @@
  * limitations under the License.
  */
 #include "k4FWCore/PodioDataSvc.h"
-#include <GaudiKernel/StatusCode.h>
 #include "GaudiKernel/IEventProcessor.h"
 #include "GaudiKernel/IProperty.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "k4FWCore/DataWrapper.h"
+#include <GaudiKernel/StatusCode.h>
 
 #include "podio/CollectionBase.h"
+#include "podio/podioVersion.h"
 
 /// Service initialisation
 StatusCode PodioDataSvc::initialize() {
   // Nothing to do: just call base class initialisation
-  StatusCode   status  = DataSvc::initialize();
+  StatusCode status = DataSvc::initialize();
   ISvcLocator* svc_loc = serviceLocator();
 
   // Attach data loader facility
   m_cnvSvc = svc_loc->service("EventPersistencySvc");
-  status   = setDataLoader(m_cnvSvc);
+  status = setDataLoader(m_cnvSvc);
 
   if (!m_filename.empty()) {
     m_filenames.push_back(m_filename);
@@ -59,13 +60,12 @@ StatusCode PodioDataSvc::initialize() {
     m_metadataframe = podio::Frame();
   }
 
-  IProperty* property;
-  auto       sc = service("ApplicationMgr", property);
-  if (sc == StatusCode::FAILURE) {
-    error() << "Could not get ApplicationMgr properties" << std::endl;
+  auto appMgr = service<IProperty>("ApplicationMgr", false);
+  if (!appMgr) {
+    throw std::runtime_error("Could not get ApplicationMgr");
   }
   Gaudi::Property<int> evtMax;
-  evtMax.assign(property->getProperty("EvtMax"));
+  evtMax.assign(appMgr->getProperty("EvtMax"));
   m_requestedEventMax = evtMax;
   m_requestedEventMax -= m_1stEvtEntry;
 
@@ -84,7 +84,7 @@ StatusCode PodioDataSvc::reinitialize() {
 }
 /// Service finalization
 StatusCode PodioDataSvc::finalize() {
-  m_cnvSvc = nullptr;  // release
+  m_cnvSvc = nullptr; // release
   DataSvc::finalize().ignore();
   return StatusCode::SUCCESS;
 }
@@ -104,7 +104,16 @@ StatusCode PodioDataSvc::clearStore() {
 StatusCode PodioDataSvc::i_setRoot(std::string root_path, IOpaqueAddress* pRootAddr) {
   // create a new frame
   if (m_reading_from_file) {
+    debug() << "Reading event " << m_eventNum + m_1stEvtEntry << ", using collections: " << m_collsToRead << endmsg;
+#if PODIO_BUILD_VERSION <= PODIO_VERSION(1, 2, 0)
+    if (!m_collsToRead.empty()) {
+      warning() << "Trying to limit collections that are read, but podio does only support this with version > 1.2"
+                << endmsg;
+    }
     m_eventframe = podio::Frame(m_reader.readEntry("events", m_eventNum + m_1stEvtEntry));
+#else
+    m_eventframe = podio::Frame(m_reader.readEntry("events", m_eventNum + m_1stEvtEntry, m_collsToRead));
+#endif
   } else {
     m_eventframe = podio::Frame();
   }
@@ -114,7 +123,16 @@ StatusCode PodioDataSvc::i_setRoot(std::string root_path, IOpaqueAddress* pRootA
 StatusCode PodioDataSvc::i_setRoot(std::string root_path, DataObject* pRootObj) {
   // create a new frame
   if (m_reading_from_file) {
+    debug() << "Reading event " << m_eventNum + m_1stEvtEntry << ", using collections: " << m_collsToRead << endmsg;
+#if PODIO_BUILD_VERSION <= PODIO_VERSION(1, 2, 0)
+    if (!m_collsToRead.empty()) {
+      warning() << "Trying to limit collections that are read, but podio does only support this with version > 1.2"
+                << endmsg;
+    }
     m_eventframe = podio::Frame(m_reader.readEntry("events", m_eventNum + m_1stEvtEntry));
+#else
+    m_eventframe = podio::Frame(m_reader.readEntry("events", m_eventNum + m_1stEvtEntry, m_collsToRead));
+#endif
   } else {
     m_eventframe = podio::Frame();
   }
@@ -133,11 +151,15 @@ void PodioDataSvc::endOfRead() {
   if (m_eventNum >= m_numAvailableEvents) {
     info() << "Reached end of file with event " << m_eventNum << " (" << m_requestedEventMax << " events requested)"
            << endmsg;
-    IEventProcessor* eventProcessor;
-    sc = service("ApplicationMgr", eventProcessor);
+    auto eventProcessor = service<IEventProcessor>("ApplicationMgr", false);
+    if (!eventProcessor) {
+      throw std::runtime_error("Could not retrieve ApplicationMgr to schedule a stop");
+    }
     sc = eventProcessor->stopRun();
+    if (sc.isFailure()) {
+      throw std::runtime_error("Failed to stop the run");
+    }
   }
-  // todo: figure out sthg to do with sc (added to silence -Wunused-result)
 }
 
 /// Standard Constructor
@@ -157,7 +179,7 @@ StatusCode PodioDataSvc::registerObject(std::string_view parentPath, std::string
   if (wrapper != nullptr) {
     podio::CollectionBase* coll = wrapper->collectionBase();
     if (coll != nullptr) {
-      size_t      pos = fullPath.find_last_of("/");
+      size_t pos = fullPath.find_last_of("/");
       std::string shortPath(fullPath.substr(pos + 1, fullPath.length()));
       // Attention: this passes the ownership of the data to the frame
       m_eventframe.put(std::unique_ptr<podio::CollectionBase>(coll), shortPath);

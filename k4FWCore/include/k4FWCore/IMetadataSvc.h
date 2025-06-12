@@ -21,6 +21,8 @@
 
 #include "GaudiKernel/IInterface.h"
 
+#include "edm4hep/utils/ParticleIDUtils.h"
+
 #include "podio/Frame.h"
 
 class IMetadataSvc : virtual public IInterface {
@@ -29,16 +31,15 @@ class IMetadataSvc : virtual public IInterface {
 public:
   DeclareInterfaceID(IMetadataSvc, 1, 0);
 
-  virtual void setFrame(podio::Frame&& frame) = 0;
+  virtual void setFrame(podio::Frame frame) = 0;
 
-  template <typename T> void put(const std::string& name, const T& obj) {
-    if (!getFrame()) {
-      setFrame(podio::Frame{});
-    }
-    getFrame()->putParameter(name, obj);
+  template <typename T>
+  void put(const std::string& name, const T& obj) {
+    getFrameForWrite()->putParameter(name, obj);
   }
 
-  template <typename T> std::optional<T> get(const std::string& name) const {
+  template <typename T>
+  std::optional<T> get(const std::string& name) const {
     const auto* frame = getFrame();
     if (!frame) {
       return std::nullopt;
@@ -47,8 +48,33 @@ public:
   }
 
 protected:
-  virtual podio::Frame*       getFrame()       = 0;
+  virtual podio::Frame* getFrame() = 0;
   virtual const podio::Frame* getFrame() const = 0;
+
+private:
+  podio::Frame* getFrameForWrite() {
+    if (!getFrame()) {
+      setFrame(podio::Frame());
+    }
+    return getFrame();
+  }
 };
+
+template <>
+inline void IMetadataSvc::put<edm4hep::utils::ParticleIDMeta>(const std::string& collName,
+                                                              const edm4hep::utils::ParticleIDMeta& pidMetaInfo) {
+  edm4hep::utils::PIDHandler::setAlgoInfo(*getFrameForWrite(), collName, pidMetaInfo);
+}
+
+template <>
+inline std::optional<edm4hep::utils::ParticleIDMeta>
+IMetadataSvc::get<edm4hep::utils::ParticleIDMeta>(const std::string& collName) const {
+  const auto* frame = getFrame();
+  if (!frame) {
+    return std::nullopt;
+  }
+
+  return edm4hep::utils::PIDHandler::getAlgoInfo(*frame, collName);
+}
 
 #endif

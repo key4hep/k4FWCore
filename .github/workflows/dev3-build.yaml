@@ -1,0 +1,27 @@
+# Oniginally copied from
+# https://github.com/key4hep/key4hep-actions/blob/main/workflows/key4hep-build.yaml
+name: LCG build (dev3)
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+  workflow_dispatch:
+  schedule:
+        - cron: '16 4 * * *'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: key4hep/key4hep-actions/key4hep-build@main
+      with:
+        build_type: dev3
+        image: alma9
+        stack: /cvmfs/sft.cern.ch/lcg/views/dev3/latest/x86_64-el9-gcc14-opt/setup.sh

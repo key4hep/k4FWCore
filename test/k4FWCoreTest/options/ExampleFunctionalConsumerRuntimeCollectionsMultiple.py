@@ -37,6 +37,8 @@ producer0 = ExampleFunctionalProducerMultiple(
     OutputCollectionSimTrackerHits=["SimTrackerHits0"],
     OutputCollectionTrackerHits=["TrackerHits0"],
     OutputCollectionTracks=["Tracks0"],
+    OutputCollectionRecoParticles=["Recos0"],
+    OutputCollectionLinks=["Links0"],
     ExampleInt=5,
 )
 producer1 = ExampleFunctionalProducerMultiple(
@@ -47,6 +49,8 @@ producer1 = ExampleFunctionalProducerMultiple(
     OutputCollectionSimTrackerHits=["SimTrackerHits1"],
     OutputCollectionTrackerHits=["TrackerHits1"],
     OutputCollectionTracks=["Tracks1"],
+    OutputCollectionRecoParticles=["Recos1"],
+    OutputCollectionLinks=["Links1"],
     ExampleInt=5,
 )
 producer2 = ExampleFunctionalProducerMultiple(
@@ -57,6 +61,8 @@ producer2 = ExampleFunctionalProducerMultiple(
     OutputCollectionSimTrackerHits=["SimTrackerHits2"],
     OutputCollectionTrackerHits=["TrackerHits2"],
     OutputCollectionTracks=["Tracks2"],
+    OutputCollectionRecoParticles=["Recos2"],
+    OutputCollectionLinks=["Links2"],
     ExampleInt=5,
 )
 

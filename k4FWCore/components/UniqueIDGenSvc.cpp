@@ -18,27 +18,57 @@
  */
 #include "UniqueIDGenSvc.h"
 
-DECLARE_COMPONENT(UniqueIDGenSvc)
+#include <fmt/core.h>
+
+#include <cstddef>
+#include <stdexcept>
+#include <string>
+
+constexpr size_t event_num_digits = std::numeric_limits<UniqueIDGenSvc::event_num_t>::digits;
+constexpr size_t run_num_digits = std::numeric_limits<UniqueIDGenSvc::run_num_t>::digits;
+constexpr size_t seed_digits = std::numeric_limits<UniqueIDGenSvc::seed_t>::digits;
+constexpr size_t name_digits = std::numeric_limits<size_t>::digits;
 
 UniqueIDGenSvc::UniqueIDGenSvc(const std::string& name, ISvcLocator* svcLoc) : base_class(name, svcLoc) {}
 
-StatusCode UniqueIDGenSvc::initialize() {
-  StatusCode sc = Service::initialize();
-  return sc;
+size_t UniqueIDGenSvc::getUniqueID(event_num_t evt_num, run_num_t run_num, const std::string& name) const {
+  std::bitset<seed_digits> seed_bits = m_seed.value();
+  std::bitset<event_num_digits> event_num_bits = evt_num;
+  std::bitset<run_num_digits> run_num_bits = run_num;
+  std::bitset<name_digits> name_bits = std::hash<std::string>{}(name);
+
+  std::bitset<seed_digits + event_num_digits + run_num_digits + name_digits> combined_bits;
+
+  for (size_t i = 0; i < name_digits; i++) {
+    combined_bits[i] = name_bits[i];
+  }
+  for (size_t i = 0; i < run_num_digits; i++) {
+    combined_bits[i + name_digits] = run_num_bits[i];
+  }
+  for (size_t i = 0; i < event_num_digits; i++) {
+    combined_bits[i + run_num_digits + name_digits] = event_num_bits[i];
+  }
+  for (size_t i = 0; i < seed_digits; i++) {
+    combined_bits[i + event_num_digits + run_num_digits + name_digits] = seed_bits[i];
+  }
+
+  auto hash = std::hash<std::bitset<seed_digits + event_num_digits + run_num_digits + name_digits>>{}(combined_bits);
+
+  if (m_checkDuplicates) {
+    auto [it, inserted] = [=, this, &name]() {
+      std::lock_guard<std::mutex> lock(m_mutex);
+      return m_uniqueIDs.insert({hash, {evt_num, run_num, name}});
+    }();
+    if (!inserted) {
+      const auto& [id_evt, id_run, id_name] = it->second;
+      throw std::runtime_error(
+          fmt::format("Duplicate ID for event number, run number and algorithm name: {}, {}, \"{}\". "
+                      "ID already assigned to: {}, {}, \"{}\"",
+                      evt_num, run_num, name, id_evt, id_run, id_name));
+    }
+  }
+
+  return hash;
 }
 
-const size_t bits32    = std::numeric_limits<uint32_t>::digits;
-const size_t bits64    = std::numeric_limits<uint64_t>::digits;
-const size_t bitsSizeT = std::numeric_limits<size_t>::digits;
-
-size_t UniqueIDGenSvc::getUniqueID(uint32_t evt_num, uint32_t run_num, const std::string& name) const {
-  std::bitset<bits64>    seed_bits(this->m_seed);
-  std::bitset<bits32>    event_num_bits(evt_num), run_num_bits(run_num);
-  size_t                 str_hash = std::hash<std::string>{}(name);
-  std::bitset<bitsSizeT> name_bits(str_hash);
-
-  std::bitset<bits64 + bits32 + bits32 + bitsSizeT> combined_bits(seed_bits.to_string() + event_num_bits.to_string() +
-                                                                  run_num_bits.to_string() + name_bits.to_string());
-
-  return std::hash<std::bitset<bits64 + bits32 + bits32 + bitsSizeT>>{}(combined_bits);
-}
+DECLARE_COMPONENT(UniqueIDGenSvc)
