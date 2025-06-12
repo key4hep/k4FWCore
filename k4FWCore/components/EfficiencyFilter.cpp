@@ -26,6 +26,14 @@
 #include <random>
 #include <string>
 
+template <typename List1, typename List2>
+struct ConcatTypeLists;
+
+template <template <typename...> class List, typename... Ts, typename... Us>
+struct ConcatTypeLists<List<Ts...>, List<Us...>> {
+  using type = List<Ts..., Us...>;
+};
+
 struct EfficiencyFilter final : k4FWCore::Transformer<podio::CollectionBase*(const podio::CollectionBase&,
                                                                              const edm4hep::EventHeaderCollection&)> {
   EfficiencyFilter(const std::string& name, ISvcLocator* svcLoc)
@@ -60,12 +68,8 @@ struct EfficiencyFilter final : k4FWCore::Transformer<podio::CollectionBase*(con
 
     const auto uid = m_uniqueIDSvc->getUniqueID(evtHeader, name());
 
-    auto ptr = dispatchByType(
-        coll, uid,
-        edm4hep::edm4hepDataTypes{}); // Dispatch to the correct createSubsetCollection template function based on type
-    if (!ptr) {
-      ptr = dispatchByType(coll, uid, edm4hep::edm4hepLinkTypes{}); // Try link types if not found in data types
-    }
+    using AllTypes = typename ConcatTypeLists<edm4hep::edm4hepDataTypes, edm4hep::edm4hepLinkTypes>::type;
+    auto ptr = dispatchByType(coll, uid, AllTypes{});
     if (!ptr) {
       throw std::runtime_error(fmt::format(
           "EfficiencyFilter: No createSubsetCollection function found for collection type '{}'", coll.getTypeName()));
