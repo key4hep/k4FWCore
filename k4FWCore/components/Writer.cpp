@@ -101,16 +101,6 @@ public:
       // For these types, the quotes must be removed in postprocessing.
       config_data.emplace_back(std::get<0>(per_property) + " = \"" + std::get<1>(per_property) + "\"\n");
     }
-    // Some default components are not captured by the job option service
-    // and have to be traversed like this. Note that Gaudi!577 will improve this.
-    for (const auto* name : {"ApplicationMgr", "MessageSvc", "NTupleSvc"}) {
-      auto svc = service<IProperty>(name);
-      if (!svc.isValid())
-        continue;
-      for (const auto* property : svc->getProperties()) {
-        config_data.emplace_back(std::string(name) + "." + property->name() + " = \"" + property->toString() + "\"\n");
-      }
-    }
 
     config_metadata_frame.putParameter("gaudiConfigOptions", config_data);
     if (const char* env_key4hep_stack = std::getenv("KEY4HEP_STACK")) {
