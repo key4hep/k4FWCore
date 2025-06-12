@@ -71,7 +71,7 @@ endfunction()
 add_custom_target(copy_directory ALL
   COMMAND ${CMAKE_COMMAND} -E copy_directory
           ${PROJECT_SOURCE_DIR}/python/k4FWCore/ ${PROJECT_BINARY_DIR}/k4FWCore/genConfDir/k4FWCore
-  COMMENT "Copying k4FWCore python package after building k4FWCoreTestPlugins"
+  COMMENT "Copying k4FWCore python package after building all the libraries and plugins"
   DEPENDS k4FWCoreTestPlugins k4FWCore k4FWCorePlugins
 )
 
