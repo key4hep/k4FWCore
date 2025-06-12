@@ -129,9 +129,7 @@ StatusCode PodioOutput::finalize() {
     if (!svc.isValid())
       continue;
     for (const auto* property : svc->getProperties()) {
-      config_data.emplace_back(
-        std::string(name) + "." + property->name() + " = \"" + property->toString() + "\"\n"
-      );
+      config_data.emplace_back(std::string(name) + "." + property->name() + " = \"" + property->toString() + "\"\n");
     }
   }
 
