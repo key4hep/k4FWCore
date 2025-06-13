@@ -115,26 +115,12 @@ StatusCode PodioOutput::finalize() {
   const auto& jobOptionsSvc = Gaudi::svcLocator()->getOptsSvc();
   const auto& configured_properties = jobOptionsSvc.items();
   for (const auto& per_property : configured_properties) {
-    std::stringstream config_stream;
     // sample output:
     // HepMCToEDMConverter.genparticles = "GenParticles";
     // Note that quotes are added to all property values,
     // which leads to problems with ints, lists, dicts and bools.
     // For these types, the quotes must be removed in postprocessing.
-    config_stream << std::get<0>(per_property) << " = \"" << std::get<1>(per_property) << "\";" << std::endl;
-    config_data.push_back(config_stream.str());
-  }
-  // Some default components are not captured by the job option service
-  // and have to be traversed like this. Note that Gaudi!577 will improve this.
-  for (const auto* name : {"ApplicationMgr", "MessageSvc", "NTupleSvc"}) {
-    std::stringstream config_stream;
-    auto svc = service<IProperty>(name);
-    if (!svc.isValid())
-      continue;
-    for (const auto* property : svc->getProperties()) {
-      config_stream << name << "." << property->name() << " = \"" << property->toString() << "\";" << std::endl;
-    }
-    config_data.push_back(config_stream.str());
+    config_data.emplace_back(std::get<0>(per_property) + " = \"" + std::get<1>(per_property) + "\"\n");
   }
 
   // Collect all the metadata
