@@ -24,6 +24,10 @@ See the [documentation](doc/PodioInputOutput.md) for more information.
 
 Algorithm merging multiple collections of the same type into a single collection.
 
+### EfficiencyFilter
+
+Algorithm that takes a collection and creates a subset collection with a random sample of the elements of the collection.
+
 ### EventHeaderCreator
 
 Algorithm creating a new `edm4hep::EventHeaderCollection` data object.
