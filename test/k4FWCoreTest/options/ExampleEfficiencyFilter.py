@@ -67,7 +67,8 @@ filter_not_exact = EfficiencyFilter(
     InputCollection=["MergedMCParticles"],
     OutputCollection=["FilteredNotExactMCParticles"],
     Efficiency=0.8,
-    Exact=False,
+    Exact=False,  # If False, every hit will be kept with a probability of 0.8
+    # If True, then 80% of the hits, for each event, will be kept
 )
 
 filter_links = EfficiencyFilter(

@@ -84,7 +84,7 @@ private:
                                        "The efficiency of the filter, between 0 and 1. If 0.5, each item has a 50% "
                                        "chance to be kept in the output collection."};
   Gaudi::Property<bool> m_exact{
-      this, "Exact", true,
+      this, "Exact", false,
       "If true, the output collection will have exactly the number of elements given by the efficiency. For example, "
       "if the efficiency is 0.5 and the input collection has 10 elements, the output collection will have exactly 5 "
       "elements. The result is floored."
