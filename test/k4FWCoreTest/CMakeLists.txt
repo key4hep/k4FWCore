@@ -244,6 +244,8 @@ add_test_with_env(ReadLimitedInputsAllEventsIOSvc options/ExampleIOSvcLimitInput
 
 add_test_with_env(ParticleIDMetadataFramework options/ExampleParticleIDMetadata.py)
 
+add_test_with_env(EfficiencyFilter options/ExampleEfficiencyFilter.py PROPERTIES DEPENDS EventHeaderFiller FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
+
 
 add_executable(check_ParticleIDOutputs src/check_ParticleIDOutputs.cpp)
 target_link_libraries(check_ParticleIDOutputs PRIVATE podio::podioIO EDM4HEP::edm4hep EDM4HEP::utils fmt::fmt)
