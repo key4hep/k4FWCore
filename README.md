@@ -26,7 +26,7 @@ Algorithm merging multiple collections of the same type into a single collection
 
 ### EfficiencyFilter
 
-Algorithm that takes a collection and creates a subset collection with a random sample of the elements of the collection.
+Algorithm that takes a collection and creates a subset collection by randomly accepting elements according to the user-defined `Efficiency`.
 
 ### EventHeaderCreator
 
