@@ -55,20 +55,20 @@ merger_links = CollectionMerger(
     OutputCollection=["MergedLinks"],
 )
 
-filter = EfficiencyFilter(
+filter_exact = EfficiencyFilter(
     "Filter",
     InputCollection=["MergedMCParticles"],
     OutputCollection=["FilteredMCParticles"],
     Efficiency=0.8,
+    Exact=True,  # If True, then 80% of the MCP, for each event, will be kept (for an event with 10 MCP, 8 will be kept always)
 )
 
-filter_not_exact = EfficiencyFilter(
+filter = EfficiencyFilter(
     "FilterNotExact",
     InputCollection=["MergedMCParticles"],
     OutputCollection=["FilteredNotExactMCParticles"],
     Efficiency=0.8,
-    Exact=False,  # If False, every hit will be kept with a probability of 0.8
-    # If True, then 80% of the hits, for each event, will be kept
+    Exact=False,  # If False (default), every MCP will be kept with a probability of 0.8 (roll the dice for each MCP)
 )
 
 filter_links = EfficiencyFilter(
@@ -76,6 +76,7 @@ filter_links = EfficiencyFilter(
     InputCollection=["MergedLinks"],
     OutputCollection=["FilteredLinks"],
     Efficiency=0.8,
+    Exact=True,
 )
 
 ApplicationMgr(
@@ -85,7 +86,7 @@ ApplicationMgr(
         merger,
         merger_links,
         filter,
-        filter_not_exact,
+        filter_exact,
         filter_links,
     ],
     EvtSel="NONE",
