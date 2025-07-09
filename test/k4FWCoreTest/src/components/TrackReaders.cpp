@@ -26,8 +26,8 @@
 
 #include <string>
 
-struct TypeMisMatchDemo final : k4FWCore::Transformer<edm4hep::MCParticleCollection(const edm4hep::TrackCollection&)> {
-  TypeMisMatchDemo(const std::string& name, ISvcLocator* svcLoc)
+struct TrackReader final : k4FWCore::Transformer<edm4hep::MCParticleCollection(const edm4hep::TrackCollection&)> {
+  TrackReader(const std::string& name, ISvcLocator* svcLoc)
       : Transformer(name, svcLoc, {KeyValues("InputCollection", {"MCParticles"})},
                     {KeyValues("OutputCollection", {"MCParticles2"})}) {}
 
@@ -41,11 +41,11 @@ struct TypeMisMatchDemo final : k4FWCore::Transformer<edm4hep::MCParticleCollect
   }
 };
 
-DECLARE_COMPONENT(TypeMisMatchDemo)
+DECLARE_COMPONENT(TrackReader)
 
-struct TypeMisMatchDemoMultiple final
+struct TrackReaderMultiple final
     : k4FWCore::Transformer<edm4hep::MCParticleCollection(const std::vector<const edm4hep::TrackCollection*>&)> {
-  TypeMisMatchDemoMultiple(const std::string& name, ISvcLocator* svcLoc)
+  TrackReaderMultiple(const std::string& name, ISvcLocator* svcLoc)
       : Transformer(name, svcLoc, {KeyValues("InputCollections", {"MCParticles1", "MCParticles2"})},
                     {KeyValues("OutputCollection", {"OutputMCParticles"})}) {}
 
@@ -61,4 +61,4 @@ struct TypeMisMatchDemoMultiple final
   }
 };
 
-DECLARE_COMPONENT(TypeMisMatchDemoMultiple)
+DECLARE_COMPONENT(TrackReaderMultiple)
