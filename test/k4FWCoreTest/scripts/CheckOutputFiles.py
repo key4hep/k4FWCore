@@ -28,7 +28,7 @@ import ROOT
 
 def check_collections(filename, names):
     print(f'Checking file "{filename}" for collections {names}')
-    podio_reader = podio.root_io.Reader(filename)
+    podio_reader = podio.reading.get_reader(filename)
     if "events" not in podio_reader.categories:
         raise RuntimeError(f"File {filename} has no events")
     frames = podio_reader.get("events")
@@ -51,7 +51,7 @@ def check_collections(filename, names):
 
 def check_events(filename, number):
     print(f'Checking file "{filename}" for {number} events')
-    podio_reader = podio.root_io.Reader(filename)
+    podio_reader = podio.reading.get_reader(filename)
     frames = podio_reader.get("events")
     if len(frames) != number:
         print(f"File {filename} has {len(frames)} events but {number} are expected")
@@ -60,7 +60,7 @@ def check_events(filename, number):
 
 def check_metadata(filename, expected_metadata):
     print(f'Checking file "{filename}" for metadata')
-    podio_reader = podio.root_io.Reader(filename)
+    podio_reader = podio.reading.get_reader(filename)
     metadata = podio_reader.get("metadata")[0]
     for key, value in expected_metadata.items():
         if (metaval := metadata.get_parameter(key)) != value:
@@ -195,7 +195,7 @@ check_collections(
     ],
 )
 
-podio_reader = podio.root_io.Reader("functional_merged_collections.root")
+podio_reader = podio.reading.get_reader("functional_merged_collections.root")
 frames = podio_reader.get("events")
 ev = frames[0]
 new_mcs = ev.get("NewMCParticles")
@@ -234,7 +234,7 @@ check_metadata(
     },
 )
 
-reader = podio.root_io.Reader("functional_metadata.root")
+reader = podio.reading.get_reader("functional_metadata.root")
 metadata = reader.get("metadata")[0]
 for key, value in zip(
     [
@@ -285,7 +285,7 @@ check_metadata(
     },
 )
 
-reader = podio.root_io.Reader("eventHeaderConcurrent.root")
+reader = podio.reading.get_reader("eventHeaderConcurrent.root")
 events = reader.get("events")
 expected_events_length = 10
 expected_run_number = 42
@@ -322,7 +322,7 @@ for i, filename in enumerate(
         "functional_metadata.root",
     ]
 ):
-    reader = podio.root_io.Reader(filename)
+    reader = podio.reading.get_reader(filename)
     configuration_metadata = reader.get("configuration_metadata")[0].get_parameter(
         "gaudiConfigOptions"
     )
@@ -359,7 +359,7 @@ for i, filename in enumerate(
             )
 
 
-reader = podio.root_io.Reader("functional_random_filter.root")
+reader = podio.reading.get_reader("functional_random_filter.root")
 frames = reader.get("events")
 for frame in frames:
     filtered = frame.get("FilteredMCParticles")

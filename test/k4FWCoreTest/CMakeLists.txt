@@ -196,8 +196,15 @@ add_test_with_env(FunctionalMultipleMemory options/ExampleFunctionalMultipleMemo
 add_test_with_env(FunctionalProducer options/ExampleFunctionalProducer.py)
 set_tests_properties(FunctionalProducer PROPERTIES FIXTURES_SETUP ProducerFile)
 add_test_with_env(FunctionalProducerAnother options/ExampleFunctionalProducer.py --second)
-add_test_with_env(FunctionalProducerMultiple options/ExampleFunctionalProducerMultiple.py)
+
+# PODIO_DEFAULT_WRITE_RNTUPLE needs to be unset because the test FunctionalMix reads it through
+# PodioInput, which does not support RNTuple output
+add_test(NAME FunctionalProducerMultiple
+         COMMAND bash -c "unset PODIO_DEFAULT_WRITE_RNTUPLE; ${K4RUN} ${CMAKE_CURRENT_LIST_DIR}/options/ExampleFunctionalProducerMultiple.py"
+)
 set_tests_properties(FunctionalProducerMultiple PROPERTIES FIXTURES_SETUP ProducerMultipleFile)
+set_test_env(FunctionalProducerMultiple)
+
 add_test_with_env(FunctionalProducerAbsolutePath options/ExampleFunctionalProducerAbsolutePath.py ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalFile options/ExampleFunctionalFile.py PROPERTIES FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalSeveralInputFiles options/ExampleFunctionalSeveralInputFiles.py)
@@ -240,7 +247,7 @@ add_test_with_env(FunctionalFileRNTuple options/ExampleFunctionalFile.py --IOSvc
 add_test_with_env(FunctionalTTreeToRNTuple options/ExampleFunctionalTTreeToRNTuple.py PROPERTIES FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
 add_test_with_env(GaudiFunctional options/ExampleGaudiFunctional.py PROPERTIES FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
 add_test_with_env(ReadLimitedInputsIOSvc options/ExampleIOSvcLimitInputCollections.py PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile ADD_TO_CHECK_FILES)
-add_test_with_env(ReadLimitedInputsAllEventsIOSvc options/ExampleIOSvcLimitInputCollections.py --IOSvc.Output "functional_limited_input_all_events.root" -n -1 PROPERTIES FIXTURES_REQUIRED ExampleEventData ADD_TO_CHECK_FILES)
+add_test_with_env(ReadLimitedInputsAllEventsIOSvc options/ExampleIOSvcLimitInputCollections.py --IOSvc.Output "functional_limited_input_all_events.root" -n -1 PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile ADD_TO_CHECK_FILES)
 
 add_test_with_env(ParticleIDMetadataFramework options/ExampleParticleIDMetadata.py)
 
