@@ -197,7 +197,7 @@ add_test_with_env(FunctionalProducer options/ExampleFunctionalProducer.py)
 set_tests_properties(FunctionalProducer PROPERTIES FIXTURES_SETUP ProducerFile)
 add_test_with_env(FunctionalProducerAnother options/ExampleFunctionalProducer.py --second)
 
-# PODIO_DEFAULT_WRITE_RNTUPLE needs to be unset because the test FunctionalMix reads it through
+# PODIO_DEFAULT_WRITE_RNTUPLE needs to be unset because the test FunctionalMix reads through
 # PodioInput, which does not support RNTuple output
 add_test(NAME FunctionalProducerMultiple
          COMMAND bash -c "unset PODIO_DEFAULT_WRITE_RNTUPLE; ${K4RUN} ${CMAKE_CURRENT_LIST_DIR}/options/ExampleFunctionalProducerMultiple.py"
