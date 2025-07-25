@@ -40,25 +40,22 @@ class CollectionPusher : public Gaudi::Functional::details::BaseClass_t<Gaudi::F
 
   template <typename T>
   using OutputHandle_t = Gaudi::Functional::details::OutputHandle_t<Traits_, std::remove_pointer_t<T>>;
-  std::vector<OutputHandle_t<Out>> m_outputs;
 
 protected:
+  std::vector<OutputHandle_t<Out>> m_outputs;
+
   Gaudi::Property<std::vector<std::string>> m_inputCollections{
-      this, "InputCollections", {"First collection"}, "List of input collections"};
-  // Gaudi::Property<std::string>                                        m_input{this, "Input", "Event", "Input file"};
+      this, "InputCollections", {}, "List of input collections"};
 
 public:
   CollectionPusher(std::string name, ISvcLocator* locator)
       : base_class(std::move(name), locator),
         m_inputCollections{this,
                            "InputCollections",
-                           {"Event"},
+                           {},
                            [this](Gaudi::Details::PropertyBase&) {
                              const std::string cmd = System::cmdLineArgs()[0];
                              if (cmd.find("genconf") != std::string::npos) {
-                               return;
-                             }
-                             if (m_inputCollections.value().size() == 1 && m_inputCollections.value()[0] == "Event") {
                                return;
                              }
 
@@ -116,6 +113,12 @@ public:
     if (!m_iosvc.isValid()) {
       error() << "Unable to locate IIOSvc interface" << endmsg;
       return StatusCode::FAILURE;
+    }
+
+    if (m_inputCollections.empty()) {
+      for (const std::string& collName : m_iosvc->getAvailableCollections()) {
+        m_outputs.emplace_back(collName, this);
+      }
     }
 
     return StatusCode::SUCCESS;

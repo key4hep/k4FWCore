@@ -20,6 +20,7 @@ import logging
 
 from Gaudi import Configuration
 from Configurables import ApplicationMgr as AppMgr
+from Configurables import HiveSlimEventLoopMgr
 from Configurables import Reader, Writer, IOSvc, Gaudi__Sequencer, EventLoopMgr
 from Gaudi.Configuration import WARNING
 from k4FWCore.utils import get_logger
@@ -90,23 +91,25 @@ class ApplicationMgr:
                 logger.info(f"Initializing reader to read {n_events} events")
                 return
 
-        # We need to peek into the file because we lack information.
-        # Import here to avoid always importing ROOT which is slow
-        from podio.reading import get_reader
+        if isinstance(self._mgr.EventLoop, HiveSlimEventLoopMgr):
+            # We need to peek into the file because we lack information.
+            # Import here to avoid always importing ROOT which is slow
+            # from podio.reading import get_reader
+            from podio.reading import get_reader
 
-        podio_reader = get_reader(iosvc_props[inp][0])
-        if n_events == -1:
-            self._mgr.EvtMax = len(podio_reader.get("events"))
-        if not collections:
-            try:
-                frame = podio_reader.get("events")[0]
-                logger.debug("Using the first frame to determine collections to read")
-                collections = list(frame.getAvailableCollections())
-            except IndexError:
-                logger.warning("Warning, the events category wasn't found in the input file")
-                raise
-            logger.info(f"Passing {collections} as collections to read to the Reader")
-            reader.InputCollections = collections
+            podio_reader = get_reader(iosvc_props[inp][0])
+            if n_events == -1:
+                self._mgr.EvtMax = len(podio_reader.get("events"))
+            if not collections:
+                try:
+                    frame = podio_reader.get("events")[0]
+                    logger.debug("Using the first frame to determine collections to read")
+                    collections = list(frame.getAvailableCollections())
+                except IndexError:
+                    logger.warning("Warning, the events category wasn't found in the input file")
+                    raise
+                logger.info(f"Passing {collections} as collections to read to the Reader")
+                reader.InputCollections = collections
 
     def fix_properties(self):
         # If there isn't an EventLoopMgr then it's the default

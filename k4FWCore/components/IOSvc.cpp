@@ -186,6 +186,14 @@ void IOSvc::handle(const Incident& incident) {
   }
 }
 
+std::vector<std::string> IOSvc::getAvailableCollections() {
+  if (m_reader) {
+    return m_reader->readFrame(podio::Category::Event, m_nextEntry).getAvailableCollections();
+  }
+  throw GaudiException("Reader is not initialized", name(), StatusCode::FAILURE);
+  return {};
+}
+
 bool IOSvc::checkIfWriteCollection(const std::string& collName) { return m_switch.isOn(collName); }
 
 DECLARE_COMPONENT(IOSvc)

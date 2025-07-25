@@ -45,9 +45,7 @@ public:
 
   std::tuple<std::vector<podio::CollectionBase*>, std::vector<std::string>, podio::Frame> next() override;
 
-  std::shared_ptr<std::vector<std::string>> getCollectionNames() const override {
-    return std::make_shared<std::vector<std::string>>(m_collectionNames);
-  }
+  std::vector<std::string> getAvailableCollections() override;
 
 protected:
   Gaudi::Property<std::vector<std::string>> m_collectionNames{
