@@ -188,7 +188,7 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
               << ", " << tracks->at(0).getChi2() << ", " << tracks->at(0).getNdf();
         throw std::runtime_error(error.str());
       }
-      coll->push_back(tracks->at(0).clone());
+      coll.push_back(tracks->at(0).clone());
       trackVecOut.emplace_back(std::move(coll));
     }
 
