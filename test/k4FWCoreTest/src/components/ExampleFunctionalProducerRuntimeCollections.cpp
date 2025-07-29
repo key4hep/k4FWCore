@@ -45,8 +45,8 @@ struct ExampleFunctionalProducerRuntimeCollections final
       }
       info() << "Creating collection " << i << endmsg;
       auto coll = edm4hep::MCParticleCollection();
-      coll->create(1, 2, 3, 4.f, 5.f, 6.f);
-      coll->create(2, 3, 4, 5.f, 6.f, 7.f);
+      coll.create(1, 2, 3, 4.f, 5.f, 6.f);
+      coll.create(2, 3, 4, 5.f, 6.f, 7.f);
       outputCollections.emplace_back(std::move(coll));
     }
     return outputCollections;

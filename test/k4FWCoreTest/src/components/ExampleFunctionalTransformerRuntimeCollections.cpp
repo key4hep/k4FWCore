@@ -49,8 +49,8 @@ struct ExampleFunctionalTransformerRuntimeCollections final
       std::string name = "NewMCParticles" + std::to_string(i);
       auto& old_coll = input.at(i);
       auto coll = edm4hep::MCParticleCollection();
-      coll->push_back(old_coll->at(0).clone());
-      coll->push_back(old_coll->at(1).clone());
+      coll.push_back(old_coll->at(0).clone());
+      coll.push_back(old_coll->at(1).clone());
       outputCollections.emplace_back(std::move(coll));
     }
     return outputCollections;
