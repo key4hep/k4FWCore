@@ -122,7 +122,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
 
   // Copy MCParticles for physics event into a new collection
   for (const auto&& part : particles) {
-    oparticles->push_back(part.clone(false));
+    oparticles.push_back(part.clone(false));
   }
   // Fix relations to point to the new particles
   for (size_t i = 0; i < particles.size(); ++i) {
@@ -146,7 +146,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
         auto nhit = simTrackerHit.clone(false);
         if (simTrackerHit.getParticle().getObjectID().index != -1)
           nhit.setParticle(oparticles[simTrackerHit.getParticle().getObjectID().index]);
-        ocoll->push_back(nhit);
+        ocoll.push_back(nhit);
       }
     }
     osimTrackerHits.emplace_back(std::move(ocoll));
@@ -261,7 +261,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
 
           npart.setTime(bgParticles[i].getTime() + timeOffset);
           npart.setOverlay(true);
-          oparticles->push_back(npart);
+          oparticles.push_back(npart);
           for (const auto& parent : bgParticles[i].getParents()) {
             parentDaughterMap[j].first.push_back(parent.getObjectID().index);
           }
@@ -314,7 +314,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
             nhit.setOverlay(true);
             nhit.setTime(simTrackerHit.getTime() + timeOffset);
             nhit.setParticle(oparticles[oldToNewMap[simTrackerHit.getParticle().getObjectID().index]]);
-            ocoll->push_back(nhit);
+            ocoll.push_back(nhit);
           }
         }
 
@@ -381,7 +381,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
   for (const auto& [index, calHitMap] : cellIDsMap) {
     auto ocoll = edm4hep::SimCalorimeterHitCollection();
     for (const auto& [cellID, hit] : calHitMap) {
-      ocoll->push_back(std::move(hit));
+      ocoll.push_back(std::move(hit));
     }
     osimCaloHits.emplace_back(std::move(ocoll));
   }
