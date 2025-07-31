@@ -229,7 +229,7 @@ add_test_with_env(FunctionalMetadataOldAlgorithm options/ExampleFunctionalMetada
 add_test_with_env(createEventHeaderConcurrent options/createEventHeaderConcurrent.py ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalMetadataReadOldAlgorithm options/ExampleFunctionalMetadataReadOldAlgorithm.py PROPERTIES DEPENDS FunctionalMetadataOldAlgorithm ADD_TO_CHECK_FILES)
 add_test_with_env(FunctionalNonExistingFile options/ExampleFunctionalNonExistingFile.py)
-set_tests_properties(FunctionalNonExistingFile PROPERTIES PASS_REGULAR_EXPRESSION "Failed to open file")
+set_tests_properties(FunctionalNonExistingFile PROPERTIES PASS_REGULAR_EXPRESSION "does not exist")
 add_test_with_env(FunctionalNonExistingFileOverwritten options/ExampleFunctionalNonExistingFile.py --IOSvc.Input functional_producer.root PROPERTIES FIXTURES_REQUIRED ProducerFile)
 add_test_with_env(FunctionalFileTooLong options/ExampleFunctionalFile.py -n 999 --IOSvc.Output toolong.root PROPERTIES FIXTURES_REQUIRED ProducerFile PASS_REGULAR_EXPRESSION
                   "Application Manager Terminated successfully with a user requested ScheduledStop")

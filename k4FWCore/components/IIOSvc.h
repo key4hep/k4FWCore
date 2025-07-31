@@ -40,7 +40,7 @@ public:
    * @return A tuple containing the collections read, the collection names and the frame that owns the collections
    */
   virtual std::tuple<std::vector<podio::CollectionBase*>, std::vector<std::string>, podio::Frame> next() = 0;
-  virtual std::shared_ptr<std::vector<std::string>> getCollectionNames() const = 0;
+  virtual std::vector<std::string> getAvailableCollections() = 0;
 
   virtual podio::Writer& getWriter() = 0;
   virtual void deleteWriter() = 0;
