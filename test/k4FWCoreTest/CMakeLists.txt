@@ -58,12 +58,12 @@ set(K4RUN ${PROJECT_SOURCE_DIR}/k4FWCore/scripts/k4run)
 
 
 #[[
-add_test_with_env
+add_test_fwcore
 -----------------
 
 Adds a test with custom properties and environment setup.
 
-.. command:: add_test_with_env(testname [test_arguments...] [PROPERTIES property1 value1...] [ADD_TO_CHECK_FILES])
+.. command:: add_test_fwcore(testname [test_arguments...] [PROPERTIES property1 value1...] [ADD_TO_CHECK_FILES])
 
   :param testname: Name of the test
   :param test_arguments: Arguments passed to the test command
@@ -79,9 +79,9 @@ Adds a test with custom properties and environment setup.
 
   Example::
 
-    add_test_with_env(FunctionalTest options/Example.py PROPERTIES TIMEOUT 300 ADD_TO_CHECK_FILES)
+    add_test_fwcore(FunctionalTest options/Example.py PROPERTIES TIMEOUT 300 ADD_TO_CHECK_FILES)
 ]]
-function(add_test_with_env testname)
+function(add_test_fwcore testname)
   foreach(arg ${ARGN})
     if(arg STREQUAL "PROPERTIES")
       set(TEST_PROPERTIES_FOUND TRUE)
@@ -112,23 +112,23 @@ endfunction()
 add_test(NAME FunctionalCheckFiles COMMAND python3 ${CMAKE_CURRENT_LIST_DIR}/scripts/CheckOutputFiles.py)
 set_tests_properties(FunctionalCheckFiles PROPERTIES FIXTURES_REQUIRED TestFiles)
 
-add_test_with_env(CreateExampleEventData options/createExampleEventData.py)
+add_test_fwcore(CreateExampleEventData options/createExampleEventData.py)
 set_tests_properties(CreateExampleEventData PROPERTIES FIXTURES_SETUP ExampleEventDataFile)
-add_test_with_env(CreateExampleEventDataInDirectory options/createExampleEventDataInDirectory.py)
+add_test_fwcore(CreateExampleEventDataInDirectory options/createExampleEventDataInDirectory.py)
 
-add_test_with_env(CheckExampleEventData options/checkExampleEventData.py PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile)
-add_test_with_env(CheckExampleEventData_noCollections options/checkExampleEventData.py --collections= PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile)
-add_test_with_env(CheckExampleEventData_toolong options/checkExampleEventData.py -n 999 PROPERTIES PASS_REGULAR_EXPRESSION
+add_test_fwcore(CheckExampleEventData options/checkExampleEventData.py PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile)
+add_test_fwcore(CheckExampleEventData_noCollections options/checkExampleEventData.py --collections= PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile)
+add_test_fwcore(CheckExampleEventData_toolong options/checkExampleEventData.py -n 999 PROPERTIES PASS_REGULAR_EXPRESSION
                   "Application Manager Terminated successfully with a user requested ScheduledStop" FIXTURES_REQUIRED ExampleEventDataFile)
-add_test_with_env(CheckExampleEventData_unbounded options/checkExampleEventData.py -n -1 PROPERTIES PASS_REGULAR_EXPRESSION
+add_test_fwcore(CheckExampleEventData_unbounded options/checkExampleEventData.py -n -1 PROPERTIES PASS_REGULAR_EXPRESSION
                   "Application Manager Terminated successfully with a user requested ScheduledStop" FIXTURES_REQUIRED ExampleEventDataFile)
-add_test_with_env(ReadExampleEventData options/readExampleEventData.py)
+add_test_fwcore(ReadExampleEventData options/readExampleEventData.py)
 set_property(TEST ReadExampleEventData APPEND PROPERTY FIXTURES_REQUIRED ExampleEventDataFile)
-add_test_with_env(ReadExampleDataFromNthEvent options/readExampleDataFromNthEvent.py PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile)
-add_test_with_env(ReadLimitedInputsk4DataSvc options/readLimitedSetOfCollectionsk4DataSvc.py ADD_TO_CHECK_FILES PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile)
-add_test_with_env(ReadLimitedInputsAllEventsk4DataSvc options/readLimitedSetOfCollectionsk4DataSvc.py -n -1 --PodioOutput.filename "output_k4test_exampledata_limited_allevents.root" ADD_TO_CHECK_FILES PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile)
+add_test_fwcore(ReadExampleDataFromNthEvent options/readExampleDataFromNthEvent.py PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile)
+add_test_fwcore(ReadLimitedInputsk4DataSvc options/readLimitedSetOfCollectionsk4DataSvc.py ADD_TO_CHECK_FILES PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile)
+add_test_fwcore(ReadLimitedInputsAllEventsk4DataSvc options/readLimitedSetOfCollectionsk4DataSvc.py -n -1 --PodioOutput.filename "output_k4test_exampledata_limited_allevents.root" ADD_TO_CHECK_FILES PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile)
 
-add_test_with_env(AlgorithmWithTFile options/TestAlgorithmWithTFile.py)
+add_test_fwcore(AlgorithmWithTFile options/TestAlgorithmWithTFile.py)
 set_property(TEST AlgorithmWithTFile PROPERTY WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 add_test(NAME AlgorithmWithTFileCheckFrameworkOutput
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
@@ -139,38 +139,38 @@ add_test(NAME AlgorithmWithTFileCheckMyTFileOutput
          COMMAND  python scripts/check_TestAlgorithmWithTFile_myTFile_nonempty.py)
 set_property(TEST AlgorithmWithTFileCheckMyTFileOutput APPEND PROPERTY DEPENDS AlgorithmWithTFile)
 
-add_test_with_env(CreateExampleEventData_cellID options/createExampleEventData_cellID.py ADD_TO_CHECK_FILES)
-add_test_with_env(TwoProducers options/TwoProducers.py --filename output_k4fwcore_test_twoproducer.root
+add_test_fwcore(CreateExampleEventData_cellID options/createExampleEventData_cellID.py ADD_TO_CHECK_FILES)
+add_test_fwcore(TwoProducers options/TwoProducers.py --filename output_k4fwcore_test_twoproducer.root
                   --magicNumberOffset.Producer2 12345 --Producer1.magicNumberOffset 54321)
-add_test_with_env(CheckCommandLineArguments options/createHelloWorld.py --HelloWorldAlg1.PerEventPrintMessage TwasBrilligAndTheSlithyToves
+add_test_fwcore(CheckCommandLineArguments options/createHelloWorld.py --HelloWorldAlg1.PerEventPrintMessage TwasBrilligAndTheSlithyToves
 PROPERTIES PASS_REGULAR_EXPRESSION "TwasBrilligAndTheSlithyToves"
 )
 add_test(NAME checkKeepDropSwitch
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
          COMMAND python scripts/check_KeepDropSwitch.py ${PROJECT_BINARY_DIR}/test/k4FWCoreTest/output_k4test_exampledata_2.root)
 set_property(TEST checkKeepDropSwitch APPEND PROPERTY DEPENDS ReadExampleEventData)
-add_test_with_env(TestUniqueIDGenSvc options/TestUniqueIDGenSvc.py -n 1)
-add_test_with_env(TestUniqueIDGenSvcRepeated options/TestUniqueIDGenSvc.py -n 2 PROPERTIES PASS_REGULAR_EXPRESSION "Duplicate ID for event number, run number and algorithm name")
-add_test_with_env(TestEventHeaderFiller options/createEventHeader.py)
-add_test_with_env(EventHeaderCheck options/runEventHeaderCheck.py PROPERTIES DEPENDS TestEventHeaderFiller)
+add_test_fwcore(TestUniqueIDGenSvc options/TestUniqueIDGenSvc.py -n 1)
+add_test_fwcore(TestUniqueIDGenSvcRepeated options/TestUniqueIDGenSvc.py -n 2 PROPERTIES PASS_REGULAR_EXPRESSION "Duplicate ID for event number, run number and algorithm name")
+add_test_fwcore(TestEventHeaderFiller options/createEventHeader.py)
+add_test_fwcore(EventHeaderCheck options/runEventHeaderCheck.py PROPERTIES DEPENDS TestEventHeaderFiller)
 add_test(NAME TestExec WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR} COMMAND python options/TestExec.py)
 
 add_test(NAME Testk4runNoArgumentsHelp COMMAND ${K4RUN})
 set_tests_properties(Testk4runNoArgumentsHelp PROPERTIES PASS_REGULAR_EXPRESSION "Usage: k4run <options_file.py>, use --help to get a complete list of arguments")
-add_test_with_env(Testk4runCustomArguments options/TestArgs.py --foo=42 PROPERTIES PASS_REGULAR_EXPRESSION "The answer is 42")
-add_test_with_env(Testk4runVerboseOutput options/TestArgs.py --log-level=verbose PROPERTIES PASS_REGULAR_EXPRESSION " VERBOSE ")
-add_test_with_env(Testk4runHelpOnly options/TestArgs.py --help PROPERTIES PASS_REGULAR_EXPRESSION "show this help message and exit")
+add_test_fwcore(Testk4runCustomArguments options/TestArgs.py --foo=42 PROPERTIES PASS_REGULAR_EXPRESSION "The answer is 42")
+add_test_fwcore(Testk4runVerboseOutput options/TestArgs.py --log-level=verbose PROPERTIES PASS_REGULAR_EXPRESSION " VERBOSE ")
+add_test_fwcore(Testk4runHelpOnly options/TestArgs.py --help PROPERTIES PASS_REGULAR_EXPRESSION "show this help message and exit")
 
-add_test_with_env(TestEventCounter options/TestEventCounter.py)
+add_test_fwcore(TestEventCounter options/TestEventCounter.py)
 set_tests_properties(TestEventCounter PROPERTIES FAIL_REGULAR_EXPRESSION "Processing event 1;Processing event 3"
                      PASS_REGULAR_EXPRESSION "(Processing event 0.*Processing event 2|Processing event 2.*Processing event 0).*Processed 4 events.*Processed 4 events")
 
-add_test_with_env(FunctionalMemory options/ExampleFunctionalMemory.py)
-add_test_with_env(FunctionalMTMemory options/ExampleFunctionalMTMemory.py)
-add_test_with_env(FunctionalMultipleMemory options/ExampleFunctionalMultipleMemory.py)
-add_test_with_env(FunctionalProducer options/ExampleFunctionalProducer.py)
+add_test_fwcore(FunctionalMemory options/ExampleFunctionalMemory.py)
+add_test_fwcore(FunctionalMTMemory options/ExampleFunctionalMTMemory.py)
+add_test_fwcore(FunctionalMultipleMemory options/ExampleFunctionalMultipleMemory.py)
+add_test_fwcore(FunctionalProducer options/ExampleFunctionalProducer.py)
 set_tests_properties(FunctionalProducer PROPERTIES FIXTURES_SETUP ProducerFile)
-add_test_with_env(FunctionalProducerAnother options/ExampleFunctionalProducer.py --second)
+add_test_fwcore(FunctionalProducerAnother options/ExampleFunctionalProducer.py --second)
 
 # PODIO_DEFAULT_WRITE_RNTUPLE needs to be unset because the test FunctionalMix reads through
 # PodioInput, which does not support RNTuple output
@@ -179,63 +179,63 @@ add_test(NAME FunctionalProducerMultiple
 )
 set_tests_properties(FunctionalProducerMultiple PROPERTIES FIXTURES_SETUP ProducerMultipleFile)
 
-add_test_with_env(FunctionalProducerAbsolutePath options/ExampleFunctionalProducerAbsolutePath.py ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalFile options/ExampleFunctionalFile.py PROPERTIES FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalSeveralInputFiles options/ExampleFunctionalSeveralInputFiles.py)
+add_test_fwcore(FunctionalProducerAbsolutePath options/ExampleFunctionalProducerAbsolutePath.py ADD_TO_CHECK_FILES)
+add_test_fwcore(FunctionalFile options/ExampleFunctionalFile.py PROPERTIES FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
+add_test_fwcore(FunctionalSeveralInputFiles options/ExampleFunctionalSeveralInputFiles.py)
 set_tests_properties(FunctionalSeveralInputFiles PROPERTIES DEPENDS "FunctionalProducer;FunctionalProducerAnother")
-add_test_with_env(FunctionalMTFile options/ExampleFunctionalMTFile.py PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalMultipleFile options/ExampleFunctionalFileMultiple.py PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalMix options/runFunctionalMix.py PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalMixIOSvc options/runFunctionalMix.py --iosvc PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalOutputCommands options/ExampleFunctionalOutputCommands.py PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalConsumerRuntimeCollections options/ExampleFunctionalConsumerRuntimeCollections.py)
-add_test_with_env(FunctionalConsumerRuntimeCollectionsMultiple options/ExampleFunctionalConsumerRuntimeCollectionsMultiple.py)
-add_test_with_env(FunctionalProducerRuntimeCollections options/ExampleFunctionalProducerRuntimeCollections.py)
-add_test_with_env(FunctionalTransformerRuntimeCollections options/ExampleFunctionalTransformerRuntimeCollections.py)
-add_test_with_env(FunctionalTransformerRuntimeEmpty options/ExampleFunctionalTransformerRuntimeEmpty.py ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalTransformerRuntimeCollectionsMultiple options/ExampleFunctionalTransformerRuntimeCollectionsMultiple.py)
-add_test_with_env(FunctionalTransformerHist options/ExampleFunctionalTransformerHist.py ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalCollectionMerger options/ExampleFunctionalCollectionMerger.py PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalFilterFile options/ExampleFunctionalFilterFile.py ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalMetadata options/ExampleFunctionalMetadata.py ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalMetadataRead options/ExampleFunctionalMetadataRead.py PROPERTIES DEPENDS FunctionalMetadata ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalMetadataOldAlgorithm options/ExampleFunctionalMetadataOldAlgorithm.py ADD_TO_CHECK_FILES)
-add_test_with_env(createEventHeaderConcurrent options/createEventHeaderConcurrent.py ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalMetadataReadOldAlgorithm options/ExampleFunctionalMetadataReadOldAlgorithm.py PROPERTIES DEPENDS FunctionalMetadataOldAlgorithm ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalNonExistingFile options/ExampleFunctionalNonExistingFile.py)
+add_test_fwcore(FunctionalMTFile options/ExampleFunctionalMTFile.py PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
+add_test_fwcore(FunctionalMultipleFile options/ExampleFunctionalFileMultiple.py PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
+add_test_fwcore(FunctionalMix options/runFunctionalMix.py PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
+add_test_fwcore(FunctionalMixIOSvc options/runFunctionalMix.py --iosvc PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
+add_test_fwcore(FunctionalOutputCommands options/ExampleFunctionalOutputCommands.py PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
+add_test_fwcore(FunctionalConsumerRuntimeCollections options/ExampleFunctionalConsumerRuntimeCollections.py)
+add_test_fwcore(FunctionalConsumerRuntimeCollectionsMultiple options/ExampleFunctionalConsumerRuntimeCollectionsMultiple.py)
+add_test_fwcore(FunctionalProducerRuntimeCollections options/ExampleFunctionalProducerRuntimeCollections.py)
+add_test_fwcore(FunctionalTransformerRuntimeCollections options/ExampleFunctionalTransformerRuntimeCollections.py)
+add_test_fwcore(FunctionalTransformerRuntimeEmpty options/ExampleFunctionalTransformerRuntimeEmpty.py ADD_TO_CHECK_FILES)
+add_test_fwcore(FunctionalTransformerRuntimeCollectionsMultiple options/ExampleFunctionalTransformerRuntimeCollectionsMultiple.py)
+add_test_fwcore(FunctionalTransformerHist options/ExampleFunctionalTransformerHist.py ADD_TO_CHECK_FILES)
+add_test_fwcore(FunctionalCollectionMerger options/ExampleFunctionalCollectionMerger.py PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
+add_test_fwcore(FunctionalFilterFile options/ExampleFunctionalFilterFile.py ADD_TO_CHECK_FILES)
+add_test_fwcore(FunctionalMetadata options/ExampleFunctionalMetadata.py ADD_TO_CHECK_FILES)
+add_test_fwcore(FunctionalMetadataRead options/ExampleFunctionalMetadataRead.py PROPERTIES DEPENDS FunctionalMetadata ADD_TO_CHECK_FILES)
+add_test_fwcore(FunctionalMetadataOldAlgorithm options/ExampleFunctionalMetadataOldAlgorithm.py ADD_TO_CHECK_FILES)
+add_test_fwcore(createEventHeaderConcurrent options/createEventHeaderConcurrent.py ADD_TO_CHECK_FILES)
+add_test_fwcore(FunctionalMetadataReadOldAlgorithm options/ExampleFunctionalMetadataReadOldAlgorithm.py PROPERTIES DEPENDS FunctionalMetadataOldAlgorithm ADD_TO_CHECK_FILES)
+add_test_fwcore(FunctionalNonExistingFile options/ExampleFunctionalNonExistingFile.py)
 set_tests_properties(FunctionalNonExistingFile PROPERTIES PASS_REGULAR_EXPRESSION "does not exist")
-add_test_with_env(FunctionalNonExistingFileOverwritten options/ExampleFunctionalNonExistingFile.py --IOSvc.Input functional_producer.root PROPERTIES FIXTURES_REQUIRED ProducerFile)
-add_test_with_env(FunctionalFileTooLong options/ExampleFunctionalFile.py -n 999 --IOSvc.Output toolong.root PROPERTIES FIXTURES_REQUIRED ProducerFile PASS_REGULAR_EXPRESSION
+add_test_fwcore(FunctionalNonExistingFileOverwritten options/ExampleFunctionalNonExistingFile.py --IOSvc.Input functional_producer.root PROPERTIES FIXTURES_REQUIRED ProducerFile)
+add_test_fwcore(FunctionalFileTooLong options/ExampleFunctionalFile.py -n 999 --IOSvc.Output toolong.root PROPERTIES FIXTURES_REQUIRED ProducerFile PASS_REGULAR_EXPRESSION
                   "Application Manager Terminated successfully with a user requested ScheduledStop")
-add_test_with_env(FunctionalFileTooShort options/ExampleFunctionalFile.py -n 2 --IOSvc.Output two_events.root PROPERTIES FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalFileCLI options/ExampleFunctionalNoFile.py --IOSvc.Input functional_producer.root --IOSvc.Output functional_transformer_cli.root ADD_TO_CHECK_FILES)
+add_test_fwcore(FunctionalFileTooShort options/ExampleFunctionalFile.py -n 2 --IOSvc.Output two_events.root PROPERTIES FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
+add_test_fwcore(FunctionalFileCLI options/ExampleFunctionalNoFile.py --IOSvc.Input functional_producer.root --IOSvc.Output functional_transformer_cli.root ADD_TO_CHECK_FILES)
 set_tests_properties(FunctionalFileCLI PROPERTIES FIXTURES_REQUIRED ProducerFile)
-add_test_with_env(FunctionalFileCLIMultiple options/ExampleFunctionalNoFile.py --IOSvc.Input functional_producer.root functional_producer.root --IOSvc.Output functional_transformer_cli_multiple.root -n -1 ADD_TO_CHECK_FILES)
+add_test_fwcore(FunctionalFileCLIMultiple options/ExampleFunctionalNoFile.py --IOSvc.Input functional_producer.root functional_producer.root --IOSvc.Output functional_transformer_cli_multiple.root -n -1 ADD_TO_CHECK_FILES)
 set_tests_properties(FunctionalFileCLIMultiple PROPERTIES FIXTURES_REQUIRED ProducerFile)
 
-add_test_with_env(FunctionalWrongImport options/ExampleFunctionalWrongImport.py)
+add_test_fwcore(FunctionalWrongImport options/ExampleFunctionalWrongImport.py)
 set_tests_properties(FunctionalWrongImport PROPERTIES PASS_REGULAR_EXPRESSION "ImportError: Importing ApplicationMgr or IOSvc from Configurables is not allowed.")
-add_test_with_env(FunctionalReadNthEvent options/ExampleFunctionalReadNthEvent.py PROPERTIES FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalProducerRNTuple options/ExampleFunctionalProducer.py --IOSvc.OutputType RNTuple --IOSvc.Output functional_producer_rntuple.root ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalFileRNTuple options/ExampleFunctionalFile.py --IOSvc.OutputType RNTuple --IOSvc.Input functional_producer_rntuple.root --IOSvc.Output functional_producer_rntuple_file.root PROPERTIES DEPENDS FunctionalProducerRNTuple ADD_TO_CHECK_FILES)
-add_test_with_env(FunctionalTTreeToRNTuple options/ExampleFunctionalTTreeToRNTuple.py PROPERTIES FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
-add_test_with_env(GaudiFunctional options/ExampleGaudiFunctional.py PROPERTIES FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
-add_test_with_env(ReadLimitedInputsIOSvc options/ExampleIOSvcLimitInputCollections.py PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile ADD_TO_CHECK_FILES)
-add_test_with_env(ReadLimitedInputsAllEventsIOSvc options/ExampleIOSvcLimitInputCollections.py --IOSvc.Output "functional_limited_input_all_events.root" -n -1 PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile ADD_TO_CHECK_FILES)
+add_test_fwcore(FunctionalReadNthEvent options/ExampleFunctionalReadNthEvent.py PROPERTIES FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
+add_test_fwcore(FunctionalProducerRNTuple options/ExampleFunctionalProducer.py --IOSvc.OutputType RNTuple --IOSvc.Output functional_producer_rntuple.root ADD_TO_CHECK_FILES)
+add_test_fwcore(FunctionalFileRNTuple options/ExampleFunctionalFile.py --IOSvc.OutputType RNTuple --IOSvc.Input functional_producer_rntuple.root --IOSvc.Output functional_producer_rntuple_file.root PROPERTIES DEPENDS FunctionalProducerRNTuple ADD_TO_CHECK_FILES)
+add_test_fwcore(FunctionalTTreeToRNTuple options/ExampleFunctionalTTreeToRNTuple.py PROPERTIES FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
+add_test_fwcore(GaudiFunctional options/ExampleGaudiFunctional.py PROPERTIES FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
+add_test_fwcore(ReadLimitedInputsIOSvc options/ExampleIOSvcLimitInputCollections.py PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile ADD_TO_CHECK_FILES)
+add_test_fwcore(ReadLimitedInputsAllEventsIOSvc options/ExampleIOSvcLimitInputCollections.py --IOSvc.Output "functional_limited_input_all_events.root" -n -1 PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile ADD_TO_CHECK_FILES)
 
-add_test_with_env(ParticleIDMetadataFramework options/ExampleParticleIDMetadata.py)
+add_test_fwcore(ParticleIDMetadataFramework options/ExampleParticleIDMetadata.py)
 
-add_test_with_env(EfficiencyFilter options/ExampleEfficiencyFilter.py PROPERTIES DEPENDS EventHeaderFiller FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
+add_test_fwcore(EfficiencyFilter options/ExampleEfficiencyFilter.py PROPERTIES DEPENDS EventHeaderFiller FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
 
 
 add_executable(check_ParticleIDOutputs src/check_ParticleIDOutputs.cpp)
 target_link_libraries(check_ParticleIDOutputs PRIVATE podio::podioIO EDM4HEP::edm4hep EDM4HEP::utils fmt::fmt)
 add_test(NAME check_ParticleIDOutputs COMMAND check_ParticleIDOutputs example_with_particleids.root)
 set_tests_properties(check_ParticleIDOutputs PROPERTIES DEPENDS ParticleIDMetadataFramework)
-add_test_with_env(TypeMisMatchDemo options/TypeMisMatchDemo.py PROPERTIES PASS_REGULAR_EXPRESSION "Failed to cast collection MCParticles to the required type")
+add_test_fwcore(TypeMisMatchDemo options/TypeMisMatchDemo.py PROPERTIES PASS_REGULAR_EXPRESSION "Failed to cast collection MCParticles to the required type")
 
-add_test_with_env(TypeMisMatchDemoMultiple options/TypeMisMatchDemoMultiple.py PROPERTIES PASS_REGULAR_EXPRESSION "Failed to cast collection MCParticles1 to the required type")
-add_test_with_env(ReadMarlinWrapperCollection options/readMarlinWrapperCollection.py)
+add_test_fwcore(TypeMisMatchDemoMultiple options/TypeMisMatchDemoMultiple.py PROPERTIES PASS_REGULAR_EXPRESSION "Failed to cast collection MCParticles1 to the required type")
+add_test_fwcore(ReadMarlinWrapperCollection options/readMarlinWrapperCollection.py)
 
 add_test(NAME check_broken_pipe
          COMMAND bash -c "[ $(${K4RUN} options/ExampleFunctionalProducer.py | head -n 2 | wc -l) = 2 ]"
