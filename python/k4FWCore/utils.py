@@ -21,8 +21,12 @@ import os
 import re
 import logging
 import sys
-from io import TextIOWrapper
 from typing import Union
+from importlib.machinery import SourceFileLoader
+import importlib.util
+from pathlib import Path
+
+import warnings
 
 
 def check_wrong_imports(code: str) -> None:
@@ -57,18 +61,17 @@ def check_wrong_imports(code: str) -> None:
         raise ImportError("Importing ApplicationMgr or IOSvc from Configurables is not allowed.")
 
 
-def load_file(opt_file: Union[TextIOWrapper, str, os.PathLike]) -> None:
+def load_file(opt_file: Union[str, os.PathLike]) -> None:
     """Loads and executes the content of a given file in the current interpreter session.
 
-    This function takes a file object or a path to a file, reads its content,
-    and then executes it as Python code within the global scope of the current
-    interpreter session. If `opt_file` is a file handle it will not be closed.
+    This function takes a path to a file, reads its content, and then executes
+    it as Python code within the global scope of the current interpreter
+    session.
 
     Args:
-        opt_file (Union[TextIOWrapper, str, os.PathLike]): A file object or a
-                                                           path to the file that
-                                                           contains Python code
-                                                           to be executed.
+        opt_file (Union[str, os.PathLike]): A file object or a path to the file
+                                            that contains Python code to be
+                                            executed.
 
     Raises:
         FileNotFoundError: If `opt_file` is a path and no file exists at that path.
@@ -77,14 +80,39 @@ def load_file(opt_file: Union[TextIOWrapper, str, os.PathLike]) -> None:
         Exception: Any exception raised by the executed code will be propagated.
 
     """
+    # Cannot simply deepcopy globals. Hence, populate the necessary stuff
+    namespace = {
+        "__file__": __file__,
+        "__builtins__": __builtins__,
+        "__loader__": __loader__,
+    }
+
     if isinstance(opt_file, (str, os.PathLike)):
         with open(opt_file, "r") as file:
             code = file.read()
-    else:
-        code = opt_file.read()
-    check_wrong_imports(str(code))
+            filename = file.name
 
-    exec(code, globals())
+        module_name = Path(opt_file).stem
+        loader = SourceFileLoader(module_name, str(opt_file))
+
+        namespace.update(
+            {
+                "__file__": os.path.realpath(opt_file),
+                "__spec__": importlib.util.spec_from_loader(loader.name, loader),
+            }
+        )
+    else:
+        warnings.warn(
+            "load_file will remove support for handling TextIOWrapper. Please switch to pasing os.PathLike",
+            FutureWarning,
+        )
+        code = opt_file.read()
+        filename = opt_file.name
+        namespace.update({"__file__": filename})
+    check_wrong_imports(str(code))
+    code = compile(code, filename, "exec")
+
+    exec(code, namespace)
 
 
 _logger = None
