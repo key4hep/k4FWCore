@@ -31,8 +31,12 @@
 #include "k4FWCore/FunctionalUtils.h"
 
 #include <memory>
+#include <string>
+#include <tuple>
+#include <utility>
+#include <vector>
 
-class CollectionPusher : public Gaudi::Functional::details::BaseClass_t<Gaudi::Functional::Traits::useDefaults> {
+class Reader : public Gaudi::Functional::details::BaseClass_t<Gaudi::Functional::Traits::useDefaults> {
   using Traits_ = Gaudi::Functional::Traits::useDefaults;
   using Out = std::unique_ptr<podio::CollectionBase>;
   using base_class = Gaudi::Functional::details::BaseClass_t<Traits_>;
@@ -41,73 +45,31 @@ class CollectionPusher : public Gaudi::Functional::details::BaseClass_t<Gaudi::F
   template <typename T>
   using OutputHandle_t = Gaudi::Functional::details::OutputHandle_t<Traits_, std::remove_pointer_t<T>>;
 
-protected:
-  std::vector<OutputHandle_t<Out>> m_outputs;
-
-  Gaudi::Property<std::vector<std::string>> m_inputCollections{
-      this, "InputCollections", {}, "List of input collections"};
-
 public:
-  CollectionPusher(std::string name, ISvcLocator* locator)
-      : base_class(std::move(name), locator),
-        m_inputCollections{this,
-                           "InputCollections",
-                           {},
-                           [this](Gaudi::Details::PropertyBase&) {
-                             const std::string cmd = System::cmdLineArgs()[0];
-                             if (cmd.find("genconf") != std::string::npos) {
-                               return;
-                             }
-
-                             for (auto& c : m_inputCollections.value()) {
-                               m_outputs.emplace_back(c, this);
-                             }
-                           },
-                           Gaudi::Details::Property::ImmediatelyInvokeHandler{true}} {}
-
-  // derived classes can NOT implement execute
-  StatusCode execute(const EventContext&) const final {
-    try {
-      auto out = (*this)();
-
-      auto outColls = std::get<std::vector<podio::CollectionBase*>>(out);
-      auto outputLocations = std::get<std::vector<std::string>>(out);
-
-      // if (out.size() != m_outputs.size()) {
-      //   throw GaudiException("Error during transform: expected " + std::to_string(m_outputs.size()) +
-      //                            " containers, got " + std::to_string(out.size()) + " instead",
-      //                        this->name(), StatusCode::FAILURE);
-      // }
-      for (size_t i = 0; i != outColls.size(); ++i) {
-        m_outputs[i].put(std::unique_ptr<podio::CollectionBase>(outColls[i]));
-      }
-      return Gaudi::Functional::FilterDecision::PASSED;
-    } catch (GaudiException& e) {
-      (e.code() ? this->warning() : this->error()) << e.tag() << " : " << e.message() << endmsg;
-      return e.code();
-    }
-  }
-
-  virtual std::tuple<std::vector<podio::CollectionBase*>, std::vector<std::string>> operator()() const = 0;
-
-private:
-  ServiceHandle<IDataProviderSvc> m_dataSvc{this, "EventDataSvc", "EventDataSvc"};
-};
-
-class Reader final : public CollectionPusher {
-public:
-  Reader(const std::string& name, ISvcLocator* svcLoc) : CollectionPusher(name, svcLoc) {
+  Reader(const std::string& name, ISvcLocator* svcLoc)
+      : base_class(name, svcLoc), m_inputCollections{this,
+                                                     "InputCollections",
+                                                     {},
+                                                     [this](Gaudi::Details::PropertyBase&) {
+                                                       const std::string cmd = System::cmdLineArgs()[0];
+                                                       if (cmd.find("genconf") != std::string::npos) {
+                                                         return;
+                                                       }
+                                                       for (const auto& c : m_inputCollections.value()) {
+                                                         m_outputs.emplace_back(c, this);
+                                                       }
+                                                     },
+                                                     Gaudi::Details::Property::ImmediatelyInvokeHandler{true}},
+        m_iosvc{this, "IOSvc", "IOSvc"}, m_dataSvc{this, "EventDataSvc", "EventDataSvc"} {
     setProperty("Cardinality", 1).ignore();
   }
-
-  bool isReEntrant() const override { return false; }
 
   // Gaudi doesn't run the destructor of the Services so we have to
   // manually ask for the reader to be deleted so it will call finish()
   // See https://gitlab.cern.ch/gaudi/Gaudi/-/issues/169
   ~Reader() override { m_iosvc->deleteReader(); }
 
-  ServiceHandle<IIOSvc> m_iosvc{this, "IOSvc", "IOSvc"};
+  bool isReEntrant() const override { return false; }
 
   StatusCode initialize() override {
     if (!m_iosvc.isValid()) {
@@ -131,22 +93,43 @@ public:
     return StatusCode::SUCCESS;
   }
 
+  StatusCode execute(const EventContext&) const final {
+    try {
+      const auto readData = nextCollections();
+
+      auto readCollections = std::get<0>(readData);
+
+      for (size_t i = 0; i != readCollections.size(); ++i) {
+        m_outputs[i].put(std::unique_ptr<podio::CollectionBase>(readCollections[i]));
+      }
+      return Gaudi::Functional::FilterDecision::PASSED;
+    } catch (GaudiException& e) {
+      (e.code() ? this->warning() : this->error()) << e.tag() << " : " << e.message() << endmsg;
+      return e.code();
+    }
+  }
+
+private:
   // The IOSvc takes care of reading and passing the data
   // By convention the Frame is pushed to the store
   // so that it's deleted at the right time
-  std::tuple<std::vector<podio::CollectionBase*>, std::vector<std::string>> operator()() const override {
-    auto val = m_iosvc->next();
+  std::tuple<std::vector<podio::CollectionBase*>, std::vector<std::string>> nextCollections() const {
 
-    auto eds = eventSvc().as<IDataProviderSvc>();
-    auto frame = std::move(std::get<podio::Frame>(val));
+    auto nextData = m_iosvc->next();
 
-    auto tmp = new AnyDataWrapper<podio::Frame>(std::move(frame));
-    if (eds->registerObject("/Event" + k4FWCore::frameLocation, tmp).isFailure()) {
+    const auto tmpWrapper = new AnyDataWrapper<podio::Frame>(std::move(std::get<podio::Frame>(nextData)));
+    const auto eds = eventSvc().as<IDataProviderSvc>();
+    if (eds->registerObject("/Event" + k4FWCore::frameLocation, tmpWrapper).isFailure()) {
       error() << "Failed to register Frame object" << endmsg;
     }
 
-    return std::make_tuple(std::get<0>(val), std::get<1>(val));
+    return std::make_tuple(std::get<0>(nextData), std::get<1>(nextData));
   }
+
+  Gaudi::Property<std::vector<std::string>> m_inputCollections;
+  mutable std::vector<OutputHandle_t<Out>> m_outputs;
+  ServiceHandle<IIOSvc> m_iosvc;
+  ServiceHandle<IDataProviderSvc> m_dataSvc;
 };
 
 DECLARE_COMPONENT(Reader)
