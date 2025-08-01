@@ -24,7 +24,6 @@
 #include "podio/CollectionBase.h"
 #include "podio/Writer.h"
 
-#include <memory>
 #include <vector>
 
 /**
