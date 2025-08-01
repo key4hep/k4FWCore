@@ -149,16 +149,50 @@ namespace details {
         using EDM4hepType = std::remove_cv_t<std::remove_pointer_t<typename TupleType::value_type>>;
         auto inputMap = std::vector<const EDM4hepType*>();
         for (auto& handle : std::get<Index>(handles)) {
-          podio::CollectionBase* in = handle.get()->get();
-          auto* typedIn = dynamic_cast<const EDM4hepType*>(in);
-          if (typedIn) {
-            inputMap.push_back(typedIn);
-          } else {
-            throw GaudiException(
-                thisClass->name(),
-                fmt::format("Failed to cast collection {} to the required type {}, the type of the collection is {}",
-                            handle.objKey(), typeid(EDM4hepType).name(), in ? in->getTypeName() : "[undetermined]"),
-                StatusCode::FAILURE);
+          try {
+            podio::CollectionBase* in = handle.get()->get();
+            auto* typedIn = dynamic_cast<const EDM4hepType*>(in);
+            if (typedIn) {
+              inputMap.push_back(typedIn);
+            } else {
+              throw GaudiException(
+                  thisClass->name(),
+                  fmt::format("Failed to cast collection {} to the required type {}, the type of the collection is {}",
+                              handle.objKey(), typeid(EDM4hepType).name(), in ? in->getTypeName() : "[undetermined]"),
+                  StatusCode::FAILURE);
+            }
+          } catch (GaudiException& e) {
+            // When the type of the collection is different from the one requested, this can happen because
+            // 1. a mistake was made in the input types of a functional algorithm
+            // 2. the data was produced using the old DataHandle, which is never going to be in the input type
+            if (e.message().find("different from") != std::string::npos) {
+              thisClass->debug() << "Trying to cast the collection " << std::get<Index>(handles)[0].objKey()
+                                 << " to the requested type didn't work " << endmsg;
+              DataObject* p;
+              IDataProviderSvc* svc = thisClass->evtSvc();
+              svc->retrieveObject("/Event/" + std::get<Index>(handles)[0].objKey(), p).ignore();
+              // This is how Gaudi::Algorithms saves collections through the DataHandle
+              const auto* wrp = dynamic_cast<const DataWrapper<EDM4hepType>*>(p);
+              // This is how the Marlin wrapper saves collections when converting from LCIO to EDM4hep
+              const auto* marlinWrp = dynamic_cast<const DataWrapper<podio::CollectionBase>*>(p);
+              if (!wrp && !marlinWrp) {
+                throw GaudiException(thisClass->name(),
+                                     "Failed to cast collection " + std::get<Index>(handles)[0].objKey() +
+                                         " to the requested type " + typeid(EDM4hepType).name(),
+                                     StatusCode::FAILURE);
+              }
+              if (wrp) {
+                // std::get<Index>(inputTuple) = const_cast<EDM4hepType*>(wrp->getData());
+                inputMap.push_back(const_cast<EDM4hepType*>(wrp->getData()));
+              } else {
+                // std::get<Index>(inputTuple) =
+                //     dynamic_cast<EDM4hepType*>(const_cast<podio::CollectionBase*>(marlinWrp->getData()));
+                inputMap.push_back(
+                    dynamic_cast<EDM4hepType*>(const_cast<podio::CollectionBase*>(marlinWrp->getData())));
+              }
+            } else {
+              throw e;
+            }
           }
         }
         std::get<Index>(inputTuple) = std::move(inputMap);
