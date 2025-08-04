@@ -31,6 +31,7 @@ PodioOutput::PodioOutput(const std::string& name, ISvcLocator* svcLoc)
     : Gaudi::Algorithm(name, svcLoc), m_firstEvent(true) {}
 
 StatusCode PodioOutput::initialize() {
+  warning() << "PodioOutput is deprecated and will be removed. Use the IOSvc instead" << endmsg;
   if (Gaudi::Algorithm::initialize().isFailure())
     return StatusCode::FAILURE;
 
@@ -106,6 +107,8 @@ StatusCode PodioOutput::execute(const EventContext&) const {
  *
  */
 StatusCode PodioOutput::finalize() {
+  warning() << "PodioOutput is deprecated and will be removed. Use the IOSvc instead" << endmsg;
+
   if (Gaudi::Algorithm::finalize().isFailure())
     return StatusCode::FAILURE;
   //// prepare job options metadata ///////////////////////
