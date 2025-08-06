@@ -158,7 +158,8 @@ namespace details {
             throw GaudiException(
                 thisClass->name(),
                 fmt::format("Failed to cast collection {} to the required type {}, the type of the collection is {}",
-                            handle.objKey(), typeid(EDM4hepType).name(), collection ? collection->getTypeName() : "[undetermined]"),
+                            handle.objKey(), typeid(EDM4hepType).name(),
+                            collection ? collection->getTypeName() : "[undetermined]"),
                 StatusCode::FAILURE);
           }
         }
@@ -223,9 +224,8 @@ namespace details {
       if constexpr (isVectorLike_v<std::tuple_element_t<Index, std::tuple<Out...>>>) {
         const auto& outputVector = std::get<Index>(outputs);
         if (outputHandles.size() != outputVector.size()) {
-          std::string msg = "Size of the output vector " + std::to_string(outputHandles.size()) +
-                            " with type " + typeid(outputHandles).name() +
-                            " does not match the expected size from the steering file " +
+          std::string msg = "Size of the output vector " + std::to_string(outputHandles.size()) + " with type " +
+                            typeid(outputHandles).name() + " does not match the expected size from the steering file " +
                             std::to_string(outputVector.size());
           throw GaudiException(thisClass->name(), msg, StatusCode::FAILURE);
         }
@@ -235,8 +235,7 @@ namespace details {
           ++index;
         }
       } else {
-        Gaudi::Functional::details::put(std::get<Index>(outputs)[0],
-                                        convertToUniquePtr(std::move(outputHandles)));
+        Gaudi::Functional::details::put(std::get<Index>(outputs)[0], convertToUniquePtr(std::move(outputHandles)));
       }
 
       // Recursive call for the next index
