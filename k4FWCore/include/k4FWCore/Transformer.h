@@ -76,32 +76,33 @@ namespace details {
           m_inputLocations{Gaudi::Property<std::vector<DataObjID>>{
               this, std::get<I>(inputs).first, to_DataObjID(std::get<I>(inputs).second),
               [this](Gaudi::Details::PropertyBase&) {
-                std::vector<InputHandle_t<typename EventStoreType<In>::type>> h;
-                for (auto& value : this->m_inputLocations[I].value()) {
+                std::vector<InputHandle_t<typename EventStoreType<In>::type>> handles;
+                handles.reserve(this->m_inputLocations[I].value().size());
+                for (const auto& value : this->m_inputLocations[I].value()) {
                   auto handle = InputHandle_t<typename EventStoreType<In>::type>(value, this);
-                  h.push_back(std::move(handle));
+                  handles.push_back(std::move(handle));
                 }
-                std::get<I>(m_inputs) = std::move(h);
+                std::get<I>(m_inputs) = std::move(handles);
               },
               Gaudi::Details::Property::ImmediatelyInvokeHandler{true}}...},
           // Same as above for the output locations
           m_outputLocations{Gaudi::Property<std::vector<DataObjID>>{
               this, std::get<J>(outputs).first, to_DataObjID(std::get<J>(outputs).second),
               [this](Gaudi::Details::PropertyBase&) {
-                std::vector<OutputHandle_t<typename EventStoreType<Out>::type>> h;
-                for (auto& inpID : this->m_outputLocations.value()) {
-                  if (inpID.key().empty()) {
+                std::vector<OutputHandle_t<typename EventStoreType<Out>::type>> handles;
+                for (const auto& outputId : this->m_outputLocations.value()) {
+                  if (outputId.key().empty()) {
                     continue;
                   }
-                  auto handle = OutputHandle_t<typename EventStoreType<Out>::type>(inpID, this);
-                  h.push_back(std::move(handle));
+                  auto handle = OutputHandle_t<typename EventStoreType<Out>::type>(outputId, this);
+                  handles.push_back(std::move(handle));
                 }
-                std::get<0>(m_outputs) = std::move(h);
+                std::get<0>(m_outputs) = std::move(handles);
               },
               Gaudi::Details::Property::ImmediatelyInvokeHandler{true}}...} {}
 
-    constexpr static std::size_t N_in = sizeof...(In);
-    constexpr static std::size_t N_out = 1;
+    static constexpr std::size_t N_in = sizeof...(In);
+    static constexpr std::size_t N_out = 1;
 
     Transformer(std::string name, ISvcLocator* locator,
                 Gaudi::Functional::details::RepeatValues_<KeyValues, N_in> const& inputs,
@@ -210,34 +211,35 @@ namespace details {
           m_inputLocations{Gaudi::Property<std::vector<DataObjID>>{
               this, std::get<I>(inputs).first, to_DataObjID(std::get<I>(inputs).second),
               [this](Gaudi::Details::PropertyBase&) {
-                std::vector<InputHandle_t<typename EventStoreType<In>::type>> h;
-                for (auto& value : this->m_inputLocations[I].value()) {
+                std::vector<InputHandle_t<typename EventStoreType<In>::type>> handles;
+                handles.reserve(this->m_inputLocations[I].value().size());
+                for (const auto& value : this->m_inputLocations[I].value()) {
                   auto handle = InputHandle_t<typename EventStoreType<In>::type>(value, this);
-                  h.push_back(std::move(handle));
+                  handles.push_back(std::move(handle));
                 }
-                std::get<I>(m_inputs) = std::move(h);
+                std::get<I>(m_inputs) = std::move(handles);
               },
               Gaudi::Details::Property::ImmediatelyInvokeHandler{true}}...},
           m_outputLocations{Gaudi::Property<std::vector<DataObjID>>{
               this, std::get<J>(outputs).first, to_DataObjID(std::get<J>(outputs).second),
               [this](Gaudi::Details::PropertyBase&) {
-                std::vector<OutputHandle_t<typename EventStoreType<Out>::type>> h;
+                std::vector<OutputHandle_t<typename EventStoreType<Out>::type>> handles;
                 // Is this needed?
                 // std::sort(this->m_outputLocations[J].value().begin(), this->m_outputLocations[J].value().end(),
                 //           [](const DataObjID& a, const DataObjID& b) { return a.key() < b.key(); });
-                for (auto& inpID : this->m_outputLocations[J].value()) {
-                  if (inpID.key().empty()) {
+                for (const auto& outputId : this->m_outputLocations[J].value()) {
+                  if (outputId.key().empty()) {
                     continue;
                   }
-                  auto handle = OutputHandle_t<typename EventStoreType<Out>::type>(inpID, this);
-                  h.push_back(std::move(handle));
+                  auto handle = OutputHandle_t<typename EventStoreType<Out>::type>(outputId, this);
+                  handles.push_back(std::move(handle));
                 }
-                std::get<J>(m_outputs) = std::move(h);
+                std::get<J>(m_outputs) = std::move(handles);
               },
               Gaudi::Details::Property::ImmediatelyInvokeHandler{true}}...} {}
 
-    constexpr static std::size_t N_in = sizeof...(In);
-    constexpr static std::size_t N_out = sizeof...(Out);
+    static constexpr std::size_t N_in = sizeof...(In);
+    static constexpr std::size_t N_out = sizeof...(Out);
 
     MultiTransformer(std::string name, ISvcLocator* locator,
                      Gaudi::Functional::details::RepeatValues_<KeyValues, N_in> const& inputs,
