@@ -69,9 +69,8 @@ def load_file(opt_file: Union[str, os.PathLike]) -> None:
     session.
 
     Args:
-        opt_file (Union[str, os.PathLike]): A file object or a path to the file
-                                            that contains Python code to be
-                                            executed.
+        opt_file (Union[str, os.PathLike]): A path to the file that contains
+                                            Python code to be executed.
 
     Raises:
         FileNotFoundError: If `opt_file` is a path and no file exists at that path.
@@ -80,38 +79,22 @@ def load_file(opt_file: Union[str, os.PathLike]) -> None:
         Exception: Any exception raised by the executed code will be propagated.
 
     """
-    # Cannot simply deepcopy globals. Hence, populate the necessary stuff
+    with open(opt_file, "r") as ofile:
+        code = ofile.read()
+
+    module_name = Path(opt_file).stem
+    loader = SourceFileLoader(module_name, str(opt_file))
+
     namespace = {
-        "__file__": __file__,
+        "__file__": os.path.realpath(opt_file),
+        "__spec__": importlib.util.spec_from_loader(loader.name, loader),
+        # Cannot simply deepcopy globals. Hence, populate the necessary stuff
         "__builtins__": __builtins__,
         "__loader__": __loader__,
     }
 
-    if isinstance(opt_file, (str, os.PathLike)):
-        with open(opt_file, "r") as file:
-            code = file.read()
-            filename = file.name
-
-        module_name = Path(opt_file).stem
-        loader = SourceFileLoader(module_name, str(opt_file))
-
-        namespace.update(
-            {
-                "__file__": os.path.realpath(opt_file),
-                "__spec__": importlib.util.spec_from_loader(loader.name, loader),
-            }
-        )
-    else:
-        warnings.warn(
-            "load_file will remove support for handling TextIOWrapper. Please switch to pasing os.PathLike",
-            FutureWarning,
-        )
-        code = opt_file.read()
-        filename = opt_file.name
-        namespace.update({"__file__": filename})
     check_wrong_imports(str(code))
-    code = compile(code, filename, "exec")
-
+    code = compile(code, ofile.name, "exec")
     exec(code, namespace)
 
 
