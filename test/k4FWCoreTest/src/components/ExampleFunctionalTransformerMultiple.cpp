@@ -75,7 +75,7 @@ struct ExampleFunctionalTransformerMultiple final
     for (const auto& p : particles) {
       // We need to create a new particle since the current one is already in a collection
 
-      auto newParticle = newParticlesColl->create();
+      auto newParticle = newParticlesColl.create();
       newParticle.setPDG(p.getPDG() + m_offset);
       newParticle.setGeneratorStatus(p.getGeneratorStatus() + m_offset);
       newParticle.setSimulatorStatus(p.getSimulatorStatus() + m_offset);
