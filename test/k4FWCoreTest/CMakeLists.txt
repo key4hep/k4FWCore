@@ -223,6 +223,17 @@ add_test_fwcore(GaudiFunctional options/ExampleGaudiFunctional.py PROPERTIES FIX
 add_test_fwcore(ReadLimitedInputsIOSvc options/ExampleIOSvcLimitInputCollections.py PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile ADD_TO_CHECK_FILES)
 add_test_fwcore(ReadLimitedInputsAllEventsIOSvc options/ExampleIOSvcLimitInputCollections.py --IOSvc.Output "functional_limited_input_all_events.root" -n -1 PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile ADD_TO_CHECK_FILES)
 
+# Tests that ensure that load_file populates the necessary python globals
+# accordingly to make loaded files work like imported files
+# __file__ points to the loaded file and not k4FWCore/python/utils.py
+add_test_fwcore(CheckLoadedFilesHaveCorrectDunderFile options/checkLoadedFileProperties.py)
+# If there is an error in the loaded file the filename of that file needs to
+# appear in the output
+add_test_fwcore(CheckLoadedFileCorrectPathOnError options/checkLoadedFileProperties.py --with-error)
+set_tests_properties(CheckLoadedFileCorrectPathOnError
+  PROPERTIES PASS_REGULAR_EXPRESSION [=[  File ".*/test/k4FWCoreTest/options/checkLoadedFileProperties.py", line 36, in <module>]=]
+)
+
 add_test_fwcore(ParticleIDMetadataFramework options/ExampleParticleIDMetadata.py)
 
 add_test_fwcore(EfficiencyFilter options/ExampleEfficiencyFilter.py PROPERTIES DEPENDS EventHeaderFiller FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
