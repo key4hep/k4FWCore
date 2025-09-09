@@ -160,6 +160,7 @@ PodioInput::PodioInput(const std::string& name, ISvcLocator* svcLoc) : Consumer(
 }
 
 StatusCode PodioInput::initialize() {
+  warning() << "PodioInput is deprecated and will be removed. Use the IOSvc instead" << endmsg;
   // If someone uses the collections property from the command line and passes
   // an empty string we assume they want all collections (as a simple way to
   // override whatever is in the options file)
@@ -170,6 +171,11 @@ StatusCode PodioInput::initialize() {
   debug() << "Setting collections to read to: " << m_collectionNames.value() << endmsg;
   m_podioDataSvc->setCollsToRead(m_collectionNames);
 
+  return StatusCode::SUCCESS;
+}
+
+StatusCode PodioInput::finalize() {
+  warning() << "PodioInput is deprecated and will be removed. Use the IOSvc instead" << endmsg;
   return StatusCode::SUCCESS;
 }
 

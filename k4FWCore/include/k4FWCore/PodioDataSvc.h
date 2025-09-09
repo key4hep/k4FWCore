@@ -42,7 +42,7 @@ class MetaDataHandle;
  *
  *  @author B. Hegner
  */
-class PodioDataSvc : public DataSvc {
+class [[deprecated("Use the IOSvc instead")]] PodioDataSvc : public DataSvc {
   template <typename T>
   friend class k4FWCore::MetaDataHandle;
   friend class PodioOutput;
