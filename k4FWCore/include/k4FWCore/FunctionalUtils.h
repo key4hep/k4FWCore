@@ -221,10 +221,10 @@ namespace details {
       if constexpr (isVectorLike_v<std::tuple_element_t<Index, std::tuple<Out...>>>) {
         const auto& outputVector = std::get<Index>(outputs);
         if (outputHandles.size() != outputVector.size()) {
-          std::string msg = "Size of the output vector " + std::to_string(outputHandles.size()) + " with type " +
-                            typeid(outputHandles).name() + " does not match the expected size from the steering file " +
-                            std::to_string(outputVector.size());
-          throw GaudiException(msg, thisClass->name(), StatusCode::FAILURE);
+          throw GaudiException(fmt::format("Size of the output vector {} with type {} does not match the expected size "
+                                           "from the steering file {}",
+                                           outputHandles.size(), typeid(outputHandles).name(), outputVector.size()),
+                               thisClass->name(), StatusCode::FAILURE);
         }
         size_t index = 0;
         for (auto& value : outputHandles) {
