@@ -159,8 +159,7 @@ namespace details {
                 fmt::format("Failed to cast collection {} to the required type {}, the type of the collection is {}",
                             handle.objKey(), typeid(EDM4hepType).name(),
                             collection ? collection->getTypeName() : "[undetermined]"),
-                thisClass->name(),
-                StatusCode::FAILURE);
+                thisClass->name(), StatusCode::FAILURE);
           }
         }
         std::get<Index>(inputTuple) = std::move(inputVector);
@@ -170,12 +169,6 @@ namespace details {
         try {
           podio::CollectionBase* collection = std::get<Index>(handles)[0].get()->get();
           auto* typedCollection = dynamic_cast<EDM4hepType*>(collection);
-            throw GaudiException(
-                fmt::format("Failed to cast collection {} to the required type {}, the type of the collection is {}",
-                            std::get<Index>(handles)[0].objKey(), typeid(EDM4hepType).name(),
-                            collection ? collection->getTypeName() : "[undetermined]"),
-                thisClass->name(),
-                StatusCode::FAILURE);
           if (typedCollection) {
             std::get<Index>(inputTuple) = typedCollection;
           } else {
@@ -183,8 +176,7 @@ namespace details {
                 fmt::format("Failed to cast collection {} to the required type {}, the type of the collection is {}",
                             std::get<Index>(handles)[0].objKey(), typeid(EDM4hepType).name(),
                             collection ? collection->getTypeName() : "[undetermined]"),
-                thisClass->name(),
-                StatusCode::FAILURE);
+                thisClass->name(), StatusCode::FAILURE);
           }
         } catch (GaudiException& e) {
           // When the type of the collection is different from the one requested, this can happen because
@@ -203,8 +195,7 @@ namespace details {
             if (!wrapper && !marlinWrapper) {
               throw GaudiException(fmt::format("Failed to cast collection {} to the required type {}",
                                                std::get<Index>(handles)[0].objKey(), typeid(EDM4hepType).name()),
-                                   thisClass->name(),
-                                   StatusCode::FAILURE);
+                                   thisClass->name(), StatusCode::FAILURE);
             }
             if (wrapper) {
               std::get<Index>(inputTuple) = const_cast<EDM4hepType*>(wrapper->getData());
