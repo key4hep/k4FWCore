@@ -156,10 +156,10 @@ namespace details {
             inputVector.push_back(typedCollection);
           } else {
             throw GaudiException(
-                thisClass->name(),
                 fmt::format("Failed to cast collection {} to the required type {}, the type of the collection is {}",
                             handle.objKey(), typeid(EDM4hepType).name(),
                             collection ? collection->getTypeName() : "[undetermined]"),
+                thisClass->name(),
                 StatusCode::FAILURE);
           }
         }
@@ -170,14 +170,20 @@ namespace details {
         try {
           podio::CollectionBase* collection = std::get<Index>(handles)[0].get()->get();
           auto* typedCollection = dynamic_cast<EDM4hepType*>(collection);
+            throw GaudiException(
+                fmt::format("Failed to cast collection {} to the required type {}, the type of the collection is {}",
+                            std::get<Index>(handles)[0].objKey(), typeid(EDM4hepType).name(),
+                            collection ? collection->getTypeName() : "[undetermined]"),
+                thisClass->name(),
+                StatusCode::FAILURE);
           if (typedCollection) {
             std::get<Index>(inputTuple) = typedCollection;
           } else {
             throw GaudiException(
-                thisClass->name(),
                 fmt::format("Failed to cast collection {} to the required type {}, the type of the collection is {}",
                             std::get<Index>(handles)[0].objKey(), typeid(EDM4hepType).name(),
                             collection ? collection->getTypeName() : "[undetermined]"),
+                thisClass->name(),
                 StatusCode::FAILURE);
           }
         } catch (GaudiException& e) {
@@ -195,9 +201,9 @@ namespace details {
             // This is how the Marlin wrapper saves collections when converting from LCIO to EDM4hep
             const auto* marlinWrapper = dynamic_cast<const DataWrapper<podio::CollectionBase>*>(dataObject);
             if (!wrapper && !marlinWrapper) {
-              throw GaudiException(thisClass->name(),
-                                   "Failed to cast collection " + std::get<Index>(handles)[0].objKey() +
-                                       " to the requested type " + typeid(EDM4hepType).name(),
+              throw GaudiException(fmt::format("Failed to cast collection {} to the required type {}",
+                                               std::get<Index>(handles)[0].objKey(), typeid(EDM4hepType).name()),
+                                   thisClass->name(),
                                    StatusCode::FAILURE);
             }
             if (wrapper) {
@@ -227,7 +233,7 @@ namespace details {
           std::string msg = "Size of the output vector " + std::to_string(outputHandles.size()) + " with type " +
                             typeid(outputHandles).name() + " does not match the expected size from the steering file " +
                             std::to_string(outputVector.size());
-          throw GaudiException(thisClass->name(), msg, StatusCode::FAILURE);
+          throw GaudiException(msg, thisClass->name(), StatusCode::FAILURE);
         }
         size_t index = 0;
         for (auto& value : outputHandles) {
@@ -277,12 +283,13 @@ namespace details {
 
   template <typename T>
   const T& FunctionalDataObjectReadHandle<T>::get() const {
-    auto dataObj = this->fetch();
+    const auto dataObj = this->fetch();
     if (!dataObj) {
-      throw GaudiException("Cannot retrieve \'" + this->objKey() + "\' from transient store.",
-                           this->m_owner ? this->owner()->name() : "no owner", StatusCode::FAILURE);
+      throw GaudiException(fmt::format("Cannot retrieve '{}' from transient store [{}]", this->objKey(),
+                                       this->m_owner ? this->owner()->name() : "no owner"),
+                           "FunctionalDataObjectReadHandle", StatusCode::FAILURE);
     }
-    auto ptr = dynamic_cast<AnyDataWrapper<std::unique_ptr<podio::CollectionBase>>*>(dataObj);
+    const auto ptr = dynamic_cast<AnyDataWrapper<std::unique_ptr<podio::CollectionBase>>*>(dataObj);
     return maybeTransformToEDM4hep<T>(ptr->getData().get());
   }
 
