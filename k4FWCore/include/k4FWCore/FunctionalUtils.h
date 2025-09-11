@@ -147,36 +147,36 @@ namespace details {
       if constexpr (isVectorLike_v<TupleType>) {
         // Bare EDM4hep type, without pointers or const
         using EDM4hepType = std::remove_cv_t<std::remove_pointer_t<typename TupleType::value_type>>;
-        auto inputMap = std::vector<const EDM4hepType*>();
-        for (auto& handle : std::get<Index>(handles)) {
-          podio::CollectionBase* in = handle.get()->get();
-          auto* typedIn = dynamic_cast<const EDM4hepType*>(in);
-          if (typedIn) {
-            inputMap.push_back(typedIn);
+        auto inputVector = std::vector<const EDM4hepType*>();
+        inputVector.reserve(std::get<Index>(handles).size());
+        for (const auto& handle : std::get<Index>(handles)) {
+          podio::CollectionBase* collection = handle.get()->get();
+          auto* typedCollection = dynamic_cast<const EDM4hepType*>(collection);
+          if (typedCollection) {
+            inputVector.push_back(typedCollection);
           } else {
             throw GaudiException(
-                thisClass->name(),
                 fmt::format("Failed to cast collection {} to the required type {}, the type of the collection is {}",
-                            handle.objKey(), typeid(EDM4hepType).name(), in ? in->getTypeName() : "[undetermined]"),
-                StatusCode::FAILURE);
+                            handle.objKey(), typeid(EDM4hepType).name(),
+                            collection ? collection->getTypeName() : "[undetermined]"),
+                thisClass->name(), StatusCode::FAILURE);
           }
         }
-        std::get<Index>(inputTuple) = std::move(inputMap);
+        std::get<Index>(inputTuple) = std::move(inputVector);
       } else {
         // Bare EDM4hep type, without pointers or const
         using EDM4hepType = std::remove_cv_t<std::remove_pointer_t<TupleType>>;
         try {
-          podio::CollectionBase* in = std::get<Index>(handles)[0].get()->get();
-          auto* typedIn = dynamic_cast<EDM4hepType*>(in);
-          if (typedIn) {
-            std::get<Index>(inputTuple) = typedIn;
+          podio::CollectionBase* collection = std::get<Index>(handles)[0].get()->get();
+          auto* typedCollection = dynamic_cast<EDM4hepType*>(collection);
+          if (typedCollection) {
+            std::get<Index>(inputTuple) = typedCollection;
           } else {
             throw GaudiException(
-                thisClass->name(),
                 fmt::format("Failed to cast collection {} to the required type {}, the type of the collection is {}",
                             std::get<Index>(handles)[0].objKey(), typeid(EDM4hepType).name(),
-                            in ? in->getTypeName() : "[undetermined]"),
-                StatusCode::FAILURE);
+                            collection ? collection->getTypeName() : "[undetermined]"),
+                thisClass->name(), StatusCode::FAILURE);
           }
         } catch (GaudiException& e) {
           // When the type of the collection is different from the one requested, this can happen because
@@ -185,24 +185,23 @@ namespace details {
           if (e.message().find("different from") != std::string::npos) {
             thisClass->debug() << "Trying to cast the collection " << std::get<Index>(handles)[0].objKey()
                                << " to the requested type didn't work " << endmsg;
-            DataObject* p;
-            IDataProviderSvc* svc = thisClass->evtSvc();
-            svc->retrieveObject("/Event/" + std::get<Index>(handles)[0].objKey(), p).ignore();
+            DataObject* dataObject;
+            IDataProviderSvc* eventDataSvc = thisClass->evtSvc();
+            eventDataSvc->retrieveObject("/Event/" + std::get<Index>(handles)[0].objKey(), dataObject).ignore();
             // This is how Gaudi::Algorithms saves collections through the DataHandle
-            const auto* wrp = dynamic_cast<const DataWrapper<EDM4hepType>*>(p);
+            const auto* wrapper = dynamic_cast<const DataWrapper<EDM4hepType>*>(dataObject);
             // This is how the Marlin wrapper saves collections when converting from LCIO to EDM4hep
-            const auto* marlinWrp = dynamic_cast<const DataWrapper<podio::CollectionBase>*>(p);
-            if (!wrp && !marlinWrp) {
-              throw GaudiException(thisClass->name(),
-                                   "Failed to cast collection " + std::get<Index>(handles)[0].objKey() +
-                                       " to the requested type " + typeid(EDM4hepType).name(),
-                                   StatusCode::FAILURE);
+            const auto* marlinWrapper = dynamic_cast<const DataWrapper<podio::CollectionBase>*>(dataObject);
+            if (!wrapper && !marlinWrapper) {
+              throw GaudiException(fmt::format("Failed to cast collection {} to the required type {}",
+                                               std::get<Index>(handles)[0].objKey(), typeid(EDM4hepType).name()),
+                                   thisClass->name(), StatusCode::FAILURE);
             }
-            if (wrp) {
-              std::get<Index>(inputTuple) = const_cast<EDM4hepType*>(wrp->getData());
+            if (wrapper) {
+              std::get<Index>(inputTuple) = const_cast<EDM4hepType*>(wrapper->getData());
             } else {
               std::get<Index>(inputTuple) =
-                  dynamic_cast<EDM4hepType*>(const_cast<podio::CollectionBase*>(marlinWrp->getData()));
+                  dynamic_cast<EDM4hepType*>(const_cast<podio::CollectionBase*>(marlinWrapper->getData()));
             }
           } else {
             throw e;
@@ -216,36 +215,37 @@ namespace details {
   }
 
   template <size_t Index, typename... Out, typename... Handles>
-  void putVectorOutputs(std::tuple<Handles...>&& handles, const auto& m_outputs, auto thisClass) {
+  void putVectorOutputs(std::tuple<Handles...>&& handles, const auto& outputs, auto thisClass) {
     if constexpr (Index < sizeof...(Handles)) {
+      auto& outputHandles = std::get<Index>(handles); // Can not be const to allow std::move(value) below
       if constexpr (isVectorLike_v<std::tuple_element_t<Index, std::tuple<Out...>>>) {
-        int i = 0;
-        if (std::get<Index>(handles).size() != std::get<Index>(m_outputs).size()) {
-          std::string msg = "Size of the output vector " + std::to_string(std::get<Index>(handles).size()) +
-                            " with type " + typeid(std::get<Index>(handles)).name() +
-                            " does not match the expected size from the steering file " +
-                            std::to_string(std::get<Index>(m_outputs).size());
-          throw GaudiException(thisClass->name(), msg, StatusCode::FAILURE);
+        const auto& outputVector = std::get<Index>(outputs);
+        if (outputHandles.size() != outputVector.size()) {
+          throw GaudiException(fmt::format("Size of the output vector {} with type {} does not match the expected size "
+                                           "from the steering file {}",
+                                           outputHandles.size(), typeid(outputHandles).name(), outputVector.size()),
+                               thisClass->name(), StatusCode::FAILURE);
         }
-        for (auto& val : std::get<Index>(handles)) {
-          Gaudi::Functional::details::put(std::get<Index>(m_outputs)[i], convertToUniquePtr(std::move(val)));
-          i++;
+        size_t index = 0;
+        for (auto& value : outputHandles) {
+          Gaudi::Functional::details::put(outputVector[index], convertToUniquePtr(std::move(value)));
+          ++index;
         }
       } else {
-        Gaudi::Functional::details::put(std::get<Index>(m_outputs)[0],
-                                        convertToUniquePtr(std::move(std::get<Index>(handles))));
+        Gaudi::Functional::details::put(std::get<Index>(outputs)[0], convertToUniquePtr(std::move(outputHandles)));
       }
 
       // Recursive call for the next index
-      putVectorOutputs<Index + 1, Out...>(std::move(handles), m_outputs, thisClass);
+      putVectorOutputs<Index + 1, Out...>(std::move(handles), outputs, thisClass);
     }
   }
 
-  inline std::vector<DataObjID> to_DataObjID(const std::vector<std::string>& in) {
-    std::vector<DataObjID> out;
-    out.reserve(in.size());
-    std::transform(in.begin(), in.end(), std::back_inserter(out), [](const std::string& i) { return DataObjID{i}; });
-    return out;
+  inline std::vector<DataObjID> to_DataObjID(const std::vector<std::string>& inputStrings) {
+    std::vector<DataObjID> outputIds;
+    outputIds.reserve(inputStrings.size());
+    std::transform(inputStrings.begin(), inputStrings.end(), std::back_inserter(outputIds),
+                   [](const std::string& str) { return DataObjID{str}; });
+    return outputIds;
   }
 
   // Functional handles
@@ -274,12 +274,13 @@ namespace details {
 
   template <typename T>
   const T& FunctionalDataObjectReadHandle<T>::get() const {
-    auto dataObj = this->fetch();
+    const auto dataObj = this->fetch();
     if (!dataObj) {
-      throw GaudiException("Cannot retrieve \'" + this->objKey() + "\' from transient store.",
-                           this->m_owner ? this->owner()->name() : "no owner", StatusCode::FAILURE);
+      throw GaudiException(fmt::format("Cannot retrieve '{}' from transient store [{}]", this->objKey(),
+                                       this->m_owner ? this->owner()->name() : "no owner"),
+                           "FunctionalDataObjectReadHandle", StatusCode::FAILURE);
     }
-    auto ptr = dynamic_cast<AnyDataWrapper<std::unique_ptr<podio::CollectionBase>>*>(dataObj);
+    const auto ptr = dynamic_cast<AnyDataWrapper<std::unique_ptr<podio::CollectionBase>>*>(dataObj);
     return maybeTransformToEDM4hep<T>(ptr->getData().get());
   }
 

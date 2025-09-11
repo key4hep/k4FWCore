@@ -68,7 +68,8 @@ namespace details {
               this, std::get<I>(inputs).first, to_DataObjID(std::get<I>(inputs).second),
               [this](Gaudi::Details::PropertyBase&) {
                 std::vector<InputHandle_t<EventStoreType_t>> handles;
-                for (auto& value : this->m_inputLocations[I].value()) {
+                handles.reserve(this->m_inputLocations[I].value().size());
+                for (const auto& value : this->m_inputLocations[I].value()) {
                   auto handle = InputHandle_t<EventStoreType_t>(value, this);
                   handles.push_back(std::move(handle));
                 }
