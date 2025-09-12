@@ -57,7 +57,7 @@ def check_wrong_imports(code: str) -> None:
         raise ImportError("Importing ApplicationMgr or IOSvc from Configurables is not allowed.")
 
 
-def load_file(opt_file: Union[TextIOWrapper, str, os.PathLike]) -> None:
+def load_file(opt_file: Union[TextIOWrapper, str, os.PathLike], vars: dict = globals()) -> None:
     """Loads and executes the content of a given file in the current interpreter session.
 
     This function takes a file object or a path to a file, reads its content,
@@ -69,6 +69,7 @@ def load_file(opt_file: Union[TextIOWrapper, str, os.PathLike]) -> None:
                                                            path to the file that
                                                            contains Python code
                                                            to be executed.
+         vars (dict): Global dictionary to use for reading the file.
 
     Raises:
         FileNotFoundError: If `opt_file` is a path and no file exists at that path.
@@ -84,7 +85,7 @@ def load_file(opt_file: Union[TextIOWrapper, str, os.PathLike]) -> None:
         code = opt_file.read()
     check_wrong_imports(str(code))
 
-    exec(code, globals())
+    exec(code, vars)
 
 
 _logger = None

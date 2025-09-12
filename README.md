@@ -43,7 +43,7 @@ Service generating unique, reproducible numbers to be used for seeding RNG used 
 ## k4run
 ```
 $ k4run --help
-usage: k4run [--dry-run] [-v] [-n NUM_EVENTS] [-l] [--gdb] [--interactive-root] [-h] [config_files ...]
+usage: k4run [--dry-run] [-v] [-n NUM_EVENTS] [-l] [--gdb] [--interactive-root] [--log-level {VERBOSE,DEBUG,INFO,WARNING,ERROR}] [-i] [-h] [config_files ...]
 
 Run job in the Key4hep framework
 
@@ -58,6 +58,9 @@ options:
   -l, --list            Print all the configurable components available in the framework and exit
   --gdb                 Attach gdb debugger
   --interactive-root    Run with ROOT in interactive mode (e.g. to see plots)
+  --log-level {VERBOSE,DEBUG,INFO,WARNING,ERROR}
+                        Set the log (output) level for python and the ApplicationMgr
+  -i                    Start a Python command loop after reading the configuration files
   -h, --help            show this help message and exit
 ```
 When supplied with a Gaudi steering file `k4run --help file.py` also shows the settable properties of the Gaudi algorithms used in the file. Additionally, it is possible to add further arguments and use them in the steering file by using the Python `argparse.ArgumentParser` shared by `k4run`.
