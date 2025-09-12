@@ -31,13 +31,13 @@
 /**
  * @brief Helper to check return codes in a Gaudi component.
  *
- * <code>CHECK( EXP )</code> will evaluate @c EXP.  If this results in something
- * that evaluates to @c false (including @c StatusCode::FAILURE), we emit
- * an error message and immediately return a @c StatusCode::FAILURE.
+ * <code>K4_GAUDI_CHECK( EXP )</code> will evaluate @c EXP.  If this results
+ * in something that evaluates to @c false (including @c StatusCode::FAILURE),
+ * we emit an error message and immediately return a @c StatusCode::FAILURE.
  * This can be used to make checking the results of calls from Gaudi components
  * easier to read.
  */
-#define K4_CHECK(EXP)                                                                                                  \
+#define K4_GAUDI_CHECK(EXP)                                                                                            \
   do {                                                                                                                 \
     if (!(EXP)) {                                                                                                      \
       error() << __FILE__ << ":" << __LINE__ << " error returned from: " << #EXP << endmsg;                            \
