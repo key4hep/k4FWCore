@@ -33,6 +33,6 @@ parser.add_argument(
 args = parser.parse_known_args()[0]
 
 if args.with_error:
-    a = 32 / 0
+    raise SyntaxError("This is a forced error")
 else:
     assert __file__.endswith("checkLoadedFileProperties.py")

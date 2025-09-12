@@ -26,8 +26,6 @@ from importlib.machinery import SourceFileLoader
 import importlib.util
 from pathlib import Path
 
-import warnings
-
 
 def check_wrong_imports(code: str) -> None:
     """Check for wrong imports in the given code.
@@ -93,9 +91,8 @@ def load_file(opt_file: Union[str, os.PathLike]) -> None:
         "__loader__": __loader__,
     }
 
-    check_wrong_imports(str(code))
-    code = compile(code, ofile.name, "exec")
-    exec(code, namespace)
+    check_wrong_imports(code)
+    exec(compile(code, ofile.name, "exec"), namespace)
 
 
 _logger = None
