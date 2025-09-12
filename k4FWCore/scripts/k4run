@@ -136,7 +136,10 @@ def startInteractive(vars):
     vars = vars.copy()
 
     # start the interpreter
-    code.interact(local=vars)
+    code.interact(
+        local=vars,
+        banner="Starting interactive Python session.  Exit with Ctrl-D to resume the job.",
+    )
     return
 
 
@@ -193,6 +196,7 @@ def main():
 
     parser.add_argument(
         "-i",
+        "--interactive",
         action="store_true",
         help="Start a Python command loop after reading the configuration files",
         default=False,
@@ -220,8 +224,7 @@ def main():
             print(f"{item} (from {cfgdb[item]['lib']}), path: {path_to_component}")
         sys.exit()
 
-    config_ns = {}
-    config_ns["os"] = os
+    config_ns = {"os": os}
     for file in opts[0].config_files:
         load_file(file, config_ns)
 
@@ -280,7 +283,7 @@ def main():
 
     from Gaudi.Main import gaudimain
 
-    if opts.i:
+    if opts.interactive:
         startInteractive(config_ns)
 
     gaudi = gaudimain()
