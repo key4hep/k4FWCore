@@ -6,6 +6,7 @@ import argparse
 import logging
 import signal
 import warnings
+from pathlib import Path
 
 from k4FWCore.utils import load_file, get_logger, set_log_level, LOG_LEVELS
 
@@ -141,7 +142,7 @@ def main():
 
     parser.add_argument(
         "config_files",
-        type=open,
+        type=Path,
         action="store",
         nargs="*",
         help="Gaudi config (python) files describing the job",

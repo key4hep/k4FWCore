@@ -21,8 +21,10 @@ import os
 import re
 import logging
 import sys
-from io import TextIOWrapper
 from typing import Union
+from importlib.machinery import SourceFileLoader
+import importlib.util
+from pathlib import Path
 
 
 def check_wrong_imports(code: str) -> None:
@@ -57,18 +59,16 @@ def check_wrong_imports(code: str) -> None:
         raise ImportError("Importing ApplicationMgr or IOSvc from Configurables is not allowed.")
 
 
-def load_file(opt_file: Union[TextIOWrapper, str, os.PathLike]) -> None:
+def load_file(opt_file: Union[str, os.PathLike]) -> None:
     """Loads and executes the content of a given file in the current interpreter session.
 
-    This function takes a file object or a path to a file, reads its content,
-    and then executes it as Python code within the global scope of the current
-    interpreter session. If `opt_file` is a file handle it will not be closed.
+    This function takes a path to a file, reads its content, and then executes
+    it as Python code within the global scope of the current interpreter
+    session.
 
     Args:
-        opt_file (Union[TextIOWrapper, str, os.PathLike]): A file object or a
-                                                           path to the file that
-                                                           contains Python code
-                                                           to be executed.
+        opt_file (Union[str, os.PathLike]): A path to the file that contains
+                                            Python code to be executed.
 
     Raises:
         FileNotFoundError: If `opt_file` is a path and no file exists at that path.
@@ -77,14 +77,22 @@ def load_file(opt_file: Union[TextIOWrapper, str, os.PathLike]) -> None:
         Exception: Any exception raised by the executed code will be propagated.
 
     """
-    if isinstance(opt_file, (str, os.PathLike)):
-        with open(opt_file, "r") as file:
-            code = file.read()
-    else:
-        code = opt_file.read()
-    check_wrong_imports(str(code))
+    with open(opt_file, "r") as ofile:
+        code = ofile.read()
 
-    exec(code, globals())
+    module_name = Path(opt_file).stem
+    loader = SourceFileLoader(module_name, str(opt_file))
+
+    namespace = {
+        "__file__": os.path.realpath(opt_file),
+        "__spec__": importlib.util.spec_from_loader(loader.name, loader),
+        # Cannot simply deepcopy globals. Hence, populate the necessary stuff
+        "__builtins__": __builtins__,
+        "__loader__": __loader__,
+    }
+
+    check_wrong_imports(code)
+    exec(compile(code, ofile.name, "exec"), namespace)
 
 
 _logger = None
