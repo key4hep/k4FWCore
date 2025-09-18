@@ -60,7 +60,7 @@ options:
   --interactive-root    Run with ROOT in interactive mode (e.g. to see plots)
   --log-level {VERBOSE,DEBUG,INFO,WARNING,ERROR}
                         Set the log (output) level for python and the ApplicationMgr
-  -i                    Start a Python command loop after reading the configuration files
+  -i,--interactive      Start a Python command loop after reading the configuration files
   -h, --help            show this help message and exit
 ```
 When supplied with a Gaudi steering file `k4run --help file.py` also shows the settable properties of the Gaudi algorithms used in the file. Additionally, it is possible to add further arguments and use them in the steering file by using the Python `argparse.ArgumentParser` shared by `k4run`.
