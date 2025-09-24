@@ -248,6 +248,10 @@ namespace details {
     return outputIds;
   }
 
+  inline std::vector<DataObjID> to_DataObjID(const std::string& inputString) {
+    return {DataObjID{inputString}};
+  }
+
   // Functional handles
   // This is currently used so that the FilterPredicate can be used together with the
   // consumer/producer/transformer
