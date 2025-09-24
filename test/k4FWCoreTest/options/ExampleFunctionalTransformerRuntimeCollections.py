@@ -50,17 +50,17 @@ transformer = ExampleFunctionalTransformerRuntimeCollections(
 
 consumer0 = ExampleFunctionalConsumer(
     "Consumer0",
-    InputCollection=["NewMCParticles0"],
+    InputCollection="NewMCParticles0",
     Offset=0,
 )
 consumer1 = ExampleFunctionalConsumer(
     "Consumer1",
-    InputCollection=["NewMCParticles1"],
+    InputCollection="NewMCParticles1",
     Offset=0,
 )
 consumer2 = ExampleFunctionalConsumer(
     "Consumer2",
-    InputCollection=["NewMCParticles2"],
+    InputCollection="NewMCParticles2",
     Offset=0,
 )
 

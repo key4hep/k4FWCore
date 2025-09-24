@@ -107,37 +107,37 @@ transformer = ExampleFunctionalTransformerRuntimeCollectionsMultiple(
 
 consumer0 = ExampleFunctionalConsumerMultiple(
     "Consumer0",
-    InputCollectionFloat=["NewVectorFloat0"],
-    InputCollectionParticles=["NewMCParticles0"],
-    InputCollectionSimTrackerHits=["NewSimTrackerHits0"],
-    InputCollectionTrackerHits=["NewTrackerHits0"],
-    InputCollectionTracks=["NewTracks0"],
-    InputCollectionRecoParticles=["NewRecos0"],
-    InputCollectionLinks=["NewLinks0"],
+    InputCollectionFloat="NewVectorFloat0",
+    InputCollectionParticles="NewMCParticles0",
+    InputCollectionSimTrackerHits="NewSimTrackerHits0",
+    InputCollectionTrackerHits="NewTrackerHits0",
+    InputCollectionTracks="NewTracks0",
+    InputCollectionRecoParticles="NewRecos0",
+    InputCollectionLinks="NewLinks0",
     Offset=0,
 )
 
 consumer1 = ExampleFunctionalConsumerMultiple(
     "Consumer1",
-    InputCollectionFloat=["NewVectorFloat1"],
-    InputCollectionParticles=["NewMCParticles2"],
-    InputCollectionSimTrackerHits=["NewSimTrackerHits1"],
-    InputCollectionTrackerHits=["NewTrackerHits1"],
-    InputCollectionTracks=["NewTracks1"],
-    InputCollectionRecoParticles=["NewRecos1"],
-    InputCollectionLinks=["NewLinks1"],
+    InputCollectionFloat="NewVectorFloat1",
+    InputCollectionParticles="NewMCParticles2",
+    InputCollectionSimTrackerHits="NewSimTrackerHits1",
+    InputCollectionTrackerHits="NewTrackerHits1",
+    InputCollectionTracks="NewTracks1",
+    InputCollectionRecoParticles="NewRecos1",
+    InputCollectionLinks="NewLinks1",
     Offset=0,
 )
 
 consumer2 = ExampleFunctionalConsumerMultiple(
     "Consumer2",
-    InputCollectionFloat=["NewVectorFloat2"],
-    InputCollectionParticles=["NewMCParticles4"],
-    InputCollectionSimTrackerHits=["NewSimTrackerHits2"],
-    InputCollectionTrackerHits=["NewTrackerHits2"],
-    InputCollectionTracks=["NewTracks2"],
-    InputCollectionRecoParticles=["NewRecos2"],
-    InputCollectionLinks=["NewLinks2"],
+    InputCollectionFloat="NewVectorFloat2",
+    InputCollectionParticles="NewMCParticles4",
+    InputCollectionSimTrackerHits="NewSimTrackerHits2",
+    InputCollectionTrackerHits="NewTrackerHits2",
+    InputCollectionTracks="NewTracks2",
+    InputCollectionRecoParticles="NewRecos2",
+    InputCollectionLinks="NewLinks2",
     Offset=0,
 )
 

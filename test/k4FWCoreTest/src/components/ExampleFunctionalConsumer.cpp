@@ -30,7 +30,7 @@ struct ExampleFunctionalConsumer final : k4FWCore::Consumer<void(const edm4hep::
   // The pair in KeyValues can be changed from python and it corresponds
   // to the name of the input collection
   ExampleFunctionalConsumer(const std::string& name, ISvcLocator* svcLoc)
-      : Consumer(name, svcLoc, KeyValues("InputCollection", {"MCParticles"})) {}
+      : Consumer(name, svcLoc, KeyValue("InputCollection", "MCParticles")) {}
 
   // This is the function that will be called to transform the data
   // Note that the function has to be const, as well as the collections

@@ -53,7 +53,7 @@ producer = ExampleFunctionalProducer("Producer", OutputCollection=["MCParticles"
 
 consumer = ExampleFunctionalConsumer(
     "Consumer",
-    InputCollection=["NewMCParticles"],
+    InputCollection="NewMCParticles",
     Offset=10,
 )
 
