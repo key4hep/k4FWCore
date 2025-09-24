@@ -57,9 +57,10 @@ namespace details {
 
     template <typename T, size_t I>
     Gaudi::Property<DataObjID> make_input_prop_normal(const auto& inp) {
-      if constexpr (std::is_same_v<KeyValue, std::decay_t<decltype(inp)>>) {
+      if (inp.index() == 0) {
+        const auto& input = std::get<KeyValue>(inp);
         return {Gaudi::Property<DataObjID>(
-            this, inp.first, to_DataObjID(inp.second)[0],
+            this, input.first, to_DataObjID(input.second)[0],
             [this](Gaudi::Details::PropertyBase& p) {
               std::vector<InputHandle_t<EventStoreType_t>> handles;
               auto handle = InputHandle_t<EventStoreType_t>(static_cast<Gaudi::Property<DataObjID>&>(p).value(), this);
@@ -73,9 +74,11 @@ namespace details {
     }
     template <typename T, size_t I>
     Gaudi::Property<std::vector<DataObjID>> make_input_prop_vector(const auto& inp) {
-      if constexpr (std::is_same_v<KeyValues, std::decay_t<decltype(inp)>>) {
+      // KeyValues
+      if (inp.index() == 1) {
+        const auto& input = std::get<KeyValues>(inp);
         return {Gaudi::Property<std::vector<DataObjID>>(
-            this, inp.first, to_DataObjID(inp.second),
+            this, input.first, to_DataObjID(input.second),
             [this](Gaudi::Details::PropertyBase& p) {
               const auto& tmpprop = static_cast<Gaudi::Property<std::vector<DataObjID>>&>(p);
               const auto& tmpval = tmpprop.value();
@@ -109,15 +112,8 @@ namespace details {
           m_inputLocationsVector{make_input_prop_vector<In, I>(std::get<I>(inputs))...} {}
 
     Consumer(std::string name, ISvcLocator* locator,
-             const Gaudi::Functional::details::RepeatValues_<KeyValues, sizeof...(In)>& inputs)
+             const Gaudi::Functional::details::RepeatValues_<std::variant<KeyValue, KeyValues>, sizeof...(In)>& inputs)
         : Consumer(std::move(name), locator, inputs, std::index_sequence_for<In...>{}) {
-      std::cout << "Calling constructor with KeyValueS" << std::endl;
-    }
-
-    Consumer(std::string name, ISvcLocator* locator,
-             const Gaudi::Functional::details::RepeatValues_<KeyValue, sizeof...(In)>& inputs)
-        : Consumer(std::move(name), locator, inputs, std::index_sequence_for<In...>{}) {
-      std::cout << "Calling constructor with KeyValue" << std::endl;
     }
 
     // derived classes are NOT allowed to implement execute ...

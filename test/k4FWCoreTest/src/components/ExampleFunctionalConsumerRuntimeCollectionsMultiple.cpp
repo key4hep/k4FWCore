@@ -36,7 +36,7 @@ struct ExampleFunctionalConsumerRuntimeCollectionsMultiple final
   ExampleFunctionalConsumerRuntimeCollectionsMultiple(const std::string& name, ISvcLocator* svcLoc)
       : Consumer(name, svcLoc,
                  {KeyValues("Particles", {"MCParticles"}), KeyValues("Tracks", {"MCParticles"}),
-                  KeyValues("SimTrackerHits", {"MCParticles"})}) {}
+                  KeyValue("SimTrackerHits", "MCParticles")}) {}
 
   // This is the function that will be called to produce the data
   void operator()(const std::vector<const edm4hep::MCParticleCollection*>& particleVec,
