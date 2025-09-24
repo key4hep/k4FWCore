@@ -24,21 +24,36 @@ from Configurables import (
     ExampleFunctionalTransformer,
     ExampleFunctionalProducer,
     ExampleFunctionalConsumer,
+    ExampleFunctionalConsumerKeyValues,
 )
 from k4FWCore import ApplicationMgr
 from Configurables import EventDataSvc
+
+from k4FWCore.parseArgs import parser
+
+parser.add_argument("--use-key-values", action="store_true", help="Use KeyValues for consumer")
+
+my_opts = parser.parse_known_args()
 
 transformer = ExampleFunctionalTransformer(
     "Transformer", InputCollection=["MCParticles"], OutputCollection=["NewMCParticles"]
 )
 
+if not my_opts[0].use_key_values:
+    consumer = ExampleFunctionalConsumer(
+        "Consumer",
+        InputCollection="NewMCParticles",
+        Offset=10,
+    )
+else:
+    consumer = ExampleFunctionalConsumerKeyValues(
+        "Consumer",
+        InputCollection=["NewMCParticles"],
+        Offset=10,
+    )
+
 producer = ExampleFunctionalProducer("Producer", OutputCollection=["MCParticles"])
 
-consumer = ExampleFunctionalConsumer(
-    "Consumer",
-    InputCollection=["NewMCParticles"],
-    Offset=10,
-)
 
 ApplicationMgr(
     TopAlg=[producer, transformer, consumer],

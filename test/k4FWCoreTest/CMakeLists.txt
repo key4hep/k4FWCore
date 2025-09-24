@@ -168,6 +168,7 @@ set_tests_properties(TestEventCounter PROPERTIES FAIL_REGULAR_EXPRESSION "Proces
                      PASS_REGULAR_EXPRESSION "(Processing event 0.*Processing event 2|Processing event 2.*Processing event 0).*Processed 4 events.*Processed 4 events")
 
 add_test_fwcore(FunctionalMemory options/ExampleFunctionalMemory.py)
+add_test_fwcore(FunctionalMemoryKeyValues options/ExampleFunctionalMemory.py --use-key-values)
 add_test_fwcore(FunctionalMTMemory options/ExampleFunctionalMTMemory.py)
 add_test_fwcore(FunctionalMultipleMemory options/ExampleFunctionalMultipleMemory.py)
 add_test_fwcore(FunctionalProducer options/ExampleFunctionalProducer.py)
