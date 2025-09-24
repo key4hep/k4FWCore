@@ -51,11 +51,52 @@ namespace details {
     using InputHandle_t = Gaudi::Functional::details::InputHandle_t<Traits_, T>;
 
     std::tuple<std::vector<InputHandle_t<typename EventStoreType<In>::type>>...> m_inputs;
-    std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)> m_inputLocations{};
+
+    std::array<Gaudi::Property<DataObjID>, sizeof...(In)> m_inputLocationsNormal;
+    std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)> m_inputLocationsVector;
+
+    template <typename T, size_t I>
+    Gaudi::Property<DataObjID> make_input_prop_normal(const auto& inp) {
+      if constexpr (std::is_same_v<KeyValue, std::decay_t<decltype(inp)>>) {
+        return {Gaudi::Property<DataObjID>(
+            this, inp.first, to_DataObjID(inp.second)[0],
+            [this](Gaudi::Details::PropertyBase& p) {
+              std::vector<InputHandle_t<EventStoreType_t>> handles;
+              auto handle = InputHandle_t<EventStoreType_t>(static_cast<Gaudi::Property<DataObjID>&>(p).value(), this);
+              handles.push_back(std::move(handle));
+              std::get<I>(m_inputs) = std::move(handles);
+            },
+            Gaudi::Details::Property::ImmediatelyInvokeHandler{true})};
+      } else {
+        return Gaudi::Property<DataObjID>{};
+      }
+    }
+    template <typename T, size_t I>
+    Gaudi::Property<std::vector<DataObjID>> make_input_prop_vector(const auto& inp) {
+      if constexpr (std::is_same_v<KeyValues, std::decay_t<decltype(inp)>>) {
+        return {Gaudi::Property<std::vector<DataObjID>>(
+            this, inp.first, to_DataObjID(inp.second),
+            [this](Gaudi::Details::PropertyBase& p) {
+              const auto& tmpprop = static_cast<Gaudi::Property<std::vector<DataObjID>>&>(p);
+              const auto& tmpval = tmpprop.value();
+              std::vector<InputHandle_t<EventStoreType_t>> handles;
+              handles.reserve(tmpval.size());
+              for (const auto& value : tmpval) {
+                auto handle = InputHandle_t<EventStoreType_t>(value, this);
+                handles.push_back(std::move(handle));
+              }
+              std::get<I>(m_inputs) = std::move(handles);
+            },
+            Gaudi::Details::Property::ImmediatelyInvokeHandler{true})};
+      } else {
+        return Gaudi::Property<std::vector<DataObjID>>{};
+      }
+    }
 
     using base_class = Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>;
 
     using KeyValues = typename base_class::KeyValues;
+    using KeyValue = typename base_class::KeyValue;
 
     template <typename IArgs, std::size_t... I>
     Consumer(std::string name, ISvcLocator* locator, const IArgs& inputs, std::index_sequence<I...>)
@@ -64,22 +105,20 @@ namespace details {
           // that creates the handles because that is when the input locations become available
           // (from a steering file, for example) and the handles have to be created for
           // Gaudi to know the data flow
-          m_inputLocations{Gaudi::Property<std::vector<DataObjID>>{
-              this, std::get<I>(inputs).first, to_DataObjID(std::get<I>(inputs).second),
-              [this](Gaudi::Details::PropertyBase&) {
-                std::vector<InputHandle_t<EventStoreType_t>> handles;
-                handles.reserve(this->m_inputLocations[I].value().size());
-                for (const auto& value : this->m_inputLocations[I].value()) {
-                  auto handle = InputHandle_t<EventStoreType_t>(value, this);
-                  handles.push_back(std::move(handle));
-                }
-                std::get<I>(m_inputs) = std::move(handles);
-              },
-              Gaudi::Details::Property::ImmediatelyInvokeHandler{true}}...} {}
+          m_inputLocationsNormal{make_input_prop_normal<In, I>(std::get<I>(inputs))...},
+          m_inputLocationsVector{make_input_prop_vector<In, I>(std::get<I>(inputs))...} {}
 
     Consumer(std::string name, ISvcLocator* locator,
-             Gaudi::Functional::details::RepeatValues_<KeyValues, sizeof...(In)> const& inputs)
-        : Consumer(std::move(name), locator, inputs, std::index_sequence_for<In...>{}) {}
+             const Gaudi::Functional::details::RepeatValues_<KeyValues, sizeof...(In)>& inputs)
+        : Consumer(std::move(name), locator, inputs, std::index_sequence_for<In...>{}) {
+      std::cout << "Calling constructor with KeyValueS" << std::endl;
+    }
+
+    Consumer(std::string name, ISvcLocator* locator,
+             const Gaudi::Functional::details::RepeatValues_<KeyValue, sizeof...(In)>& inputs)
+        : Consumer(std::move(name), locator, inputs, std::index_sequence_for<In...>{}) {
+      std::cout << "Calling constructor with KeyValue" << std::endl;
+    }
 
     // derived classes are NOT allowed to implement execute ...
     StatusCode execute(const EventContext& ctx) const final {
@@ -105,7 +144,8 @@ namespace details {
         throw std::out_of_range("Called inputLocations with an index out of range, index: " + std::to_string(i) +
                                 ", number of inputs: " + std::to_string(sizeof...(In)));
       }
-      return m_inputLocations[i] | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
+      return m_inputLocationsVector[i] |
+             std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
     }
     /**
      * @brief       Get the input locations for a given input name
@@ -113,8 +153,8 @@ namespace details {
      * @return      A range of the input locations
      */
     auto inputLocations(std::string_view name) const {
-      auto it = std::ranges::find_if(m_inputLocations, [&name](const auto& prop) { return prop.name() == name; });
-      if (it == m_inputLocations.end()) {
+      auto it = std::ranges::find_if(m_inputLocationsVector, [&name](const auto& prop) { return prop.name() == name; });
+      if (it == m_inputLocationsVector.end()) {
         throw std::runtime_error("Called inputLocations with an unknown name");
       }
       return it->value() | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
