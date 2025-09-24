@@ -20,7 +20,9 @@ limitations under the License.
 set(k4fwcoretest_plugin_sources
   src/components/ExampleEventHeaderConsumer.cpp
   src/components/ExampleFunctionalConsumer.cpp
+  src/components/ExampleFunctionalConsumerKeyValues.cpp
   src/components/ExampleFunctionalConsumerMultiple.cpp
+  src/components/ExampleFunctionalConsumerMultipleKeyValues.cpp
   src/components/ExampleFunctionalConsumerRuntimeCollections.cpp
   src/components/ExampleFunctionalConsumerRuntimeCollectionsMultiple.cpp
   src/components/ExampleFunctionalFilter.cpp
