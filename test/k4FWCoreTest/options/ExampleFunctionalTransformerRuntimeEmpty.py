@@ -45,7 +45,7 @@ producer2 = ExampleFunctionalProducer(
 )
 
 transformer = ExampleFunctionalTransformerRuntimeEmpty(
-    InputCollections="MCParticles0",
+    InputCollections=["MCParticles0"],
     OutputCollections=[""],
 )
 

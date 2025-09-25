@@ -334,6 +334,48 @@ namespace details {
     }
   }
 
+  template <typename OutputHandle, typename KeyValue>
+  Gaudi::Property<DataObjID> makeOutputPropSingle(const auto& out, auto& classOutputs, auto* thisClass) {
+    if (out.index() == 0) {
+      const auto& output = std::get<KeyValue>(out);
+      return {Gaudi::Property<DataObjID>(
+          thisClass, output.first, to_DataObjID(output.second)[0],
+          [thisClass, &classOutputs](Gaudi::Details::PropertyBase& p) {
+            std::vector<OutputHandle> handles;
+            auto handle = OutputHandle(static_cast<Gaudi::Property<DataObjID>&>(p).value(), thisClass);
+            handles.push_back(std::move(handle));
+            classOutputs = std::move(handles);
+          },
+          Gaudi::Details::Property::ImmediatelyInvokeHandler{true})};
+    } else {
+      return {};
+    }
+  }
+  template <typename OutputHandle, typename KeyValues>
+  Gaudi::Property<std::vector<DataObjID>> makeOutputPropVector(const auto& out, auto& classOutputs, auto* thisClass) {
+    if (out.index() == 1) {
+      const auto& output = std::get<KeyValues>(out);
+      return {Gaudi::Property<std::vector<DataObjID>>(
+          thisClass, output.first, to_DataObjID(output.second),
+          [thisClass, &classOutputs](Gaudi::Details::PropertyBase& p) {
+            std::vector<OutputHandle> handles;
+            const auto& tmpprop = static_cast<Gaudi::Property<std::vector<DataObjID>>&>(p);
+            const auto& tmpval = tmpprop.value();
+            for (const auto& value : tmpval) {
+              if (value.key().empty()) {
+                continue;
+              }
+              auto handle = OutputHandle(value, thisClass);
+              handles.push_back(std::move(handle));
+            }
+            classOutputs = std::move(handles);
+          },
+          Gaudi::Details::Property::ImmediatelyInvokeHandler{true})};
+    } else {
+      return {};
+    }
+  }
+
 } // namespace details
 } // namespace k4FWCore
 

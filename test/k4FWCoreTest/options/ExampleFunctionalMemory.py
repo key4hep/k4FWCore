@@ -36,7 +36,7 @@ parser.add_argument("--use-key-values", action="store_true", help="Use KeyValues
 my_opts = parser.parse_known_args()
 
 transformer = ExampleFunctionalTransformer(
-    "Transformer", InputCollection="MCParticles", OutputCollection=["NewMCParticles"]
+    "Transformer", InputCollection="MCParticles", OutputCollection="NewMCParticles"
 )
 
 if not my_opts[0].use_key_values:

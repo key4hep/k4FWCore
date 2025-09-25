@@ -30,7 +30,7 @@ struct ExampleFunctionalTransformer final
     : k4FWCore::Transformer<edm4hep::MCParticleCollection(const edm4hep::MCParticleCollection&)> {
   ExampleFunctionalTransformer(const std::string& name, ISvcLocator* svcLoc)
       : Transformer(name, svcLoc, {KeyValue("InputCollection", "MCParticles")},
-                    {KeyValues("OutputCollection", {"NewMCParticles"})}) {}
+                    {KeyValue("OutputCollection", "NewMCParticles")}) {}
 
   // This is the function that will be called to transform the data
   // Note that the function has to be const, as well as all pointers to collections

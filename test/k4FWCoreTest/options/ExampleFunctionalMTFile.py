@@ -53,7 +53,7 @@ consumer = ExampleFunctionalConsumer(
 )
 
 transformer = ExampleFunctionalTransformer(
-    "Transformer", InputCollection="MCParticles1", OutputCollection=["NewMCParticles"]
+    "Transformer", InputCollection="MCParticles1", OutputCollection="NewMCParticles"
 )
 
 mgr = ApplicationMgr(

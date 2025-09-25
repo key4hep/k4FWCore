@@ -59,7 +59,8 @@ namespace details {
     std::tuple<std::vector<OutputHandle_t<typename EventStoreType<Out>::type>>> m_outputs;
     std::array<Gaudi::Property<DataObjID>, sizeof...(In)> m_inputLocationsSingle;
     std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)> m_inputLocationsVector;
-    Gaudi::Property<std::vector<DataObjID>> m_outputLocations{};
+    std::array<Gaudi::Property<DataObjID>, 1> m_outputLocationsSingle;
+    Gaudi::Property<std::vector<DataObjID>> m_outputLocationsVector;
 
     using base_class = Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>;
 
@@ -79,28 +80,17 @@ namespace details {
               std::get<I>(inputs), std::get<I>(m_inputs), this)...},
           m_inputLocationsVector{makeInputPropVector<InputHandle_t<EventStoreType_t>, KeyValues>(
               std::get<I>(inputs), std::get<I>(m_inputs), this)...},
-          // Same as above for the output locations
-          m_outputLocations{Gaudi::Property<std::vector<DataObjID>>{
-              this, std::get<J>(outputs).first, to_DataObjID(std::get<J>(outputs).second),
-              [this](Gaudi::Details::PropertyBase&) {
-                std::vector<OutputHandle_t<typename EventStoreType<Out>::type>> handles;
-                for (const auto& outputId : this->m_outputLocations.value()) {
-                  if (outputId.key().empty()) {
-                    continue;
-                  }
-                  auto handle = OutputHandle_t<typename EventStoreType<Out>::type>(outputId, this);
-                  handles.push_back(std::move(handle));
-                }
-                std::get<0>(m_outputs) = std::move(handles);
-              },
-              Gaudi::Details::Property::ImmediatelyInvokeHandler{true}}...} {}
+          m_outputLocationsSingle{makeOutputPropSingle<OutputHandle_t<EventStoreType_t>, KeyValue>(
+              std::get<0>(outputs), std::get<0>(m_outputs), this)},
+          m_outputLocationsVector{makeOutputPropVector<OutputHandle_t<EventStoreType_t>, KeyValues>(
+              std::get<0>(outputs), std::get<0>(m_outputs), this)} {}
 
     static constexpr std::size_t N_in = sizeof...(In);
     static constexpr std::size_t N_out = 1;
 
     Transformer(std::string name, ISvcLocator* locator,
                 Gaudi::Functional::details::RepeatValues_<std::variant<KeyValue, KeyValues>, N_in> const& inputs,
-                Gaudi::Functional::details::RepeatValues_<KeyValues, N_out> const& outputs)
+                Gaudi::Functional::details::RepeatValues_<std::variant<KeyValue, KeyValues>, N_out> const& outputs)
         : Transformer(std::move(name), locator, inputs, std::index_sequence_for<In...>{}, outputs,
                       std::index_sequence_for<Out>{}) {}
 
@@ -132,7 +122,8 @@ namespace details {
         throw std::out_of_range("Called inputLocations with an index out of range, index: " + std::to_string(i) +
                                 ", number of inputs: " + std::to_string(sizeof...(In)));
       }
-      return m_inputLocationsVector[i] | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
+      return m_inputLocationsVector[i] |
+             std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
     }
     /**
      * @brief       Get the input locations for a given input name
@@ -152,7 +143,8 @@ namespace details {
      * @return   A range of the output locations
      */
     auto outputLocations() const {
-      return m_outputLocations | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
+      return m_outputLocationsVector |
+             std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
     }
     /**
      * @brief       Get the output locations for a given output name
@@ -160,10 +152,11 @@ namespace details {
      * @return      A range of the output locations
      */
     auto outputLocations(std::string_view name) const {
-      if (name != m_outputLocations.name()) {
+      if (name != m_outputLocationsVector.name()) {
         throw std::runtime_error("Called outputLocations with an unknown name");
       }
-      return m_outputLocations | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
+      return m_outputLocationsVector |
+             std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
     }
     static constexpr std::size_t inputLocationsSize() { return sizeof...(In); }
 
@@ -193,7 +186,9 @@ namespace details {
     std::tuple<std::vector<OutputHandle_t<typename EventStoreType<Out>::type>>...> m_outputs;
     std::array<Gaudi::Property<DataObjID>, sizeof...(In)> m_inputLocationsSingle;
     std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)> m_inputLocationsVector;
-    std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(Out)> m_outputLocations{};
+    std::array<Gaudi::Property<DataObjID>, sizeof...(In)> m_outputLocationsSingle;
+    std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)> m_outputLocationsVector;
+    std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(Out)> m_outputLocations;
 
     using base_class = Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>;
 
@@ -257,7 +252,8 @@ namespace details {
         throw std::out_of_range("Called inputLocations with an index out of range, index: " + std::to_string(i) +
                                 ", number of inputs: " + std::to_string(sizeof...(In)));
       }
-      return m_inputLocationsVector[i] | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
+      return m_inputLocationsVector[i] |
+             std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
     }
     /**
      * @brief       Get the input locations for a given input name
