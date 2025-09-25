@@ -51,13 +51,13 @@ struct ExampleFunctionalTransformerMultiple final
           const RecoColl&, const LinkColl&)> {
   ExampleFunctionalTransformerMultiple(const std::string& name, ISvcLocator* svcLoc)
       : MultiTransformer(name, svcLoc,
-                         {KeyValues("InputCollectionFloat", {"VectorFloat"}),
-                          KeyValues("InputCollectionParticles", {"MCParticles1"}),
-                          KeyValues("InputCollectionSimTrackerHits", {"SimTrackerHits"}),
-                          KeyValues("InputCollectionTrackerHits", {"TrackerHits"}),
-                          KeyValues("InputCollectionTracks", {"Tracks"}),
-                          KeyValues("InputCollectionRecoParticles", {"RecoParticles"}),
-                          KeyValues("InputCollectionLinks", {"Links"})},
+                         {KeyValue("InputCollectionFloat", "VectorFloat"),
+                          KeyValue("InputCollectionParticles", "MCParticles1"),
+                          KeyValue("InputCollectionSimTrackerHits", "SimTrackerHits"),
+                          KeyValue("InputCollectionTrackerHits", "TrackerHits"),
+                          KeyValue("InputCollectionTracks", "Tracks"),
+                          KeyValue("InputCollectionRecoParticles", "RecoParticles"),
+                          KeyValue("InputCollectionLinks", "Links")},
                          {KeyValues("OutputCollectionCounter", {"Counter"}),
                           KeyValues("OutputCollectionParticles", {"NewMCParticles"}),
                           KeyValues("OutputLinkCollection", {"NewLinks"})}) {}

@@ -31,11 +31,11 @@ from k4FWCore import ApplicationMgr
 
 transformer = ExampleFunctionalTransformerMultiple(
     "Transformer",
-    InputCollectionFloat=["VectorFloat"],
-    InputCollectionParticles=["MCParticles1"],
-    InputCollectionSimTrackerHits=["SimTrackerHits"],
-    InputCollectionTrackerHits=["TrackerHits"],
-    InputCollectionTracks=["Tracks"],
+    InputCollectionFloat="VectorFloat",
+    InputCollectionParticles="MCParticles1",
+    InputCollectionSimTrackerHits="SimTrackerHits",
+    InputCollectionTrackerHits="TrackerHits",
+    InputCollectionTracks="Tracks",
     OutputCollectionCounter=["Counter"],
     OutputCollectionParticles=["NewMCParticles"],
     Offset=10,

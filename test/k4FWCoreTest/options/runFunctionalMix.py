@@ -143,10 +143,10 @@ consumer_produceralg_algorithm.vectorfloat = "OldAlgorithmVectorFloat"
 # Let's also run the transformer on collections that are either read, produced by a functional or an algorithm
 transformer_functional = ExampleFunctionalTransformerMultiple(
     "FunctionalTransformerMultiple",
-    InputCollectionFloat=["VectorFloat"],
-    InputCollectionParticles=["FunctionalMCParticles"],
-    InputCollectionSimTrackerHits=["OldAlgorithmSimTrackerHits"],
-    InputCollectionTrackerHits=["TrackerHits"],
+    InputCollectionFloat="VectorFloat",
+    InputCollectionParticles="FunctionalMCParticles",
+    InputCollectionSimTrackerHits="OldAlgorithmSimTrackerHits",
+    InputCollectionTrackerHits="TrackerHits",
     OutputCollectionCounter=["Counter"],
     OutputCollectionParticles=["TransformedFunctionalMCParticles1"],
 )
