@@ -52,11 +52,11 @@ namespace details {
 
     std::tuple<std::vector<InputHandle_t<typename EventStoreType<In>::type>>...> m_inputs;
 
-    std::array<Gaudi::Property<DataObjID>, sizeof...(In)> m_inputLocationsNormal;
+    std::array<Gaudi::Property<DataObjID>, sizeof...(In)> m_inputLocationsSingle;
     std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)> m_inputLocationsVector;
 
-    template <typename T, size_t I>
-    Gaudi::Property<DataObjID> make_input_prop_normal(const auto& inp) {
+    template <size_t I>
+    Gaudi::Property<DataObjID> make_input_prop_single(const auto& inp) {
       if (inp.index() == 0) {
         const auto& input = std::get<KeyValue>(inp);
         return {Gaudi::Property<DataObjID>(
@@ -72,7 +72,7 @@ namespace details {
         return Gaudi::Property<DataObjID>{};
       }
     }
-    template <typename T, size_t I>
+    template <size_t I>
     Gaudi::Property<std::vector<DataObjID>> make_input_prop_vector(const auto& inp) {
       // KeyValues
       if (inp.index() == 1) {
@@ -108,8 +108,8 @@ namespace details {
           // that creates the handles because that is when the input locations become available
           // (from a steering file, for example) and the handles have to be created for
           // Gaudi to know the data flow
-          m_inputLocationsNormal{make_input_prop_normal<In, I>(std::get<I>(inputs))...},
-          m_inputLocationsVector{make_input_prop_vector<In, I>(std::get<I>(inputs))...} {}
+          m_inputLocationsSingle{make_input_prop_single<I>(std::get<I>(inputs))...},
+          m_inputLocationsVector{make_input_prop_vector<I>(std::get<I>(inputs))...} {}
 
     Consumer(std::string name, ISvcLocator* locator,
              const Gaudi::Functional::details::RepeatValues_<std::variant<KeyValue, KeyValues>, sizeof...(In)>& inputs)
