@@ -248,9 +248,7 @@ namespace details {
     return outputIds;
   }
 
-  inline std::vector<DataObjID> to_DataObjID(const std::string& inputString) {
-    return {DataObjID{inputString}};
-  }
+  inline std::vector<DataObjID> to_DataObjID(const std::string& inputString) { return {DataObjID{inputString}}; }
 
   // Functional handles
   // This is currently used so that the FilterPredicate can be used together with the
@@ -295,6 +293,46 @@ namespace details {
 
     using BaseClass = Gaudi::Algorithm;
   };
+
+  template <typename InputHandle, typename KeyValue>
+  Gaudi::Property<DataObjID> makeInputPropSingle(const auto& inp, auto& classInputs, auto* thisClass) {
+    if (inp.index() == 0) {
+      const auto& input = std::get<KeyValue>(inp);
+      return {Gaudi::Property<DataObjID>(
+          thisClass, input.first, to_DataObjID(input.second)[0],
+          [thisClass, &classInputs](Gaudi::Details::PropertyBase& p) {
+            std::vector<InputHandle> handles;
+            auto handle = InputHandle(static_cast<Gaudi::Property<DataObjID>&>(p).value(), thisClass);
+            handles.push_back(std::move(handle));
+            classInputs = std::move(handles);
+          },
+          Gaudi::Details::Property::ImmediatelyInvokeHandler{true})};
+    } else {
+      return {};
+    }
+  }
+  template <typename InputHandle, typename KeyValues>
+  Gaudi::Property<std::vector<DataObjID>> makeInputPropVector(const auto& inp, auto& classInputs, auto* thisClass) {
+    if (inp.index() == 1) {
+      const auto& input = std::get<KeyValues>(inp);
+      return {Gaudi::Property<std::vector<DataObjID>>(
+          thisClass, input.first, to_DataObjID(input.second),
+          [thisClass, &classInputs](Gaudi::Details::PropertyBase& p) {
+            const auto& tmpprop = static_cast<Gaudi::Property<std::vector<DataObjID>>&>(p);
+            const auto& tmpval = tmpprop.value();
+            std::vector<InputHandle> handles;
+            handles.reserve(tmpval.size());
+            for (const auto& value : tmpval) {
+              auto handle = InputHandle(value, thisClass);
+              handles.push_back(std::move(handle));
+            }
+            classInputs = std::move(handles);
+          },
+          Gaudi::Details::Property::ImmediatelyInvokeHandler{true})};
+    } else {
+      return {};
+    }
+  }
 
 } // namespace details
 } // namespace k4FWCore

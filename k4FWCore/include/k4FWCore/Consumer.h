@@ -55,47 +55,6 @@ namespace details {
     std::array<Gaudi::Property<DataObjID>, sizeof...(In)> m_inputLocationsSingle;
     std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)> m_inputLocationsVector;
 
-    template <size_t I>
-    Gaudi::Property<DataObjID> make_input_prop_single(const auto& inp) {
-      if (inp.index() == 0) {
-        const auto& input = std::get<KeyValue>(inp);
-        return {Gaudi::Property<DataObjID>(
-            this, input.first, to_DataObjID(input.second)[0],
-            [this](Gaudi::Details::PropertyBase& p) {
-              std::vector<InputHandle_t<EventStoreType_t>> handles;
-              auto handle = InputHandle_t<EventStoreType_t>(static_cast<Gaudi::Property<DataObjID>&>(p).value(), this);
-              handles.push_back(std::move(handle));
-              std::get<I>(m_inputs) = std::move(handles);
-            },
-            Gaudi::Details::Property::ImmediatelyInvokeHandler{true})};
-      } else {
-        return Gaudi::Property<DataObjID>{};
-      }
-    }
-    template <size_t I>
-    Gaudi::Property<std::vector<DataObjID>> make_input_prop_vector(const auto& inp) {
-      // KeyValues
-      if (inp.index() == 1) {
-        const auto& input = std::get<KeyValues>(inp);
-        return {Gaudi::Property<std::vector<DataObjID>>(
-            this, input.first, to_DataObjID(input.second),
-            [this](Gaudi::Details::PropertyBase& p) {
-              const auto& tmpprop = static_cast<Gaudi::Property<std::vector<DataObjID>>&>(p);
-              const auto& tmpval = tmpprop.value();
-              std::vector<InputHandle_t<EventStoreType_t>> handles;
-              handles.reserve(tmpval.size());
-              for (const auto& value : tmpval) {
-                auto handle = InputHandle_t<EventStoreType_t>(value, this);
-                handles.push_back(std::move(handle));
-              }
-              std::get<I>(m_inputs) = std::move(handles);
-            },
-            Gaudi::Details::Property::ImmediatelyInvokeHandler{true})};
-      } else {
-        return Gaudi::Property<std::vector<DataObjID>>{};
-      }
-    }
-
     using base_class = Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>;
 
     using KeyValues = typename base_class::KeyValues;
@@ -108,13 +67,14 @@ namespace details {
           // that creates the handles because that is when the input locations become available
           // (from a steering file, for example) and the handles have to be created for
           // Gaudi to know the data flow
-          m_inputLocationsSingle{make_input_prop_single<I>(std::get<I>(inputs))...},
-          m_inputLocationsVector{make_input_prop_vector<I>(std::get<I>(inputs))...} {}
+          m_inputLocationsSingle{makeInputPropSingle<InputHandle_t<EventStoreType_t>, KeyValue>(
+              std::get<I>(inputs), std::get<I>(m_inputs), this)...},
+          m_inputLocationsVector{makeInputPropVector<InputHandle_t<EventStoreType_t>, KeyValues>(
+              std::get<I>(inputs), std::get<I>(m_inputs), this)...} {}
 
     Consumer(std::string name, ISvcLocator* locator,
              const Gaudi::Functional::details::RepeatValues_<std::variant<KeyValue, KeyValues>, sizeof...(In)>& inputs)
-        : Consumer(std::move(name), locator, inputs, std::index_sequence_for<In...>{}) {
-    }
+        : Consumer(std::move(name), locator, inputs, std::index_sequence_for<In...>{}) {}
 
     // derived classes are NOT allowed to implement execute ...
     StatusCode execute(const EventContext& ctx) const final {
