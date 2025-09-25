@@ -46,7 +46,7 @@ struct ExampleFunctionalTransformerHist final
   // The pairs in KeyValues can be changed from python and they correspond
   // to the name of the input and output collections respectively
   ExampleFunctionalTransformerHist(const std::string& name, ISvcLocator* svcLoc)
-      : Transformer(name, svcLoc, KeyValues("InputCollection", {"MCParticles"}),
+      : Transformer(name, svcLoc, KeyValue("InputCollection", "MCParticles"),
                     KeyValues("OutputCollection", {"MCParticles"})) {}
 
   // This is the function that will be called to produce the data

@@ -57,11 +57,13 @@ namespace details {
 
     std::tuple<std::vector<InputHandle_t<typename EventStoreType<In>::type>>...> m_inputs;
     std::tuple<std::vector<OutputHandle_t<typename EventStoreType<Out>::type>>> m_outputs;
-    std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)> m_inputLocations{};
+    std::array<Gaudi::Property<DataObjID>, sizeof...(In)> m_inputLocationsSingle;
+    std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)> m_inputLocationsVector;
     Gaudi::Property<std::vector<DataObjID>> m_outputLocations{};
 
     using base_class = Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>;
 
+    using KeyValue = typename base_class::KeyValue;
     using KeyValues = typename base_class::KeyValues;
 
     template <typename IArgs, typename OArgs, std::size_t... I, std::size_t... J>
@@ -73,18 +75,10 @@ namespace details {
           // callback runs is when the input locations become available (from
           // a steering file, for example) and the handles have to be created
           // for Gaudi to know the data flow
-          m_inputLocations{Gaudi::Property<std::vector<DataObjID>>{
-              this, std::get<I>(inputs).first, to_DataObjID(std::get<I>(inputs).second),
-              [this](Gaudi::Details::PropertyBase&) {
-                std::vector<InputHandle_t<typename EventStoreType<In>::type>> handles;
-                handles.reserve(this->m_inputLocations[I].value().size());
-                for (const auto& value : this->m_inputLocations[I].value()) {
-                  auto handle = InputHandle_t<typename EventStoreType<In>::type>(value, this);
-                  handles.push_back(std::move(handle));
-                }
-                std::get<I>(m_inputs) = std::move(handles);
-              },
-              Gaudi::Details::Property::ImmediatelyInvokeHandler{true}}...},
+          m_inputLocationsSingle{makeInputPropSingle<InputHandle_t<EventStoreType_t>, KeyValue>(
+              std::get<I>(inputs), std::get<I>(m_inputs), this)...},
+          m_inputLocationsVector{makeInputPropVector<InputHandle_t<EventStoreType_t>, KeyValues>(
+              std::get<I>(inputs), std::get<I>(m_inputs), this)...},
           // Same as above for the output locations
           m_outputLocations{Gaudi::Property<std::vector<DataObjID>>{
               this, std::get<J>(outputs).first, to_DataObjID(std::get<J>(outputs).second),
@@ -105,7 +99,7 @@ namespace details {
     static constexpr std::size_t N_out = 1;
 
     Transformer(std::string name, ISvcLocator* locator,
-                Gaudi::Functional::details::RepeatValues_<KeyValues, N_in> const& inputs,
+                Gaudi::Functional::details::RepeatValues_<std::variant<KeyValue, KeyValues>, N_in> const& inputs,
                 Gaudi::Functional::details::RepeatValues_<KeyValues, N_out> const& outputs)
         : Transformer(std::move(name), locator, inputs, std::index_sequence_for<In...>{}, outputs,
                       std::index_sequence_for<Out>{}) {}
@@ -138,7 +132,7 @@ namespace details {
         throw std::out_of_range("Called inputLocations with an index out of range, index: " + std::to_string(i) +
                                 ", number of inputs: " + std::to_string(sizeof...(In)));
       }
-      return m_inputLocations[i] | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
+      return m_inputLocationsVector[i] | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
     }
     /**
      * @brief       Get the input locations for a given input name
@@ -146,8 +140,8 @@ namespace details {
      * @return      A range of the input locations
      */
     auto inputLocations(std::string_view name) const {
-      auto it = std::ranges::find_if(m_inputLocations, [&name](const auto& prop) { return prop.name() == name; });
-      if (it == m_inputLocations.end()) {
+      auto it = std::ranges::find_if(m_inputLocationsVector, [&name](const auto& prop) { return prop.name() == name; });
+      if (it == m_inputLocationsVector.end()) {
         throw std::runtime_error("Called inputLocations with an unknown name");
       }
       return it->value() | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });

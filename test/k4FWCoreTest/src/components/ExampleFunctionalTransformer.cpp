@@ -29,7 +29,7 @@
 struct ExampleFunctionalTransformer final
     : k4FWCore::Transformer<edm4hep::MCParticleCollection(const edm4hep::MCParticleCollection&)> {
   ExampleFunctionalTransformer(const std::string& name, ISvcLocator* svcLoc)
-      : Transformer(name, svcLoc, {KeyValues("InputCollection", {"MCParticles"})},
+      : Transformer(name, svcLoc, {KeyValue("InputCollection", "MCParticles")},
                     {KeyValues("OutputCollection", {"NewMCParticles"})}) {}
 
   // This is the function that will be called to transform the data

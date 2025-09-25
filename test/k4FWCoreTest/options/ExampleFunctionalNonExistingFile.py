@@ -28,7 +28,7 @@ svc = IOSvc()
 svc.Input = "non_existing_file.root"
 
 transformer = ExampleFunctionalTransformer(
-    "Transformer", InputCollection=["MCParticles"], OutputCollection=["NewMCParticles"]
+    "Transformer", InputCollection="MCParticles", OutputCollection=["NewMCParticles"]
 )
 
 mgr = ApplicationMgr(
