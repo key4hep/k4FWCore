@@ -67,9 +67,9 @@ namespace details {
     using KeyValue = typename base_class::KeyValue;
     using KeyValues = typename base_class::KeyValues;
 
-    template <typename IArgs, typename OArgs, std::size_t... I, std::size_t... J>
+    template <typename IArgs, typename OArgs, std::size_t... I>
     Transformer(std::string name, ISvcLocator* locator, const IArgs& inputs, std::index_sequence<I...>,
-                const OArgs& outputs, std::index_sequence<J...>)
+                const OArgs& outputs)
         : base_class(std::move(name), locator),
           // The input locations are filled by creating a property with a
           // callback function that creates the handles because when the
@@ -91,8 +91,7 @@ namespace details {
     Transformer(std::string name, ISvcLocator* locator,
                 Gaudi::Functional::details::RepeatValues_<std::variant<KeyValue, KeyValues>, N_in> const& inputs,
                 Gaudi::Functional::details::RepeatValues_<std::variant<KeyValue, KeyValues>, N_out> const& outputs)
-        : Transformer(std::move(name), locator, inputs, std::index_sequence_for<In...>{}, outputs,
-                      std::index_sequence_for<Out>{}) {}
+        : Transformer(std::move(name), locator, inputs, std::index_sequence_for<In...>{}, outputs) {}
 
     // derived classes are NOT allowed to implement execute ...
     StatusCode execute(const EventContext& ctx) const final {
