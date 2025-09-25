@@ -36,8 +36,8 @@ transformer = ExampleFunctionalTransformerMultiple(
     InputCollectionSimTrackerHits="SimTrackerHits",
     InputCollectionTrackerHits="TrackerHits",
     InputCollectionTracks="Tracks",
-    OutputCollectionCounter=["Counter"],
-    OutputCollectionParticles=["NewMCParticles"],
+    OutputCollectionCounter="Counter",
+    OutputCollectionParticles="NewMCParticles",
     Offset=10,
 )
 

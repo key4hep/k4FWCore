@@ -58,9 +58,9 @@ struct ExampleFunctionalTransformerMultiple final
                           KeyValue("InputCollectionTracks", "Tracks"),
                           KeyValue("InputCollectionRecoParticles", "RecoParticles"),
                           KeyValue("InputCollectionLinks", "Links")},
-                         {KeyValues("OutputCollectionCounter", {"Counter"}),
-                          KeyValues("OutputCollectionParticles", {"NewMCParticles"}),
-                          KeyValues("OutputLinkCollection", {"NewLinks"})}) {}
+                         {KeyValue("OutputCollectionCounter", {"Counter"}),
+                          KeyValue("OutputCollectionParticles", {"NewMCParticles"}),
+                          KeyValue("OutputLinkCollection", {"NewLinks"})}) {}
 
   // This is the function that will be called to transform the data
   // Note that the function has to be const, as well as the collections

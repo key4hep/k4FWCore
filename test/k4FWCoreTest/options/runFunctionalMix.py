@@ -147,8 +147,8 @@ transformer_functional = ExampleFunctionalTransformerMultiple(
     InputCollectionParticles="FunctionalMCParticles",
     InputCollectionSimTrackerHits="OldAlgorithmSimTrackerHits",
     InputCollectionTrackerHits="TrackerHits",
-    OutputCollectionCounter=["Counter"],
-    OutputCollectionParticles=["TransformedFunctionalMCParticles1"],
+    OutputCollectionCounter="Counter",
+    OutputCollectionParticles="TransformedFunctionalMCParticles1",
 )
 
 
