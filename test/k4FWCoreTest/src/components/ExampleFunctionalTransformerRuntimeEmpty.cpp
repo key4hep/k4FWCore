@@ -38,7 +38,7 @@ struct ExampleFunctionalTransformerRuntimeEmpty final
   // The pair in KeyValues can be changed from python and it corresponds
   // to the name of the output collections
   ExampleFunctionalTransformerRuntimeEmpty(const std::string& name, ISvcLocator* svcLoc)
-  : Transformer(name, svcLoc, {KeyValues("InputCollections", {"MCParticles"})},
+      : Transformer(name, svcLoc, {KeyValues("InputCollections", {"MCParticles"})},
                     {KeyValues("OutputCollections", {"MCParticles"})}) {}
 
   // This is the function that will be called to produce the data
