@@ -262,7 +262,8 @@ namespace details {
       if (i >= sizeof...(Out)) {
         throw std::out_of_range("Called outputLocations with an index out of range");
       }
-      return m_outputLocationsVector[i] | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
+      return m_outputLocationsVector[i] |
+             std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
     }
     /**
      * @brief       Get the output locations for a given output name
@@ -270,8 +271,8 @@ namespace details {
      * @return      A range of the output locations
      */
     auto outputLocations(std::string_view name) const {
-      auto it = std::ranges::find_if(m_outputLocationsVector,
-                                     [&name](const auto& prop) { return prop.name() == name; });
+      auto it =
+          std::ranges::find_if(m_outputLocationsVector, [&name](const auto& prop) { return prop.name() == name; });
       if (it == m_outputLocationsVector.end()) {
         throw std::runtime_error("Called outputLocations with an unknown name");
       }
