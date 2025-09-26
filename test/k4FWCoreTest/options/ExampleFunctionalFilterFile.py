@@ -36,7 +36,7 @@ transformer = ExampleFunctionalTransformer(
     "Transformer", InputCollection="MCParticles", OutputCollection="NewMCParticles"
 )
 
-producer = ExampleFunctionalProducer("Producer", OutputCollection=["MCParticles"])
+producer = ExampleFunctionalProducer("Producer", OutputCollection="MCParticles")
 
 filt = ExampleFunctionalFilter(
     "Filter",

@@ -31,15 +31,15 @@ from Configurables import EventDataSvc
 
 producer0 = ExampleFunctionalProducer(
     "Producer0",
-    OutputCollection=["MCParticles0"],
+    OutputCollection="MCParticles0",
 )
 producer1 = ExampleFunctionalProducer(
     "Producer1",
-    OutputCollection=["MCParticles1"],
+    OutputCollection="MCParticles1",
 )
 producer2 = ExampleFunctionalProducer(
     "Producer2",
-    OutputCollection=["MCParticles2"],
+    OutputCollection="MCParticles2",
 )
 
 transformer = ExampleFunctionalTransformerRuntimeCollections(

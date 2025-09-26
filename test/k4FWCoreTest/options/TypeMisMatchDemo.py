@@ -23,7 +23,7 @@ from Configurables import ExampleFunctionalProducer, TypeMisMatchDemo, EventData
 
 from k4FWCore import ApplicationMgr
 
-producer = ExampleFunctionalProducer("Producer", OutputCollection=["MCParticles"])
+producer = ExampleFunctionalProducer("Producer", OutputCollection="MCParticles")
 
 mismatch = TypeMisMatchDemo(InputCollection=["MCParticles"], OutputLevel=DEBUG)
 

@@ -49,10 +49,10 @@ if multithreaded:
 
 
 producer1 = ExampleFunctionalProducer(
-    "ExampleFunctionalProducer1", OutputCollection=["MCParticles1"]
+    "ExampleFunctionalProducer1", OutputCollection="MCParticles1"
 )
 producer2 = ExampleFunctionalProducer(
-    "ExampleFunctionalProducer2", OutputCollection=["MCParticles2"]
+    "ExampleFunctionalProducer2", OutputCollection="MCParticles2"
 )
 
 transformer1 = ExampleFunctionalTransformerHist(

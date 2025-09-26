@@ -52,7 +52,7 @@ else:
         Offset=10,
     )
 
-producer = ExampleFunctionalProducer("Producer", OutputCollection=["MCParticles"])
+producer = ExampleFunctionalProducer("Producer", OutputCollection="MCParticles")
 
 
 ApplicationMgr(

@@ -43,7 +43,7 @@ svc.outputCommands = [
 
 
 particle_producer = ExampleFunctionalProducer(
-    OutputCollection=["MCParticles3"],
+    OutputCollection="MCParticles3",
 )
 
 
