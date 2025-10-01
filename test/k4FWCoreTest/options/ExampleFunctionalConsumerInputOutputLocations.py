@@ -43,13 +43,17 @@ producer3 = ExampleFunctionalProducer(
     "Producer3",
     OutputCollection="MCParticles3",
 )
+producer4 = ExampleFunctionalProducer(
+    "Producer4",
+    OutputCollection="MCParticles4",
+)
 consumer = ExampleFunctionalConsumerInputOutputLocations(
     "Consumer",
 )
 
 
 ApplicationMgr(
-    TopAlg=[producer0, producer1, producer2, producer3, consumer],
+    TopAlg=[producer0, producer1, producer2, producer3, producer4, consumer],
     EvtSel="NONE",
     EvtMax=10,
     ExtSvc=[EventDataSvc("EventDataSvc")],

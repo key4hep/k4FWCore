@@ -54,7 +54,6 @@ namespace details {
 
     std::array<Gaudi::Property<DataObjID>, sizeof...(In)> m_inputLocationsSingle;
     std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)> m_inputLocationsVector;
-    std::array<bool, sizeof...(In)> m_isInputVectorLike{isVectorLike_v<In>...};
 
     using base_class = Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>;
 
@@ -102,12 +101,12 @@ namespace details {
                                 ", number of inputs: " + std::to_string(sizeof...(In)));
       }
       std::vector<std::string> names;
-      if (m_isInputVectorLike[i]) {
+      if (!m_inputLocationsSingle[i].name().empty()) {
+        names.push_back(m_inputLocationsSingle[i].value().key());
+      } else {
         for (const auto& id : m_inputLocationsVector[i].value()) {
           names.push_back(id.key());
         }
-      } else {
-        names.push_back(m_inputLocationsSingle[i].value().key());
       }
       return names;
     }
