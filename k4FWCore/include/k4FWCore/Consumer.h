@@ -27,7 +27,7 @@
 
 #include "k4FWCore/FunctionalUtils.h"
 
-#include <ranges>
+#include <algorithm>
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
@@ -54,6 +54,7 @@ namespace details {
 
     std::array<Gaudi::Property<DataObjID>, sizeof...(In)> m_inputLocationsSingle;
     std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)> m_inputLocationsVector;
+    std::array<bool, sizeof...(In)> m_isInputVectorLike{isVectorLike_v<In>...};
 
     using base_class = Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>;
 
@@ -100,8 +101,15 @@ namespace details {
         throw std::out_of_range("Called inputLocations with an index out of range, index: " + std::to_string(i) +
                                 ", number of inputs: " + std::to_string(sizeof...(In)));
       }
-      return m_inputLocationsVector[i] |
-             std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
+      std::vector<std::string> names;
+      if (m_isInputVectorLike[i]) {
+        for (const auto& id : m_inputLocationsVector[i].value()) {
+          names.push_back(id.key());
+        }
+      } else {
+        names.push_back(m_inputLocationsSingle[i].value().key());
+      }
+      return names;
     }
     /**
      * @brief       Get the input locations for a given input name
@@ -109,11 +117,23 @@ namespace details {
      * @return      A range of the input locations
      */
     auto inputLocations(std::string_view name) const {
-      auto it = std::ranges::find_if(m_inputLocationsVector, [&name](const auto& prop) { return prop.name() == name; });
-      if (it == m_inputLocationsVector.end()) {
-        throw std::runtime_error("Called inputLocations with an unknown name");
+      std::vector<std::string> names;
+      const auto it =
+          std::ranges::find_if(m_inputLocationsVector, [&name](const auto& prop) { return prop.name() == name; });
+      if (it != m_inputLocationsVector.end()) {
+        for (const auto& id : it->value()) {
+          names.push_back(id.key());
+        }
+      } else {
+        const auto it2 =
+            std::ranges::find_if(m_inputLocationsSingle, [&name](const auto& prop) { return prop.name() == name; });
+        if (it2 == m_inputLocationsSingle.end()) {
+          throw std::out_of_range("Called inputLocations with a name that does not exist: " + std::string(name));
+        } else {
+          names.push_back(it2->value().key());
+        }
       }
-      return it->value() | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
+      return names;
     }
     static constexpr std::size_t inputLocationsSize() { return sizeof...(In); }
   };
