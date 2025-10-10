@@ -50,12 +50,13 @@ the tuple returned from `parse_known_args`.
 
 # Interactive python prompt
 
-The `-i`, `--interactive` option for k4run in k4FWCore starts an interactive Python
-command prompt after reading the configuration files. In this mode, algorithm
-instances, are accessible from the prompt. You can inspect
-them using commands like `print(alg)`, which displays information about the
-algorithm instance and its properties. Most properties can be modified
-interactively. For example, after `k4run steering.py -i`:
+The `-i`, `--interactive` option for k4run in k4FWCore starts an interactive
+Python command prompt after reading the configuration files. In this mode,
+algorithm instances are accessible from the prompt. You can inspect them using
+commands like `print(alg)` (where `alg` is the name of the python variable that
+holds the algorithm) which displays information about the algorithm instance and
+its properties. Most properties can be modified interactively. For example,
+after `k4run steering.py -i`:
 
 ``` python
 >>> print(alg)
