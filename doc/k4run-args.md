@@ -64,7 +64,8 @@ interactively. For example, after `k4run steering.py`:
 ...
 |-ExampleInt                 = 3  (default: 3)
 >>> alg.ExampleInt = 4
->>> print(alg)/***** Algorithm ExampleFunctionalProducer/ExampleFunctionalProducer *******************************
+>>> print(alg)
+/***** Algorithm ExampleFunctionalProducer/ExampleFunctionalProducer *******************************
 |-OutputLevel                = 0  (default: 0)
 ...
 |-ExampleInt                 = 4  (default: 3)
