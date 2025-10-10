@@ -129,6 +129,21 @@ class DeprecatedStoreTrueAction(argparse.Action):
         setattr(namespace, self.dest, True)
 
 
+def startInteractive(vars):
+    """Start an interactive session"""
+    import code
+
+    # collect all global and local variables
+    vars = vars.copy()
+
+    # start the interpreter
+    code.interact(
+        local=vars,
+        banner="Starting interactive Python session.  Exit with Ctrl-D to resume the job.",
+    )
+    return
+
+
 def main():
     # ensure that we (and the subprocesses) use the C standard localization
     os.environ["LC_ALL"] = "C"
@@ -180,6 +195,14 @@ def main():
         choices=LOG_LEVELS,
     )
 
+    parser.add_argument(
+        "-i",
+        "--interactive",
+        action="store_true",
+        help="Start a Python command loop after reading the configuration files",
+        default=False,
+    )
+
     # Once to parse the files and another time below to have the new parameters
     # in the namespace since parsing of the file happens when the namespace
     # has already been filled
@@ -202,8 +225,9 @@ def main():
             print(f"{item} (from {cfgdb[item]['lib']}), path: {path_to_component}")
         sys.exit()
 
+    config_ns = {}
     for file in opts[0].config_files:
-        load_file(file)
+        config_ns.update(load_file(file))
 
     from Configurables import ApplicationMgr
 
@@ -259,6 +283,9 @@ def main():
     ApplicationMgr().fix_properties()
 
     from Gaudi.Main import gaudimain
+
+    if opts.interactive:
+        startInteractive(config_ns)
 
     gaudi = gaudimain()
     if not opts.dry_run:

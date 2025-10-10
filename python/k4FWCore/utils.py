@@ -93,6 +93,7 @@ def load_file(opt_file: Union[str, os.PathLike]) -> None:
 
     check_wrong_imports(code)
     exec(compile(code, ofile.name, "exec"), namespace)
+    return namespace
 
 
 _logger = None
