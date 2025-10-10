@@ -55,7 +55,7 @@ command prompt after reading the configuration files. In this mode, algorithm
 instances, are accessible from the prompt. You can inspect
 them using commands like `print(alg)`, which displays information about the
 algorithm instance and its properties. Most properties can be modified
-interactively. For example, after `k4run steering.py`:
+interactively. For example, after `k4run steering.py -i`:
 
 ``` python
 >>> print(alg)
