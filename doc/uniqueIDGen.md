@@ -89,8 +89,8 @@ class ExampleRNGSeedingAlg final
     : public k4FWCore::Transformer<podio::UserDataCollection<double>(const edm4hep::EventHeaderCollection&)> {
 public:
   ExampleRNGSeedingAlg(const std::string& name, ISvcLocator* svcLoc)
-      : Transformer(name, svcLoc, {KeyValues("EventHeaderCollection", {"EventHeader"})},
-                    {KeyValues("OutputCollection", {"RandomNumbers"})}) {}
+      : Transformer(name, svcLoc, {KeyValue("EventHeaderCollection", "EventHeader")},
+                    {KeyValue("OutputCollection", "RandomNumbers")}) {}
 ```
 
 Then, declare a member variable for the service interface and locate the service during algorithm initialization:
