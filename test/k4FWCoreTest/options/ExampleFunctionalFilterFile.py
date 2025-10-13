@@ -33,10 +33,10 @@ iosvc = IOSvc("IOSvc")
 iosvc.Output = "functional_filter.root"
 
 transformer = ExampleFunctionalTransformer(
-    "Transformer", InputCollection=["MCParticles"], OutputCollection=["NewMCParticles"]
+    "Transformer", InputCollection="MCParticles", OutputCollection="NewMCParticles"
 )
 
-producer = ExampleFunctionalProducer("Producer", OutputCollection=["MCParticles"])
+producer = ExampleFunctionalProducer("Producer", OutputCollection="MCParticles")
 
 filt = ExampleFunctionalFilter(
     "Filter",

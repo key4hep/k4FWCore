@@ -46,14 +46,14 @@ scheduler.ShowDataFlow = True
 scheduler.ShowControlFlow = True
 
 transformer = ExampleFunctionalTransformer(
-    "Transformer", InputCollection=["MCParticles"], OutputCollection=["NewMCParticles"]
+    "Transformer", InputCollection="MCParticles", OutputCollection="NewMCParticles"
 )
 
-producer = ExampleFunctionalProducer("Producer", OutputCollection=["MCParticles"])
+producer = ExampleFunctionalProducer("Producer", OutputCollection="MCParticles")
 
 consumer = ExampleFunctionalConsumer(
     "Consumer",
-    InputCollection=["NewMCParticles"],
+    InputCollection="NewMCParticles",
     Offset=10,
 )
 

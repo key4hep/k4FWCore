@@ -20,9 +20,12 @@ limitations under the License.
 set(k4fwcoretest_plugin_sources
   src/components/ExampleEventHeaderConsumer.cpp
   src/components/ExampleFunctionalConsumer.cpp
+  src/components/ExampleFunctionalConsumerKeyValues.cpp
   src/components/ExampleFunctionalConsumerMultiple.cpp
+  src/components/ExampleFunctionalConsumerMultipleKeyValues.cpp
   src/components/ExampleFunctionalConsumerRuntimeCollections.cpp
   src/components/ExampleFunctionalConsumerRuntimeCollectionsMultiple.cpp
+  src/components/ExampleFunctionalConsumerInputOutputLocations.cpp
   src/components/ExampleFunctionalFilter.cpp
   src/components/ExampleFunctionalMetadataConsumer.cpp
   src/components/ExampleFunctionalMetadataProducer.cpp
@@ -35,6 +38,8 @@ set(k4fwcoretest_plugin_sources
   src/components/ExampleFunctionalTransformerRuntimeCollections.cpp
   src/components/ExampleFunctionalTransformerRuntimeCollectionsMultiple.cpp
   src/components/ExampleFunctionalTransformerRuntimeEmpty.cpp
+  src/components/ExampleFunctionalTransformerInputOutputLocations.cpp
+  src/components/ExampleFunctionalMultiTransformerInputOutputLocations.cpp
   src/components/ExampleGaudiFunctionalProducer.cpp
   src/components/ExampleParticleIDConsumer.cpp
   src/components/ExampleParticleIDProducer.cpp
@@ -166,6 +171,7 @@ set_tests_properties(TestEventCounter PROPERTIES FAIL_REGULAR_EXPRESSION "Proces
                      PASS_REGULAR_EXPRESSION "(Processing event 0.*Processing event 2|Processing event 2.*Processing event 0).*Processed 4 events.*Processed 4 events")
 
 add_test_fwcore(FunctionalMemory options/ExampleFunctionalMemory.py)
+add_test_fwcore(FunctionalMemoryKeyValues options/ExampleFunctionalMemory.py --use-key-values)
 add_test_fwcore(FunctionalMTMemory options/ExampleFunctionalMTMemory.py)
 add_test_fwcore(FunctionalMultipleMemory options/ExampleFunctionalMultipleMemory.py)
 add_test_fwcore(FunctionalProducer options/ExampleFunctionalProducer.py)
@@ -238,6 +244,8 @@ add_test_fwcore(ParticleIDMetadataFramework options/ExampleParticleIDMetadata.py
 
 add_test_fwcore(EfficiencyFilter options/ExampleEfficiencyFilter.py PROPERTIES DEPENDS EventHeaderFiller FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
 
+add_test_fwcore(FunctionalTransformerInputOutputLocations options/ExampleFunctionalTransformerInputOutputLocations.py)
+add_test_fwcore(FunctionalMultiTransformerInputOutputLocations options/ExampleFunctionalMultiTransformerInputOutputLocations.py)
 
 add_executable(check_ParticleIDOutputs src/check_ParticleIDOutputs.cpp)
 target_link_libraries(check_ParticleIDOutputs PRIVATE podio::podioIO EDM4HEP::edm4hep EDM4HEP::utils fmt::fmt)

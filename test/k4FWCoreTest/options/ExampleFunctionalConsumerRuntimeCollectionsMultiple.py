@@ -76,7 +76,7 @@ consumer = ExampleFunctionalConsumerRuntimeCollectionsMultiple(
         "MCParticles4",
     ],
     Tracks=["Tracks0", "Tracks1", "Tracks2"],
-    SimTrackerHits=["SimTrackerHits0"],
+    SimTrackerHits="SimTrackerHits0",
     Offset=0,
 )
 

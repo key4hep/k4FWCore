@@ -50,13 +50,13 @@ struct ExampleFunctionalConsumerMultiple final
   ExampleFunctionalConsumerMultiple(const std::string& name, ISvcLocator* svcLoc)
       : Consumer(name, svcLoc,
                  {
-                     KeyValue("InputCollectionFloat", "VectorFloat"),
-                     KeyValue("InputCollectionParticles", "MCParticles1"),
-                     KeyValue("InputCollectionSimTrackerHits", "SimTrackerHits"),
-                     KeyValue("InputCollectionTrackerHits", "TrackerHits"),
-                     KeyValue("InputCollectionTracks", "Tracks"),
-                     KeyValue("InputCollectionRecoParticles", "RecoParticles"),
-                     KeyValue("InputCollectionLinks", "Links"),
+                     KeyValues("InputCollectionFloat", {"VectorFloat"}),
+                     KeyValues("InputCollectionParticles", {"MCParticles1"}),
+                     KeyValues("InputCollectionSimTrackerHits", {"SimTrackerHits"}),
+                     KeyValues("InputCollectionTrackerHits", {"TrackerHits"}),
+                     KeyValues("InputCollectionTracks", {"Tracks"}),
+                     KeyValues("InputCollectionRecoParticles", {"RecoParticles"}),
+                     KeyValues("InputCollectionLinks", {"Links"}),
                  }) {}
 
   // This is the function that will be called to transform the data

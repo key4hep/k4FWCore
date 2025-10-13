@@ -102,9 +102,9 @@ producer_functional = ExampleFunctionalProducerMultiple(
 # Here we check a few new classes and others that are read from the file
 consumer_producerfun_functional = ExampleFunctionalConsumerMultiple(
     "FunctionalConsumerFromFunctional",
-    InputCollectionParticles=["FunctionalMCParticles"],
-    InputCollectionRecoParticles=["FunctionalRecos"],
-    InputCollectionLinks=["FunctionalLinks"],
+    InputCollectionParticles="FunctionalMCParticles",
+    InputCollectionRecoParticles="FunctionalRecos",
+    InputCollectionLinks="FunctionalLinks",
     Offset=0,
 )
 consumer_producerfun_algorithm = k4FWCoreTest_CheckExampleEventData(
@@ -129,9 +129,9 @@ producer_algorithm.links = "OldAlgorithmLinks"
 
 consumer_produceralg_functional = ExampleFunctionalConsumerMultiple(
     "FunctionalConsumerFromAlgorithm",
-    InputCollectionParticles=["OldAlgorithmMCParticles"],
-    InputCollectionRecoParticles=["OldAlgorithmRecoParticles"],
-    InputCollectionLinks=["OldAlgorithmLinks"],
+    InputCollectionParticles="OldAlgorithmMCParticles",
+    InputCollectionRecoParticles="OldAlgorithmRecoParticles",
+    InputCollectionLinks="OldAlgorithmLinks",
     Offset=0,
 )
 consumer_produceralg_algorithm = k4FWCoreTest_CheckExampleEventData("CheckAlgorithm")
@@ -143,12 +143,12 @@ consumer_produceralg_algorithm.vectorfloat = "OldAlgorithmVectorFloat"
 # Let's also run the transformer on collections that are either read, produced by a functional or an algorithm
 transformer_functional = ExampleFunctionalTransformerMultiple(
     "FunctionalTransformerMultiple",
-    InputCollectionFloat=["VectorFloat"],
-    InputCollectionParticles=["FunctionalMCParticles"],
-    InputCollectionSimTrackerHits=["OldAlgorithmSimTrackerHits"],
-    InputCollectionTrackerHits=["TrackerHits"],
-    OutputCollectionCounter=["Counter"],
-    OutputCollectionParticles=["TransformedFunctionalMCParticles1"],
+    InputCollectionFloat="VectorFloat",
+    InputCollectionParticles="FunctionalMCParticles",
+    InputCollectionSimTrackerHits="OldAlgorithmSimTrackerHits",
+    InputCollectionTrackerHits="TrackerHits",
+    OutputCollectionCounter="Counter",
+    OutputCollectionParticles="TransformedFunctionalMCParticles1",
 )
 
 

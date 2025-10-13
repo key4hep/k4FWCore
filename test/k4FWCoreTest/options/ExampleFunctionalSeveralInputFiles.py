@@ -30,7 +30,7 @@ svc.Input = [
     "functional_producer2.root",
 ]
 
-consumer = ExampleFunctionalConsumer("Consumer", InputCollection=["MCParticles"], Offset=0)
+consumer = ExampleFunctionalConsumer("Consumer", InputCollection="MCParticles", Offset=0)
 
 mgr = ApplicationMgr(
     TopAlg=[consumer],

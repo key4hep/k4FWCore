@@ -31,13 +31,13 @@ from k4FWCore import ApplicationMgr
 
 transformer = ExampleFunctionalTransformerMultiple(
     "Transformer",
-    InputCollectionFloat=["VectorFloat"],
-    InputCollectionParticles=["MCParticles1"],
-    InputCollectionSimTrackerHits=["SimTrackerHits"],
-    InputCollectionTrackerHits=["TrackerHits"],
-    InputCollectionTracks=["Tracks"],
-    OutputCollectionCounter=["Counter"],
-    OutputCollectionParticles=["NewMCParticles"],
+    InputCollectionFloat="VectorFloat",
+    InputCollectionParticles="MCParticles1",
+    InputCollectionSimTrackerHits="SimTrackerHits",
+    InputCollectionTrackerHits="TrackerHits",
+    InputCollectionTracks="Tracks",
+    OutputCollectionCounter="Counter",
+    OutputCollectionParticles="NewMCParticles",
     Offset=10,
 )
 
@@ -45,12 +45,12 @@ producer = ExampleFunctionalProducerMultiple("Producer")
 
 consumer = ExampleFunctionalConsumerMultiple(
     "Consumer",
-    InputCollectionFloat=["VectorFloat"],
-    InputCollectionParticles=["NewMCParticles"],
-    InputCollectionSimTrackerHits=["SimTrackerHits"],
-    InputCollectionTrackerHits=["TrackerHits"],
-    InputCollectionTracks=["Tracks"],
-    InputCollectionLinks=["NewLinks"],
+    InputCollectionFloat="VectorFloat",
+    InputCollectionParticles="NewMCParticles",
+    InputCollectionSimTrackerHits="SimTrackerHits",
+    InputCollectionTrackerHits="TrackerHits",
+    InputCollectionTracks="Tracks",
+    InputCollectionLinks="NewLinks",
     Offset=10,
 )
 

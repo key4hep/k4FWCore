@@ -30,7 +30,7 @@ svc.Input = "functional_producer.root"
 svc.Output = "functional_transformer.root"
 
 transformer = ExampleFunctionalTransformer(
-    "Transformer", InputCollection=["MCParticles"], OutputCollection=["NewMCParticles"]
+    "Transformer", InputCollection="MCParticles", OutputCollection="NewMCParticles"
 )
 
 mgr = ApplicationMgr(

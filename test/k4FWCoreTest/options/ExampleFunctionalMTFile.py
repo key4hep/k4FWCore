@@ -48,12 +48,12 @@ svc.Output = "functional_transformerMT.root"
 
 consumer = ExampleFunctionalConsumer(
     "Consumer1",
-    InputCollection=["MCParticles1"],
+    InputCollection="MCParticles1",
     Offset=0,
 )
 
 transformer = ExampleFunctionalTransformer(
-    "Transformer", InputCollection=["MCParticles1"], OutputCollection=["NewMCParticles"]
+    "Transformer", InputCollection="MCParticles1", OutputCollection="NewMCParticles"
 )
 
 mgr = ApplicationMgr(

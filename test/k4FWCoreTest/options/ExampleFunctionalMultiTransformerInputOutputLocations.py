@@ -17,12 +17,12 @@
 # limitations under the License.
 #
 
-# This is an example using a consumer that takes any number of collections
+# This is an example using a transformer that takes and produces any number of collections
 
 from Gaudi.Configuration import INFO
 from Configurables import (
     ExampleFunctionalProducer,
-    ExampleFunctionalConsumerRuntimeCollections,
+    ExampleFunctionalMultiTransformerInputOutputLocations,
 )
 from k4FWCore import ApplicationMgr
 from Configurables import EventDataSvc
@@ -39,15 +39,20 @@ producer2 = ExampleFunctionalProducer(
     "Producer2",
     OutputCollection="MCParticles2",
 )
-consumer = ExampleFunctionalConsumerRuntimeCollections(
-    "Consumer",
-    InputCollection=["MCParticles0", "MCParticles1", "MCParticles2"],
-    Offset=0,
+producer3 = ExampleFunctionalProducer(
+    "Producer3",
+    OutputCollection="MCParticles3",
+)
+producer4 = ExampleFunctionalProducer(
+    "Producer4",
+    OutputCollection="MCParticles4",
+)
+transformer = ExampleFunctionalMultiTransformerInputOutputLocations(
+    "Transformer",
 )
 
-
 ApplicationMgr(
-    TopAlg=[producer0, producer1, producer2, consumer],
+    TopAlg=[producer0, producer1, producer2, producer3, producer4, transformer],
     EvtSel="NONE",
     EvtMax=10,
     ExtSvc=[EventDataSvc("EventDataSvc")],

@@ -33,19 +33,19 @@ iosvc.Output = "functional_transformer_runtime_empty.root"
 
 producer0 = ExampleFunctionalProducer(
     "Producer0",
-    OutputCollection=["MCParticles0"],
+    OutputCollection="MCParticles0",
 )
 producer1 = ExampleFunctionalProducer(
     "Producer1",
-    OutputCollection=["MCParticles1"],
+    OutputCollection="MCParticles1",
 )
 producer2 = ExampleFunctionalProducer(
     "Producer2",
-    OutputCollection=["MCParticles2"],
+    OutputCollection="MCParticles2",
 )
 
 transformer = ExampleFunctionalTransformerRuntimeEmpty(
-    InputCollections=["MCParticles0", "MCParticles1", "MCParticles2"],
+    InputCollections=["MCParticles0"],
     OutputCollections=[""],
 )
 

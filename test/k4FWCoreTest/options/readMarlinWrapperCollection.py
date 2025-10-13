@@ -27,7 +27,7 @@ from Configurables import EventDataSvc
 producer = k4FWCoreTest_CreateMarlinWrapperCollection("Producer")
 consumer = ExampleFunctionalConsumer(
     "Consumer",
-    InputCollection=["MCParticles"],
+    InputCollection="MCParticles",
     Offset=0,
 )
 

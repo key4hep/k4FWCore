@@ -50,17 +50,15 @@ struct ExampleFunctionalTransformerMultiple final
           const FloatColl&, const ParticleColl&, const SimTrackerHitColl&, const TrackerHitColl&, const TrackColl&,
           const RecoColl&, const LinkColl&)> {
   ExampleFunctionalTransformerMultiple(const std::string& name, ISvcLocator* svcLoc)
-      : MultiTransformer(name, svcLoc,
-                         {KeyValues("InputCollectionFloat", {"VectorFloat"}),
-                          KeyValues("InputCollectionParticles", {"MCParticles1"}),
-                          KeyValues("InputCollectionSimTrackerHits", {"SimTrackerHits"}),
-                          KeyValues("InputCollectionTrackerHits", {"TrackerHits"}),
-                          KeyValues("InputCollectionTracks", {"Tracks"}),
-                          KeyValues("InputCollectionRecoParticles", {"RecoParticles"}),
-                          KeyValues("InputCollectionLinks", {"Links"})},
-                         {KeyValues("OutputCollectionCounter", {"Counter"}),
-                          KeyValues("OutputCollectionParticles", {"NewMCParticles"}),
-                          KeyValues("OutputLinkCollection", {"NewLinks"})}) {}
+      : MultiTransformer(
+            name, svcLoc,
+            {KeyValue("InputCollectionFloat", "VectorFloat"), KeyValue("InputCollectionParticles", "MCParticles1"),
+             KeyValue("InputCollectionSimTrackerHits", "SimTrackerHits"),
+             KeyValue("InputCollectionTrackerHits", "TrackerHits"), KeyValue("InputCollectionTracks", "Tracks"),
+             KeyValue("InputCollectionRecoParticles", "RecoParticles"), KeyValue("InputCollectionLinks", "Links")},
+            {KeyValue("OutputCollectionCounter", {"Counter"}),
+             KeyValue("OutputCollectionParticles", {"NewMCParticles"}),
+             KeyValue("OutputLinkCollection", {"NewLinks"})}) {}
 
   // This is the function that will be called to transform the data
   // Note that the function has to be const, as well as the collections

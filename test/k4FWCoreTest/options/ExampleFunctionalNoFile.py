@@ -28,7 +28,7 @@ from k4FWCore import ApplicationMgr, IOSvc
 svc = IOSvc("IOSvc")
 
 transformer = ExampleFunctionalTransformer(
-    "Transformer", InputCollection=["MCParticles"], OutputCollection=["NewMCParticles"]
+    "Transformer", InputCollection="MCParticles", OutputCollection="NewMCParticles"
 )
 
 mgr = ApplicationMgr(

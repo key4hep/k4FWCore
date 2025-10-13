@@ -31,7 +31,7 @@ svc.Output = "gaudi_functional.root"
 
 gaudi_producer = ExampleGaudiFunctionalProducer("GaudiProducer", OutputCollectionName="Output")
 transformer = ExampleFunctionalTransformer(
-    "Transformer", InputCollection=["MCParticles"], OutputCollection=["NewMCParticles"]
+    "Transformer", InputCollection="MCParticles", OutputCollection="NewMCParticles"
 )
 
 mgr = ApplicationMgr(

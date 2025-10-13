@@ -27,7 +27,7 @@
 
 #include "k4FWCore/FunctionalUtils.h"
 
-#include <ranges>
+#include <algorithm>
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
@@ -51,11 +51,14 @@ namespace details {
     using InputHandle_t = Gaudi::Functional::details::InputHandle_t<Traits_, T>;
 
     std::tuple<std::vector<InputHandle_t<typename EventStoreType<In>::type>>...> m_inputs;
-    std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)> m_inputLocations{};
+
+    std::array<Gaudi::Property<DataObjID>, sizeof...(In)> m_inputLocationsSingle;
+    std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)> m_inputLocationsVector;
 
     using base_class = Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>;
 
     using KeyValues = typename base_class::KeyValues;
+    using KeyValue = typename base_class::KeyValue;
 
     template <typename IArgs, std::size_t... I>
     Consumer(std::string name, ISvcLocator* locator, const IArgs& inputs, std::index_sequence<I...>)
@@ -64,21 +67,13 @@ namespace details {
           // that creates the handles because that is when the input locations become available
           // (from a steering file, for example) and the handles have to be created for
           // Gaudi to know the data flow
-          m_inputLocations{Gaudi::Property<std::vector<DataObjID>>{
-              this, std::get<I>(inputs).first, to_DataObjID(std::get<I>(inputs).second),
-              [this](Gaudi::Details::PropertyBase&) {
-                std::vector<InputHandle_t<EventStoreType_t>> handles;
-                handles.reserve(this->m_inputLocations[I].value().size());
-                for (const auto& value : this->m_inputLocations[I].value()) {
-                  auto handle = InputHandle_t<EventStoreType_t>(value, this);
-                  handles.push_back(std::move(handle));
-                }
-                std::get<I>(m_inputs) = std::move(handles);
-              },
-              Gaudi::Details::Property::ImmediatelyInvokeHandler{true}}...} {}
+          m_inputLocationsSingle{makeInputPropSingle<InputHandle_t<EventStoreType_t>, KeyValue>(
+              std::get<I>(inputs), std::get<I>(m_inputs), this)...},
+          m_inputLocationsVector{makeInputPropVector<InputHandle_t<EventStoreType_t>, KeyValues>(
+              std::get<I>(inputs), std::get<I>(m_inputs), this)...} {}
 
     Consumer(std::string name, ISvcLocator* locator,
-             Gaudi::Functional::details::RepeatValues_<KeyValues, sizeof...(In)> const& inputs)
+             const Gaudi::Functional::details::RepeatValues_<std::variant<KeyValue, KeyValues>, sizeof...(In)>& inputs)
         : Consumer(std::move(name), locator, inputs, std::index_sequence_for<In...>{}) {}
 
     // derived classes are NOT allowed to implement execute ...
@@ -105,7 +100,15 @@ namespace details {
         throw std::out_of_range("Called inputLocations with an index out of range, index: " + std::to_string(i) +
                                 ", number of inputs: " + std::to_string(sizeof...(In)));
       }
-      return m_inputLocations[i] | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
+      std::vector<std::string> names;
+      if (!m_inputLocationsSingle[i].name().empty()) {
+        names.push_back(m_inputLocationsSingle[i].value().key());
+      } else {
+        for (const auto& id : m_inputLocationsVector[i].value()) {
+          names.push_back(id.key());
+        }
+      }
+      return names;
     }
     /**
      * @brief       Get the input locations for a given input name
@@ -113,11 +116,23 @@ namespace details {
      * @return      A range of the input locations
      */
     auto inputLocations(std::string_view name) const {
-      auto it = std::ranges::find_if(m_inputLocations, [&name](const auto& prop) { return prop.name() == name; });
-      if (it == m_inputLocations.end()) {
-        throw std::runtime_error("Called inputLocations with an unknown name");
+      std::vector<std::string> names;
+      const auto it =
+          std::ranges::find_if(m_inputLocationsVector, [&name](const auto& prop) { return prop.name() == name; });
+      if (it != m_inputLocationsVector.end()) {
+        for (const auto& id : it->value()) {
+          names.push_back(id.key());
+        }
+      } else {
+        const auto it2 =
+            std::ranges::find_if(m_inputLocationsSingle, [&name](const auto& prop) { return prop.name() == name; });
+        if (it2 == m_inputLocationsSingle.end()) {
+          throw std::out_of_range("Called inputLocations with a name that does not exist: " + std::string(name));
+        } else {
+          names.push_back(it2->value().key());
+        }
       }
-      return it->value() | std::views::transform([](const DataObjID& id) -> const auto& { return id.key(); });
+      return names;
     }
     static constexpr std::size_t inputLocationsSize() { return sizeof...(In); }
   };

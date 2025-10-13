@@ -26,11 +26,11 @@
 #include <stdexcept>
 #include <string>
 
-struct ExampleFunctionalConsumer final : k4FWCore::Consumer<void(const edm4hep::MCParticleCollection& input)> {
+struct ExampleFunctionalConsumerKeyValues final : k4FWCore::Consumer<void(const edm4hep::MCParticleCollection& input)> {
   // The pair in KeyValues can be changed from python and it corresponds
   // to the name of the input collection
-  ExampleFunctionalConsumer(const std::string& name, ISvcLocator* svcLoc)
-      : Consumer(name, svcLoc, KeyValue("InputCollection", "MCParticles")) {}
+  ExampleFunctionalConsumerKeyValues(const std::string& name, ISvcLocator* svcLoc)
+      : Consumer(name, svcLoc, KeyValues("InputCollection", {"MCParticles"})) {}
 
   // This is the function that will be called to transform the data
   // Note that the function has to be const, as well as the collections
@@ -61,4 +61,4 @@ struct ExampleFunctionalConsumer final : k4FWCore::Consumer<void(const edm4hep::
   Gaudi::Property<int> m_offset{this, "Offset", 10, "Integer to add to the dummy values written to the edm"};
 };
 
-DECLARE_COMPONENT(ExampleFunctionalConsumer)
+DECLARE_COMPONENT(ExampleFunctionalConsumerKeyValues)
