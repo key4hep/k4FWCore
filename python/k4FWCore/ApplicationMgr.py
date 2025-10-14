@@ -22,7 +22,7 @@ from Gaudi import Configuration
 from Configurables import ApplicationMgr as AppMgr
 from Configurables import HiveSlimEventLoopMgr
 from Configurables import Reader, Writer, IOSvc, Gaudi__Sequencer, EventLoopMgr
-from Gaudi.Configuration import WARNING
+from Gaudi.Configuration import WARNING, VERBOSE
 from k4FWCore.utils import get_logger
 
 logger = get_logger()
@@ -111,7 +111,7 @@ class ApplicationMgr:
                 logger.info(f"Passing {collections} as collections to read to the Reader")
                 reader.InputCollections = collections
 
-    def fix_properties(self):
+    def fix_properties(self, verbose=False):
         # If there isn't an EventLoopMgr then it's the default
         # This will suppress two warnings about not using external input
         if not hasattr(self._mgr, "EventLoop"):
@@ -168,13 +168,14 @@ class ApplicationMgr:
                             Members=self._mgr.TopAlg,
                             Sequential=False,
                             ShortCircuit=False,
-                            OutputLevel=99,
+                            OutputLevel=99 if not verbose else VERBOSE,
                         ),
                         writer,
                     ],
-                    OutputLevel=99,
+                    OutputLevel=99 if not verbose else VERBOSE,
                 )
             ]
+            print('Setting OutputLevel of "k4FWCore__Sequencer" to', 99 if not verbose else 0)
 
     def __getattr__(self, name):
         return getattr(self._mgr, name)

@@ -280,7 +280,7 @@ def main():
 
     from k4FWCore import ApplicationMgr
 
-    ApplicationMgr().fix_properties()
+    ApplicationMgr().fix_properties(opts.log_level == "VERBOSE")
 
     from Gaudi.Main import gaudimain
 
