@@ -168,9 +168,11 @@ class ApplicationMgr:
                             Members=self._mgr.TopAlg,
                             Sequential=False,
                             ShortCircuit=False,
+                            OutputLevel=99,
                         ),
                         writer,
                     ],
+                    OutputLevel=99,
                 )
             ]
 
