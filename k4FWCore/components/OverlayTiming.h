@@ -49,7 +49,6 @@
 #include "Gaudi/Property.h"
 
 #include <map>
-#include <random>
 #include <string>
 #include <vector>
 
@@ -86,10 +85,10 @@ struct OverlayTiming : public k4FWCore::MultiTransformer<retType(
                            const std::vector<const edm4hep::SimCalorimeterHitCollection*>&)> {
   OverlayTiming(const std::string& name, ISvcLocator* svcLoc)
       : MultiTransformer(name, svcLoc,
-                         {KeyValues("EventHeader", {"EventHeader"}), KeyValues("MCParticles", {"DefaultMCParticles"}),
+                         {KeyValue("EventHeader", {"EventHeader"}), KeyValue("MCParticles", "DefaultMCParticles"),
                           KeyValues("SimTrackerHits", {"DefaultSimTrackerHits"}),
                           KeyValues("SimCalorimeterHits", {"DefaultSimCalorimeterHits"})},
-                         {KeyValues("OutputMCParticles", {"NewMCParticles"}),
+                         {KeyValue("OutputMCParticles", "NewMCParticles"),
                           KeyValues("OutputSimTrackerHits", {"MCParticles1"}),
                           KeyValues("OutputSimCalorimeterHits", {"MCParticles2"}),
                           KeyValues("OutputCaloHitContributions", {"OverlayCaloHitContributions"})}) {}

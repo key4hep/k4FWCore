@@ -41,7 +41,7 @@ iosvc.Output = "output_overlay.root"
 # ]
 
 overlay = OverlayTiming()
-overlay.MCParticles = ["MCParticle"]
+overlay.MCParticles = "MCParticles"
 overlay.SimTrackerHits = ["VertexBarrelCollection", "VertexEndcapCollection"]
 overlay.SimCalorimeterHits = ["HCalRingCollection"]
 overlay.BackgroundMCParticleCollectionName = "MCParticle"
