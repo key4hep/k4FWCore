@@ -175,7 +175,6 @@ class ApplicationMgr:
                     OutputLevel=99 if not verbose else VERBOSE,
                 )
             ]
-            print('Setting OutputLevel of "k4FWCore__Sequencer" to', 99 if not verbose else 0)
 
     def __getattr__(self, name):
         return getattr(self._mgr, name)
