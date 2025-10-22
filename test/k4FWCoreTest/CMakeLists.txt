@@ -256,6 +256,9 @@ add_test_fwcore(TypeMisMatchDemo options/TypeMisMatchDemo.py PROPERTIES PASS_REG
 add_test_fwcore(TypeMisMatchDemoMultiple options/TypeMisMatchDemoMultiple.py PROPERTIES PASS_REGULAR_EXPRESSION "Failed to cast collection MCParticles1 to the required type")
 add_test_fwcore(ReadMarlinWrapperCollection options/readMarlinWrapperCollection.py)
 
+add_test_fwcore(InvalidOutputCommandsNoCrash options/invalidOutputCommandsNoCrash.py)
+set_tests_properties(InvalidOutputCommandsNoCrash PROPERTIES FIXTURES_REQUIRED ProducerFile)
+
 add_test(NAME check_broken_pipe
          COMMAND bash -c "[ $(${K4RUN} options/ExampleFunctionalProducer.py | head -n 2 | wc -l) = 2 ]"
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
