@@ -22,6 +22,7 @@
 #include <sstream>
 #include <stdexcept>
 
+namespace {
 int wildcmp(const char* wild, const char* string) {
   // Written by Jack Handy - <A href="mailto:jakkhandy@hotmail.com">jakkhandy@hotmail.com</A>
   const char *cp = nullptr, *mp = nullptr;
@@ -63,7 +64,9 @@ std::vector<std::string> split(const std::string& s, char delim) {
   }
   return elems;
 }
+} // namespace
 
+namespace k4FWCore {
 bool KeepDropSwitch::isOn(const std::string& astring) const {
   auto im = m_cache.find(astring);
   if (im != m_cache.end())
@@ -116,3 +119,5 @@ KeepDropSwitch::Cmd KeepDropSwitch::extractCommand(const std::string& cmdline) c
   std::cout << std::endl;
   return UNKNOWN;
 }
+
+} // namespace k4FWCore

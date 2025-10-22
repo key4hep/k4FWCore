@@ -23,9 +23,7 @@
 #include <string>
 #include <vector>
 
-std::vector<std::string> split(const std::string& s, char delim);
-
-int wildcmp(const char* wild, const char* string);
+namespace k4FWCore {
 
 class KeepDropSwitch {
 public:
@@ -41,5 +39,9 @@ private:
   CommandLines m_commandlines;
   mutable std::map<std::string, bool> m_cache;
 };
+
+} // namespace k4FWCore
+
+using KeepDropSwitch [[deprecated("Use k4FWCore::KeepDropSwitch instead")]] = k4FWCore::KeepDropSwitch;
 
 #endif

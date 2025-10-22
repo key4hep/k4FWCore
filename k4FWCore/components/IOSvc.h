@@ -64,7 +64,7 @@ protected:
 
   std::mutex m_changeBufferLock;
 
-  KeepDropSwitch m_switch;
+  k4FWCore::KeepDropSwitch m_switch;
 
   std::optional<podio::Reader> m_reader;
   std::optional<podio::Writer> m_writer;

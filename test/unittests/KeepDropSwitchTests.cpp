@@ -4,6 +4,8 @@
 #include "catch2/matchers/catch_matchers_string.hpp"
 #include "catch2/matchers/catch_matchers_vector.hpp"
 
+using k4FWCore::KeepDropSwitch;
+
 TEST_CASE("KeepDropSwitch default constructor accepts all") {
   const auto keepDropSwitch = KeepDropSwitch();
   REQUIRE(keepDropSwitch.isOn("MCParticles"));
