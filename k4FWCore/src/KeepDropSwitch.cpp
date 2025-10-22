@@ -96,10 +96,7 @@ bool KeepDropSwitch::getFlag(const std::string& astring) const noexcept {
     bool match = wildcmp(pattern.c_str(), astring.c_str());
     if (not match)
       continue;
-    else if (cmd == Cmd::KEEP)
-      flag = true;
-    else
-      flag = false;
+    flag = (cmd == Cmd::KEEP);
   }
   return flag;
 }
