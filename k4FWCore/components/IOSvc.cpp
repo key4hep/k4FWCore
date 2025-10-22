@@ -66,7 +66,12 @@ StatusCode IOSvc::initialize() {
 
   m_nextEntry = m_firstEventEntry;
 
-  m_switch = KeepDropSwitch(m_outputCommands);
+  try {
+    m_switch = k4FWCore::KeepDropSwitch(m_outputCommands);
+  } catch (const std::invalid_argument& ex) {
+    fatal() << ex.what() << endmsg;
+    return StatusCode::FAILURE;
+  }
 
   m_incidentSvc = service("IncidentSvc");
   if (!m_incidentSvc) {

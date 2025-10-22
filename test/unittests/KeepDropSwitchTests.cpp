@@ -56,8 +56,6 @@ TEST_CASE("KeepDropSwitch keep and drop with ? wildcard") {
 }
 
 TEST_CASE("KeepDropSwitch malformed cmd inputs") {
-  const auto globalMalformed = KeepDropSwitch({"abc"});
-  REQUIRE_THROWS_AS(globalMalformed.isOn("Any string"), std::invalid_argument);
-  const auto malformedCmd = KeepDropSwitch({"foobar MCParticles"});
-  REQUIRE_THROWS_AS(malformedCmd.isOn("whatever"), std::invalid_argument);
+  REQUIRE_THROWS_AS(KeepDropSwitch({"abc"}), std::invalid_argument);
+  REQUIRE_THROWS_AS(KeepDropSwitch({"foobar MCParticles"}), std::invalid_argument);
 }

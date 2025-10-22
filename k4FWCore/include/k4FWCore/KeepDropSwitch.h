@@ -27,16 +27,18 @@ namespace k4FWCore {
 
 class KeepDropSwitch {
 public:
-  enum Cmd { KEEP, DROP, UNKNOWN };
-  typedef std::vector<std::string> CommandLines;
+  typedef std::vector<std::string> InputCommands;
   KeepDropSwitch() = default;
-  explicit KeepDropSwitch(const CommandLines& cmds) { m_commandlines = cmds; }
+  explicit KeepDropSwitch(const InputCommands& cmds);
   bool isOn(const std::string& astring) const;
 
 private:
-  bool getFlag(const std::string& astring) const;
-  Cmd extractCommand(const std::string& cmdLine) const;
-  CommandLines m_commandlines;
+  enum class Cmd { KEEP, DROP, INVALID };
+  using OutputCommand = std::tuple<Cmd, std::string>;
+
+  bool getFlag(const std::string& astring) const noexcept;
+  OutputCommand extractCommand(const std::string& cmdLine) const;
+  std::vector<OutputCommand> m_commandlines{};
   mutable std::map<std::string, bool> m_cache;
 };
 
