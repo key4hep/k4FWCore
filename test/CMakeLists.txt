@@ -1,0 +1,2 @@
+add_subdirectory(k4FWCoreTest)
+add_subdirectory(unittests)
