@@ -34,8 +34,11 @@ class INoiseCaloCellsTool : virtual public IAlgTool {
 public:
   DeclareInterfaceID(INoiseCaloCellsTool, 1, 0);
 
-  virtual void addRandomCellNoise(std::unordered_map<uint64_t, double>& aCells) = 0;
-  virtual void filterCellNoise(std::unordered_map<uint64_t, double>& aCells) = 0;
+  virtual void addRandomCellNoise(std::unordered_map<uint64_t, double>& aCells) const = 0;
+  virtual void filterCellNoise(std::unordered_map<uint64_t, double>& aCells) const = 0;
+
+  virtual void addRandomCellNoise(std::vector<std::pair<uint64_t, double>>& aCells) const = 0;
+  virtual void filterCellNoise(std::vector<std::pair<uint64_t, double>>& aCells) const = 0;
 };
 
 #endif /* RECINTERFACE_INOISECALOCELLSTOOL_H */
