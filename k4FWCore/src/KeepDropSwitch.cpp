@@ -18,8 +18,7 @@
  */
 #include "k4FWCore/KeepDropSwitch.h"
 
-#include <fmt/format.h>
-
+#include <format>
 #include <sstream>
 #include <stdexcept>
 
@@ -73,7 +72,7 @@ KeepDropSwitch::KeepDropSwitch(const InputCommands& cmds) {
   for (const auto& cmdLine : cmds) {
     auto [cmd, arg] = extractCommand(cmdLine);
     if (cmd == Cmd::INVALID) {
-      throw std::invalid_argument(fmt::format("'{}' is not a valid command for the KeepDropSwitch", cmdLine));
+      throw std::invalid_argument(std::format("'{}' is not a valid command for the KeepDropSwitch", cmdLine));
     }
     m_commandlines.emplace_back(cmd, std::move(arg));
   }
