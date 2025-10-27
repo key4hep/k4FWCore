@@ -44,6 +44,4 @@ private:
 
 } // namespace k4FWCore
 
-using KeepDropSwitch [[deprecated("Use k4FWCore::KeepDropSwitch instead")]] = k4FWCore::KeepDropSwitch;
-
 #endif
