@@ -67,35 +67,6 @@ def import_from(
     return module
 
 
-def load_file(opt_file: Union[TextIOWrapper, str, os.PathLike]) -> None:
-    """Loads and executes the content of a given file in the current interpreter session.
-
-    This function takes a file object or a path to a file, reads its content,
-    and then executes it as Python code within the global scope of the current
-    interpreter session. If `opt_file` is a file handle it will not be closed.
-
-    Args:
-        opt_file (Union[TextIOWrapper, str, os.PathLike]): A file object or a
-                                                           path to the file that
-                                                           contains Python code
-                                                           to be executed.
-
-    Raises:
-        FileNotFoundError: If `opt_file` is a path and no file exists at that path.
-        IOError: If there's an error opening or reading the file.
-        SyntaxError: If there's a syntax error in the code being executed.
-        Exception: Any exception raised by the executed code will be propagated.
-
-    """
-    if isinstance(opt_file, (str, os.PathLike)):
-        with open(opt_file, "r") as file:
-            code = compile(file.read(), file.name, "exec")
-    else:
-        code = compile(opt_file.read(), opt_file.name, "exec")
-
-    exec(code, globals())
-
-
 class SequenceLoader:
     """A class for loading algorithm sequences onto a list of algorithms
 
