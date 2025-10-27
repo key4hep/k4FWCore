@@ -90,7 +90,7 @@ protected:
   int m_entries{0};
   int m_nextEntry{0};
 
-  bool checkIfWriteCollection(const std::string& collName) override;
+  bool checkIfWriteCollection(const std::string& collName) const override;
 };
 
 #endif
