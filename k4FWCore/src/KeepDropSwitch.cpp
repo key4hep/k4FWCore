@@ -92,10 +92,9 @@ bool KeepDropSwitch::isOn(const std::string& astring) const {
 bool KeepDropSwitch::getFlag(const std::string& astring) const noexcept {
   bool flag = true;
   for (const auto& [cmd, pattern] : m_commandlines) {
-    bool match = wildcmp(pattern.c_str(), astring.c_str());
-    if (not match)
-      continue;
-    flag = (cmd == Cmd::KEEP);
+    if (wildcmp(pattern.c_str(), astring.c_str())) {
+      flag = (cmd == Cmd::KEEP);
+    }
   }
   return flag;
 }
