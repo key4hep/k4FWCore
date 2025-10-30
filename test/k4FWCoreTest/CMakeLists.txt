@@ -150,10 +150,7 @@ add_test_fwcore(TwoProducers options/TwoProducers.py --filename output_k4fwcore_
 add_test_fwcore(CheckCommandLineArguments options/createHelloWorld.py --HelloWorldAlg1.PerEventPrintMessage TwasBrilligAndTheSlithyToves
 PROPERTIES PASS_REGULAR_EXPRESSION "TwasBrilligAndTheSlithyToves"
 )
-add_test(NAME checkKeepDropSwitch
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND python scripts/check_KeepDropSwitch.py ${PROJECT_BINARY_DIR}/test/k4FWCoreTest/output_k4test_exampledata_2.root)
-set_property(TEST checkKeepDropSwitch APPEND PROPERTY DEPENDS ReadExampleEventData)
+
 add_test_fwcore(TestUniqueIDGenSvc options/TestUniqueIDGenSvc.py -n 1)
 add_test_fwcore(TestUniqueIDGenSvcRepeated options/TestUniqueIDGenSvc.py -n 2 PROPERTIES PASS_REGULAR_EXPRESSION "Duplicate ID for event number, run number and algorithm name")
 add_test_fwcore(TestEventHeaderFiller options/createEventHeader.py)
@@ -255,6 +252,9 @@ add_test_fwcore(TypeMisMatchDemo options/TypeMisMatchDemo.py PROPERTIES PASS_REG
 
 add_test_fwcore(TypeMisMatchDemoMultiple options/TypeMisMatchDemoMultiple.py PROPERTIES PASS_REGULAR_EXPRESSION "Failed to cast collection MCParticles1 to the required type")
 add_test_fwcore(ReadMarlinWrapperCollection options/readMarlinWrapperCollection.py)
+
+add_test_fwcore(InvalidOutputCommandsNoCrash options/invalidOutputCommandsNoCrash.py)
+set_tests_properties(InvalidOutputCommandsNoCrash PROPERTIES FIXTURES_REQUIRED ProducerFile PASS_REGULAR_EXPRESSION "ERROR 'abc' is not a valid command for the KeepDropSwitch")
 
 add_test(NAME check_broken_pipe
          COMMAND bash -c "[ $(${K4RUN} options/ExampleFunctionalProducer.py | head -n 2 | wc -l) = 2 ]"

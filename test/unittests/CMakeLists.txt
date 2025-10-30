@@ -1,0 +1,70 @@
+#[[
+Copyright (c) 2014-2024 Key4hep-Project.
+
+This file is part of Key4hep.
+See https://key4hep.github.io/key4hep-doc/ for further info.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+]]
+
+set(USE_EXTERNAL_CATCH2 AUTO CACHE STRING "Link against an external Catch2 v3 static library, otherwise build it locally")
+set_property(CACHE USE_EXTERNAL_CATCH2 PROPERTY STRINGS AUTO ON OFF)
+
+set(CATCH2_MIN_VERSION 3.5.0)
+if(USE_EXTERNAL_CATCH2)
+  if (USE_EXTERNAL_CATCH2 STREQUAL AUTO)
+    find_package(Catch2 ${CATCH2_MIN_VERSION})
+  else()
+    find_package(Catch2 ${CATCH2_MIN_VERSION} REQUIRED)
+  endif()
+endif()
+
+if(NOT Catch2_FOUND)
+  message(STATUS "Fetching local copy of Catch2 library for unit-tests...")
+  # Build Catch2 with the default flags, to avoid generating warnings when we
+  # build it
+  set(CXX_FLAGS_CMAKE_USED ${CMAKE_CXX_FLAGS})
+  set(CMAKE_CXX_FLAGS ${CXX_FLAGS_CMAKE_DEFAULTS})
+  Include(FetchContent)
+  FetchContent_Declare(
+    Catch2
+    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+    GIT_TAG        v${CATCH2_MIN_VERSION}
+    )
+  FetchContent_MakeAvailable(Catch2)
+  set(CMAKE_MODULE_PATH ${Catch2_SOURCE_DIR}/extras ${CMAKE_MODULE_PATH})
+
+  # Disable clang-tidy on external contents
+  set_target_properties(Catch2 PROPERTIES CXX_CLANG_TIDY "")
+
+  # Hack around the fact, that the include directories are not declared as
+  # SYSTEM for the targets defined this way. Otherwise warnings can still occur
+  # in Catch2 code when templates are evaluated (which happens quite a bit)
+  get_target_property(CATCH2_IF_INC_DIRS Catch2 INTERFACE_INCLUDE_DIRECTORIES)
+  set_target_properties(Catch2 PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${CATCH2_IF_INC_DIRS}")
+
+  # Reset the flags
+  set(CMAKE_CXX_FLAGS ${CXX_FLAGS_CMAKE_USED})
+endif()
+
+add_executable(unittests_k4FWCore KeepDropSwitchTests.cpp)
+target_link_libraries(unittests_k4FWCore
+  PUBLIC
+  k4FWCore::k4FWCore
+  PRIVATE Catch2::Catch2WithMain
+)
+
+include(Catch)
+catch_discover_tests(unittests_k4FWCore
+  TEST_PREFIX "UT_" # make it possible to filter easily with -R ^UT
+)

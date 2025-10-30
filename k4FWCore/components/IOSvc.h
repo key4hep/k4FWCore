@@ -64,7 +64,7 @@ protected:
 
   std::mutex m_changeBufferLock;
 
-  KeepDropSwitch m_switch;
+  k4FWCore::KeepDropSwitch m_switch;
 
   std::optional<podio::Reader> m_reader;
   std::optional<podio::Writer> m_writer;
@@ -90,7 +90,7 @@ protected:
   int m_entries{0};
   int m_nextEntry{0};
 
-  bool checkIfWriteCollection(const std::string& collName) override;
+  bool checkIfWriteCollection(const std::string& collName) const override;
 };
 
 #endif

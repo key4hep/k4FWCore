@@ -66,7 +66,7 @@ StatusCode IOSvc::initialize() {
 
   m_nextEntry = m_firstEventEntry;
 
-  m_switch = KeepDropSwitch(m_outputCommands);
+  m_switch = k4FWCore::KeepDropSwitch(m_outputCommands);
 
   m_incidentSvc = service("IncidentSvc");
   if (!m_incidentSvc) {
@@ -194,6 +194,6 @@ std::vector<std::string> IOSvc::getAvailableCollections() {
   return {};
 }
 
-bool IOSvc::checkIfWriteCollection(const std::string& collName) { return m_switch.isOn(collName); }
+bool IOSvc::checkIfWriteCollection(const std::string& collName) const { return m_switch.isOn(collName); }
 
 DECLARE_COMPONENT(IOSvc)

@@ -18,10 +18,17 @@
  */
 #include "k4FWCore/KeepDropSwitch.h"
 
-#include <iostream>
 #include <sstream>
 #include <stdexcept>
+#ifdef __cpp_lib_format
+#include <format>
+using std::format;
+#else
+#include <fmt/format.h>
+using fmt::format;
+#endif
 
+namespace {
 int wildcmp(const char* wild, const char* string) {
   // Written by Jack Handy - <A href="mailto:jakkhandy@hotmail.com">jakkhandy@hotmail.com</A>
   const char *cp = nullptr, *mp = nullptr;
@@ -63,6 +70,19 @@ std::vector<std::string> split(const std::string& s, char delim) {
   }
   return elems;
 }
+} // namespace
+
+namespace k4FWCore {
+KeepDropSwitch::KeepDropSwitch(const InputCommands& cmds) {
+  m_commandlines.reserve(cmds.size());
+  for (const auto& cmdLine : cmds) {
+    auto [cmd, arg] = extractCommand(cmdLine);
+    if (cmd == Cmd::INVALID) {
+      throw std::invalid_argument(format("'{}' is not a valid command for the KeepDropSwitch", cmdLine));
+    }
+    m_commandlines.emplace_back(cmd, std::move(arg));
+  }
+}
 
 bool KeepDropSwitch::isOn(const std::string& astring) const {
   auto im = m_cache.find(astring);
@@ -75,44 +95,29 @@ bool KeepDropSwitch::isOn(const std::string& astring) const {
   }
 }
 
-bool KeepDropSwitch::getFlag(const std::string& astring) const {
+bool KeepDropSwitch::getFlag(const std::string& astring) const noexcept {
   bool flag = true;
-  for (const auto& cmdline : m_commandlines) {
-    std::vector<std::string> words = split(cmdline, ' ');
-    if (words.size() != 2) {
-      std::ostringstream msg;
-      msg << "malformed command string : " << cmdline;
-      throw std::invalid_argument(msg.str());
+  for (const auto& [cmd, pattern] : m_commandlines) {
+    if (wildcmp(pattern.c_str(), astring.c_str())) {
+      flag = (cmd == Cmd::KEEP);
     }
-    std::string cmd = words[0];
-    std::string pattern = words[1];
-    Cmd theCmd = UNKNOWN;
-    if (cmd == "keep")
-      theCmd = KEEP;
-    else if (cmd == "drop")
-      theCmd = DROP;
-    else {
-      std::ostringstream msg;
-      msg << "malformed command in line: " << std::endl;
-      msg << cmdline << std::endl;
-      msg << "should be keep or drop, lower case" << std::endl;
-      throw std::invalid_argument(msg.str());
-    }
-    bool match = wildcmp(pattern.c_str(), astring.c_str());
-    if (not match)
-      continue;
-    else if (theCmd == KEEP)
-      flag = true;
-    else
-      flag = false;
   }
   return flag;
 }
 
-KeepDropSwitch::Cmd KeepDropSwitch::extractCommand(const std::string& cmdline) const {
+KeepDropSwitch::OutputCommand KeepDropSwitch::extractCommand(const std::string& cmdline) const {
   auto words = split(cmdline, ' ');
-  for (auto& word : words)
-    std::cout << "'" << word << "' ";
-  std::cout << std::endl;
-  return UNKNOWN;
+  if (words.size() != 2) {
+    return {Cmd::INVALID, ""};
+  }
+  if (words[0] == "keep") {
+    return {Cmd::KEEP, words[1]};
+  }
+  if (words[0] == "drop") {
+    return {Cmd::DROP, words[1]};
+  }
+
+  return {Cmd::INVALID, ""};
 }
+
+} // namespace k4FWCore

@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 #
 # Copyright (c) 2014-2024 Key4hep-Project.
 #
@@ -16,19 +17,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import ROOT
-import sys
 
-ROOT.gSystem.Load("libedm4hepDict")
+from Gaudi.Configuration import INFO
+from k4FWCore import ApplicationMgr, IOSvc
+from Configurables import ExampleFunctionalTransformer, EventDataSvc
 
-file = ROOT.TFile.Open(sys.argv[1])
-tree = file.Get("events")
-tree.GetEntry(0)
+iosvc = IOSvc("IOSvc")
+iosvc.Input = "functional_producer.root"
+iosvc.Output = "invalidOutputCommandsOutput.root"
+iosvc.outputCommands = ["abc"]
 
-ndf = tree.Tracks.at(0).ndf
-if ndf == 0:
-    raise Exception("podio::CollectionBase read from file did not saved properly")
+transformer = ExampleFunctionalTransformer(
+    "Transformer", InputCollection="MCParticles", OutputCollection="NewMCParticles"
+)
 
-status = tree.GetBranchStatus("MCParticles")
-if status:
-    raise Exception("KeepDropSwitch did not drop the collection")
+
+ApplicationMgr(
+    TopAlg=[transformer],
+    EvtSel="NONE",
+    EvtMax=3,
+    ExtSvc=[EventDataSvc("EventDataSvc")],
+    OutputLevel=INFO,
+)
