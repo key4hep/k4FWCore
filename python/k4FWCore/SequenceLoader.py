@@ -19,7 +19,9 @@
 
 import os
 from typing import Optional, Dict, Any, Union
-from k4FWCore.utils import import_from
+from k4FWCore.utils import import_from, get_logger
+
+logger = get_logger()
 
 
 class SequenceLoader:
@@ -48,6 +50,7 @@ class SequenceLoader:
                 dictionary will be the available variables in the imported
                 module and the values will be the values of these variables.
         """
+        logger.info(f"Creating SequenceLoader with {len(alg_list)} algorithms already defined")
         self.alg_list = alg_list
         self.global_vars = global_vars
 
@@ -74,12 +77,14 @@ class SequenceLoader:
             that file to the alg_list
 
         """
+        logger.info(f"Loading '{sequence_name} from '{module_path}'")
         seq_module = import_from(
             module_path,
             global_vars=self.global_vars,
         )
 
         seq = getattr(seq_module, sequence_name)
+        logger.debug(f"Adding {len(seq)} algorithms contained in '{sequence_name}'")
         self.alg_list.extend(seq)
 
     def load(self, sequence: str) -> None:
