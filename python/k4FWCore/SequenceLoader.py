@@ -17,7 +17,8 @@
 # limitations under the License.
 #
 
-from typing import Optional, Dict, Any
+import os
+from typing import Optional, Dict, Any, Union
 from k4FWCore.utils import import_from
 
 
@@ -50,17 +51,51 @@ class SequenceLoader:
         self.alg_list = alg_list
         self.global_vars = global_vars
 
+    def load_from(self, module_path: Union[str, os.PathLike], sequence_name: str) -> None:
+        """Load a sequence of algorithms from a specified Python file and append
+        it to the algorithm list
+
+        Args:
+            module_path (Union[str, os.PathLike]): The path to the python module
+                (file) from which to load the sequence. The path is interpreted
+                to be relative to the execution directory of the process from
+                which this method is called unless an absolute path is passed.
+            sequence_name (str): The name of the sequence to load from the
+                specified python module
+
+        Examples:
+            >>> alg_list = []
+            >>> seq_loader = SequenceLoader(alg_list)
+            >>> seq_loader.load_from("Tracking/TrackingDigi.py",
+                                     "TrackingDigiSequence")
+
+            This will import the file `Tracking/TrackingDigi.py` and add the
+            sequence of algorithms that is defined in `TrackingDigiSequence` in
+            that file to the alg_list
+
+        """
+        seq_module = import_from(
+            module_path,
+            global_vars=self.global_vars,
+        )
+
+        seq = getattr(seq_module, sequence_name)
+        self.alg_list.extend(seq)
+
     def load(self, sequence: str) -> None:
         """Loads a sequence algorithm from a specified Python file and appends
         it to the algorithm list
 
-        The method constructs the filename from the sequence parameter name and
-        imports the sequence from the imported module.
+        This is a convenience overload for load_from that constructs the
+        filename from the sequence parameter name and imports the sequence from
+        the imported module.
 
         Args:
             sequence (str): The name of the sequence to load. The sequence name
                 should correspond to a Python file and class name following the
                 pattern `{sequence}.py` and `{sequence}Sequence`, respectively.
+                The sequence is interpreted to be relative to the path from
+                which the process is launched, unless it's an absolute path.
 
         Examples:
             >>> alg_list = []
@@ -70,14 +105,8 @@ class SequenceLoader:
             This will import the file `Tracking/TrackingDigi.py` and add the
             sequence of algorithms that is defined in `TrackingDigiSequence` in
             that file to the alg_list
+
         """
         filename = f"{sequence}.py"
         seq_name = f"{sequence.split('/')[-1]}Sequence"
-
-        seq_module = import_from(
-            filename,
-            global_vars=self.global_vars,
-        )
-
-        seq = getattr(seq_module, seq_name)
-        self.alg_list.extend(seq)
+        return self.load_from(filename, seq_name)
