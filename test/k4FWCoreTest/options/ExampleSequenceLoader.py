@@ -33,6 +33,8 @@ svc.Output = "gaudi_functional.root"
 algList = []
 sequenceLoader = SequenceLoader(algList)
 
+# Use an absolute path here to be independent of the working directory in which
+# the tests run
 sequenceLoader.load(f"{Path(__file__).parent}/ExampleSequence")
 
 transformer = ExampleFunctionalTransformer(
