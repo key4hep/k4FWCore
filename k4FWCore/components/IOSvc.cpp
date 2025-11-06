@@ -34,10 +34,12 @@
 #include <tuple>
 
 StatusCode IOSvc::initialize() {
-  Service::initialize().orElse([&]() {
-    error() << "Unable to initialize base class Service." << endmsg;
-    return StatusCode::FAILURE;
-  }).ignore();
+  Service::initialize()
+      .orElse([&]() {
+        error() << "Unable to initialize base class Service." << endmsg;
+        return StatusCode::FAILURE;
+      })
+      .ignore();
 
   if (!m_importedFromk4FWCore) {
     error() << "Use 'from k4FWCore import IOSvc' instead of 'from Configurables import IOSvc' to access the service"
