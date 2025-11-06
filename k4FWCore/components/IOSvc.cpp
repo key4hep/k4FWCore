@@ -34,11 +34,10 @@
 #include <tuple>
 
 StatusCode IOSvc::initialize() {
-  StatusCode sc = Service::initialize();
-  if (sc.isFailure()) {
+  Service::initialize().orElse([&]() {
     error() << "Unable to initialize base class Service." << endmsg;
-    return sc;
-  }
+    return StatusCode::FAILURE;
+  }).ignore();
 
   if (!m_importedFromk4FWCore) {
     error() << "Use 'from k4FWCore import IOSvc' instead of 'from Configurables import IOSvc' to access the service"
@@ -191,7 +190,6 @@ std::vector<std::string> IOSvc::getAvailableCollections() {
     return m_reader->readFrame(podio::Category::Event, m_nextEntry).getAvailableCollections();
   }
   throw GaudiException("Reader is not initialized", name(), StatusCode::FAILURE);
-  return {};
 }
 
 bool IOSvc::checkIfWriteCollection(const std::string& collName) const { return m_switch.isOn(collName); }

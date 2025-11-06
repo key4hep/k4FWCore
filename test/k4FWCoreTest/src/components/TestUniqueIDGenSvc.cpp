@@ -18,7 +18,6 @@
  */
 #include "TestUniqueIDGenSvc.h"
 #include "edm4hep/MutableEventHeader.h"
-#include <cstdint>
 
 DECLARE_COMPONENT(TestUniqueIDGenSvc)
 
@@ -26,13 +25,7 @@ TestUniqueIDGenSvc::TestUniqueIDGenSvc(const std::string& aName, ISvcLocator* aS
     : Gaudi::Algorithm(aName, aSvcLoc) {}
 
 StatusCode TestUniqueIDGenSvc::initialize() {
-  if (Gaudi::Algorithm::initialize().isFailure()) {
-    return StatusCode::FAILURE;
-  }
-
-  m_service = serviceLocator()->service("UniqueIDGenSvc");
-
-  return StatusCode::SUCCESS;
+  return Gaudi::Algorithm::initialize().andThen([&]() { m_service = serviceLocator()->service("UniqueIDGenSvc"); });
 }
 
 // This is meant to run up to two times
