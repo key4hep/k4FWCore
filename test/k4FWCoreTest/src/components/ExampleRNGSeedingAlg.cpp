@@ -35,19 +35,9 @@ public:
 
   // locate the  UniqueIDGenSvc service during initialization
   StatusCode initialize() final {
-    StatusCode sc = Transformer::initialize();
-    if (sc.isFailure()) {
-      error() << "Unable to initialize base class Service." << endmsg;
-      return sc;
-    }
-
-    m_uniqueIDSvc = service("UniqueIDGenSvc");
-    if (!m_uniqueIDSvc) {
-      error() << "Unable to locate the UniqueIDGenSvc" << endmsg;
-      return StatusCode::FAILURE;
-    }
-
-    return StatusCode::SUCCESS;
+    return Transformer::initialize()
+        .orElse([&]() { error() << "Unable to initialize base class Service." << endmsg; })
+        .andThen([&]() { m_uniqueIDSvc = service("UniqueIDGenSvc"); });
   }
 
   podio::UserDataCollection<double> operator()(const edm4hep::EventHeaderCollection& evtHeader) const final {

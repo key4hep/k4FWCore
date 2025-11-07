@@ -41,24 +41,16 @@ struct EfficiencyFilter final : k4FWCore::Transformer<podio::CollectionBase*(con
                     {KeyValues("OutputCollection", {""})}) {}
 
   StatusCode initialize() final {
-    StatusCode sc = Transformer::initialize();
-    if (sc.isFailure()) {
-      error() << "Unable to initialize base class Service." << endmsg;
-      return sc;
-    }
-
-    m_uniqueIDSvc = service("UniqueIDGenSvc");
-    if (!m_uniqueIDSvc) {
-      error() << "Unable to locate the UniqueIDGenSvc" << endmsg;
-      return StatusCode::FAILURE;
-    }
-
-    if (m_efficiency < 0.0 || m_efficiency > 1.0) {
-      error() << "Efficiency must be between 0 and 1." << endmsg;
-      return StatusCode::FAILURE;
-    }
-
-    return StatusCode::SUCCESS;
+    return Transformer::initialize()
+        .orElse([&] { error() << "Unable to initialize base class Service." << endmsg; })
+        .andThen([&] {
+          m_uniqueIDSvc = service("UniqueIDGenSvc");
+          if (m_efficiency < 0.0 || m_efficiency > 1.0) {
+            error() << "Efficiency must be between 0 and 1." << endmsg;
+            return StatusCode::FAILURE;
+          }
+          return StatusCode::SUCCESS;
+        });
   }
 
   podio::CollectionBase* operator()(const podio::CollectionBase& coll,
