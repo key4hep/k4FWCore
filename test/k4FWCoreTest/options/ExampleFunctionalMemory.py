@@ -22,8 +22,10 @@
 from Gaudi.Configuration import INFO
 from Configurables import (
     ExampleFunctionalTransformer,
+    ExampleFunctionalTransformerEventContext,
     ExampleFunctionalProducer,
     ExampleFunctionalConsumer,
+    ExampleFunctionalConsumerEventContext,
     ExampleFunctionalConsumerKeyValues,
 )
 from k4FWCore import ApplicationMgr
@@ -31,24 +33,36 @@ from Configurables import EventDataSvc
 
 from k4FWCore.parseArgs import parser
 
-parser.add_argument("--use-key-values", action="store_true", help="Use KeyValues for consumer")
+arg_group = parser.add_mutually_exclusive_group()
+arg_group.add_argument("--use-key-values", action="store_true", help="Use KeyValues for consumer")
+arg_group.add_argument(
+    "--use-event-context",
+    action="store_true",
+    help="Use the variants of the consumer and transformer that take an EventContext",
+)
 
 my_opts = parser.parse_known_args()
 
-transformer = ExampleFunctionalTransformer(
+consumer_alg = ExampleFunctionalConsumer
+transformer_alg = ExampleFunctionalTransformer
+if my_opts[0].use_event_context:
+    consumer_alg = ExampleFunctionalConsumerEventContext
+    transformer_alg = ExampleFunctionalTransformerEventContext
+
+transformer = transformer_alg(
     "Transformer", InputCollection="MCParticles", OutputCollection="NewMCParticles"
 )
 
-if not my_opts[0].use_key_values:
-    consumer = ExampleFunctionalConsumer(
-        "Consumer",
-        InputCollection="NewMCParticles",
-        Offset=10,
-    )
-else:
+if my_opts[0].use_key_values:
     consumer = ExampleFunctionalConsumerKeyValues(
         "Consumer",
         InputCollection=["NewMCParticles"],
+        Offset=10,
+    )
+else:
+    consumer = consumer_alg(
+        "Consumer",
+        InputCollection="NewMCParticles",
         Offset=10,
     )
 

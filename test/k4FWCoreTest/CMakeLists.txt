@@ -26,6 +26,7 @@ set(k4fwcoretest_plugin_sources
   src/components/ExampleFunctionalConsumerRuntimeCollections.cpp
   src/components/ExampleFunctionalConsumerRuntimeCollectionsMultiple.cpp
   src/components/ExampleFunctionalConsumerInputOutputLocations.cpp
+  src/components/ExampleFunctionalConsumerEventContext.cpp
   src/components/ExampleFunctionalFilter.cpp
   src/components/ExampleFunctionalMetadataConsumer.cpp
   src/components/ExampleFunctionalMetadataProducer.cpp
@@ -35,11 +36,13 @@ set(k4fwcoretest_plugin_sources
   src/components/ExampleFunctionalTransformer.cpp
   src/components/ExampleFunctionalTransformerHist.cpp
   src/components/ExampleFunctionalTransformerMultiple.cpp
+  src/components/ExampleFunctionalTransformerMultipleEventContext.cpp
   src/components/ExampleFunctionalTransformerRuntimeCollections.cpp
   src/components/ExampleFunctionalTransformerRuntimeCollectionsMultiple.cpp
   src/components/ExampleFunctionalTransformerRuntimeEmpty.cpp
   src/components/ExampleFunctionalTransformerInputOutputLocations.cpp
   src/components/ExampleFunctionalMultiTransformerInputOutputLocations.cpp
+  src/components/ExampleFunctionalTransformerEventContext.cpp
   src/components/ExampleGaudiFunctionalProducer.cpp
   src/components/ExampleParticleIDConsumer.cpp
   src/components/ExampleParticleIDProducer.cpp
@@ -173,9 +176,11 @@ set_tests_properties(TestEventCounter PROPERTIES FAIL_REGULAR_EXPRESSION "Proces
                      PASS_REGULAR_EXPRESSION "(Processing event 0.*Processing event 2|Processing event 2.*Processing event 0).*Processed 4 events.*Processed 4 events")
 
 add_test_fwcore(FunctionalMemory options/ExampleFunctionalMemory.py)
+add_test_fwcore(FunctionalMemoryEventContext options/ExampleFunctionalMemory.py --use-event-context)
 add_test_fwcore(FunctionalMemoryKeyValues options/ExampleFunctionalMemory.py --use-key-values)
 add_test_fwcore(FunctionalMTMemory options/ExampleFunctionalMTMemory.py)
 add_test_fwcore(FunctionalMultipleMemory options/ExampleFunctionalMultipleMemory.py)
+add_test_fwcore(FunctionalMultipleMemoryEventContext options/ExampleFunctionalMultipleMemory.py --use-event-context)
 add_test_fwcore(FunctionalProducer options/ExampleFunctionalProducer.py PROPERTIES FIXTURES_SETUP ProducerFile)
 add_test_fwcore(FunctionalProducerAnother options/ExampleFunctionalProducer.py --second PROPERTIES FIXTURES_SETUP AnotherProducerFile)
 

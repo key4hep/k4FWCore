@@ -24,12 +24,27 @@ from Gaudi.Configuration import INFO
 from Configurables import (
     ExampleFunctionalProducerMultiple,
     ExampleFunctionalTransformerMultiple,
+    ExampleFunctionalTransformerMultipleEventContext,
     ExampleFunctionalConsumerMultiple,
 )
 from Configurables import EventDataSvc
 from k4FWCore import ApplicationMgr
 
-transformer = ExampleFunctionalTransformerMultiple(
+from k4FWCore.parseArgs import parser
+
+parser.add_argument(
+    "--use-event-context",
+    action="store_true",
+    help="Use the variants of the consumer and transformer that take an EventContext",
+)
+
+my_opts = parser.parse_known_args()
+
+transformer_alg = ExampleFunctionalTransformerMultiple
+if my_opts[0].use_event_context:
+    transformer_alg = ExampleFunctionalTransformerMultipleEventContext
+
+transformer = transformer_alg(
     "Transformer",
     InputCollectionFloat="VectorFloat",
     InputCollectionParticles="MCParticles1",
