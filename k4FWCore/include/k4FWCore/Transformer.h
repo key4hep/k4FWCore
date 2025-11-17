@@ -21,7 +21,6 @@
 
 #include "Gaudi/Functional/details.h"
 #include "Gaudi/Functional/utilities.h"
-#include <GaudiKernel/FunctionalFilterDecision.h>
 
 #include "k4FWCore/FunctionalUtils.h"
 
@@ -107,7 +106,6 @@ namespace details {
               std::get<0>(this->m_outputs)[0],
               convertToUniquePtr(std::move(filter_evtcontext<In...>::apply(*this, ctx, this->m_inputs))));
         }
-        return Gaudi::Functional::FilterDecision::PASSED;
       } catch (GaudiException& e) {
         (e.code() ? this->warning() : this->error()) << e.tag() << " : " << e.message() << endmsg;
         return e.code();
