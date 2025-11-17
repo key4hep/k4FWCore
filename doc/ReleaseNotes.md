@@ -1,3 +1,100 @@
+# v01-04
+
+* 2025-11-07 Juan Miguel Carceller ([PR#357](https://github.com/key4hep/k4FWCore/pull/357))
+  - Include `<variant>` where it's used, introduced in b233ef11
+
+* 2025-11-05 sss ([PR#355](https://github.com/key4hep/k4FWCore/pull/355))
+  - Make interfaces of ICallPositionsTool const.
+
+* 2025-11-05 sss ([PR#354](https://github.com/key4hep/k4FWCore/pull/354))
+  - Make methods of ICalibrateCaloHitsTool const, and add an interface that takes a vector of hit information rather than a map.
+
+* 2025-10-30 Thomas Madlener ([PR#351](https://github.com/key4hep/k4FWCore/pull/351))
+  - Check the commands for the `KeepDropSwitch` in the constructor instead of re-parsing them every time `isOn` is called. 
+  - Move the `KeepDropSwitch` into the `k4FWCore` namespace and deprecate the unnamespaced usage.
+  - Make the `IOSvc` fail in `initialize` in case the `outputCommands` are invalid
+  - Add unittests for `KeepDropSwitch`
+
+* 2025-10-27 sss ([PR#353](https://github.com/key4hep/k4FWCore/pull/353))
+  - Updated noise tool interfaces to remove non-const methods and add interfaces that operate on vectors rather than maps.
+
+* 2025-10-13 Juan Miguel Carceller ([PR#345](https://github.com/key4hep/k4FWCore/pull/345))
+  - Add support for setting single values for inputs and outputs by using `KeyValue` (in Python, a single string). Previously, all the inputs and outputs had to be `KeyValues`, which in Python is a list of strings.
+  - Use `KeyValue` in several test algorithms that take as input or output a single collection.
+  - Add an algorithm `ExampleFunctionalConsumerKeyValues` that uses `KeyValues` to make sure it keeps working (there are still several tests using `KeyValues`, those that read or have as output a list of collections).
+  - Add tests using `inputLocations()` and `outputLocations()` that cover both cases when using `KeyValue` and `KeyValues`.
+
+* 2025-10-10 sss ([PR#346](https://github.com/key4hep/k4FWCore/pull/346))
+  - ICaloReadCrosstalkMap migrated to have const methods.
+
+* 2025-10-10 sss ([PR#342](https://github.com/key4hep/k4FWCore/pull/342))
+  - k4run: add the switch --interactive, -i.  When given, k4run will enter a Python command loop after the configuration has been read, allowing one to inspect the configuration interactively.  This is useful for debugging.
+
+* 2025-09-23 Juan Miguel Carceller ([PR#343](https://github.com/key4hep/k4FWCore/pull/343))
+  - Similar to https://github.com/key4hep/EDM4hep/pull/445, remove support for CPACK that is not being used nor tested.
+
+* 2025-09-17 Thomas Madlener ([PR#310](https://github.com/key4hep/k4FWCore/pull/310))
+  - Make sure that `load_file` sets the correct `__file__` and `__spec__` information for files that are loaded with it
+  - Restore the output of the filename in case loading doesn't work
+  - Deprecate passing a file handle to `load_file` and always pass a path-like object
+
+* 2025-09-11 jmcarcell ([PR#339](https://github.com/key4hep/k4FWCore/pull/339))
+  - Clean up of functional utilities and code: reserve when possible and use better names for the variables and use `const` in loops when possible
+  - Fix exceptions to be constructed the same way with `fmt::format`.
+
+* 2025-09-10 jmcarcell ([PR#338](https://github.com/key4hep/k4FWCore/pull/338))
+  - Refactor the CollectionPusher class into the Reader class
+
+* 2025-09-09 Thomas Madlener ([PR#318](https://github.com/key4hep/k4FWCore/pull/318))
+  - Deprecate `PodioDataSvc` (and `k4DataSvc` and `FCCDataSvc`) as well as the `PodioInput`, `PodioOutput`.
+  - Add `WARNING` messages at runtime to inform users about the upcoming removal.
+
+* 2025-08-13 Juan Miguel Carceller ([PR#340](https://github.com/key4hep/k4FWCore/pull/340))
+  - Use . instead of -> for objects that are not pointers in ExampleFunctionalTransformerMultiple
+
+* 2025-08-04 jmcarcell ([PR#337](https://github.com/key4hep/k4FWCore/pull/337))
+  - Update tests following https://github.com/key4hep/k4-project-template/pull/30. In this case, tests were already working without installing
+
+* 2025-07-31 jmcarcell ([PR#335](https://github.com/key4hep/k4FWCore/pull/335))
+  - Get the available collections from IOSvc instead of peeking in the file (if any) before running, improving the performance when running single-threaded (unchanged when running multithreaded)
+
+* 2025-07-29 jmcarcell ([PR#336](https://github.com/key4hep/k4FWCore/pull/336))
+  - Use . instead of -> for objects that are not pointers
+
+* 2025-07-21 jmcarcell ([PR#334](https://github.com/key4hep/k4FWCore/pull/334))
+  - Fix the test `ReadLimitedInputsAllEventsIOSvc` that currently depends on tests (with `FIXTURE_REQUIRED`) with the wrong name
+  - Make sure `PODIO_DEFAULT_WRITE_RNTUPLE` is not set when running the test `FunctionalProducerMultiple` since the test `FunctionalMix` reads the file it produces through `PodioInput`, which does not support RNTuples
+  - Adapt CheckOutputFiles.py to use `podio.reading.get_reader` to automatically get the correct reader (TTree or RNTuple)
+
+* 2025-07-08 jmcarcell ([PR#322](https://github.com/key4hep/k4FWCore/pull/322))
+  - Add an EfficiencyFilter, an algorithm that will take an EDM4hep collection and return a subset collection with a certain efficiency. The `Exact` parameter can be used to control whether the efficiency is exactly that number of simply
+    each element is kept with `Efficiency` probability.
+  - Add a test that runs the EfficiencyFilter both in the exact version (to check that exactly `Efficiency * length` elements are saved) and in the non-exact version
+
+* 2025-07-03 jmcarcell ([PR#328](https://github.com/key4hep/k4FWCore/pull/328))
+  - Remove the outdated script k4-print-joboptions. It doesn't work on current files, it's not using the podio readers (so it doesn't support RNTuples, if it was working) and the same functionality can easily be obtained with `podio-dump`.
+
+* 2025-06-24 jmcarcell ([PR#329](https://github.com/key4hep/k4FWCore/pull/329))
+  - Do not write properties twice for ApplicationMgr and MessageSvc. Do not write any properties for the NTupleSvc
+  - Construct strings in place instead of using `std::stringstream`
+  - Remove an extra `;` at the end of each pair of property and value, they are anyway each different strings
+
+* 2025-06-13 jmcarcell ([PR#314](https://github.com/key4hep/k4FWCore/pull/314))
+  - Unset DISPLAY to avoid importing ROOT when not showing plots
+
+* 2025-06-12 jmcarcell ([PR#327](https://github.com/key4hep/k4FWCore/pull/327))
+  - Format two lines to fix pre-commit after updating to llvm 20
+
+* 2025-06-12 jmcarcell ([PR#326](https://github.com/key4hep/k4FWCore/pull/326))
+  - Create a new target to copy the files after all the other targets to prevent errors
+
+* 2025-06-05 Thomas Madlener ([PR#323](https://github.com/key4hep/k4FWCore/pull/323))
+  - Switch from `file(GLOB ...)` to explicitly mention source files for k4FWCore plugin sources
+
+* 2025-06-05 jmcarcell ([PR#316](https://github.com/key4hep/k4FWCore/pull/316))
+  - Use the Warnings property only if it exists for EventLoopMgr
+  - Do not use the Warnings property in the tests since it is going to be removed (warnings will not be silenced in these tests before v40r0)
+
 # v01-03
 
 * 2025-05-27 Thomas Madlener ([PR#317](https://github.com/key4hep/k4FWCore/pull/317))
