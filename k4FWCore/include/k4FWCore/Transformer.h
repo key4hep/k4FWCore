@@ -256,7 +256,7 @@ namespace details {
       try {
         auto tmp = filter_evtcontext<In...>::apply(*this, ctx, this->m_inputs);
         putVectorOutputs<0, Out...>(std::move(tmp), m_outputs, this);
-        return Gaudi::Functional::FilterDecision::PASSED;
+        return StatusCode::SUCCESS;
       } catch (GaudiException& e) {
         (e.code() ? this->warning() : this->error()) << e.tag() << " : " << e.message() << endmsg;
         return e.code();
