@@ -63,7 +63,8 @@ struct ExampleFunctionalTransformerMultipleEventContext final
   // This is the function that will be called to transform the data
   // Note that the function has to be const, as well as the collections
   // we get from the input
-  std::tuple<Counter, Particle, LinkColl> operator()(const EventContext& ctx, const FloatColl&, const ParticleColl& particles,
+  std::tuple<Counter, Particle, LinkColl> operator()(const EventContext& ctx, const FloatColl&,
+                                                     const ParticleColl& particles,
                                                      const SimTrackerHitColl& simTrackerHits,
                                                      const TrackerHitColl& trackerHits, const TrackColl& tracks,
                                                      const RecoColl& recos, const LinkColl& links) const override {
