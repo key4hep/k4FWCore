@@ -190,7 +190,7 @@ def main():
     parser.add_argument(
         "--log-level",
         help="Set the log (output) level for python and the ApplicationMgr",
-        default="INFO",
+        default=None,
         type=lambda x: x.upper(),
         choices=LOG_LEVELS,
     )
@@ -210,7 +210,7 @@ def main():
     if opts[0].verbose:
         opts[0].log_level = "VERBOSE"
     logger = get_logger()
-    set_log_level(opts[0].log_level)
+    set_log_level(opts[0].log_level or "INFO")
 
     if opts[0].list:
         from Gaudi import Configuration
