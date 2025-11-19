@@ -8,6 +8,8 @@ import signal
 import warnings
 from pathlib import Path
 
+from Gaudi import Configuration
+
 from k4FWCore.utils import load_file, get_logger, set_log_level, LOG_LEVELS
 
 # Terminate the process if a SIGPIPE is received
@@ -213,8 +215,6 @@ def main():
     set_log_level(opts[0].log_level or "INFO")
 
     if opts[0].list:
-        from Gaudi import Configuration
-
         cfgdb = Configuration.cfgDb
         logger.info("Available components:\n")
         for item in sorted(cfgdb):
@@ -267,10 +267,16 @@ def main():
         else:
             conf.setProp(optionName.rsplit(".", 1)[1], opts_dict[optionName])
 
-    if opts.verbose:
-        from Gaudi.Configuration import VERBOSE
+    if opts.log_level:
+        try:
+            ApplicationMgr().OutputLevel = getattr(
+                Configuration, logging.getLevelName(logger.level)
+            )
+        except AttributeError:
+            logger.warning(
+                f"{logging.getLevelName(logger.level)} (from log level {logger.level}) is not a valid OutputLevel for Gaudi"
+            )
 
-        ApplicationMgr().OutputLevel = VERBOSE
     if opts.num_events is not None:
         ApplicationMgr().EvtMax = opts.num_events
     # Allow graceful exit with Ctrl + C
