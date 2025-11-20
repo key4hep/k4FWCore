@@ -38,8 +38,8 @@ private:
 
   bool getFlag(const std::string& astring) const noexcept;
   OutputCommand extractCommand(const std::string& cmdLine) const;
-  std::vector<OutputCommand> m_commandlines{};
   mutable std::map<std::string, bool> m_cache;
+  std::vector<OutputCommand> m_outputCommands{};
 };
 
 } // namespace k4FWCore

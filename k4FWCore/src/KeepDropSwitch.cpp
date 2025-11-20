@@ -74,13 +74,13 @@ std::vector<std::string> split(const std::string& s, char delim) {
 
 namespace k4FWCore {
 KeepDropSwitch::KeepDropSwitch(const InputCommands& cmds) {
-  m_commandlines.reserve(cmds.size());
+  m_outputCommands.reserve(cmds.size());
   for (const auto& cmdLine : cmds) {
     auto [cmd, arg] = extractCommand(cmdLine);
     if (cmd == Cmd::INVALID) {
       throw std::invalid_argument(format("'{}' is not a valid command for the KeepDropSwitch", cmdLine));
     }
-    m_commandlines.emplace_back(cmd, std::move(arg));
+    m_outputCommands.emplace_back(cmd, std::move(arg));
   }
 }
 
@@ -97,7 +97,7 @@ bool KeepDropSwitch::isOn(const std::string& astring) const {
 
 bool KeepDropSwitch::getFlag(const std::string& astring) const noexcept {
   bool flag = true;
-  for (const auto& [cmd, pattern] : m_commandlines) {
+  for (const auto& [cmd, pattern] : m_outputCommands) {
     if (wildcmp(pattern.c_str(), astring.c_str())) {
       flag = (cmd == Cmd::KEEP);
     }
