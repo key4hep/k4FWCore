@@ -151,7 +151,7 @@ k4run <steering-file> --IOSvc.OutputType "RNTuple"
 :::
 ::::
 
-During processing, at the end of each event from the Gaudi event loop the `IOSvc` will write a frame with the collection present in TES. By default all the collections will be written. The `outputCommands` property of `IOSvc` can be used to specify commands to select which collections should be written. For example, the following commands will skip writing all the collections except for the collections named `MCParticles1`, `MCParticles2` and `SimTrackerHits`:
+During processing, at the end of each event from the Gaudi event loop the `IOSvc` will write a frame with the collections present in TES. By default all the collections will be written. The `outputCommands` property of `IOSvc` can be used to specify commands to select which collections should be written. For example, the following commands will skip writing all the collections except for the collections named `MCParticles1`, `MCParticles2` and `SimTrackerHits`:
 
 ::::{tab-set}
 :::{tab-item} Python
