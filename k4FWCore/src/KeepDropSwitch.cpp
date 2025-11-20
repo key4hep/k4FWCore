@@ -29,7 +29,7 @@ using fmt::format;
 #endif
 
 namespace {
-int wildcmp(const char* wild, const char* string) {
+int wildcmp(const char* wild, const char* string) noexcept {
   // Written by Jack Handy - <A href="mailto:jakkhandy@hotmail.com">jakkhandy@hotmail.com</A>
   const char *cp = nullptr, *mp = nullptr;
   while ((*string) && (*wild != '*')) {
@@ -84,18 +84,7 @@ KeepDropSwitch::KeepDropSwitch(const InputCommands& cmds) {
   }
 }
 
-bool KeepDropSwitch::isOn(const std::string& astring) const {
-  auto im = m_cache.find(astring);
-  if (im != m_cache.end())
-    return im->second;
-  else {
-    bool val = getFlag(astring);
-    m_cache.insert(std::pair<std::string, bool>(astring, val));
-    return val;
-  }
-}
-
-bool KeepDropSwitch::getFlag(const std::string& astring) const noexcept {
+bool KeepDropSwitch::isOn(const std::string& astring) const noexcept {
   bool flag = true;
   for (const auto& [cmd, pattern] : m_outputCommands) {
     if (wildcmp(pattern.c_str(), astring.c_str())) {
