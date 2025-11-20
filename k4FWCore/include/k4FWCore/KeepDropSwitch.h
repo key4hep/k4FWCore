@@ -34,6 +34,8 @@ public:
 
 private:
   enum class Cmd { KEEP, DROP, INVALID };
+  static Cmd fromString(const std::string_view cmd) noexcept;
+
   using OutputCommand = std::tuple<Cmd, std::string>;
 
   bool getFlag(const std::string& astring) const noexcept;
