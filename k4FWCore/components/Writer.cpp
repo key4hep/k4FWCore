@@ -156,12 +156,21 @@ public:
       //   continue;
       // }
       auto collName = pReg->name().substr(1, pReg->name().size() - 1);
-      auto coll = dynamic_cast<AnyDataWrapper<std::unique_ptr<podio::CollectionBase>>*>(pReg->object());
-      if (!coll) {
-        warning() << collName << " does not point to a podio::CollectionBase in the TES" << endmsg;
-        continue;
+      const auto coll = dynamic_cast<AnyDataWrapper<std::unique_ptr<podio::CollectionBase>>*>(pReg->object());
+      std::string_view collType = "";
+      if (coll) {
+        collType = coll->getData()->getTypeName();
+      } else {
+        // Things stored via DataHandles nned special casing
+        if (const auto oldColl = dynamic_cast<DataWrapperBase*>(pReg->object())) {
+          collType = oldColl->collectionBase()->getTypeName();
+        }
       }
-      const auto collType = coll->getData()->getTypeName();
+
+      if (collType.empty()) {
+        warning() << "Could not determine type for collection: " << collName << ". Type based selection will not work"
+                  << endmsg;
+      }
       debug() << "Adding " << collName << " (type: " << collType << ") to the list of available collections" << endmsg;
       namesAndTypes.emplace(std::move(collName), collType);
     }
