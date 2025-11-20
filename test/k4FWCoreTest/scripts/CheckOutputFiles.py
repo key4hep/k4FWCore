@@ -94,9 +94,9 @@ check_collections(
         "VectorFloat",
         "MCParticles1",
         "MCParticles2",
+        "NewMCParticles",
         "SimTrackerHits",
         "TrackerHits",
-        "RecoParticles",
         "Links",
     ],
 )
