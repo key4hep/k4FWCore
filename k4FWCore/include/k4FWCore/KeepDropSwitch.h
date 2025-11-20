@@ -29,13 +29,15 @@ public:
   typedef std::vector<std::string> InputCommands;
   KeepDropSwitch() = default;
   explicit KeepDropSwitch(const InputCommands& cmds);
-  bool isOn(const std::string& astring) const noexcept;
+  inline bool isOn(const std::string& astring) const noexcept { return isOn(astring, ""); }
+  bool isOn(const std::string& astring, const std::string_view typeName) const noexcept;
 
 private:
   enum class Cmd { KEEP, DROP, INVALID };
   static Cmd fromString(const std::string_view cmd) noexcept;
 
-  using OutputCommand = std::tuple<Cmd, std::string>;
+  enum class Kind { Name, Type };
+  using OutputCommand = std::tuple<Cmd, Kind, std::string>;
 
   OutputCommand extractCommand(const std::string& cmdLine) const;
   std::vector<OutputCommand> m_outputCommands{};

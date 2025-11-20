@@ -75,4 +75,29 @@ TEST_CASE("KeepDropSwitch keep and drop with ? wildcard") {
 TEST_CASE("KeepDropSwitch malformed cmd inputs") {
   REQUIRE_THROWS_AS(KeepDropSwitch({"abc"}), std::invalid_argument);
   REQUIRE_THROWS_AS(KeepDropSwitch({"foobar MCParticles"}), std::invalid_argument);
+  REQUIRE_THROWS_AS(KeepDropSwitch({"keep anything-but-type collType"}), std::invalid_argument);
+}
+
+TEST_CASE("KeepDropSwitch drops types") {
+  const auto keepDropSwitch = KeepDropSwitch({"drop type MCParticleCollection"});
+  REQUIRE(keepDropSwitch.isOn("MCParticles"));
+  REQUIRE_FALSE(keepDropSwitch.isOn("MCParticles", "MCParticleCollection"));
+  REQUIRE(keepDropSwitch.isOn("MCParticles", "AnotherCollection"));
+}
+
+TEST_CASE("KeepDropSwitch types respect command order") {
+  auto keepDropSwitch = KeepDropSwitch({"drop *", "keep type ABCollection"});
+  REQUIRE(keepDropSwitch.isOn("collName", "ABCollection"));
+  REQUIRE_FALSE(keepDropSwitch.isOn("collName", "NonKeptType"));
+  REQUIRE_FALSE(keepDropSwitch.isOn("collName"));
+
+  keepDropSwitch = KeepDropSwitch({"keep type ABCollection", "drop *"});
+  REQUIRE_FALSE(keepDropSwitch.isOn("collName", "ABCollection"));
+
+  keepDropSwitch = KeepDropSwitch({"drop *", "keep MCParticles", "drop type ABCType", "keep type FooType"});
+  REQUIRE(keepDropSwitch.isOn("Anything", "FooType"));
+  REQUIRE_FALSE(keepDropSwitch.isOn("Anything", "ABCType"));
+  REQUIRE_FALSE(keepDropSwitch.isOn("MCParticles", "ABCType"));
+  REQUIRE(keepDropSwitch.isOn("MCParticles"));
+  REQUIRE_FALSE(keepDropSwitch.isOn("Anything"));
 }
