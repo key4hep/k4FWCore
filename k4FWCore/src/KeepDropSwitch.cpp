@@ -105,19 +105,22 @@ bool KeepDropSwitch::getFlag(const std::string& astring) const noexcept {
   return flag;
 }
 
+KeepDropSwitch::Cmd KeepDropSwitch::fromString(const std::string_view cmd) noexcept {
+  if (cmd == "drop") {
+    return Cmd::DROP;
+  }
+  if (cmd == "keep") {
+    return Cmd::KEEP;
+  }
+  return Cmd::INVALID;
+}
+
 KeepDropSwitch::OutputCommand KeepDropSwitch::extractCommand(const std::string& cmdline) const {
   auto words = split(cmdline, ' ');
   if (words.size() != 2) {
     return {Cmd::INVALID, ""};
   }
-  if (words[0] == "keep") {
-    return {Cmd::KEEP, words[1]};
-  }
-  if (words[0] == "drop") {
-    return {Cmd::DROP, words[1]};
-  }
-
-  return {Cmd::INVALID, ""};
+  return {fromString(words[0]), words[1]};
 }
 
 } // namespace k4FWCore
