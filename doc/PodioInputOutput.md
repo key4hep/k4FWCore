@@ -175,6 +175,19 @@ k4run <steering-file> --IOSvc.outputCommands \
 :::
 ::::
 
+It is also possible to specify entire datatypes for keeping or dropping via the `type` sub-command, e.g. to keep everything but any collection that is of type `edm4hep::SimTrackerHitCollection` one would do:
+
+```python
+io_svc.outputCommands = [
+    "drop type edm4hep::SimTrackerHitCollection",
+]
+```
+
+:::{note}
+The commands are processed in order so the last relevant *keep* or *drop* for any given collection will decide.
+:::
+
+
 ## Accessing metadata
 
 The k4FWCore provides the `MetadataSvc` that allows accessing user metadata in PODIO-based data-models. There is no need to instantiate the `MetadataSvc` explicitly when using `IOSvc` as `IOSvc` can instantiate it on its own if needed.
