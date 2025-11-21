@@ -16,9 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import logging
 
-from Gaudi import Configuration
 from Configurables import ApplicationMgr as AppMgr
 from Configurables import HiveSlimEventLoopMgr
 from Configurables import Reader, Writer, IOSvc, Gaudi__Sequencer, EventLoopMgr
@@ -43,12 +41,6 @@ class ApplicationMgr:
 
     def __init__(self, **kwargs):
         self._mgr = AppMgr(**kwargs)
-        try:
-            self._mgr.OutputLevel = getattr(Configuration, logging.getLevelName(logger.level))
-        except AttributeError:
-            logger.warning(
-                f"{logging.getLevelName(logger.level)} (from log level {logger.level}) is not a valid OutputLevel for Gaudi"
-            )
 
     def _setup_reader(self, reader, iosvc_props):
         """Setup the reader consistently such that it has sane defaults
