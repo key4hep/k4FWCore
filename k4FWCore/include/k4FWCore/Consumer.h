@@ -45,21 +45,25 @@ namespace details {
       : Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_> {
     using Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>::DataHandleMixin;
 
-    static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike_v<In>) && ...),
+    static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike_v<In> ||
+                    std::is_same_v<In, EventContext>) &&
+                   ...),
                   "Consumer input types must be EDM4hep collections or vectors of collection pointers");
+
+    static constexpr size_t N_in = filter_evtcontext<In...>::size;
+
+    using base_class = Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>;
+
+    using KeyValue = base_class::KeyValue;
+    using KeyValues = base_class::KeyValues;
 
     template <typename T>
     using InputHandle_t = Gaudi::Functional::details::InputHandle_t<Traits_, T>;
 
-    std::tuple<std::vector<InputHandle_t<typename EventStoreType<In>::type>>...> m_inputs;
+    wrap_tuple_types<InputHandle_t, filter_evtcontext_t<In...>>::type m_inputs;
 
-    std::array<Gaudi::Property<DataObjID>, sizeof...(In)> m_inputLocationsSingle;
-    std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)> m_inputLocationsVector;
-
-    using base_class = Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>;
-
-    using KeyValues = typename base_class::KeyValues;
-    using KeyValue = typename base_class::KeyValue;
+    std::array<Gaudi::Property<DataObjID>, N_in> m_inputLocationsSingle;
+    std::array<Gaudi::Property<std::vector<DataObjID>>, N_in> m_inputLocationsVector;
 
     template <typename IArgs, std::size_t... I>
     Consumer(std::string name, ISvcLocator* locator, const IArgs& inputs, std::index_sequence<I...>)
@@ -74,13 +78,12 @@ namespace details {
               std::get<I>(inputs), std::get<I>(m_inputs), this)...} {}
 
     Consumer(std::string name, ISvcLocator* locator,
-             const Gaudi::Functional::details::RepeatValues_<std::variant<KeyValue, KeyValues>, sizeof...(In)>& inputs)
-        : Consumer(std::move(name), locator, inputs, std::index_sequence_for<In...>{}) {}
+             const Gaudi::Functional::details::RepeatValues_<std::variant<KeyValue, KeyValues>, N_in>& inputs)
+        : Consumer(std::move(name), locator, inputs, std::make_index_sequence<N_in>{}) {}
 
-    // derived classes are NOT allowed to implement execute ...
     StatusCode execute(const EventContext& ctx) const final {
       try {
-        filter_evtcontext_tt<In...>::apply(*this, ctx, m_inputs);
+        filter_evtcontext<In...>::apply(*this, ctx, m_inputs);
         return Gaudi::Functional::FilterDecision::PASSED;
       } catch (GaudiException& e) {
         (e.code() ? this->warning() : this->error()) << e.tag() << " : " << e.message() << endmsg;
@@ -88,7 +91,6 @@ namespace details {
       }
     }
 
-    // ... instead, they must implement the following operator
     virtual void operator()(const In&...) const = 0;
 
     /**
@@ -97,9 +99,9 @@ namespace details {
      * @return   A range of the input locations
      */
     auto inputLocations(size_t i) const {
-      if (i >= sizeof...(In)) {
+      if (i >= N_in) {
         throw std::out_of_range("Called inputLocations with an index out of range, index: " + std::to_string(i) +
-                                ", number of inputs: " + std::to_string(sizeof...(In)));
+                                ", number of inputs: " + std::to_string(N_in));
       }
       std::vector<std::string> names;
       if (!m_inputLocationsSingle[i].name().empty()) {
@@ -135,7 +137,7 @@ namespace details {
       }
       return names;
     }
-    static constexpr std::size_t inputLocationsSize() { return sizeof...(In); }
+    static constexpr std::size_t inputLocationsSize() { return N_in; }
   };
 
 } // namespace details
