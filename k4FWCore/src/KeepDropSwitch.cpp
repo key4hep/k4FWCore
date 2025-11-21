@@ -29,7 +29,7 @@ using fmt::format;
 #endif
 
 namespace {
-int wildcmp(const char* wild, const char* string) {
+int wildcmp(const char* wild, const char* string) noexcept {
   // Written by Jack Handy - <A href="mailto:jakkhandy@hotmail.com">jakkhandy@hotmail.com</A>
   const char *cp = nullptr, *mp = nullptr;
   while ((*string) && (*wild != '*')) {
@@ -74,50 +74,56 @@ std::vector<std::string> split(const std::string& s, char delim) {
 
 namespace k4FWCore {
 KeepDropSwitch::KeepDropSwitch(const InputCommands& cmds) {
-  m_commandlines.reserve(cmds.size());
+  m_outputCommands.reserve(cmds.size());
   for (const auto& cmdLine : cmds) {
-    auto [cmd, arg] = extractCommand(cmdLine);
+    auto [cmd, kind, arg] = extractCommand(cmdLine);
     if (cmd == Cmd::INVALID) {
       throw std::invalid_argument(format("'{}' is not a valid command for the KeepDropSwitch", cmdLine));
     }
-    m_commandlines.emplace_back(cmd, std::move(arg));
+    m_outputCommands.emplace_back(cmd, kind, std::move(arg));
   }
 }
 
-bool KeepDropSwitch::isOn(const std::string& astring) const {
-  auto im = m_cache.find(astring);
-  if (im != m_cache.end())
-    return im->second;
-  else {
-    bool val = getFlag(astring);
-    m_cache.insert(std::pair<std::string, bool>(astring, val));
-    return val;
-  }
-}
-
-bool KeepDropSwitch::getFlag(const std::string& astring) const noexcept {
+bool KeepDropSwitch::isOn(const std::string& astring, const std::string_view typeName) const noexcept {
   bool flag = true;
-  for (const auto& [cmd, pattern] : m_commandlines) {
-    if (wildcmp(pattern.c_str(), astring.c_str())) {
-      flag = (cmd == Cmd::KEEP);
+  for (const auto& [cmd, kind, pattern] : m_outputCommands) {
+    switch (kind) {
+    case Kind::Name:
+      if (wildcmp(pattern.c_str(), astring.c_str())) {
+        flag = (cmd == Cmd::KEEP);
+      }
+      break;
+    case Kind::Type:
+      if (pattern == typeName) {
+        flag = (cmd == Cmd::KEEP);
+      }
+      break;
     }
   }
   return flag;
 }
 
+KeepDropSwitch::Cmd KeepDropSwitch::fromString(const std::string_view cmd) noexcept {
+  if (cmd == "drop") {
+    return Cmd::DROP;
+  }
+  if (cmd == "keep") {
+    return Cmd::KEEP;
+  }
+  return Cmd::INVALID;
+}
+
 KeepDropSwitch::OutputCommand KeepDropSwitch::extractCommand(const std::string& cmdline) const {
   auto words = split(cmdline, ' ');
-  if (words.size() != 2) {
-    return {Cmd::INVALID, ""};
+  if (words.size() == 2) {
+    return {fromString(words[0]), Kind::Name, words[1]};
   }
-  if (words[0] == "keep") {
-    return {Cmd::KEEP, words[1]};
-  }
-  if (words[0] == "drop") {
-    return {Cmd::DROP, words[1]};
+  if (words.size() == 3 && words[1] == "type") {
+    return {fromString(words[0]), Kind::Type, words[2]};
   }
 
-  return {Cmd::INVALID, ""};
+  // For invalid commands the Kind doesn't matter really
+  return {Cmd::INVALID, Kind::Name, ""};
 }
 
 } // namespace k4FWCore

@@ -19,7 +19,6 @@
 #ifndef EXAMPLES_KEEPDROPSWITCH_H
 #define EXAMPLES_KEEPDROPSWITCH_H
 
-#include <map>
 #include <string>
 #include <vector>
 
@@ -30,16 +29,18 @@ public:
   typedef std::vector<std::string> InputCommands;
   KeepDropSwitch() = default;
   explicit KeepDropSwitch(const InputCommands& cmds);
-  bool isOn(const std::string& astring) const;
+  inline bool isOn(const std::string& astring) const noexcept { return isOn(astring, ""); }
+  bool isOn(const std::string& astring, const std::string_view typeName) const noexcept;
 
 private:
   enum class Cmd { KEEP, DROP, INVALID };
-  using OutputCommand = std::tuple<Cmd, std::string>;
+  static Cmd fromString(const std::string_view cmd) noexcept;
 
-  bool getFlag(const std::string& astring) const noexcept;
+  enum class Kind { Name, Type };
+  using OutputCommand = std::tuple<Cmd, Kind, std::string>;
+
   OutputCommand extractCommand(const std::string& cmdLine) const;
-  std::vector<OutputCommand> m_commandlines{};
-  mutable std::map<std::string, bool> m_cache;
+  std::vector<OutputCommand> m_outputCommands{};
 };
 
 } // namespace k4FWCore

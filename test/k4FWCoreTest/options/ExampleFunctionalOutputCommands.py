@@ -32,6 +32,8 @@ svc.outputCommands = [
     "drop Counter",
     "drop NewMCParticles",
     "drop NewLinks",
+    "keep type edm4hep::MCParticleCollection",
+    "drop type edm4hep::ReconstructedParticleCollection",
 ]
 
 transformer = ExampleFunctionalTransformerMultiple(
