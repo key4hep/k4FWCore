@@ -122,7 +122,7 @@ namespace details {
                   "EventContext can only appear as first argument");
 
     using type = std::tuple<In...>;
-    static constexpr std::size_t size = std::tuple_size<type>::value;
+    static constexpr std::size_t size = std::tuple_size_v<type>;
 
     template <typename Algorithm, typename Handles>
     static auto apply(const Algorithm& algo, Handles& handles) {
@@ -148,7 +148,7 @@ namespace details {
                   "EventContext can only appear as first argument");
 
     using type = std::tuple<In...>;
-    static constexpr std::size_t size = std::tuple_size<type>::value;
+    static constexpr std::size_t size = std::tuple_size_v<type>;
 
     template <typename Algorithm, typename Handles>
     static auto apply(const Algorithm& algo, const EventContext& ctx, Handles& handles) {
