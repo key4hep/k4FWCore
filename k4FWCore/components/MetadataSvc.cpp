@@ -28,17 +28,9 @@
 #include <memory>
 
 StatusCode MetadataSvc::initialize() {
-  StatusCode sc = Service::initialize();
-  if (sc.isFailure()) {
-    error() << "Unable to initialize base class Service." << endmsg;
-    return sc;
-  }
-  m_dataSvc = service("EventDataSvc");
-  if (!m_dataSvc) {
-    error() << "Unable to locate the EventDataSvc" << endmsg;
-    return StatusCode::FAILURE;
-  }
-  return StatusCode::SUCCESS;
+  return Service::initialize()
+      .orElse([&]() { error() << "Unable to initialize base class Service." << endmsg; })
+      .andThen([&]() { m_dataSvc = service("EventDataSvc"); });
 }
 
 StatusCode MetadataSvc::finalize() { return Service::finalize(); }
