@@ -171,10 +171,10 @@ namespace details {
   // pack expansion is needed. Once to filter out the event context, and the other one to
   // create the tuple of vectors of handles
   template <template <typename> class Handle, typename Tuple>
-  struct wrap_tuple_types;
+  struct to_tuple_of_handle_vec;
 
   template <template <typename> class Handle, typename... Ts>
-  struct wrap_tuple_types<Handle, std::tuple<Ts...>> {
+  struct to_tuple_of_handle_vec<Handle, std::tuple<Ts...>> {
     using type = std::tuple<std::vector<Handle<typename EventStoreType<Ts>::type>>...>;
   };
 

@@ -65,7 +65,7 @@ namespace details {
     template <typename T>
     using OutputHandle_t = Gaudi::Functional::details::OutputHandle_t<Traits_, std::remove_pointer_t<T>>;
 
-    wrap_tuple_types<InputHandle_t, filter_evtcontext_t<In...>>::type m_inputs;
+    to_tuple_of_handle_vec<InputHandle_t, filter_evtcontext_t<In...>>::type m_inputs;
     std::tuple<std::vector<OutputHandle_t<EventStoreType_t>>> m_outputs;
 
     std::array<Gaudi::Property<DataObjID>, N_in> m_inputLocationsSingle;
@@ -224,7 +224,7 @@ namespace details {
     template <typename T>
     using OutputHandle_t = Gaudi::Functional::details::OutputHandle_t<Traits_, std::remove_pointer_t<T>>;
 
-    wrap_tuple_types<InputHandle_t, filter_evtcontext_t<In...>>::type m_inputs;
+    to_tuple_of_handle_vec<InputHandle_t, filter_evtcontext_t<In...>>::type m_inputs;
     std::tuple<std::vector<OutputHandle_t<typename EventStoreType<Out>::type>>...> m_outputs;
 
     std::array<Gaudi::Property<DataObjID>, N_in> m_inputLocationsSingle;
