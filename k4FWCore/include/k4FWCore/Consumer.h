@@ -60,7 +60,7 @@ namespace details {
     template <typename T>
     using InputHandle_t = Gaudi::Functional::details::InputHandle_t<Traits_, T>;
 
-    to_tuple_of_handle_vec<InputHandle_t, filter_evtcontext_t<In...>>::type m_inputs;
+    tuple_of_handle_vec_t<InputHandle_t, filter_evtcontext_t<In...>> m_inputs;
 
     std::array<Gaudi::Property<DataObjID>, N_in> m_inputLocationsSingle;
     std::array<Gaudi::Property<std::vector<DataObjID>>, N_in> m_inputLocationsVector;
