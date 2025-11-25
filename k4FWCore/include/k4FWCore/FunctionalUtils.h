@@ -117,16 +117,18 @@ namespace details {
   }
 
   template <typename... In>
-  struct filter_evtcontext_tt {
+  struct filter_evtcontext {
     static_assert(!std::disjunction_v<std::is_same<EventContext, In>...>,
                   "EventContext can only appear as first argument");
+
+    using type = std::tuple<In...>;
+    static constexpr std::size_t size = std::tuple_size_v<type>;
 
     template <typename Algorithm, typename Handles>
     static auto apply(const Algorithm& algo, Handles& handles) {
       return std::apply(
           [&](const auto&... handle) { return algo(get(handle, algo, Gaudi::Hive::currentContext())...); }, handles);
     }
-
     template <typename Algorithm, typename Handles>
     static auto apply(const Algorithm& algo, const EventContext&, Handles& handles) {
       auto inputTuple = std::tuple<addPtrIfColl<In>...>();
@@ -139,6 +141,47 @@ namespace details {
                         inputTuple);
     }
   };
+
+  template <typename... In>
+  struct filter_evtcontext<EventContext, In...> {
+    static_assert(!std::disjunction_v<std::is_same<EventContext, In>...>,
+                  "EventContext can only appear as first argument");
+
+    using type = std::tuple<In...>;
+    static constexpr std::size_t size = std::tuple_size_v<type>;
+
+    template <typename Algorithm, typename Handles>
+    static auto apply(const Algorithm& algo, const EventContext& ctx, Handles& handles) {
+      auto inputTuple = std::tuple<addPtrIfColl<In>...>();
+
+      // Build the input tuple by picking up either std::vector with an arbitrary
+      // number of collections or single collections
+      readVectorInputs<0, In...>(handles, &algo, inputTuple);
+
+      return std::apply(
+          [&](const auto&... input) { return algo(ctx, maybeTransformToEDM4hep<decltype(input)>(input)...); },
+          inputTuple);
+    }
+  };
+
+  template <typename... In>
+  using filter_evtcontext_t = typename filter_evtcontext<In...>::type;
+
+  // This is a helper class to create the input and output types because a double parameter
+  // pack expansion is needed. Once to filter out the event context, and the other one to
+  // create the tuple of vectors of handles
+  template <template <typename> class Handle, typename Tuple>
+  struct tuple_of_handle_vec {
+    using type = std::tuple<>;
+  };
+
+  template <template <typename> class Handle, typename... Ts>
+  struct tuple_of_handle_vec<Handle, std::tuple<Ts...>> {
+    using type = std::tuple<std::vector<Handle<typename EventStoreType<Ts>::type>>...>;
+  };
+
+  template <template <typename> class Handle, typename... Ts>
+  using tuple_of_handle_vec_t = typename tuple_of_handle_vec<Handle, Ts...>::type;
 
   template <size_t Index, typename... In, typename... Handles, typename InputTuple>
   void readVectorInputs(const std::tuple<Handles...>& handles, auto thisClass, InputTuple& inputTuple) {

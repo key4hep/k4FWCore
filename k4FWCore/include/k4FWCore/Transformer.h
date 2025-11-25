@@ -21,7 +21,6 @@
 
 #include "Gaudi/Functional/details.h"
 #include "Gaudi/Functional/utilities.h"
-#include <GaudiKernel/FunctionalFilterDecision.h>
 
 #include "k4FWCore/FunctionalUtils.h"
 
@@ -45,28 +44,34 @@ namespace details {
       : Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_> {
     using Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>::DataHandleMixin;
 
-    static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike_v<In>) && ...),
+    static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike_v<In> ||
+                    std::is_same_v<In, EventContext>) &&
+                   ...),
                   "Transformer and Producer input types must be EDM4hep collections or vectors of collections");
     static_assert((std::is_base_of_v<podio::CollectionBase, Out> || isVectorLike_v<Out> ||
                    std::is_same_v<podio::CollectionBase*, Out>),
                   "Transformer and Producer output types must be EDM4hep collections or vectors of collections");
+
+    static constexpr std::size_t N_in = filter_evtcontext<In...>::size;
+    static constexpr std::size_t N_out = 1;
+
+    using base_class = Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>;
+
+    using KeyValue = base_class::KeyValue;
+    using KeyValues = base_class::KeyValues;
 
     template <typename T>
     using InputHandle_t = Gaudi::Functional::details::InputHandle_t<Traits_, std::remove_pointer_t<T>>;
     template <typename T>
     using OutputHandle_t = Gaudi::Functional::details::OutputHandle_t<Traits_, std::remove_pointer_t<T>>;
 
-    std::tuple<std::vector<InputHandle_t<typename EventStoreType<In>::type>>...> m_inputs;
-    std::tuple<std::vector<OutputHandle_t<typename EventStoreType<Out>::type>>> m_outputs;
-    std::array<Gaudi::Property<DataObjID>, sizeof...(In)> m_inputLocationsSingle;
-    std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)> m_inputLocationsVector;
+    tuple_of_handle_vec_t<InputHandle_t, filter_evtcontext_t<In...>> m_inputs;
+    std::tuple<std::vector<OutputHandle_t<EventStoreType_t>>> m_outputs;
+
+    std::array<Gaudi::Property<DataObjID>, N_in> m_inputLocationsSingle;
+    std::array<Gaudi::Property<std::vector<DataObjID>>, N_in> m_inputLocationsVector;
     Gaudi::Property<DataObjID> m_outputLocationsSingle;
     Gaudi::Property<std::vector<DataObjID>> m_outputLocationsVector;
-
-    using base_class = Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>;
-
-    using KeyValue = typename base_class::KeyValue;
-    using KeyValues = typename base_class::KeyValues;
 
     template <typename IArgs, typename OArgs, std::size_t... I>
     Transformer(std::string name, ISvcLocator* locator, const IArgs& inputs, std::index_sequence<I...>,
@@ -86,30 +91,26 @@ namespace details {
           m_outputLocationsVector{makeOutputPropVector<OutputHandle_t<EventStoreType_t>, KeyValues>(
               std::get<0>(outputs), std::get<0>(m_outputs), this)} {}
 
-    static constexpr std::size_t N_in = sizeof...(In);
-    static constexpr std::size_t N_out = 1;
-
     Transformer(std::string name, ISvcLocator* locator,
                 Gaudi::Functional::details::RepeatValues_<std::variant<KeyValue, KeyValues>, N_in> const& inputs,
                 Gaudi::Functional::details::RepeatValues_<std::variant<KeyValue, KeyValues>, N_out> const& outputs)
-        : Transformer(std::move(name), locator, inputs, std::index_sequence_for<In...>{}, outputs) {}
+        : Transformer(std::move(name), locator, inputs, std::make_index_sequence<N_in>{}, outputs) {}
 
-    // derived classes are NOT allowed to implement execute ...
     StatusCode execute(const EventContext& ctx) const final {
       try {
         if constexpr (isVectorLike<Out>::value) {
-          std::tuple<Out> tmp = filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs);
+          std::tuple<Out> tmp = filter_evtcontext<In...>::apply(*this, ctx, this->m_inputs);
           putVectorOutputs<0, Out>(std::move(tmp), m_outputs, this);
         } else {
           Gaudi::Functional::details::put(
               std::get<0>(this->m_outputs)[0],
-              convertToUniquePtr(std::move(filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs))));
+              convertToUniquePtr(std::move(filter_evtcontext<In...>::apply(*this, ctx, this->m_inputs))));
         }
-        return Gaudi::Functional::FilterDecision::PASSED;
       } catch (GaudiException& e) {
         (e.code() ? this->warning() : this->error()) << e.tag() << " : " << e.message() << endmsg;
         return e.code();
       }
+      return StatusCode::SUCCESS;
     }
 
     /**
@@ -118,9 +119,9 @@ namespace details {
      * @return   A range of the input locations
      */
     auto inputLocations(const size_t i) const {
-      if (i >= sizeof...(In)) {
+      if (i >= N_in) {
         throw std::out_of_range("Called inputLocations with an index out of range, index: " + std::to_string(i) +
-                                ", number of inputs: " + std::to_string(sizeof...(In)));
+                                ", number of inputs: " + std::to_string(N_in));
       }
       std::vector<std::string> names;
       if (!m_inputLocationsSingle[i].name().empty()) {
@@ -190,9 +191,8 @@ namespace details {
       }
       return names;
     }
-    static constexpr std::size_t inputLocationsSize() { return sizeof...(In); }
+    static constexpr std::size_t inputLocationsSize() { return N_in; }
 
-    // ... instead, they must implement the following operator
     virtual Out operator()(const In&...) const = 0;
   };
 
@@ -204,29 +204,33 @@ namespace details {
       : Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_> {
     using Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>::DataHandleMixin;
 
-    static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike<In>::value) && ...),
+    static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike<In>::value ||
+                    std::is_same_v<In, EventContext>) &&
+                   ...),
                   "Transformer and Producer input types must be EDM4hep collections or vectors of collections");
     static_assert(((std::is_base_of_v<podio::CollectionBase, Out> || isVectorLike<Out>::value) && ...),
                   "Transformer and Producer output types must be EDM4hep collections or vectors of collections");
+
+    static constexpr std::size_t N_in = filter_evtcontext<In...>::size;
+    static constexpr std::size_t N_out = sizeof...(Out);
+
+    using base_class = Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>;
+
+    using KeyValue = base_class::KeyValue;
+    using KeyValues = base_class::KeyValues;
 
     template <typename T>
     using InputHandle_t = Gaudi::Functional::details::InputHandle_t<Traits_, std::remove_pointer_t<T>>;
     template <typename T>
     using OutputHandle_t = Gaudi::Functional::details::OutputHandle_t<Traits_, std::remove_pointer_t<T>>;
 
-    std::tuple<std::vector<InputHandle_t<typename EventStoreType<In>::type>>...> m_inputs;
+    tuple_of_handle_vec_t<InputHandle_t, filter_evtcontext_t<In...>> m_inputs;
     std::tuple<std::vector<OutputHandle_t<typename EventStoreType<Out>::type>>...> m_outputs;
-    std::array<Gaudi::Property<DataObjID>, sizeof...(In)> m_inputLocationsSingle;
-    std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(In)> m_inputLocationsVector;
-    std::array<Gaudi::Property<DataObjID>, sizeof...(Out)> m_outputLocationsSingle;
-    std::array<Gaudi::Property<std::vector<DataObjID>>, sizeof...(Out)> m_outputLocationsVector;
-    std::array<bool, sizeof...(In)> m_isInputVectorLike{isVectorLike_v<In>...};
-    std::array<bool, sizeof...(Out)> m_isOutputVectorLike{isVectorLike_v<Out>...};
 
-    using base_class = Gaudi::Functional::details::DataHandleMixin<std::tuple<>, std::tuple<>, Traits_>;
-
-    using KeyValue = typename base_class::KeyValue;
-    using KeyValues = typename base_class::KeyValues;
+    std::array<Gaudi::Property<DataObjID>, N_in> m_inputLocationsSingle;
+    std::array<Gaudi::Property<std::vector<DataObjID>>, N_in> m_inputLocationsVector;
+    std::array<Gaudi::Property<DataObjID>, N_out> m_outputLocationsSingle;
+    std::array<Gaudi::Property<std::vector<DataObjID>>, N_out> m_outputLocationsVector;
 
     template <typename IArgs, typename OArgs, std::size_t... I, std::size_t... J>
     MultiTransformer(std::string name, ISvcLocator* locator, const IArgs& inputs, std::index_sequence<I...>,
@@ -241,21 +245,18 @@ namespace details {
           m_outputLocationsVector{makeOutputPropVector<OutputHandle_t<EventStoreType_t>, KeyValues>(
               std::get<J>(outputs), std::get<J>(m_outputs), this)...} {}
 
-    static constexpr std::size_t N_in = sizeof...(In);
-    static constexpr std::size_t N_out = sizeof...(Out);
-
     MultiTransformer(std::string name, ISvcLocator* locator,
                      Gaudi::Functional::details::RepeatValues_<std::variant<KeyValue, KeyValues>, N_in> const& inputs,
                      Gaudi::Functional::details::RepeatValues_<std::variant<KeyValue, KeyValues>, N_out> const& outputs)
-        : MultiTransformer(std::move(name), locator, inputs, std::index_sequence_for<In...>{}, outputs,
-                           std::index_sequence_for<Out...>{}) {}
+        : MultiTransformer(std::move(name), locator, inputs, std::make_index_sequence<N_in>{}, outputs,
+                           std::make_index_sequence<N_out>{}) {}
 
     // derived classes are NOT allowed to implement execute ...
     StatusCode execute(const EventContext& ctx) const final {
       try {
-        auto tmp = filter_evtcontext_tt<In...>::apply(*this, ctx, this->m_inputs);
+        auto tmp = filter_evtcontext<In...>::apply(*this, ctx, this->m_inputs);
         putVectorOutputs<0, Out...>(std::move(tmp), m_outputs, this);
-        return Gaudi::Functional::FilterDecision::PASSED;
+        return StatusCode::SUCCESS;
       } catch (GaudiException& e) {
         (e.code() ? this->warning() : this->error()) << e.tag() << " : " << e.message() << endmsg;
         return e.code();
@@ -268,9 +269,9 @@ namespace details {
      * @return   A range of the input locations
      */
     auto inputLocations(size_t i) const {
-      if (i >= sizeof...(In)) {
+      if (i >= N_in) {
         throw std::out_of_range("Called inputLocations with an index out of range, index: " + std::to_string(i) +
-                                ", number of inputs: " + std::to_string(sizeof...(In)));
+                                ", number of inputs: " + std::to_string(N_in));
       }
       std::vector<std::string> names;
       if (!m_inputLocationsSingle[i].name().empty()) {
@@ -313,7 +314,7 @@ namespace details {
      * @return   A range of the output locations
      */
     auto outputLocations(size_t i) const {
-      if (i >= sizeof...(Out)) {
+      if (i >= N_out) {
         throw std::out_of_range("Called outputLocations with an index out of range");
       }
       std::vector<std::string> names;
@@ -351,8 +352,8 @@ namespace details {
       return names;
     }
 
-    static constexpr std::size_t inputLocationsSize() { return sizeof...(In); }
-    static constexpr std::size_t outputLocationsSize() { return sizeof...(Out); }
+    static constexpr std::size_t inputLocationsSize() { return N_in; }
+    static constexpr std::size_t outputLocationsSize() { return N_out; }
 
     // ... instead, they must implement the following operator
     virtual std::tuple<Out...> operator()(const In&...) const = 0;
