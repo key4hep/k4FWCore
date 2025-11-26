@@ -41,14 +41,14 @@ TEST_CASE("KeepDropSwitch keep * keeps all") {
   const auto keepDropSwitch = KeepDropSwitch({"keep *"});
   REQUIRE(keepDropSwitch.isOn("MCParticles"));
   REQUIRE(keepDropSwitch.isOn(""));
-  REQUIRE(keepDropSwitch.isOn("aribtrary strings are also accepted"));
+  REQUIRE(keepDropSwitch.isOn("arbitrary strings are also accepted"));
 }
 
 TEST_CASE("KeepDropSwitch cmd order is respected for *") {
   const auto dropAllFirst = KeepDropSwitch({"drop *", "keep *"});
   REQUIRE(dropAllFirst.isOn("MCParticles"));
   REQUIRE(dropAllFirst.isOn(""));
-  REQUIRE(dropAllFirst.isOn("aribtrary strings are also accepted"));
+  REQUIRE(dropAllFirst.isOn("arbitrary strings are also accepted"));
 
   const auto keepAllFirst = KeepDropSwitch({"keep *", "drop *"});
   REQUIRE_FALSE(keepAllFirst.isOn("MCParticles"));
