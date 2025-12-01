@@ -56,6 +56,7 @@ set(k4fwcoretest_plugin_sources
   src/components/k4FWCoreTest_HelloWorldAlg.cpp
   src/components/TestUniqueIDGenSvc.cpp
   src/components/TypeMisMatchDemo.cpp
+  src/components/ExampleTupleWriter.cpp
 )
 
 gaudi_add_module(k4FWCoreTestPlugins
@@ -234,6 +235,11 @@ add_test_fwcore(FunctionalTTreeToRNTuple options/ExampleFunctionalTTreeToRNTuple
 add_test_fwcore(GaudiFunctional options/ExampleGaudiFunctional.py PROPERTIES FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
 add_test_fwcore(ReadLimitedInputsIOSvc options/ExampleIOSvcLimitInputCollections.py PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile ADD_TO_CHECK_FILES)
 add_test_fwcore(ReadLimitedInputsAllEventsIOSvc options/ExampleIOSvcLimitInputCollections.py --IOSvc.Output "functional_limited_input_all_events.root" -n -1 PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile ADD_TO_CHECK_FILES)
+
+add_test_fwcore(ExampleTupleWriterWithOutput options/ExampleFunctionalFile.py --add-ttree-ntuple --IOSvc.Output functional_with_tuple.root
+  PROPERTIES FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
+add_test_fwcore(ExampleTupleWriterRNTupleWithOutput options/ExampleFunctionalFile.py --add-ttree-ntuple --use-rntuple-for-ntuple --TupleWriter.OutputFile ntuple_rntuple.root --IOSvc.Output functional_with_tuple_rntuple.root
+  PROPERTIES FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
 
 # Tests that ensure that load_file populates the necessary python globals
 # accordingly to make loaded files work like imported files

@@ -24,6 +24,7 @@ except ImportError:
     print(f"PYTHONPATH={os.environ['PYTHONPATH']}")
     raise
 import ROOT
+import cppyy
 
 
 def check_collections(filename, names):
@@ -374,3 +375,88 @@ for frame in frames:
     filtered_links = frame.get("FilteredLinks")
     if len(filtered_links) != 16:
         raise RuntimeError(f"Expected 16 links in FilteredLinks, got {len(filtered_links)}")
+
+
+types = {
+    "Charge": float,
+    "GeneratorStatus": int,
+    "Mass": float,
+    "PDG": int,
+    "SimulatorStatus": int,
+    "Time": float,
+    "Text": cppyy.gbl.std.string,
+    "Vertex": cppyy.gbl.edm4hep.Vector3d,
+    "CastedToInt": int,
+}
+values = {
+    "Charge": 4.0,
+    "GeneratorStatus": 2,
+    "Mass": 6.0,
+    "PDG": 1,
+    "SimulatorStatus": 3,
+    "Time": 5.0,
+    "Text": "hello!",
+    "Vertex": cppyy.gbl.edm4hep.Vector3d(1.0, 2.0, 3.0),
+    "CastedToInt": 3,
+}
+
+for filename in ["ntuple.root", "ntupleMT.root"]:
+    ttree_ntuple = ROOT.TFile.Open(filename)
+    tree = ttree_ntuple.Get("tree")
+    if tree.GetEntries() != 10:
+        raise RuntimeError(f"The ntuple in {filename} does not have 10 entries")
+    for i, (entry, (col_name, col_type)) in enumerate(zip(tree, types.items())):
+        value = getattr(entry, col_name)
+        if col_type is not type(value):
+            raise RuntimeError(
+                f"The type of column {col_name} in ntuple.root does not match the expected type {col_type}, found {type(value)} instead"
+            )
+        if col_name == "Vertex":
+            if (
+                value.x != values[col_name].x
+                or value.y != values[col_name].y
+                or value.z != values[col_name].z
+            ):
+                raise RuntimeError(
+                    f"The value of column {col_name} in ntuple.root does not match the expected value {values[col_name]}, found {value} instead"
+                )
+        else:
+            if value != values[col_name]:
+                raise RuntimeError(
+                    f"The value of column {col_name} in ntuple.root does not match the expected value {values[col_name]}, found {value} instead"
+                )
+        if entry.Counter != i:
+            raise RuntimeError(
+                f"The value of column Counter in rntuple.root does not match the expected value {i}, found {entry.Counter} instead"
+            )
+
+filename = "ntuple_rntuple.root"
+reader = ROOT.RNTupleReader.Open("rntuple", filename)
+if reader.GetNEntries() != 10:
+    raise RuntimeError(f"The rntuple in {filename} does not have 10 entries")
+for i in range(reader.GetNEntries()):
+    entry = reader.CreateEntry()
+    reader.LoadEntry(i, entry)
+    for col_name, col_type in types.items():
+        if col_type is not type(entry[col_name]):
+            raise RuntimeError(
+                f"The type of column {col_name} in rntuple.root does not match the expected type {col_type}, found {type(entry[col_name])} instead"
+            )
+        if col_name == "Vertex":
+            if (
+                entry[col_name].x != values[col_name].x
+                or entry[col_name].y != values[col_name].y
+                or entry[col_name].z != values[col_name].z
+            ):
+                raise RuntimeError(
+                    f"The value of column {col_name} in rntuple.root does not match the expected value {values[col_name]}, found {entry[col_name]} instead"
+                )
+        else:
+            if entry[col_name] != values[col_name]:
+                raise RuntimeError(
+                    f"The value of column {col_name} in rntuple.root does not match the expected value {values[col_name]}, found {entry[col_name]} instead"
+                )
+    if entry["Counter"] != i:
+        raise RuntimeError(
+            f"The value of column Counter in rntuple.root does not match the expected value {i}, found {entry['Counter']} instead"
+        )

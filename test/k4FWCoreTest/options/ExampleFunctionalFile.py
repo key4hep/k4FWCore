@@ -24,6 +24,22 @@ from Gaudi.Configuration import INFO
 from Configurables import ExampleFunctionalTransformer
 from Configurables import EventDataSvc
 from k4FWCore import ApplicationMgr, IOSvc
+from Configurables import ExampleTupleWriter
+
+from k4FWCore.parseArgs import parser
+
+parser.add_argument(
+    "--add-ttree-ntuple",
+    action="store_true",
+    help="Add TTree Ntuple to the output files",
+)
+parser.add_argument(
+    "--use-rntuple-for-ntuple",
+    action="store_true",
+    help="Use RNTuple for the Ntuple output",
+)
+
+args = parser.parse_known_args()[0]
 
 svc = IOSvc("IOSvc")
 svc.Input = "functional_producer.root"
@@ -33,8 +49,19 @@ transformer = ExampleFunctionalTransformer(
     "Transformer", InputCollection="MCParticles", OutputCollection="NewMCParticles"
 )
 
+extra_algs = []
+if args.add_ttree_ntuple:
+    tuple_writer = ExampleTupleWriter(
+        "TupleWriter",
+        OutputFile="ntuple.root",
+        Name="rntuple" if args.use_rntuple_for_ntuple else "tree",
+        RNTuple=args.use_rntuple_for_ntuple,
+    )
+    extra_algs.append(tuple_writer)
+
+
 mgr = ApplicationMgr(
-    TopAlg=[transformer],
+    TopAlg=[transformer] + extra_algs,
     EvtSel="NONE",
     EvtMax=-1,
     ExtSvc=[EventDataSvc("EventDataSvc")],
