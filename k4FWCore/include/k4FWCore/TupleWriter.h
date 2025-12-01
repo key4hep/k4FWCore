@@ -27,8 +27,8 @@
 #include "k4FWCore/FunctionalUtils.h"
 
 #include <algorithm>
-#include <mutex>
 #include <stdexcept>
+#include <strings.h>
 #include <type_traits>
 #include <utility>
 #include <variant>
@@ -73,9 +73,10 @@ namespace details {
     std::array<Gaudi::Property<std::vector<DataObjID>>, N_in> m_inputLocationsVector;
 
     Gaudi::Property<std::string> m_outputFile{this, "OutputFile", "tree.root", "The name of the output ROOT file"};
-    Gaudi::Property<std::string> m_Name{this, "Name", "tree", "The name of the output ROOT tree or RNTuple"};
-    Gaudi::Property<std::string> m_treeDescription{this, "TreeDescription", "TTree created from TupleWriter.h",
-                                                   "The name of the output ROOT tree"};
+    Gaudi::Property<std::vector<std::string>> m_Names{
+        this, "Names", {"tree"}, "The name of the output ROOT tree or RNTuple"};
+    Gaudi::Property<std::vector<std::string>> m_treeDescription{
+        this, "Descriptions", {"TTree created from TupleWriter.h"}, "The name of the output ROOT tree"};
     Gaudi::Property<bool> m_RNTuple{this, "RNTuple", false,
                                     "If true, the output will be an RNTuple instead of a TTree"};
 
@@ -95,15 +96,31 @@ namespace details {
                 const Gaudi::Functional::details::RepeatValues_<std::variant<KeyValue, KeyValues>, N_in>& inputs)
         : TupleWriter(std::move(name), locator, inputs, std::make_index_sequence<N_in>{}) {}
 
-    void initializeBackend() const {
+    void initializeBackend(size_t index) const {
+
+      if (m_Names.size() != m_treeDescription.size()) {
+        throw std::runtime_error("TupleWriter: Name and TreeDescription properties must have the same size");
+      }
+
+      if (m_filled.empty()) {
+        m_filled.resize(m_Names.size());
+        if (!m_RNTuple) {
+          m_file = std::make_unique<TFile>(m_outputFile.value().c_str(), "RECREATE");
+          m_tree.resize(m_Names.size());
+        } else {
+          m_writer.resize(m_Names.size());
+          m_rntupleEntry.resize(m_Names.size());
+        }
+      }
+
       if (!m_RNTuple) {
-        m_file = std::make_unique<TFile>(m_outputFile.value().c_str(), "RECREATE");
-        m_tree = std::make_unique<TTree>(m_Name.value().c_str(), m_treeDescription.value().c_str());
-        for (const auto& [key, var] : m_NTupleMap) {
+        m_tree[index] =
+            std::make_unique<TTree>(m_Names.value()[index].c_str(), m_treeDescription.value()[index].c_str());
+        for (const auto& [key, var] : m_NTupleMaps[index].m_map) {
           std::visit(
-              [this, &key](auto&& arg) {
+              [this, &key, index](auto&& arg) {
                 using T = std::decay_t<decltype(arg)>;
-                m_tree->Branch(key.c_str(), &std::get<T>(m_NTupleMap[key]));
+                m_tree[index]->Branch(key.c_str(), &std::get<T>(m_NTupleMaps[index].m_map[key]));
               },
               var);
         }
@@ -111,7 +128,7 @@ namespace details {
       }
 
       auto model = ROOT::RNTupleModel::Create();
-      for (const auto& [key, var] : m_NTupleMap) {
+      for (const auto& [key, var] : m_NTupleMaps[index].m_map) {
         std::visit(
             [&key, &model](auto&& arg) {
               using T = std::decay_t<decltype(arg)>;
@@ -120,51 +137,69 @@ namespace details {
             var);
       }
       model->Freeze();
-      m_rntupleEntry = model->CreateBareEntry();
-      for (const auto& [key, var] : m_NTupleMap) {
+      m_rntupleEntry[index] = model->CreateBareEntry();
+      for (const auto& [key, var] : m_NTupleMaps[index].m_map) {
         std::visit(
-            [this, &key](auto&& arg) {
+            [this, &key, index](auto&& arg) {
               using T = std::decay_t<decltype(arg)>;
-              m_rntupleEntry->BindRawPtr(key, &std::get<T>(m_NTupleMap[key]));
+              m_rntupleEntry[index]->BindRawPtr(key, &std::get<T>(m_NTupleMaps[index].m_map[key]));
             },
             var);
       }
-      m_writer = ROOT::RNTupleWriter::Recreate(std::move(model), m_Name.value(), m_outputFile.value());
+      m_writer[index] = ROOT::RNTupleWriter::Recreate(std::move(model), m_Names[index], m_outputFile);
     }
 
-    virtual void fill() const final {
-      std::call_once(m_initFlag, [this]() { initializeBackend(); });
-      if (m_RNTuple) {
-        m_writer->Fill(*m_rntupleEntry);
-      } else {
-        m_tree->Fill();
+    void fill(size_t index) const {
+      if (index >= m_initFlag.size() || !m_initFlag[index]) {
+        initializeBackend(index);
+        if (index >= m_initFlag.size()) {
+          m_initFlag.resize(m_Names.size());
+        }
+        m_initFlag[index] = true;
       }
+      if (m_RNTuple) {
+        m_writer[index]->Fill(*m_rntupleEntry[index]);
+      } else {
+        m_tree[index]->Fill();
+      }
+      m_filled[index] = true;
     }
 
     StatusCode execute(const EventContext& ctx) const final {
+      m_currentMapIndex = 0;
       try {
         filter_evtcontext<In...>::apply(*this, ctx, m_inputs);
       } catch (GaudiException& e) {
         (e.code() ? this->warning() : this->error()) << e.tag() << " : " << e.message() << endmsg;
         return e.code();
       }
-      if (!m_filled) {
-        fill();
+      for (size_t i = 0; i < m_Names.size(); ++i) {
+        if (m_filled.empty() || !m_filled[i]) {
+          fill(i);
+        }
+        m_filled[i] = false;
       }
-      m_filled = false;
       return StatusCode::SUCCESS;
     }
 
     StatusCode finalize() final {
+      // This can happen if there were no events processed
+      if (!m_file && !m_RNTuple) {
+        return StatusCode::SUCCESS;
+      }
       if (!m_RNTuple) {
         m_file->cd();
-        m_tree->Write();
+        for (const auto& tree : m_tree) {
+          tree->Write();
+        }
         m_file->Close();
         // "Leak" as it seems it is not possible to make this not crash
         // when running multithreaded, anyway the process is ending
-        [[maybe_unused]] const auto tree = m_tree.release();
+        for (auto& tree : m_tree) {
+          [[maybe_unused]] const auto tmpTree = tree.release();
+        }
       } else {
-        m_writer.reset();
+        m_writer.clear();
       }
       return StatusCode::SUCCESS;
     }
@@ -219,29 +254,54 @@ namespace details {
     bool isReEntrant() const final { return false; }
 
   private:
-    mutable std::unique_ptr<TFile> m_file;
-    mutable std::unique_ptr<TTree> m_tree;
+    mutable std::unique_ptr<TFile> m_file{};
+    mutable std::vector<std::unique_ptr<TTree>> m_tree{};
 
-    mutable std::unique_ptr<ROOT::RNTupleWriter> m_writer;
-    mutable std::unique_ptr<ROOT::REntry> m_rntupleEntry;
+    mutable std::vector<std::unique_ptr<ROOT::RNTupleWriter>> m_writer{};
+    mutable std::vector<std::unique_ptr<ROOT::REntry>> m_rntupleEntry{};
 
-    mutable std::once_flag m_initFlag{};
-    mutable bool m_filled{false};
+    mutable std::vector<bool> m_initFlag{};
+    mutable std::vector<bool> m_filled{};
 
     // A map that can not be copied, to avoid a copy when calling getNTupleMap
     // and not assigning it to a reference
-    mutable struct NonCopiableMap {
+    struct NonCopiableMap {
+      friend struct TupleWriter;
       NonCopiableMap() = default;
-      NonCopiableMap(const NonCopiableMap&) = delete;            // Use auto&
-      NonCopiableMap& operator=(const NonCopiableMap&) = delete; // Use auto&
+      NonCopiableMap(const NonCopiableMap&) = delete;            // Assign with auto&
+      NonCopiableMap& operator=(const NonCopiableMap&) = delete; // Assign with auto&
+      NonCopiableMap(NonCopiableMap&&) = default;
+      NonCopiableMap& operator=(NonCopiableMap&&) = default;
       NTupleTypes& operator[](const std::string& key) { return m_map[key]; }
-      auto begin() const { return m_map.begin(); }
-      auto end() const { return m_map.end(); }
+      // auto begin() const { return m_map.begin(); }
+      // auto end() const { return m_map.end(); }
+      void fill() { m_parent->fill(m_index); }
+
+    private:
       std::map<std::string, NTupleTypes> m_map;
+      int m_index{0};
+      const TupleWriter* m_parent{nullptr};
     } m_NTupleMap;
 
+    mutable std::vector<NonCopiableMap> m_NTupleMaps;
+    mutable size_t m_currentMapIndex{0};
+
   public:
-    NonCopiableMap& getNTupleMap() const { return m_NTupleMap; }
+    NonCopiableMap& getNextTupleMap() const {
+      if (m_currentMapIndex >= m_Names.size()) {
+        throw std::out_of_range("Requested more NTuple maps than available: " + std::to_string(m_currentMapIndex) +
+                                " requested, " + std::to_string(m_NTupleMaps.size()) + " available");
+      }
+      if (m_NTupleMaps.empty()) {
+        m_NTupleMaps.resize(m_Names.size());
+        for (size_t i = 0; i < m_Names.size(); ++i) {
+          auto& map = m_NTupleMaps[i];
+          map.m_index = i;
+          map.m_parent = this;
+        }
+      }
+      return m_NTupleMaps[m_currentMapIndex++];
+    }
   };
 
 } // namespace details

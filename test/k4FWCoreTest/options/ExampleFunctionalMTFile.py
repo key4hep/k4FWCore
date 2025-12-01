@@ -64,6 +64,9 @@ tuplewriter = ExampleTupleWriter(
     "TupleWriter",
     InputCollection="MCParticles1",
     OutputFile="ntupleMT.root",
+    AdditionalTrees=True,
+    Names=["tree", "tree_manual", "tree_twice"],
+    Descriptions=["default", "manual", "twice filled"],
 )
 
 mgr = ApplicationMgr(

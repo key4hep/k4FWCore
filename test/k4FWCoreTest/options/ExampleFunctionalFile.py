@@ -54,7 +54,7 @@ if args.add_ttree_ntuple:
     tuple_writer = ExampleTupleWriter(
         "TupleWriter",
         OutputFile="ntuple.root",
-        Name="rntuple" if args.use_rntuple_for_ntuple else "tree",
+        Names=["rntuple"] if args.use_rntuple_for_ntuple else ["tree"],
         RNTuple=args.use_rntuple_for_ntuple,
     )
     extra_algs.append(tuple_writer)

@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-// #include "Gaudi/Property.h"
+#include "Gaudi/Property.h"
 
 #include "edm4hep/MCParticleCollection.h"
 
@@ -55,7 +55,8 @@ struct ExampleTupleWriter final
     // For integers a bigger integer (like std::size_t) can not be assigned to a smaller one (like int)
     // sign to unsigned and viceversa works fine.
 
-    auto& NTupleMap = getNTupleMap();
+    // auto& NTupleMap = getNTupleMap();
+    auto& NTupleMap = getNextTupleMap();
 
     NTupleMap["PDG"] = particle.getPDG();
     NTupleMap["GeneratorStatus"] = particle.getGeneratorStatus();
@@ -76,12 +77,37 @@ struct ExampleTupleWriter final
 
     NTupleMap["Counter"] = m_counter++;
 
-    // Optionally fill the tuple here if you want to fill more than once per event (for example, once per particle)
-    // In this case, no automatic filling will happen
-    // fill();
+    // Optionally fill the tuple here if you want to do it manually, for example, to fill more than once per event (for example, once per particle)
+    // If fill() is called for a map, no automatic filling will happen at the end of operator()
+    // NTupleMap.fill();
+
+    if (m_additionalTrees) {
+      auto& NTupleMapFilledManually = getNextTupleMap();
+      NTupleMapFilledManually["PDG"] = particle.getPDG();
+      NTupleMapFilledManually["Charge"] = particle.getCharge();
+      NTupleMapFilledManually["Text"] = "additional tree";
+      NTupleMapFilledManually["Counter"] = m_anotherCounter++;
+      NTupleMapFilledManually.fill();
+
+      auto& NTupleMapFilledTwice = getNextTupleMap();
+      NTupleMapFilledTwice["PDG"] = particle.getPDG();
+      NTupleMapFilledTwice["Counter"] = m_anotherCounter++;      
+      NTupleMapFilledTwice.fill();
+      // All variables should be filled before calling fill again
+      // If a variable is not filled, it will contain the value from the previous fill
+      NTupleMapFilledTwice["PDG"] = particle.getPDG();
+      NTupleMapFilledTwice["Counter"] = m_anotherCounter++;
+      NTupleMapFilledTwice.fill();
+    }
+
   }
 
   mutable std::atomic<int> m_counter = 0;
+  mutable std::atomic<int> m_anotherCounter = 0;
+
+  Gaudi::Property<bool> m_additionalTrees{
+      this, "AdditionalTrees", false, "If true, additional trees are created"};
+
 };
 
 DECLARE_COMPONENT(ExampleTupleWriter)
