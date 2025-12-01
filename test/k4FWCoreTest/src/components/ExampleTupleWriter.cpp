@@ -77,9 +77,9 @@ struct ExampleTupleWriter final
 
     NTupleMap["Counter"] = m_counter++;
 
-    // Optionally fill the tuple here if you want to do it manually, for example, to fill more than once per event (for example, once per particle)
-    // If fill() is called for a map, no automatic filling will happen at the end of operator()
-    // NTupleMap.fill();
+    // Optionally fill the tuple here if you want to do it manually, for example, to fill more than once per event (for
+    // example, once per particle) If fill() is called for a map, no automatic filling will happen at the end of
+    // operator() NTupleMap.fill();
 
     if (m_additionalTrees) {
       auto& NTupleMapFilledManually = getNextTupleMap();
@@ -91,7 +91,7 @@ struct ExampleTupleWriter final
 
       auto& NTupleMapFilledTwice = getNextTupleMap();
       NTupleMapFilledTwice["PDG"] = particle.getPDG();
-      NTupleMapFilledTwice["Counter"] = m_anotherCounter++;      
+      NTupleMapFilledTwice["Counter"] = m_anotherCounter++;
       NTupleMapFilledTwice.fill();
       // All variables should be filled before calling fill again
       // If a variable is not filled, it will contain the value from the previous fill
@@ -99,15 +99,12 @@ struct ExampleTupleWriter final
       NTupleMapFilledTwice["Counter"] = m_anotherCounter++;
       NTupleMapFilledTwice.fill();
     }
-
   }
 
   mutable std::atomic<int> m_counter = 0;
   mutable std::atomic<int> m_anotherCounter = 0;
 
-  Gaudi::Property<bool> m_additionalTrees{
-      this, "AdditionalTrees", false, "If true, additional trees are created"};
-
+  Gaudi::Property<bool> m_additionalTrees{this, "AdditionalTrees", false, "If true, additional trees are created"};
 };
 
 DECLARE_COMPONENT(ExampleTupleWriter)
