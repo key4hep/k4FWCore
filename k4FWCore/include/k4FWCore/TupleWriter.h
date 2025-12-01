@@ -130,7 +130,7 @@ namespace details {
 
     void initializeSlots() const {
       if (m_slots.empty()) {
-        if (m_Names.size() != m_treeDescription.size()) {
+        if (!m_RNTuple && m_Names.size() != m_treeDescription.size()) {
           throw std::runtime_error("TupleWriter: Name and TreeDescription properties must have the same size");
         }
         m_slots.resize(m_Names.size());
