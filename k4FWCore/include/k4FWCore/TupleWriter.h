@@ -96,73 +96,105 @@ namespace details {
                 const Gaudi::Functional::details::RepeatValues_<std::variant<KeyValue, KeyValues>, N_in>& inputs)
         : TupleWriter(std::move(name), locator, inputs, std::make_index_sequence<N_in>{}) {}
 
-    void initializeBackend(size_t index) const {
-
-      if (m_Names.size() != m_treeDescription.size()) {
-        throw std::runtime_error("TupleWriter: Name and TreeDescription properties must have the same size");
+    // Prevent assigning with copy
+    struct NonCopiableMap {
+      NonCopiableMap() = default;
+      NonCopiableMap(const NonCopiableMap&) = delete;
+      NonCopiableMap& operator=(const NonCopiableMap&) = delete;
+      NonCopiableMap(NonCopiableMap&&) = default;
+      NonCopiableMap& operator=(NonCopiableMap&&) = default;
+      NTupleTypes& operator[](const std::string& key) { return m_map[key]; }
+      void fill() {
+        if (m_parent)
+          m_parent->fill(m_index);
       }
+      std::map<std::string, NTupleTypes> m_map;
+      int m_index{0};
+      const TupleWriter* m_parent{nullptr};
+    };
 
-      if (m_filled.empty()) {
-        m_filled.resize(m_Names.size());
+    struct Slot {
+      NonCopiableMap map;
+      bool initialized{false};
+      bool filled{false};
+      std::unique_ptr<TTree> tree;                 // TTree backend
+      std::unique_ptr<ROOT::RNTupleWriter> writer; // RNTuple backend
+      std::unique_ptr<ROOT::REntry> rentry;        // RNTuple entry
+    };
+
+    mutable std::unique_ptr<TFile> m_file{}; // Only for TTree backend
+    mutable std::vector<Slot> m_slots;       // One per requested output
+    mutable size_t m_currentMapIndex{0};
+
+    void initializeSlots() const {
+      if (m_slots.empty()) {
+        if (m_Names.size() != m_treeDescription.size()) {
+          throw std::runtime_error("TupleWriter: Name and TreeDescription properties must have the same size");
+        }
+        m_slots.resize(m_Names.size());
+        for (size_t i = 0; i < m_slots.size(); ++i) {
+          m_slots[i].map.m_index = static_cast<int>(i);
+          m_slots[i].map.m_parent = this;
+        }
         if (!m_RNTuple) {
           m_file = std::make_unique<TFile>(m_outputFile.value().c_str(), "RECREATE");
-          m_tree.resize(m_Names.size());
-        } else {
-          m_writer.resize(m_Names.size());
-          m_rntupleEntry.resize(m_Names.size());
         }
       }
+    }
+
+    void initializeBackend(size_t index) const {
+      initializeSlots();
+      auto& slot = m_slots[index];
+      if (slot.initialized)
+        return;
 
       if (!m_RNTuple) {
-        m_tree[index] =
-            std::make_unique<TTree>(m_Names.value()[index].c_str(), m_treeDescription.value()[index].c_str());
-        for (const auto& [key, var] : m_NTupleMaps[index].m_map) {
+        slot.tree = std::make_unique<TTree>(m_Names.value()[index].c_str(), m_treeDescription.value()[index].c_str());
+        for (const auto& [key, var] : slot.map.m_map) {
           std::visit(
-              [this, &key, index](auto&& arg) {
+              [&slot, &key](auto&& arg) {
                 using T = std::decay_t<decltype(arg)>;
-                m_tree[index]->Branch(key.c_str(), &std::get<T>(m_NTupleMaps[index].m_map[key]));
+                slot.tree->Branch(key.c_str(), &std::get<T>(slot.map.m_map[key]));
               },
               var);
         }
-        return;
+      } else {
+        auto model = ROOT::RNTupleModel::Create();
+        for (const auto& [key, var] : slot.map.m_map) {
+          std::visit(
+              [&key, &model](auto&& arg) {
+                using T = std::decay_t<decltype(arg)>;
+                model->MakeField<T>(key);
+              },
+              var);
+        }
+        model->Freeze();
+        slot.rentry = model->CreateBareEntry();
+        for (const auto& [key, var] : slot.map.m_map) {
+          std::visit(
+              [&slot, &key](auto&& arg) {
+                using T = std::decay_t<decltype(arg)>;
+                slot.rentry->BindRawPtr(key, &std::get<T>(slot.map.m_map[key]));
+              },
+              var);
+        }
+        slot.writer = ROOT::RNTupleWriter::Recreate(std::move(model), m_Names[index], m_outputFile);
       }
-
-      auto model = ROOT::RNTupleModel::Create();
-      for (const auto& [key, var] : m_NTupleMaps[index].m_map) {
-        std::visit(
-            [&key, &model](auto&& arg) {
-              using T = std::decay_t<decltype(arg)>;
-              model->MakeField<T>(key);
-            },
-            var);
-      }
-      model->Freeze();
-      m_rntupleEntry[index] = model->CreateBareEntry();
-      for (const auto& [key, var] : m_NTupleMaps[index].m_map) {
-        std::visit(
-            [this, &key, index](auto&& arg) {
-              using T = std::decay_t<decltype(arg)>;
-              m_rntupleEntry[index]->BindRawPtr(key, &std::get<T>(m_NTupleMaps[index].m_map[key]));
-            },
-            var);
-      }
-      m_writer[index] = ROOT::RNTupleWriter::Recreate(std::move(model), m_Names[index], m_outputFile);
+      slot.initialized = true;
     }
 
     void fill(size_t index) const {
-      if (index >= m_initFlag.size() || !m_initFlag[index]) {
+      initializeSlots();
+      auto& slot = m_slots[index];
+      if (!slot.initialized) {
         initializeBackend(index);
-        if (index >= m_initFlag.size()) {
-          m_initFlag.resize(m_Names.size());
-        }
-        m_initFlag[index] = true;
       }
       if (m_RNTuple) {
-        m_writer[index]->Fill(*m_rntupleEntry[index]);
+        slot.writer->Fill(*slot.rentry);
       } else {
-        m_tree[index]->Fill();
+        slot.tree->Fill();
       }
-      m_filled[index] = true;
+      slot.filled = true;
     }
 
     StatusCode execute(const EventContext& ctx) const final {
@@ -173,44 +205,39 @@ namespace details {
         (e.code() ? this->warning() : this->error()) << e.tag() << " : " << e.message() << endmsg;
         return e.code();
       }
-      for (size_t i = 0; i < m_Names.size(); ++i) {
-        if (m_filled.empty() || !m_filled[i]) {
+      initializeSlots();
+      for (size_t i = 0; i < m_slots.size(); ++i) {
+        if (!m_slots[i].filled) {
           fill(i);
         }
-        m_filled[i] = false;
+        m_slots[i].filled = false; // reset for next event
       }
       return StatusCode::SUCCESS;
     }
 
     StatusCode finalize() final {
-      // This can happen if there were no events processed
-      if (!m_file && !m_RNTuple) {
-        return StatusCode::SUCCESS;
-      }
       if (!m_RNTuple) {
+        if (!m_file)
+          return StatusCode::SUCCESS; // no events processed
         m_file->cd();
-        for (const auto& tree : m_tree) {
-          tree->Write();
+        for (auto& slot : m_slots) {
+          if (slot.tree)
+            slot.tree->Write();
         }
         m_file->Close();
-        // "Leak" as it seems it is not possible to make this not crash
-        // when running multithreaded, anyway the process is ending
-        for (auto& tree : m_tree) {
-          [[maybe_unused]] const auto tmpTree = tree.release();
+        for (auto& slot : m_slots) {
+          if (slot.tree) [[maybe_unused]]
+            auto leaked = slot.tree.release();
         }
       } else {
-        m_writer.clear();
+        // RNTuple writers automatically flush on destruction
+        m_slots.clear();
       }
       return StatusCode::SUCCESS;
     }
 
     virtual void operator()(const In&...) const = 0;
 
-    /**
-     * @brief    Get the input locations for a given input index
-     * @param i  The index of the input
-     * @return   A range of the input locations
-     */
     auto inputLocations(size_t i) const {
       if (i >= N_in) {
         throw std::out_of_range("Called inputLocations with an index out of range, index: " + std::to_string(i) +
@@ -226,11 +253,7 @@ namespace details {
       }
       return names;
     }
-    /**
-     * @brief       Get the input locations for a given input name
-     * @param name  The name of the input
-     * @return      A range of the input locations
-     */
+
     auto inputLocations(std::string_view name) const {
       std::vector<std::string> names;
       const auto it =
@@ -253,54 +276,13 @@ namespace details {
 
     bool isReEntrant() const final { return false; }
 
-  private:
-    mutable std::unique_ptr<TFile> m_file{};
-    mutable std::vector<std::unique_ptr<TTree>> m_tree{};
-
-    mutable std::vector<std::unique_ptr<ROOT::RNTupleWriter>> m_writer{};
-    mutable std::vector<std::unique_ptr<ROOT::REntry>> m_rntupleEntry{};
-
-    mutable std::vector<bool> m_initFlag{};
-    mutable std::vector<bool> m_filled{};
-
-    // A map that can not be copied, to avoid a copy when calling getNTupleMap
-    // and not assigning it to a reference
-    struct NonCopiableMap {
-      friend struct TupleWriter;
-      NonCopiableMap() = default;
-      NonCopiableMap(const NonCopiableMap&) = delete;            // Assign with auto&
-      NonCopiableMap& operator=(const NonCopiableMap&) = delete; // Assign with auto&
-      NonCopiableMap(NonCopiableMap&&) = default;
-      NonCopiableMap& operator=(NonCopiableMap&&) = default;
-      NTupleTypes& operator[](const std::string& key) { return m_map[key]; }
-      // auto begin() const { return m_map.begin(); }
-      // auto end() const { return m_map.end(); }
-      void fill() { m_parent->fill(m_index); }
-
-    private:
-      std::map<std::string, NTupleTypes> m_map;
-      int m_index{0};
-      const TupleWriter* m_parent{nullptr};
-    } m_NTupleMap;
-
-    mutable std::vector<NonCopiableMap> m_NTupleMaps;
-    mutable size_t m_currentMapIndex{0};
-
-  public:
     NonCopiableMap& getNextTupleMap() const {
-      if (m_currentMapIndex >= m_Names.size()) {
+      initializeSlots();
+      if (m_currentMapIndex >= m_slots.size()) {
         throw std::out_of_range("Requested more NTuple maps than available: " + std::to_string(m_currentMapIndex) +
-                                " requested, " + std::to_string(m_NTupleMaps.size()) + " available");
+                                " requested, " + std::to_string(m_slots.size()) + " available");
       }
-      if (m_NTupleMaps.empty()) {
-        m_NTupleMaps.resize(m_Names.size());
-        for (size_t i = 0; i < m_Names.size(); ++i) {
-          auto& map = m_NTupleMaps[i];
-          map.m_index = i;
-          map.m_parent = this;
-        }
-      }
-      return m_NTupleMaps[m_currentMapIndex++];
+      return m_slots[m_currentMapIndex++].map;
     }
   };
 
