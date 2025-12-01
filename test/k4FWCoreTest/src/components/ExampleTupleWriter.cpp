@@ -78,8 +78,10 @@ struct ExampleTupleWriter final
     NTupleMap["Counter"] = m_counter++;
 
     // Optionally fill the tuple here if you want to do it manually, for example, to fill more than once per event (for
-    // example, once per particle) If fill() is called for a map, no automatic filling will happen at the end of
-    // operator() NTupleMap.fill();
+    // example, once per particle). If fill() is called for a map, no automatic filling will happen at the end of
+    // operator()
+
+    // NTupleMap.fill();
 
     if (m_additionalTrees) {
       auto& NTupleMapFilledManually = getNextTupleMap();
