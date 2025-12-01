@@ -98,6 +98,7 @@ namespace details {
 
     // Prevent assigning with copy
     struct NonCopiableMap {
+      friend struct TupleWriter;
       NonCopiableMap() = default;
       NonCopiableMap(const NonCopiableMap&) = delete;
       NonCopiableMap& operator=(const NonCopiableMap&) = delete;
@@ -105,12 +106,13 @@ namespace details {
       NonCopiableMap& operator=(NonCopiableMap&&) = default;
       NTupleTypes& operator[](const std::string& key) { return m_map[key]; }
       void fill() {
-        if (m_parent)
-          m_parent->fill(m_index);
+        if (fill_fn)
+          fill_fn();
       }
+
+    private:
       std::map<std::string, NTupleTypes> m_map;
-      int m_index{0};
-      const TupleWriter* m_parent{nullptr};
+      std::function<void()> fill_fn{};
     };
 
     struct Slot {
@@ -133,8 +135,7 @@ namespace details {
         }
         m_slots.resize(m_Names.size());
         for (size_t i = 0; i < m_slots.size(); ++i) {
-          m_slots[i].map.m_index = static_cast<int>(i);
-          m_slots[i].map.m_parent = this;
+          m_slots[i].map.fill_fn = [this, i]() { this->fill(i); };
         }
         if (!m_RNTuple) {
           m_file = std::make_unique<TFile>(m_outputFile.value().c_str(), "RECREATE");
