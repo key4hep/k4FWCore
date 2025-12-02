@@ -52,8 +52,8 @@ struct ExampleTupleWriter final
     // If float is not specified but double is, all float values will be assigned to double
     // If double is not specified but float is, assigning doubles will fail at compile time
     // If neither float nor double are specified, assigning any floating point value will fail at compile time
-    // For integers a bigger integer (like std::size_t) can not be assigned to a smaller one (like int)
-    // sign to unsigned and viceversa works fine.
+    // For integers a bigger integer (like std::size_t) can not be assigned to a smaller one (like int).
+    // Signed int to unsigned int and viceversa works fine.
 
     // auto& NTupleMap = getNTupleMap();
     auto& NTupleMap = getNextTupleMap();
@@ -106,7 +106,7 @@ struct ExampleTupleWriter final
   mutable std::atomic<int> m_counter = 0;
   mutable std::atomic<int> m_anotherCounter = 0;
 
-  Gaudi::Property<bool> m_additionalTrees{this, "AdditionalTrees", false, "If true, additional trees are created"};
+  Gaudi::Property<bool> m_additionalTrees{this, "AdditionalTrees", false, "If true, additional trees are created for this example"};
 };
 
 DECLARE_COMPONENT(ExampleTupleWriter)

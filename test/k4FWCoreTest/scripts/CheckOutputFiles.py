@@ -429,6 +429,37 @@ for filename in ["ntuple.root", "ntupleMT.root"]:
             raise RuntimeError(
                 f"The value of column Counter in rntuple.root does not match the expected value {i}, found {entry.Counter} instead"
             )
+    if filename != "ntupleMT.root":
+        continue
+    tree = ttree_ntuple.Get("tree_manual")
+    if tree.GetEntries() != 10:
+        raise RuntimeError(f"The ntuple in {filename} does not have 10 entries")
+    for i, (entry, (col_name, col_value)) in enumerate(zip(tree, {"PDG": 1, "Charge": 4.0, "Text": "additional tree"}.items())):
+        value = getattr(entry, col_name)
+        if value != col_value:
+            raise RuntimeError(
+                f"The value of column {col_name} in ntuple.root does not match the expected value {col_value}, found {value} instead"
+            )
+        counter = getattr(entry, "Counter")
+        if counter != 3 * i:
+            raise RuntimeError(
+                f"The value of column Counter in {filename} does not match the expected value {i % 10}, found {counter} instead"
+            )
+    tree = ttree_ntuple.Get("tree_twice")
+    if tree.GetEntries() != 20:
+        raise RuntimeError(f"The ntuple in {filename} does not have 10 entries")
+    for i, (entry, (col_name, col_value)) in enumerate(zip(tree, {"PDG": 1}.items())):
+        value = getattr(entry, col_name)
+        if value != col_value:
+            raise RuntimeError(
+                f"The value of column {col_name} in {filename} does not match the expected value {col_type}, found {value} instead"
+            )
+        counter = getattr(entry, "Counter")
+        if counter != (3 * (i // 3)) + 1 + (i % 2):
+            raise RuntimeError(
+                f"The value of column Counter in {filename} does not match the expected value {i % 10}, found {counter} instead"
+            )
+
 
 filename = "ntuple_rntuple.root"
 reader = ROOT.RNTupleReader.Open("rntuple", filename)
