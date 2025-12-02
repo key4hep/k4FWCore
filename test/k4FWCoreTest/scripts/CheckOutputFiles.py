@@ -434,7 +434,9 @@ for filename in ["ntuple.root", "ntupleMT.root"]:
     tree = ttree_ntuple.Get("tree_manual")
     if tree.GetEntries() != 10:
         raise RuntimeError(f"The ntuple in {filename} does not have 10 entries")
-    for i, (entry, (col_name, col_value)) in enumerate(zip(tree, {"PDG": 1, "Charge": 4.0, "Text": "additional tree"}.items())):
+    for i, (entry, (col_name, col_value)) in enumerate(
+        zip(tree, {"PDG": 1, "Charge": 4.0, "Text": "additional tree"}.items())
+    ):
         value = getattr(entry, col_name)
         if value != col_value:
             raise RuntimeError(

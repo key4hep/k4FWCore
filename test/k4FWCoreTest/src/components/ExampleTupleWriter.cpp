@@ -106,7 +106,8 @@ struct ExampleTupleWriter final
   mutable std::atomic<int> m_counter = 0;
   mutable std::atomic<int> m_anotherCounter = 0;
 
-  Gaudi::Property<bool> m_additionalTrees{this, "AdditionalTrees", false, "If true, additional trees are created for this example"};
+  Gaudi::Property<bool> m_additionalTrees{this, "AdditionalTrees", false,
+                                          "If true, additional trees are created for this example"};
 };
 
 DECLARE_COMPONENT(ExampleTupleWriter)
