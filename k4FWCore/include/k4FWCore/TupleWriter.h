@@ -28,7 +28,7 @@
 
 #include <algorithm>
 #include <stdexcept>
-#include <strings.h>
+#include <string>
 #include <type_traits>
 #include <utility>
 #include <variant>

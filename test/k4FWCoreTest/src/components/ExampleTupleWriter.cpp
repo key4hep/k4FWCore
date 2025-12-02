@@ -23,8 +23,10 @@
 
 #include "k4FWCore/TupleWriter.h"
 
+#include <atomic>
 #include <stdexcept>
 #include <string>
+#include <tuple>
 
 struct ExampleTupleWriter final
     // We specify the types we want to write into the tuple here, using a std::tuple
