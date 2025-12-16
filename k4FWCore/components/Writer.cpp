@@ -161,7 +161,7 @@ public:
       if (coll) {
         collType = coll->getData()->getTypeName();
       } else {
-        // Things stored via DataHandles nned special casing
+        // Things stored via DataHandles need special casing
         if (const auto oldColl = dynamic_cast<DataWrapperBase*>(pReg->object())) {
           collType = oldColl->collectionBase()->getTypeName();
         }
