@@ -170,6 +170,7 @@ public:
       if (collType.empty()) {
         warning() << "Could not determine type for collection: " << collName << ". Type based selection will not work"
                   << endmsg;
+        continue;
       }
       debug() << "Adding " << collName << " (type: " << collType << ") to the list of available collections" << endmsg;
       namesAndTypes.emplace(std::move(collName), collType);
