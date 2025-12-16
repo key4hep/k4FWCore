@@ -183,6 +183,8 @@ io_svc.outputCommands = [
 ]
 ```
 
+The type name here is matched against the type obtained with `podio::CollectionBase::getTypeName()`, i.e. *Collection* has to be included. Only exact matches are considered for the application of the command.
+
 :::{note}
 The commands are processed in order so the last relevant *keep* or *drop* for any given collection will decide.
 :::
