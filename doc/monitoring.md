@@ -22,16 +22,16 @@ limitations under the License.
 It might be necessary to monitor an algorithm, e.g. by keeping track of how many
 times different branches in the algorithm logic are taken. Since Functional
 algorithms run potentially multithreaded, the usual approach of simply using
-mutable counters or histograms for this is not easily possible. Gaudi, provides
-some threadsafe tools to make monitoring Functional algorithms possible more
-easily. These tools generally take care of updating counters and histograms in a
+mutable counters or histograms for this is not easily possible. Gaudi provides
+some threadsafe tools to make monitoring Functional algorithms more easily
+possible. These tools generally take care of updating counters and histograms in a
 threadsafe way, as well as collecting all the data from potentially multiple
 instances running on different threads at the end of the execution. We describe
 how to use these tools here.
 
 In Gaudi all of these tools live in the `Gaudi::Accumulators` namespace and we
 refer to the [documentation of
-that](ttps://gaudi.web.cern.ch/doxygen/v40r0/da/dd5/namespace_gaudi_1_1_accumulators.html)
+that](https://gaudi.web.cern.ch/doxygen/v40r0/da/dd5/namespace_gaudi_1_1_accumulators.html)
 for more technical details. We will focus on the use of some of these tools.
 
 ## Using histograms
@@ -48,7 +48,7 @@ are filled the same way.
 
 Histograms also exist as generic versions and as ROOT backed versions. The main
 difference is that the ROOT backed version will obviously produce ROOTs
-`TH[1-3][I,D,F]`s (and are hence also limited to at most 3 dimensions), where as
+`TH[1-3][I,D,F]`s (and are hence also limited to at most 3 dimensions), whereas
 the generic versions can have arbitrary dimensions and will be serialized to
 JSON.
 
@@ -83,7 +83,7 @@ struct MyAlgorithm : public /* whatever Functional you want */ {
 
 struct MyAlgorithm : public /* whatever Functional you want */ {
 
-  // Define as a a member of your (Functional) algorithm
+  // Define as a member of your (Functional) algorithm
   // NOTE: it is possible to define a default for the axis, but not strictly necessary
   // NOTE: The name we give this histogram is also how we are going to customize from python later
   mutable Gaudi::Accumulators::RootHistogram<1> m_hist1d{
@@ -92,7 +92,7 @@ struct MyAlgorithm : public /* whatever Functional you want */ {
   // We can also just define the dimensions and the title
   mutable Gaudi::Accumulators::RootHistogram<2> m_hist2d{this, "Hist2D", "A 2D histogram"};
 
-  // NOTE: For configurable histograms you ahve to register this empty callback
+  // NOTE: For configurable histograms you have to register this empty callback
   void registerCallBack(Gaudi::StateMachine::Transition, std::function<void()>){};
 };
 ```
@@ -101,8 +101,8 @@ struct MyAlgorithm : public /* whatever Functional you want */ {
 ### Filling a histogram
 
 Filling a histogram is done by using the `operator[]` of the histogram classes
-and is the same, regardless of whether the histograms are configurable or
-static, e.g.
+and is the same whether the histograms are configurable or
+static.
 
 ```cpp
 auto operator()(/* However your signature looks like */) {
@@ -110,7 +110,7 @@ auto operator()(/* However your signature looks like */) {
   ++m_hist1d[value];
 
   // For multi-dimensional histograms we have to construct a proxy index on the fly
-  ++m_hist2d[{value, value}];  // We didn't claim we use meaningful values for filling
+  ++m_hist2d[{valueX, valueY}];
 }
 ```
 
@@ -123,7 +123,7 @@ update its parent once it goes out of scope, e.g.
 
 ```cpp
 auto operator()(/* However your signature looks like */) {
-  { // create a scope to limit the liftime of the buffer
+  { // create a scope to limit the lifetime of the buffer
     auto histBuffer = m_hist1d.buffer();
     for (int i = 0; i < 1000; ++i) {
       ++histBuffer[i];
@@ -141,7 +141,7 @@ as follows
 ```python
 from Configurables import Gaudi__Histograming__Sink__Root as RootHistoSink
 
-histoSinkSvc = RootHistSink("RootHistoSink")
+histoSinkSvc = RootHistoSink("RootHistoSink")
 histoSinkSvc.FileName = "monitoring_histograms.root"
 ```
 
@@ -149,10 +149,10 @@ histoSinkSvc.FileName = "monitoring_histograms.root"
 
 ### Customizing a histogram
 
-Configurable histograms need to be crated in `initialize` as follows in order to
+Configurable histograms need to be created in `initialize` as follows in order to
 pick up the configuration from python:
 ```cpp
-StatusCode MyAlgorithm::initizlize() {
+StatusCode MyAlgorithm::initialize() {
   m_hist1d.createHistogram(*this);
   m_hist2d.createHistogram(*this);
 }
