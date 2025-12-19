@@ -307,8 +307,10 @@ namespace details {
     /// @note the use std::enable_if is required to avoid ambiguities
     template <typename OWNER, typename K, typename = std::enable_if_t<std::is_base_of_v<IProperty, OWNER>>>
     FunctionalDataObjectReadHandle(OWNER* owner, std::string propertyName, K key = {}, std::string doc = "")
-        : ::details::ReadHandle<T>(owner, Gaudi::DataHandle::Reader, std::move(propertyName), std::move(key),
-                                   std::move(doc)) {}
+        : ::details::ReadHandle<T>(std::move(key), Gaudi::DataHandle::Reader, owner) {
+      auto p = owner->declareProperty(std::move(propertyName), *this, std::move(doc));
+      p->template setOwnerType<OWNER>();
+    }
 
     template <typename... Args>
     FunctionalDataObjectReadHandle(std::tuple<Args...>&& args)
