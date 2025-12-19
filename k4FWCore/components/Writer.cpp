@@ -121,27 +121,30 @@ public:
     return StatusCode::SUCCESS;
   }
 
-  void getOutputCollections() const {
+  std::set<std::pair<std::string, std::string_view>> getOutputCollections() const {
     SmartIF<IDataManagerSvc> mgr;
     mgr = eventSvc();
 
     SmartDataPtr<DataObject> root(eventSvc(), "/Event");
     if (!root) {
       error() << "Failed to retrieve root object /Event" << endmsg;
-      return;
+      return {};
     }
 
     auto pObj = root->registry();
     if (!pObj) {
       error() << "Failed to retrieve the root registry object" << endmsg;
-      return;
+      return {};
     }
     std::vector<IRegistry*> leaves;
     StatusCode sc = mgr->objectLeaves(pObj, leaves);
     if (!sc.isSuccess()) {
       error() << "Failed to retrieve object leaves" << endmsg;
-      return;
+      return {};
     }
+
+    std::set<std::pair<std::string, std::string_view>> namesAndTypes{};
+
     for (const auto& pReg : leaves) {
       if (pReg->name() == k4FWCore::frameLocation) {
         continue;
@@ -153,9 +156,26 @@ public:
       //   continue;
       // }
       auto collName = pReg->name().substr(1, pReg->name().size() - 1);
-      debug() << "Adding " << collName << " to the list of available collections" << endmsg;
-      m_availableCollections.insert(std::move(collName));
+      const auto coll = dynamic_cast<AnyDataWrapper<std::unique_ptr<podio::CollectionBase>>*>(pReg->object());
+      std::string_view collType = "";
+      if (coll) {
+        collType = coll->getData()->getTypeName();
+      } else {
+        // Things stored via DataHandles need special casing
+        if (const auto oldColl = dynamic_cast<DataWrapperBase*>(pReg->object())) {
+          collType = oldColl->collectionBase()->getTypeName();
+        }
+      }
+
+      if (collType.empty()) {
+        warning() << "Could not determine type for collection: " << collName << ". Type based selection will not work"
+                  << endmsg;
+        continue;
+      }
+      debug() << "Adding " << collName << " (type: " << collType << ") to the list of available collections" << endmsg;
+      namesAndTypes.emplace(std::move(collName), collType);
     }
+    return namesAndTypes;
   }
 
   void operator()(const EventContext& ctx) const override {
@@ -194,15 +214,15 @@ public:
     if (m_first) {
       // Assume all the output collections are the same for all events
       // and cache them
-      getOutputCollections();
-      for (const auto& coll : m_availableCollections) {
-        const auto doWrite = iosvc->checkIfWriteCollection(coll);
-        debug() << "Checking if " << coll << " should be written: " << (doWrite ? "yes" : "no") << endmsg;
+      for (const auto& [name, type] : getOutputCollections()) {
+        const auto doWrite = iosvc->checkIfWriteCollection(name, type);
+        debug() << "Checking if " << name << " (type=" << type << ") should be written: " << (doWrite ? "yes" : "no")
+                << endmsg;
         if (doWrite) {
-          m_collectionsToSave.push_back(coll);
-          if (std::find(frameCollections.begin(), frameCollections.end(), coll) == frameCollections.end()) {
-            debug() << coll << " has to be added to the Frame" << endmsg;
-            m_collectionsToAdd.push_back(coll);
+          m_collectionsToSave.push_back(name);
+          if (std::find(frameCollections.begin(), frameCollections.end(), name) == frameCollections.end()) {
+            debug() << name << " has to be added to the Frame" << endmsg;
+            m_collectionsToAdd.push_back(name);
           }
         }
       }

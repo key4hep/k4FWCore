@@ -41,14 +41,14 @@ TEST_CASE("KeepDropSwitch keep * keeps all") {
   const auto keepDropSwitch = KeepDropSwitch({"keep *"});
   REQUIRE(keepDropSwitch.isOn("MCParticles"));
   REQUIRE(keepDropSwitch.isOn(""));
-  REQUIRE(keepDropSwitch.isOn("aribtrary strings are not accepted either"));
+  REQUIRE(keepDropSwitch.isOn("arbitrary strings are also accepted"));
 }
 
 TEST_CASE("KeepDropSwitch cmd order is respected for *") {
   const auto dropAllFirst = KeepDropSwitch({"drop *", "keep *"});
   REQUIRE(dropAllFirst.isOn("MCParticles"));
   REQUIRE(dropAllFirst.isOn(""));
-  REQUIRE(dropAllFirst.isOn("aribtrary strings are not accepted either"));
+  REQUIRE(dropAllFirst.isOn("arbitrary strings are also accepted"));
 
   const auto keepAllFirst = KeepDropSwitch({"keep *", "drop *"});
   REQUIRE_FALSE(keepAllFirst.isOn("MCParticles"));
@@ -75,4 +75,29 @@ TEST_CASE("KeepDropSwitch keep and drop with ? wildcard") {
 TEST_CASE("KeepDropSwitch malformed cmd inputs") {
   REQUIRE_THROWS_AS(KeepDropSwitch({"abc"}), std::invalid_argument);
   REQUIRE_THROWS_AS(KeepDropSwitch({"foobar MCParticles"}), std::invalid_argument);
+  REQUIRE_THROWS_AS(KeepDropSwitch({"keep anything-but-type collType"}), std::invalid_argument);
+}
+
+TEST_CASE("KeepDropSwitch drops types") {
+  const auto keepDropSwitch = KeepDropSwitch({"drop type MCParticleCollection"});
+  REQUIRE(keepDropSwitch.isOn("MCParticles"));
+  REQUIRE_FALSE(keepDropSwitch.isOn("MCParticles", "MCParticleCollection"));
+  REQUIRE(keepDropSwitch.isOn("MCParticles", "AnotherCollection"));
+}
+
+TEST_CASE("KeepDropSwitch types respect command order") {
+  auto keepDropSwitch = KeepDropSwitch({"drop *", "keep type ABCollection"});
+  REQUIRE(keepDropSwitch.isOn("collName", "ABCollection"));
+  REQUIRE_FALSE(keepDropSwitch.isOn("collName", "NonKeptType"));
+  REQUIRE_FALSE(keepDropSwitch.isOn("collName"));
+
+  keepDropSwitch = KeepDropSwitch({"keep type ABCollection", "drop *"});
+  REQUIRE_FALSE(keepDropSwitch.isOn("collName", "ABCollection"));
+
+  keepDropSwitch = KeepDropSwitch({"drop *", "keep MCParticles", "drop type ABCType", "keep type FooType"});
+  REQUIRE(keepDropSwitch.isOn("Anything", "FooType"));
+  REQUIRE_FALSE(keepDropSwitch.isOn("Anything", "ABCType"));
+  REQUIRE_FALSE(keepDropSwitch.isOn("MCParticles", "ABCType"));
+  REQUIRE(keepDropSwitch.isOn("MCParticles"));
+  REQUIRE_FALSE(keepDropSwitch.isOn("Anything"));
 }

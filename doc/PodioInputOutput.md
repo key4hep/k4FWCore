@@ -151,7 +151,7 @@ k4run <steering-file> --IOSvc.OutputType "RNTuple"
 :::
 ::::
 
-During processing, at the end of each event from the Gaudi event loop the `IOSvc` will write a frame with the collection present in TES. By default all the collections will be written. The `outputCommands` property of `IOSvc` can be used to specify commands to select which collections should be written. For example, the following commands will skip writing all the collections except for the collections named `MCParticles1`, `MCParticles2` and `SimTrackerHits`:
+During processing, at the end of each event from the Gaudi event loop the `IOSvc` will write a frame with the collections present in TES. By default all the collections will be written. The `outputCommands` property of `IOSvc` can be used to specify commands to select which collections should be written. For example, the following commands will skip writing all the collections except for the collections named `MCParticles1`, `MCParticles2` and `SimTrackerHits`:
 
 ::::{tab-set}
 :::{tab-item} Python
@@ -174,6 +174,21 @@ k4run <steering-file> --IOSvc.outputCommands \
 ```
 :::
 ::::
+
+It is also possible to specify entire datatypes for keeping or dropping via the `type` sub-command, e.g. to keep everything but any collection that is of type `edm4hep::SimTrackerHitCollection` one would do:
+
+```python
+io_svc.outputCommands = [
+    "drop type edm4hep::SimTrackerHitCollection",
+]
+```
+
+The type name here is matched against the type obtained with `podio::CollectionBase::getTypeName()`, i.e. *Collection* has to be included. Only exact matches are considered for the application of the command.
+
+:::{note}
+The commands are processed in order so the last relevant *keep* or *drop* for any given collection will decide.
+:::
+
 
 ## Accessing metadata
 

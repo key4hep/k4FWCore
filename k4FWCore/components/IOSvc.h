@@ -34,6 +34,7 @@
 #include "k4FWCore/KeepDropSwitch.h"
 
 #include <string>
+#include <string_view>
 #include <vector>
 
 class IOSvc : public extends<Service, IIOSvc, IIncidentListener> {
@@ -90,7 +91,7 @@ protected:
   int m_entries{0};
   int m_nextEntry{0};
 
-  bool checkIfWriteCollection(const std::string& collName) const override;
+  bool checkIfWriteCollection(const std::string& collName, const std::string_view collType) const override;
 };
 
 #endif

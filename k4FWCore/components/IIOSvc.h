@@ -24,6 +24,8 @@
 #include "podio/CollectionBase.h"
 #include "podio/Writer.h"
 
+#include <string>
+#include <string_view>
 #include <vector>
 
 /**
@@ -44,7 +46,7 @@ public:
   virtual podio::Writer& getWriter() = 0;
   virtual void deleteWriter() = 0;
   virtual void deleteReader() = 0;
-  virtual bool checkIfWriteCollection(const std::string& collName) const = 0;
+  virtual bool checkIfWriteCollection(const std::string& collName, const std::string_view collType) const = 0;
 };
 
 #endif
