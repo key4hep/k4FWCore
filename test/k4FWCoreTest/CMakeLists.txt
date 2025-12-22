@@ -186,7 +186,11 @@ add_test_fwcore(FunctionalProducer options/ExampleFunctionalProducer.py PROPERTI
 add_test_fwcore(FunctionalProducerAnother options/ExampleFunctionalProducer.py --second PROPERTIES FIXTURES_SETUP AnotherProducerFile)
 add_test_fwcore(FunctionalProducerSingleEvent options/ExampleFunctionalProducer.py --num-events=1 --IOSvc.Output=functional_producer_single_event.root PROPERTIES FIXTURES_SETUP ProducerFileSingleEvent)
 
-add_test_fwcore(ExampleFailingSingleEvent options/ExampleFailingSingleEvent.py PROPERTIES FIXTURES_REQUIRED ProducerFileSingleEvent)
+add_test_fwcore(ExampleFailingSingleEvent options/ExampleFailingSingleEvent.py
+   PROPERTIES
+     FIXTURES_REQUIRED ProducerFileSingleEvent
+     WILL_FAIL TRUE
+   )
 
 # PODIO_DEFAULT_WRITE_RNTUPLE needs to be unset because the test FunctionalMix reads through
 # PodioInput, which does not support RNTuple output
