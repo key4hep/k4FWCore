@@ -19,6 +19,7 @@ limitations under the License.
 
 set(k4fwcoretest_plugin_sources
   src/components/ExampleEventHeaderConsumer.cpp
+  src/components/ExampleFailingConsumer.cpp
   src/components/ExampleFunctionalConsumer.cpp
   src/components/ExampleFunctionalConsumerKeyValues.cpp
   src/components/ExampleFunctionalConsumerMultiple.cpp
@@ -183,6 +184,13 @@ add_test_fwcore(FunctionalMultipleMemory options/ExampleFunctionalMultipleMemory
 add_test_fwcore(FunctionalMultipleMemoryEventContext options/ExampleFunctionalMultipleMemory.py --use-event-context)
 add_test_fwcore(FunctionalProducer options/ExampleFunctionalProducer.py PROPERTIES FIXTURES_SETUP ProducerFile)
 add_test_fwcore(FunctionalProducerAnother options/ExampleFunctionalProducer.py --second PROPERTIES FIXTURES_SETUP AnotherProducerFile)
+add_test_fwcore(FunctionalProducerSingleEvent options/ExampleFunctionalProducer.py --num-events=1 --IOSvc.Output=functional_producer_single_event.root PROPERTIES FIXTURES_SETUP ProducerFileSingleEvent)
+
+add_test_fwcore(ExampleFailingSingleEvent options/ExampleFailingSingleEvent.py
+   PROPERTIES
+     FIXTURES_REQUIRED ProducerFileSingleEvent
+     WILL_FAIL TRUE
+   )
 
 # PODIO_DEFAULT_WRITE_RNTUPLE needs to be unset because the test FunctionalMix reads through
 # PodioInput, which does not support RNTuple output
