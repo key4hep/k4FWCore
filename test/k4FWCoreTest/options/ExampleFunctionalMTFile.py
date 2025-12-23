@@ -21,7 +21,11 @@
 # an output file in a multithreaded environment
 
 from Gaudi.Configuration import INFO, WARNING
-from Configurables import ExampleFunctionalTransformer, ExampleFunctionalConsumer
+from Configurables import (
+    ExampleFunctionalTransformer,
+    ExampleFunctionalConsumer,
+    ExampleTupleWriter,
+)
 from Configurables import HiveSlimEventLoopMgr, HiveWhiteBoard, AvalancheSchedulerSvc
 from k4FWCore import ApplicationMgr, IOSvc
 
@@ -56,8 +60,17 @@ transformer = ExampleFunctionalTransformer(
     "Transformer", InputCollection="MCParticles1", OutputCollection="NewMCParticles"
 )
 
+tuplewriter = ExampleTupleWriter(
+    "TupleWriter",
+    InputCollection="MCParticles1",
+    OutputFile="ntupleMT.root",
+    AdditionalTrees=True,
+    Names=["tree", "tree_manual", "tree_twice"],
+    Descriptions=["default", "manual", "twice filled"],
+)
+
 mgr = ApplicationMgr(
-    TopAlg=[consumer, transformer],
+    TopAlg=[consumer, transformer, tuplewriter],
     EvtSel="NONE",
     EvtMax=-1,
     ExtSvc=[whiteboard],
