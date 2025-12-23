@@ -163,6 +163,11 @@ public:
       } else {
         // Things stored via DataHandles need special casing
         if (const auto oldColl = dynamic_cast<DataWrapperBase*>(pReg->object())) {
+          if (!oldColl->collectionBase()) {
+            debug() << collName << " does not have a valid CollectionBase. " << collName << " will be skipped."
+                    << endmsg;
+            continue;
+          }
           collType = oldColl->collectionBase()->getTypeName();
         }
       }
