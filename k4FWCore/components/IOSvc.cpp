@@ -57,6 +57,7 @@ StatusCode IOSvc::initialize() {
       return StatusCode::FAILURE;
     }
     m_entries = m_reader->getEvents();
+    debug() << "The input files have " << m_entries << " event entries available" << endmsg;
   }
 
   if ((m_entries && m_firstEventEntry >= m_entries) || m_firstEventEntry < 0) {
@@ -123,15 +124,6 @@ std::tuple<std::vector<podio::CollectionBase*>, std::vector<std::string>, podio:
     }
   }
 
-  if (m_nextEntry >= m_entries) {
-    auto ep = serviceLocator()->as<IEventProcessor>();
-    StatusCode sc = ep->stopRun();
-    if (sc.isFailure()) {
-      error() << "Error when stopping run" << endmsg;
-      throw GaudiException("Error when stopping run", name(), StatusCode::FAILURE);
-    }
-  }
-
   std::vector<podio::CollectionBase*> collections;
 
   for (const auto& name : m_collectionNames) {
@@ -147,6 +139,16 @@ std::tuple<std::vector<podio::CollectionBase*>, std::vector<std::string>, podio:
 // should be removed so that they are deleted when the Frame is deleted
 // and not deleted when clearing the store
 void IOSvc::handle(const Incident& incident) {
+  if (m_reader.has_value() && incident.type() == "EndEvent" && m_nextEntry >= m_entries) {
+    debug() << "Reached the end of the input file. Scheduling a stop of the event loop" << endmsg;
+    auto ep = serviceLocator()->as<IEventProcessor>();
+    StatusCode sc = ep->stopRun();
+    if (sc.isFailure()) {
+      error() << "Error when stopping run" << endmsg;
+      throw GaudiException("Error when stopping run", name(), StatusCode::FAILURE);
+    }
+  }
+
   StatusCode code;
   if (m_hiveWhiteBoard) {
     if (!incident.context().valid()) {
