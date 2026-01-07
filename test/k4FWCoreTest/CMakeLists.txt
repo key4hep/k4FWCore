@@ -252,6 +252,7 @@ add_test_fwcore(EfficiencyFilter options/ExampleEfficiencyFilter.py PROPERTIES F
 
 add_test_fwcore(FunctionalTransformerInputOutputLocations options/ExampleFunctionalTransformerInputOutputLocations.py)
 add_test_fwcore(FunctionalMultiTransformerInputOutputLocations options/ExampleFunctionalMultiTransformerInputOutputLocations.py)
+add_test_fwcore(FunctionalConsumerInputOutputLocations options/ExampleFunctionalConsumerInputOutputLocations.py)
 
 add_executable(check_ParticleIDOutputs src/check_ParticleIDOutputs.cpp)
 target_link_libraries(check_ParticleIDOutputs PRIVATE podio::podioIO EDM4HEP::edm4hep EDM4HEP::utils fmt::fmt)
