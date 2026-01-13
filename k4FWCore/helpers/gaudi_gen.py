@@ -3,54 +3,35 @@
 Gaudi Functional C++ Class Generator
 
 A user-friendly script to generate Gaudi Functional C++ classes with proper
-structure and boilerplate code.
+structure and boilerplate code. Supports both Gaudi::Functional and k4FWCore variants.
 """
 
 import argparse
 import sys
-from typing import List, Tuple
+import re
+from typing import List, Tuple, Optional
 
 # Functional type definitions
 FUNCTIONAL_TYPES = {
     'consumer': {
         'base': 'Consumer',
-        'description': 'One input, no output',
+        'description': 'One or more inputs, no output',
         'example': 'EventTimeMonitor, ProcStatusAbortMoni'
     },
     'producer': {
         'base': 'Producer',
         'description': 'No input, one or more outputs',
-        'example': 'File IO, constant data generation'
-    },
-    'filter': {
-        'base': 'FilterPredicate',
-        'description': 'True/False output only',
-        'example': 'HDRFilter, L0Filter, ODINFilter'
+        'example': 'ExampleFunctionalProducerMultiple, file IO, constant data generation'
     },
     'transformer': {
         'base': 'Transformer',
-        'description': 'One or more inputs, one output',
-        'example': 'MySum, data transformation'
+        'description': 'One or more inputs, one or more outputs',
+        'example': 'Data transformation algorithms'
     },
-    'multi_transformer': {
-        'base': 'MultiTransformer',
-        'description': 'One or more inputs, multiple outputs',
-        'example': 'Complex data processing with multiple results'
-    },
-    'merging_transformer': {
-        'base': 'MergingTransformer',
-        'description': 'Identical inputs, one output',
-        'example': 'TrackListMerger, InCaloAcceptanceAlg'
-    },
-    'splitting_transformer': {
-        'base': 'SplittingTransformer',
-        'description': 'One input, identical outputs',
-        'example': 'HltRawBankDecoderBase'
-    },
-    'scalar_transformer': {
-        'base': 'ScalarTransformer',
-        'description': 'Vector to vector with 1-to-1 element mapping',
-        'example': 'CaloElectronAlg, CaloSinglePhotonAlg'
+    'filter': {
+        'base': 'FilterPredicate',
+        'description': 'One or more inputs, boolean output',
+        'example': 'Event selection, filtering based on criteria'
     }
 }
 
@@ -58,7 +39,7 @@ FUNCTIONAL_TYPES = {
 def parse_arguments():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
-        description='Generate Gaudi Functional C++ classes',
+        description='Generate Gaudi/k4FWCore Functional C++ classes',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=_get_functional_types_help()
     )
@@ -68,15 +49,19 @@ def parse_arguments():
                        choices=list(FUNCTIONAL_TYPES.keys()),
                        help='Type of functional to generate')
     parser.add_argument('-i', '--inputs', nargs='*', default=[],
-                       help='Input data specifications (format: "Type:Location:DefaultValue")')
+                       help='Input data specifications (format: "Type:Location" or just "Type")')
     parser.add_argument('-o', '--outputs', nargs='*', default=[],
-                       help='Output data specifications (format: "Type:Location:DefaultValue")')
+                       help='Output data specifications (format: "Type:Location" or just "Type")')
     parser.add_argument('-n', '--namespace', default='',
                        help='Namespace for the class')
     parser.add_argument('-f', '--output-file', 
                        help='Output file name (default: <ClassName>.cpp)')
-    parser.add_argument('--header-only', action='store_true',
-                       help='Generate header file instead of implementation')
+    parser.add_argument('--framework', choices=['gaudi', 'k4fwcore'], default='k4fwcore',
+                       help='Target framework (default: k4fwcore)')
+    parser.add_argument('--struct', action='store_true',
+                       help='Generate as struct instead of class')
+    parser.add_argument('-p', '--properties', nargs='*', default=[],
+                       help='Gaudi properties (format: "Type:Name:Default:Description")')
     
     return parser.parse_args()
 
@@ -88,63 +73,116 @@ def _get_functional_types_help():
         help_text += f"\n  {key}:\n"
         help_text += f"    {info['description']}\n"
         help_text += f"    Example: {info['example']}\n"
+    
+    help_text += "\n\nExample Usage:\n"
+    help_text += "  # k4FWCore producer with multiple outputs\n"
+    help_text += "  python gaudi_gen.py MyProducer producer \\\n"
+    help_text += "    -o 'edm4hep::MCParticleCollection:MCParticles' \\\n"
+    help_text += "       'edm4hep::TrackCollection:Tracks' \\\n"
+    help_text += "    --framework k4fwcore --struct\n\n"
+    help_text += "  # Gaudi transformer\n"
+    help_text += "  python gaudi_gen.py MyTransformer transformer \\\n"
+    help_text += "    -i 'InputType:InputLoc' \\\n"
+    help_text += "    -o 'OutputType:OutputLoc' \\\n"
+    help_text += "    --framework gaudi\n"
+    
     return help_text
 
 
-def parse_data_spec(spec: str) -> Tuple[str, str, str]:
-    """Parse data specification string into type, location, and default value."""
-    parts = spec.split(':')
-    if len(parts) == 1:
-        return parts[0], '', ''
-    elif len(parts) == 2:
-        return parts[0], parts[1], ''
-    else:
-        return parts[0], parts[1], parts[2]
+def parse_data_spec(spec: str) -> Tuple[str, str]:
+    """Parse data specification string into type and location.
+    Handles types with template parameters like podio::UserDataCollection<float>
+    """
+    # Find the last colon that's not inside angle brackets
+    depth = 0
+    colon_pos = -1
+    for i, char in enumerate(spec):
+        if char == '<':
+            depth += 1
+        elif char == '>':
+            depth -= 1
+        elif char == ':' and depth == 0:
+            colon_pos = i
+    
+    if colon_pos == -1:
+        return spec, ''
+    
+    return spec[:colon_pos], spec[colon_pos+1:]
 
 
-def generate_template_signature(functional_type: str, inputs: List[str], outputs: List[str]) -> str:
+def parse_property_spec(spec: str) -> Tuple[str, str, str, str]:
+    """Parse property specification into type, name, default, description."""
+    parts = spec.split(':', 3)
+    typ = parts[0] if len(parts) > 0 else 'int'
+    name = parts[1] if len(parts) > 1 else 'Property'
+    default = parts[2] if len(parts) > 2 else '0'
+    desc = parts[3] if len(parts) > 3 else 'Property description'
+    return typ, name, default, desc
+
+
+def generate_template_signature(functional_type: str, inputs: List[str], outputs: List[str], 
+                                framework: str) -> str:
     """Generate the template signature for the functional."""
     in_types = [parse_data_spec(i)[0] for i in inputs]
     out_types = [parse_data_spec(o)[0] for o in outputs]
     
     if functional_type == 'consumer':
-        return f"void(const {in_types[0]}&)" if in_types else "void()"
+        in_sig = ', '.join([f"const {t}&" for t in in_types])
+        return f"void({in_sig})"
     elif functional_type == 'producer':
-        if len(out_types) == 1:
+        if len(out_types) == 0:
+            return "void()"
+        elif len(out_types) == 1:
             return f"{out_types[0]}()"
         else:
             return f"std::tuple<{', '.join(out_types)}>()"
+    elif functional_type == 'transformer':
+        in_sig = ', '.join([f"const {t}&" for t in in_types]) if in_types else ""
+        if len(out_types) == 1:
+            return f"{out_types[0]}({in_sig})"
+        else:
+            out_sig = ', '.join(out_types)
+            return f"std::tuple<{out_sig}>({in_sig})"
     elif functional_type == 'filter':
         in_sig = ', '.join([f"const {t}&" for t in in_types])
         return f"bool({in_sig})"
-    elif functional_type == 'transformer':
-        in_sig = ', '.join([f"const {t}&" for t in in_types])
-        return f"{out_types[0]}({in_sig})"
-    elif functional_type == 'multi_transformer':
-        in_sig = ', '.join([f"const {t}&" for t in in_types])
-        out_sig = ', '.join(out_types)
-        return f"std::tuple<{out_sig}>({in_sig})"
-    elif functional_type == 'merging_transformer':
-        return f"{out_types[0]}(const std::vector<{in_types[0]}*>&)"
-    elif functional_type == 'splitting_transformer':
-        return f"std::vector<{out_types[0]}>(const {in_types[0]}&)"
-    elif functional_type == 'scalar_transformer':
-        return f"{out_types[0]}(const {in_types[0]}&)"
     
     return ""
 
 
-def generate_constructor_inputs(inputs: List[str]) -> str:
-    """Generate input KeyValue list for constructor."""
-    if not inputs:
+def generate_keyvalues_k4fwcore(data_specs: List[str], is_input: bool) -> str:
+    """Generate KeyValues initialization for k4FWCore."""
+    if not data_specs:
+        return "{}"
+    
+    lines = []
+    for spec in data_specs:
+        typ, loc = parse_data_spec(spec)
+        if not loc:
+            # Generate a default location name from type
+            # Remove Collection suffix and namespace
+            clean_name = typ.split('::')[-1].replace('Collection', '')
+            loc = clean_name
+        lines.append(f'KeyValues("{loc}", {{"{loc}"}})')
+    
+    if len(lines) == 1:
+        return lines[0]
+    else:
+        return "{\n                 " + ",\n                 ".join(lines) + "}"
+
+
+def generate_keyvalue_gaudi(data_specs: List[str]) -> str:
+    """Generate KeyValue initialization for Gaudi."""
+    if not data_specs:
         return ""
     
     key_values = []
-    for inp in inputs:
-        typ, loc, default = parse_data_spec(inp)
-        loc_name = loc if loc else f"{typ}Loc"
-        default_val = default if default else f"Input/{typ}"
-        key_values.append(f'KeyValue("{loc_name}", "{default_val}")')
+    for spec in data_specs:
+        typ, loc = parse_data_spec(spec)
+        if not loc:
+            loc = f"{typ.split('::')[-1]}Loc"
+        default_val = loc
+        key_values.append(f'KeyValue("{loc}", "{default_val}")')
     
     if len(key_values) == 1:
         return key_values[0]
@@ -152,22 +190,31 @@ def generate_constructor_inputs(inputs: List[str]) -> str:
         return "{\n              " + ",\n              ".join(key_values) + " }"
 
 
-def generate_constructor_outputs(outputs: List[str]) -> str:
-    """Generate output KeyValue list for constructor."""
-    if not outputs:
-        return ""
-    
-    key_values = []
-    for out in outputs:
-        typ, loc, default = parse_data_spec(out)
-        loc_name = loc if loc else f"{typ}Loc"
-        default_val = default if default else f"Output/{typ}"
-        key_values.append(f'KeyValue("{loc_name}", "{default_val}")')
-    
-    if len(key_values) == 1:
-        return key_values[0]
-    else:
-        return "{\n              " + ",\n              ".join(key_values) + " }"
+def generate_constructor(class_name: str, functional_type: str, inputs: List[str], 
+                        outputs: List[str], framework: str, base_class: str) -> str:
+    """Generate the constructor."""
+    if framework == 'k4fwcore':
+        input_kv = generate_keyvalues_k4fwcore(inputs, True)
+        output_kv = generate_keyvalues_k4fwcore(outputs, False)
+        
+        return f"""  {class_name}(const std::string& name, ISvcLocator* svcLoc)
+      : {base_class}(name, svcLoc, {input_kv},
+                 {output_kv}) {{}}"""
+    else:  # gaudi
+        input_kv = generate_keyvalue_gaudi(inputs)
+        output_kv = generate_keyvalue_gaudi(outputs)
+        
+        init_parts = [f"\n           {base_class}(\n               name,\n               pSvc"]
+        if input_kv:
+            init_parts.append(f", {input_kv}")
+        if output_kv:
+            init_parts.append(f",\n               {output_kv}")
+        init_parts.append(")")
+        
+        constructor_init = ''.join(init_parts)
+        
+        return f"""  {class_name}(const std::string& name, ISvcLocator* pSvc)
+      :{constructor_init} {{}}"""
 
 
 def generate_operator_signature(functional_type: str, inputs: List[str], outputs: List[str]) -> str:
@@ -176,98 +223,197 @@ def generate_operator_signature(functional_type: str, inputs: List[str], outputs
     out_types = [parse_data_spec(o)[0] for o in outputs]
     
     if functional_type == 'consumer':
-        in_sig = f"const {in_types[0]}& input" if in_types else ""
-        return f"void operator()({in_sig}) const override"
+        params = ', '.join([f"const {t}& in{i+1}" for i, t in enumerate(in_types)])
+        return f"void operator()({params}) const override"
     elif functional_type == 'producer':
-        if len(out_types) == 1:
+        if len(out_types) == 0:
+            return "void operator()() const override"
+        elif len(out_types) == 1:
             return f"{out_types[0]} operator()() const override"
         else:
             return f"std::tuple<{', '.join(out_types)}> operator()() const override"
+    elif functional_type == 'transformer':
+        params = ', '.join([f"const {t}& in{i+1}" for i, t in enumerate(in_types)])
+        if len(out_types) == 1:
+            return f"{out_types[0]} operator()({params}) const override"
+        else:
+            return f"std::tuple<{', '.join(out_types)}> operator()({params}) const override"
     elif functional_type == 'filter':
         params = ', '.join([f"const {t}& in{i+1}" for i, t in enumerate(in_types)])
         return f"bool operator()({params}) const override"
-    elif functional_type == 'transformer':
-        params = ', '.join([f"const {t}& in{i+1}" for i, t in enumerate(in_types)])
-        return f"{out_types[0]} operator()({params}) const override"
-    elif functional_type == 'multi_transformer':
-        params = ', '.join([f"const {t}& in{i+1}" for i, t in enumerate(in_types)])
-        return f"std::tuple<{', '.join(out_types)}> operator()({params}) const override"
-    elif functional_type == 'merging_transformer':
-        return f"{out_types[0]} operator()(const std::vector<{in_types[0]}*>& inputs) const override"
-    elif functional_type == 'splitting_transformer':
-        return f"std::vector<{out_types[0]}> operator()(const {in_types[0]}& input) const override"
-    elif functional_type == 'scalar_transformer':
-        return f"{out_types[0]} operator()(const {in_types[0]}& input) const override"
     
     return ""
 
 
-def generate_operator_body(functional_type: str, inputs: List[str], outputs: List[str]) -> str:
+def generate_operator_body(functional_type: str, outputs: List[str]) -> str:
     """Generate a template body for the operator()."""
+    out_types = [parse_data_spec(o)[0] for o in outputs]
+    
     if functional_type == 'consumer':
-        return "        // Process input data here\n"
+        return "    // Process input data here\n"
     elif functional_type == 'producer':
-        out_types = [parse_data_spec(o)[0] for o in outputs]
-        if len(out_types) == 1:
-            return f"        // Generate and return output data\n        return {out_types[0]}{{}};\n"
+        if len(out_types) == 0:
+            return "    // Perform operations here\n"
+        elif len(out_types) == 1:
+            return f"    // Generate and return output data\n    auto output = {out_types[0]}();\n    \n    return output;\n"
         else:
-            return f"        // Generate and return output data\n        return {{{', '.join([f'{t}{{}}' for t in out_types])}}};\n"
+            lines = []
+            for i, typ in enumerate(out_types):
+                lines.append(f"    auto output{i+1} = {typ}();")
+            lines.append("\n    // TODO: Fill output collections\n")
+            lines.append(f"    return std::make_tuple({', '.join([f'std::move(output{i+1})' for i in range(len(out_types))])});")
+            return '\n'.join(lines) + '\n'
     elif functional_type == 'filter':
-        return "        // Apply filter logic and return true/false\n        return true;\n"
-    elif functional_type in ['transformer', 'scalar_transformer']:
-        out_type = parse_data_spec(outputs[0])[0]
-        return f"        // Transform input(s) to output\n        return {out_type}{{}};\n"
-    elif functional_type == 'multi_transformer':
-        out_types = [parse_data_spec(o)[0] for o in outputs]
-        return f"        // Transform inputs to multiple outputs\n        return {{{', '.join([f'{t}{{}}' for t in out_types])}}};\n"
-    elif functional_type == 'merging_transformer':
-        out_type = parse_data_spec(outputs[0])[0]
-        return f"        // Merge inputs into single output\n        return {out_type}{{}};\n"
-    elif functional_type == 'splitting_transformer':
-        out_type = parse_data_spec(outputs[0])[0]
-        return f"        // Split input into multiple outputs\n        return std::vector<{out_type}>{{}};\n"
+        return "    // Apply filter logic and return true/false\n    return true;\n"
+    elif functional_type == 'transformer':
+        if len(out_types) == 1:
+            return f"    // Transform input(s) to output\n    auto output = {out_types[0]}();\n    \n    return output;\n"
+        else:
+            lines = []
+            for i, typ in enumerate(out_types):
+                lines.append(f"    auto output{i+1} = {typ}();")
+            lines.append("\n    // TODO: Fill output collections\n")
+            lines.append(f"    return std::make_tuple({', '.join([f'std::move(output{i+1})' for i in range(len(out_types))])});")
+            return '\n'.join(lines) + '\n'
     
     return ""
+
+
+def extract_edm_includes(typ: str) -> List[str]:
+    """Extract EDM4hep include files from a type string."""
+    includes = []
+    
+    # Handle podio types
+    if 'podio::UserDataCollection' in typ:
+        includes.append('#include "podio/UserDataCollection.h"')
+        return includes
+    
+    # Handle edm4hep types
+    if 'edm4hep::' in typ:
+        # Extract all collection types (handle nested templates)
+        # Match patterns like edm4hep::MCParticleCollection
+        pattern = r'edm4hep::(\w+Collection)'
+        matches = re.findall(pattern, typ)
+        for match in matches:
+            base_type = match.replace('Collection', '')
+            includes.append(f'#include "edm4hep/{base_type}Collection.h"')
+    
+    return includes
+
+
+def generate_includes(functional_type: str, inputs: List[str], outputs: List[str], 
+                     framework: str, properties: List[str]) -> str:
+    """Generate include statements."""
+    includes = []
+    
+    if framework == 'k4fwcore':
+        includes.append('#include "k4FWCore/Consumer.h"' if functional_type == 'consumer' else
+                       '#include "k4FWCore/Producer.h"' if functional_type == 'producer' else
+                       '#include "k4FWCore/Transformer.h"' if functional_type == 'transformer' else
+                       '#include "k4FWCore/FilterPredicate.h"')
+    else:
+        includes.append('#include "GaudiAlg/Functional.h"')
+        includes.append('#include "GaudiKernel/KeyValue.h"')
+    
+    if properties:
+        includes.append('#include "Gaudi/Property.h"')
+    
+    includes.append('')
+    
+    # Collect unique type includes
+    all_type_strings = []
+    for inp in inputs:
+        typ, _ = parse_data_spec(inp)
+        all_type_strings.append(typ)
+    for out in outputs:
+        typ, _ = parse_data_spec(out)
+        all_type_strings.append(typ)
+    
+    # Generate includes for EDM4hep types
+    type_includes = []
+    for typ in all_type_strings:
+        type_includes.extend(extract_edm_includes(typ))
+    
+    if type_includes:
+        includes.extend(sorted(set(type_includes)))
+        includes.append('')
+    
+    includes.append('#include <string>')
+    
+    # Add tuple if multiple outputs
+    out_types = [parse_data_spec(o)[0] for o in outputs]
+    if len(out_types) > 1:
+        includes.append('#include <tuple>')
+    
+    return '\n'.join(includes)
+
+
+def generate_properties(properties: List[str]) -> str:
+    """Generate Gaudi property declarations."""
+    if not properties:
+        return ""
+    
+    lines = ["\n\nprivate:"]
+    for prop_spec in properties:
+        typ, name, default, desc = parse_property_spec(prop_spec)
+        lines.append(f'  Gaudi::Property<{typ}> m_{name}{{this, "{name}", {default}, "{desc}"}};')
+    
+    return '\n'.join(lines)
+
+
+def generate_return_type_alias(outputs: List[str]) -> Optional[str]:
+    """Generate return type alias if needed (for complex return types)."""
+    out_types = [parse_data_spec(o)[0] for o in outputs]
+    if len(out_types) > 1:
+        types_str = ',\n               '.join(out_types)
+        return f"using retType =\n    std::tuple<{types_str}>;\n\n"
+    return None
 
 
 def generate_class(class_name: str, functional_type: str, inputs: List[str], 
-                   outputs: List[str], namespace: str = '') -> str:
+                   outputs: List[str], namespace: str, framework: str,
+                   use_struct: bool, properties: List[str]) -> str:
     """Generate the complete C++ class code."""
     base_class = FUNCTIONAL_TYPES[functional_type]['base']
-    template_sig = generate_template_signature(functional_type, inputs, outputs)
-    input_keyvalues = generate_constructor_inputs(inputs)
-    output_keyvalues = generate_constructor_outputs(outputs)
+    
+    if framework == 'k4fwcore':
+        base_class = f"k4FWCore::{base_class}"
+    else:
+        base_class = f"Gaudi::Functional::{base_class}"
+    
+    template_sig = generate_template_signature(functional_type, inputs, outputs, framework)
+    constructor = generate_constructor(class_name, functional_type, inputs, outputs, framework, base_class)
     operator_sig = generate_operator_signature(functional_type, inputs, outputs)
-    operator_body = generate_operator_body(functional_type, inputs, outputs)
+    operator_body = generate_operator_body(functional_type, outputs)
+    includes = generate_includes(functional_type, inputs, outputs, framework, properties)
+    prop_declarations = generate_properties(properties)
+    return_type_alias = generate_return_type_alias(outputs)
     
-    # Build constructor initializer list
-    init_parts = [f"\n           {base_class}(\n               name,\n               pSvc"]
-    if input_keyvalues:
-        init_parts.append(f", {input_keyvalues}")
-    if output_keyvalues:
-        init_parts.append(f",\n               {output_keyvalues}")
-    init_parts.append(")")
-    
-    constructor_init = ''.join(init_parts)
+    class_keyword = "struct" if use_struct else "class"
+    public_keyword = "" if use_struct else "public:\n"
     
     code = f"""// Generated by Gaudi Functional C++ Class Generator
-#include "GaudiAlg/Functional.h"
-#include "GaudiKernel/KeyValue.h"
+{includes}
 
 """
     
     if namespace:
         code += f"namespace {namespace} {{\n\n"
     
-    code += f"""class {class_name}
-  : public Gaudi::Functional::{base_class}<{template_sig}> {{
+    # Use retType alias if it exists
+    if return_type_alias:
+        code += return_type_alias
+        template_for_class = "retType()"
+    else:
+        template_for_class = template_sig
+    
+    code += f"""{class_keyword} {class_name} final : {base_class}<{template_for_class}> {{
 
-public:
-    {class_name}(const std::string& name, ISvcLocator* pSvc)
-      :{constructor_init} {{}}
+{public_keyword}{constructor}
 
-    {operator_sig} {{
-{operator_body}    }}
+  // This is the function that will be called to produce the data
+  {operator_sig} {{
+{operator_body}  }}{prop_declarations}
 }};
 
 """
@@ -291,8 +437,11 @@ def main():
     elif args.functional_type == 'producer' and not args.outputs:
         print("Error: Producer requires at least one output", file=sys.stderr)
         return 1
-    elif args.functional_type in ['transformer', 'filter'] and (not args.inputs or not args.outputs):
-        print(f"Error: {args.functional_type} requires both inputs and outputs", file=sys.stderr)
+    elif args.functional_type in ['transformer', 'filter'] and not args.inputs:
+        print(f"Error: {args.functional_type} requires at least one input", file=sys.stderr)
+        return 1
+    elif args.functional_type == 'transformer' and not args.outputs:
+        print(f"Error: {args.functional_type} requires at least one output", file=sys.stderr)
         return 1
     
     # Generate the class
@@ -301,14 +450,16 @@ def main():
         args.functional_type,
         args.inputs,
         args.outputs,
-        args.namespace
+        args.namespace,
+        args.framework,
+        args.struct,
+        args.properties
     )
     
     # Determine output file
     output_file = args.output_file
     if not output_file:
-        ext = '.h' if args.header_only else '.cpp'
-        output_file = f"{args.class_name}{ext}"
+        output_file = f"{args.class_name}.cpp"
     
     # Write to file or stdout
     if output_file == '-':
