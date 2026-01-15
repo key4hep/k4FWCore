@@ -190,20 +190,22 @@ def generate_keyvalue_gaudi(data_specs: List[str]) -> str:
 
 
 def generate_constructor(class_name: str, functional_type: str, inputs: List[str], 
-                        outputs: List[str], framework: str, base_class: str) -> str:
+                        outputs: List[str], framework: str, base_class_short: str) -> str:
     """Generate the constructor."""
     if framework == 'k4fwcore':
         input_kv = generate_keyvalues_k4fwcore(inputs, True)
         output_kv = generate_keyvalues_k4fwcore(outputs, False)
         
+        # For k4FWCore, use the short base class name (just "Producer", not "k4FWCore::Producer")
+        # because we're already inheriting from the fully qualified name
         return f"""  {class_name}(const std::string& name, ISvcLocator* svcLoc)
-      : {base_class}(name, svcLoc, {input_kv},
+      : {base_class_short}(name, svcLoc, {input_kv},
                  {output_kv}) {{}}"""
     else:  # gaudi
         input_kv = generate_keyvalue_gaudi(inputs)
         output_kv = generate_keyvalue_gaudi(outputs)
         
-        init_parts = [f"\n           {base_class}(\n               name,\n               pSvc"]
+        init_parts = [f"\n           {base_class_short}(\n               name,\n               pSvc"]
         if input_kv:
             init_parts.append(f", {input_kv}")
         if output_kv:
@@ -373,15 +375,16 @@ def generate_class(class_name: str, functional_type: str, inputs: List[str],
                    outputs: List[str], namespace: str, framework: str,
                    use_class: bool, properties: List[str], command_line: str) -> str:
     """Generate the complete C++ class code."""
-    base_class = FUNCTIONAL_TYPES[functional_type]['base']
+    base_class_short = FUNCTIONAL_TYPES[functional_type]['base']
     
     if framework == 'k4fwcore':
-        base_class = f"k4FWCore::{base_class}"
+        base_class_full = f"k4FWCore::{base_class_short}"
     else:
-        base_class = f"Gaudi::Functional::{base_class}"
+        base_class_full = f"Gaudi::Functional::{base_class_short}"
     
     template_sig = generate_template_signature(functional_type, inputs, outputs, framework)
-    constructor = generate_constructor(class_name, functional_type, inputs, outputs, framework, base_class)
+    # Pass just the short name for constructor initialization
+    constructor = generate_constructor(class_name, functional_type, inputs, outputs, framework, base_class_short)
     operator_sig = generate_operator_signature(functional_type, inputs, outputs)
     operator_body = generate_operator_body(functional_type, outputs)
     includes = generate_includes(functional_type, inputs, outputs, framework, properties)
@@ -412,7 +415,7 @@ def generate_class(class_name: str, functional_type: str, inputs: List[str],
     else:
         template_for_class = template_sig
     
-    code += f"""{class_keyword} {class_name} final : {base_class}<{template_for_class}> {{
+    code += f"""{class_keyword} {class_name} final : {base_class_full}<{template_for_class}> {{
 
 {public_keyword}{constructor}
 
@@ -484,4 +487,3 @@ def main():
 
 if __name__ == '__main__':
     sys.exit(main())
-    
