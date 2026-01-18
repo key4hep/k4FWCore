@@ -112,7 +112,7 @@ def add_arguments(parser, app_mgr):
                 f"--{propName}",
                 f"--{propNameReversed}",
                 type=proptype,
-                help=prop_value[1],
+                help=prop_value[1].replace('%', '%%').strip(),
                 nargs=args,
                 default=value,
             )
