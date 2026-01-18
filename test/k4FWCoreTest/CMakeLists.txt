@@ -240,6 +240,7 @@ add_test_fwcore(FunctionalProducerRNTuple options/ExampleFunctionalProducer.py -
 add_test_fwcore(FunctionalFileRNTuple options/ExampleFunctionalFile.py --IOSvc.OutputType RNTuple --IOSvc.Input functional_producer_rntuple.root --IOSvc.Output functional_producer_rntuple_file.root PROPERTIES FIXTURES_REQUIRED FunctionalRNTupleFile ADD_TO_CHECK_FILES)
 add_test_fwcore(FunctionalTTreeToRNTuple options/ExampleFunctionalTTreeToRNTuple.py PROPERTIES FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
 add_test_fwcore(GaudiFunctional options/ExampleGaudiFunctional.py PROPERTIES FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
+add_test_fwcore(SequenceLoader options/ExampleSequenceLoader.py)
 add_test_fwcore(ReadLimitedInputsIOSvc options/ExampleIOSvcLimitInputCollections.py PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile ADD_TO_CHECK_FILES)
 add_test_fwcore(ReadLimitedInputsAllEventsIOSvc options/ExampleIOSvcLimitInputCollections.py --IOSvc.Output "functional_limited_input_all_events.root" -n -1 PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile ADD_TO_CHECK_FILES)
 
