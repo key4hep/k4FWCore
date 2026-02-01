@@ -1,3 +1,42 @@
+# v01-05
+
+* 2026-01-19 Juan Miguel Carceller ([PR#373](https://github.com/key4hep/k4FWCore/pull/373))
+  - Turn `%` into `%%` in the argparse help of `k4run` to avoid a python error in `EfficiencyFilter.cpp`.
+
+* 2026-01-16 Thomas Madlener ([PR#371](https://github.com/key4hep/k4FWCore/pull/371))
+  - Ensure we can still configure and build with EDM4hep 1.0
+
+* 2026-01-07 Juan Miguel Carceller ([PR#370](https://github.com/key4hep/k4FWCore/pull/370))
+  - Fix crash when running with IOSvc and DataHandles of types that are not collections.
+
+* 2026-01-07 Juan Miguel Carceller ([PR#369](https://github.com/key4hep/k4FWCore/pull/369))
+  - Add missing test forgotten in b233ef11c3649ea2213f74be169d59cc80d49999 (https://github.com/key4hep/k4FWCore/pull/345)
+
+* 2026-01-07 Thomas Madlener ([PR#368](https://github.com/key4hep/k4FWCore/pull/368))
+  - Move the scheduling of the stopping of the event loop to later in the loop to give precedence of other failures during the event loop that would otherwise be shadowed.
+
+* 2025-12-23 Juan Miguel Carceller ([PR#366](https://github.com/key4hep/k4FWCore/pull/366))
+  - Fix the construction of details::ReadHandle from Gaudi following the changes in  https://gitlab.cern.ch/gaudi/Gaudi/-/merge_requests/1856 to fix compilation with Gaudi 40.2 when tests are enabled
+
+* 2025-12-19 Thomas Madlener ([PR#362](https://github.com/key4hep/k4FWCore/pull/362))
+  - Introduce the `type` subcommand to the `outputCommands` grammar to keep / drop all collections of a given datatype.
+
+* 2025-12-19 Thomas Madlener ([PR#344](https://github.com/key4hep/k4FWCore/pull/344))
+  - Add documentation about histograms
+
+* 2025-11-25 Juan Miguel Carceller ([PR#360](https://github.com/key4hep/k4FWCore/pull/360))
+  - Add support for passing EventContext in functional algorithms
+  - Add a test consumer, transformer and multitransformer that take an `EventContext` and tests that run them
+
+* 2025-11-24 sss ([PR#341](https://github.com/key4hep/k4FWCore/pull/341))
+  - Add macro K4_GAUDI_CHECK (in k4FWCore/k4_check.h) to reduce the boilerplate involved in checking Gaudi return status.  If its argument is false, the macro will emit and error and return StatusCode::FAILURE.
+
+* 2025-11-21 Thomas Madlener ([PR#361](https://github.com/key4hep/k4FWCore/pull/361))
+  - Make sure to only set an `OutputLevel` on the `ApplicationMgr` if `--log-level` has actually been used instead of setting it to `INFO` (regardless of the user configuration in the option file) even if no `--log-level` has passed
+
+* 2025-11-20 Thomas Madlener ([PR#363](https://github.com/key4hep/k4FWCore/pull/363))
+  - Use cmake fixtures to properly denote dependencies between tests
+
 # v01-04
 
 * 2025-11-07 Juan Miguel Carceller ([PR#357](https://github.com/key4hep/k4FWCore/pull/357))
