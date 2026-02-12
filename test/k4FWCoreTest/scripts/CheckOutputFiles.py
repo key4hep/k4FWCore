@@ -327,35 +327,36 @@ for i, filename in enumerate(
         "gaudiConfigOptions"
     )
     configuration_metadata = [elem.strip(" ,;\n") for elem in configuration_metadata]
+    # Split each element into key and value, remove the surrounding quotes from the value
     configuration_metadata = {
-        elem.split("=")[0]: elem.split("=")[1] for elem in configuration_metadata
+        elem.split("=")[0]: elem.split("=")[1][2:-1] for elem in configuration_metadata
     }
 
     props_and_values = {
-        "intProp": '"42"',
-        "intProp2": '"69"',
-        "floatProp": '"3.14000"',
-        "floatProp2": '"2.71828"',
-        "doubleProp": '"3.1400000"',
-        "doubleProp2": '"2.7182818"',
-        "stringProp": "\"'Hello'\"",
-        "stringProp2": "\"'Hello, World!'\"",
-        "vectorIntProp": '"[ 1 , 2 , 3 ]"',
-        "vectorIntProp2": '"[ 1 , 2 , 3 , 4 ]"',
-        "vectorFloatProp": '"[ 1.10000 , 2.20000 , 3.30000 ]"',
-        "vectorFloatProp2": '"[ 1.10000 , 2.20000 , 3.30000 , 4.40000 ]"',
-        "vectorDoubleProp": '"[ 1.1000000 , 2.2000000 , 3.3000000 ]"',
-        "vectorDoubleProp2": '"[ 1.1000000 , 2.2000000 , 3.3000000 , 4.4000000 ]"',
-        "vectorStringProp": "\"[ 'one' , 'two' , 'three' ]\"",
-        "vectorStringProp2": "\"[ 'one' , 'two' , 'three' , 'four' ]\"",
+        "intProp": 42,
+        "intProp2": 69,
+        "floatProp": 3.14,
+        "floatProp2": 2.71828,
+        "doubleProp": 3.14,
+        "doubleProp2": 2.7182818,
+        "stringProp": "Hello",
+        "stringProp2": "Hello, World!",
+        "vectorIntProp": [1, 2, 3],
+        "vectorIntProp2": [1, 2, 3, 4],
+        "vectorFloatProp": [1.1, 2.2, 3.3],
+        "vectorFloatProp2": [1.1, 2.2, 3.3, 4.4],
+        "vectorDoubleProp": [1.1, 2.2, 3.3],
+        "vectorDoubleProp2": [1.1, 2.2, 3.3, 4.4],
+        "vectorStringProp": ["one", "two", "three"],
+        "vectorStringProp2": ["one", "two", "three", "four"],
     }
 
     alg_name = "CellIDWriter" if i < 2 else "Producer"
     for prop, value in props_and_values.items():
         print(prop, value)
-        if configuration_metadata[f"{alg_name}.{prop} "] != f" {value}":
+        if eval(configuration_metadata[f"{alg_name}.{prop} "]) != value:
             raise RuntimeError(
-                f"Property {prop} has value {configuration_metadata[f'CellIDWriter.{prop} ']}, expected {value}"
+                f"Property {prop} has value {configuration_metadata[f'CellIDWriter.{prop} ']}, expected {value} (after eval)"
             )
 
 
