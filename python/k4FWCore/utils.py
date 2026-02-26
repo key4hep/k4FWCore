@@ -21,7 +21,7 @@ import os
 import re
 import logging
 import sys
-from typing import Union
+from typing import Union, Optional, Dict, Any
 from importlib.machinery import SourceFileLoader
 import importlib.util
 from pathlib import Path
@@ -127,3 +127,46 @@ def get_logger() -> logging.Logger:
     _logger.handlers = [handler]
 
     return _logger
+
+
+def import_from(
+    filename: Union[str, os.PathLike],
+    module_name: Optional[str] = None,
+    global_vars: Optional[Dict[str, Any]] = None,
+) -> Any:
+    """Dynamically imports a module from the specified file path.
+
+    This function imports a module from a given filename, with the option to
+    specify the module's name and inject global variables into the module before
+    it is returned. If `module_name` is not provided, the filename is used as
+    the module name after replacing '.' with '_'. Global variables can be passed
+    as a dictionary to `global_vars`, which will be injected into the module's
+    namespace.
+
+    Args:
+        filename (str): The path to the file from which to import the module.
+        module_name (Optional[str]): The name to assign to the module. Defaults
+            to None, in which case the filename is used as the module name.
+        global_vars (Optional[Dict[str, Any]]): A dictionary of global variables
+            to inject into the module's namespace. Defaults to None.
+
+    Returns:
+        Any: The imported module with the specified modifications.
+
+    Raises:
+        FileNotFoundError: If the specified file does not exist.
+        ImportError: If there is an error during the import process.
+
+    """
+    filename = os.path.abspath(filename)
+    if not os.path.exists(filename):
+        raise FileNotFoundError(f"No such file: '{filename}'")
+
+    module_name = module_name or os.path.basename(filename).replace(".", "_")
+    loader = SourceFileLoader(module_name, filename)
+    spec = importlib.util.spec_from_loader(loader.name, loader)
+    module = importlib.util.module_from_spec(spec)
+    if global_vars:
+        module.__dict__.update(global_vars)
+    loader.exec_module(module)
+    return module
