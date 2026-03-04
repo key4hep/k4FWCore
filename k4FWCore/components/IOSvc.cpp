@@ -146,10 +146,6 @@ std::tuple<std::vector<podio::CollectionBase*>, std::vector<std::string>, podio:
 // should be removed so that they are deleted when the Frame is deleted
 // and not deleted when clearing the store
 void IOSvc::handle(const Incident& incident) {
-  // There is a data race with m_nextEntry also being modified in next()
-  // However, if the correct number of events has been scheduled
-  // the comparison should always be true, and even if any event is running
-  // it will increase and the comparison will still be true
   if (m_reader.has_value() && incident.type() == "EndEvent" && m_nextEntry >= m_entries) {
     debug() << "Reached the end of the input file. Scheduling a stop of the event loop" << endmsg;
     auto ep = serviceLocator()->as<IEventProcessor>();
