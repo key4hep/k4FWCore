@@ -16,6 +16,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from .ApplicationMgr import ApplicationMgr
-from .IOSvc import IOSvc
-from .SequenceLoader import SequenceLoader
+
+# This is an example reading from a file and using a producer to create new
+# data
+
+from Configurables import ExampleGaudiFunctionalProducer
+
+
+gaudi_producer = ExampleGaudiFunctionalProducer("GaudiProducer", OutputCollectionName="Output")
+
+ExampleSequenceSequence = [gaudi_producer]
