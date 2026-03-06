@@ -30,6 +30,8 @@
 #include "GaudiKernel/AnyDataWrapper.h"
 #include "GaudiKernel/IEventProcessor.h"
 
+#include "TROOT.h"
+
 #include <mutex>
 #include <tuple>
 
@@ -97,6 +99,11 @@ StatusCode IOSvc::initialize() {
   }
 
   m_hiveWhiteBoard = service("EventDataSvc");
+  if (m_hiveWhiteBoard) {
+    // Needs to enabled following the recommendation in
+    // https://root.cern/manual/multi_threading/#explicit-multi-threading
+    ROOT::EnableThreadSafety();
+  }
 
   return StatusCode::SUCCESS;
 }

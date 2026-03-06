@@ -33,6 +33,7 @@
 #include "k4FWCore/IMetadataSvc.h"
 #include "k4FWCore/KeepDropSwitch.h"
 
+#include <atomic>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -89,7 +90,7 @@ protected:
   void handle(const Incident& incident) override;
 
   int m_entries{0};
-  int m_nextEntry{0};
+  std::atomic<int> m_nextEntry{0};
 
   bool checkIfWriteCollection(const std::string& collName, const std::string_view collType) const override;
 };
