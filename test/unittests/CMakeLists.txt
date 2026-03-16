@@ -68,7 +68,6 @@ target_link_libraries(unittests_k4FWCore
   k4FWCore::k4FWCore
   PRIVATE Catch2::Catch2WithMain
 )
-target_link_options(unittests_k4FWCore PRIVATE "-fsanitize=address")
 # Catch2 TEST_CASE/SECTION macros expand __COUNTER__ at the call site in user
 # code, so marking Catch2 headers as system includes is not sufficient to
 # suppress this warning, present with Clang 22
