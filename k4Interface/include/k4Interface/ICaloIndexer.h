@@ -27,7 +27,6 @@
 #define K4INTERFACE_ICALOINDEXER_H
 
 #include <cstdint>
-#include <memory>
 #include <span>
 
 /**
