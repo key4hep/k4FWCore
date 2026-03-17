@@ -55,6 +55,11 @@ if(NOT Catch2_FOUND)
 
   # Reset the flags
   set(CMAKE_CXX_FLAGS ${CXX_FLAGS_CMAKE_USED})
+else()
+  # Same hack as above for the system-installed Catch2: mark its include
+  # directories as SYSTEM to suppress warnings from Catch2 headers
+  get_target_property(CATCH2_IF_INC_DIRS Catch2::Catch2 INTERFACE_INCLUDE_DIRECTORIES)
+  set_target_properties(Catch2::Catch2 PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${CATCH2_IF_INC_DIRS}")
 endif()
 
 add_executable(unittests_k4FWCore KeepDropSwitchTests.cpp)
@@ -63,6 +68,10 @@ target_link_libraries(unittests_k4FWCore
   k4FWCore::k4FWCore
   PRIVATE Catch2::Catch2WithMain
 )
+# Catch2 TEST_CASE/SECTION macros expand __COUNTER__ at the call site in user
+# code, so marking Catch2 headers as system includes is not sufficient to
+# suppress this warning, present with Clang 22
+target_compile_options(unittests_k4FWCore PRIVATE -Wno-c2y-extensions)
 
 include(Catch)
 catch_discover_tests(unittests_k4FWCore
