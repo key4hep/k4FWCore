@@ -27,7 +27,7 @@
 namespace k4FWCore {
 
 template <typename T>
-class MetaDataHandle {
+class [[deprecated("Use k4FWCore::putParameter / k4FWCore::getParameter from MetadataUtils.h instead")]] MetaDataHandle {
 public:
   MetaDataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode a);
   MetaDataHandle(const Gaudi::DataHandle& handle, const std::string& descriptor, Gaudi::DataHandle::Mode a);
