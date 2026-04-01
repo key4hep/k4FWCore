@@ -24,8 +24,19 @@
 #include <Gaudi/Algorithm.h>
 #include <GaudiKernel/Service.h>
 
+#include <ostream>
+#include <type_traits>
 
 namespace k4FWCore {
+
+namespace detail {
+  template <typename T, typename = void>
+  struct is_streamable : std::false_type {};
+
+  template <typename T>
+  struct is_streamable<T, std::void_t<decltype(std::declval<std::ostream&>() << std::declval<const T&>())>>
+      : std::true_type {};
+} // namespace detail
 
 /// @brief Save a metadata parameter in the metadata frame
 /// @param name The name of the parameter
@@ -36,6 +47,11 @@ namespace k4FWCore {
 ///                   pretty much all of the use cases
 template <typename T, typename GaudiComp = Gaudi::Algorithm>
 void putParameter(const std::string& name, const T& value, const GaudiComp* comp) {
+  comp->debug() << "Trying to put parameter '" << name << "'";
+  if constexpr (detail::is_streamable<T>::value) {
+    comp->debug() << " (value = " << value << ")";
+  }
+  comp->debug() << endmsg;
   auto metadataSvc = comp->template service<IMetadataSvc>("MetadataSvc", false);
   if (!metadataSvc) {
     comp->error() << "MetadataSvc not found" << endmsg;
@@ -67,6 +83,7 @@ putParameter(const std::string& name, const T& value) {
 /// @return std::optional<T> The value of the parameter, if it exists or std::nullopt
 template <typename T, typename GaudiComp = Gaudi::Algorithm>
 std::optional<T> getParameter(const std::string& name, const GaudiComp* comp) {
+  comp->debug() << "Trying to get parameter '" << name << "'" << endmsg;
   auto metadataSvc = comp->template service<IMetadataSvc>("MetadataSvc", false);
   if (!metadataSvc) {
     comp->error() << "MetadataSvc not found" << endmsg;
