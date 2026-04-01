@@ -19,7 +19,11 @@
 from Gaudi.Configuration import INFO
 
 from Configurables import k4DataSvc
-from Configurables import k4FWCoreTest_cellID_writer, k4FWCoreTest_cellID_reader
+from Configurables import (
+    k4FWCoreTest_cellID_writer,
+    k4FWCoreTest_cellID_reader,
+    MetadataSvc,
+)
 from Configurables import PodioOutput
 from k4FWCore import ApplicationMgr
 
@@ -49,7 +53,7 @@ ApplicationMgr(
     TopAlg=[producer, consumer, out],
     EvtSel="NONE",
     EvtMax=10,
-    ExtSvc=[podioevent],
+    ExtSvc=[podioevent, MetadataSvc()],
     OutputLevel=INFO,
     StopOnSignal=True,
 )
