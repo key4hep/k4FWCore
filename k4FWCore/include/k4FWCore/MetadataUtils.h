@@ -19,25 +19,29 @@
 #ifndef FWCORE_METADATAUTILS_H
 #define FWCORE_METADATAUTILS_H
 
-#include "Gaudi/Algorithm.h"
+#include "k4FWCore/IMetadataSvc.h"
+
+#include <Gaudi/Algorithm.h>
 #include <GaudiKernel/Service.h>
 
-#include "k4FWCore/IMetadataSvc.h"
 
 namespace k4FWCore {
 
 /// @brief Save a metadata parameter in the metadata frame
 /// @param name The name of the parameter
 /// @param value The value of the parameter
-/// @param alg The algorithm that is saving the parameter, typically "this"
-template <typename T>
-void putParameter(const std::string& name, const T& value, const Gaudi::Algorithm* alg) {
-  auto metadataSvc = alg->service<IMetadataSvc>("MetadataSvc", false);
+/// @param comp The Gaudi component (algorithm, tool) that is saving the
+///             parameter, typically "this"
+/// @tparam GaudiComp The type of the component. This will be deduced in
+///                   pretty much all of the use cases
+template <typename T, typename GaudiComp = Gaudi::Algorithm>
+void putParameter(const std::string& name, const T& value, const GaudiComp* comp) {
+  auto metadataSvc = comp->template service<IMetadataSvc>("MetadataSvc", false);
   if (!metadataSvc) {
-    alg->error() << "MetadataSvc not found" << endmsg;
+    comp->error() << "MetadataSvc not found" << endmsg;
     return;
   }
-  metadataSvc->put<T>(name, value);
+  metadataSvc->template put<T>(name, value);
 }
 
 /// @brief Save a metadata parameter in the metadata frame. Overload for compatibility
@@ -56,16 +60,19 @@ putParameter(const std::string& name, const T& value) {
 
 /// @brief Get a metadata parameter from the metadata frame
 /// @param name The name of the parameter
-/// @param alg The algorithm that is saving the parameter, typically "this"
+/// @param comp The Gaudi component (algorithm, tool) that is retrieving the
+///             parameter, typically "this"
+/// @tparam GaudiComp The type of the component. This will be deduced in
+///                   pretty much all of the use cases
 /// @return std::optional<T> The value of the parameter, if it exists or std::nullopt
-template <typename T>
-std::optional<T> getParameter(const std::string& name, const Gaudi::Algorithm* alg) {
-  auto metadataSvc = alg->service<IMetadataSvc>("MetadataSvc", false);
+template <typename T, typename GaudiComp = Gaudi::Algorithm>
+std::optional<T> getParameter(const std::string& name, const GaudiComp* comp) {
+  auto metadataSvc = comp->template service<IMetadataSvc>("MetadataSvc", false);
   if (!metadataSvc) {
-    alg->error() << "MetadataSvc not found" << endmsg;
+    comp->error() << "MetadataSvc not found" << endmsg;
     return std::nullopt;
   }
-  return metadataSvc->get<T>(name);
+  return metadataSvc->template get<T>(name);
 }
 
 /// @brief Get a metadata parameter from the metadata frame. Overload for compatibility
