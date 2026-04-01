@@ -19,6 +19,8 @@
 #include "k4FWCoreTest_cellID_reader.h"
 #include "k4FWCoreTest_cellID_writer.h"
 
+#include <k4FWCore/MetadataUtils.h>
+
 DECLARE_COMPONENT(k4FWCoreTest_cellID_reader)
 
 k4FWCoreTest_cellID_reader::k4FWCoreTest_cellID_reader(const std::string& aName, ISvcLocator* aSvcLoc)
@@ -32,22 +34,15 @@ k4FWCoreTest_cellID_reader::k4FWCoreTest_cellID_reader(const std::string& aName,
 StatusCode k4FWCoreTest_cellID_reader::execute(const EventContext&) const {
   [[maybe_unused]] const auto simtrackerhits_coll = m_simTrackerHitReaderHandle.get();
 
-  const auto cellIDstr = m_cellIDHandle.get();
-
-  if (cellIDstr != cellIDtest) {
-    error() << "ERROR cellID is: " << cellIDstr << "expected (" << cellIDtest << ")" << endmsg;
-    return StatusCode::FAILURE;
-  }
-
-  auto optCellIDstr = m_cellIDHandle.get_optional();
+  const auto optCellIDstr = k4FWCore::getCellIDEncoding(m_simTrackerHitReaderHandle.objKey(), this);
 
   if (!optCellIDstr.has_value()) {
     error() << "ERROR: cellID is empty but was expected to hold a value" << endmsg;
     return StatusCode::FAILURE;
   }
 
-  if (optCellIDstr.value() != cellIDstr) {
-    error() << "ERROR: metadata accessed with by optional and value differs" << endmsg;
+  if (optCellIDstr.value() != cellIDtest) {
+    error() << "ERROR cellID is: " << optCellIDstr.value() << " expected (" << cellIDtest << ")" << endmsg;
     return StatusCode::FAILURE;
   }
 

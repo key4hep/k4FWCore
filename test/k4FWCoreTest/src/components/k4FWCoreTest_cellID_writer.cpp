@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 #include "k4FWCoreTest_cellID_writer.h"
+#include "k4FWCore/MetadataUtils.h"
 
 DECLARE_COMPONENT(k4FWCoreTest_cellID_writer)
 
@@ -32,7 +33,8 @@ StatusCode k4FWCoreTest_cellID_writer::initialize() {
   if (Gaudi::Algorithm::initialize().isFailure()) {
     return StatusCode::FAILURE;
   }
-  m_cellIDHandle.put(cellIDtest);
+
+  k4FWCore::putCellIDEncoding(m_simTrackerHitWriterHandle.objKey(), cellIDtest, this);
 
   return StatusCode::SUCCESS;
 }
