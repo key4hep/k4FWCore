@@ -153,7 +153,7 @@ add_test(NAME AlgorithmWithTFileCheckMyTFileOutput
 set_property(TEST AlgorithmWithTFileCheckMyTFileOutput APPEND PROPERTY FIXTURES_REQUIRED AlgorithmWithTFileFixture)
 
 add_test_fwcore(CreateExampleEventData_cellID options/createExampleEventData_cellID.py ADD_TO_CHECK_FILES)
-add_test_fwcore(TwoProducers options/TwoProducers.py --filename output_k4fwcore_test_twoproducer.root
+add_test_fwcore(TwoProducers options/TwoProducers.py
                   --magicNumberOffset.Producer2 12345 --Producer1.magicNumberOffset 54321)
 add_test_fwcore(CheckCommandLineArguments options/createHelloWorld.py --HelloWorldAlg1.PerEventPrintMessage TwasBrilligAndTheSlithyToves
 PROPERTIES PASS_REGULAR_EXPRESSION "TwasBrilligAndTheSlithyToves"

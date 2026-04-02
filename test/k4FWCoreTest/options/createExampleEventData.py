@@ -18,27 +18,21 @@
 #
 from Gaudi.Configuration import INFO
 
-from Configurables import k4DataSvc
+from Configurables import EventDataSvc
 from Configurables import k4FWCoreTest_CreateExampleEventData
-from Configurables import PodioOutput
-from k4FWCore import ApplicationMgr
+from k4FWCore import ApplicationMgr, IOSvc
 
-podioevent = k4DataSvc("EventDataSvc")
-
+iosvc = IOSvc()
+iosvc.Output = "output_k4test_exampledata.root"
+iosvc.outputCommands = ["keep *"]
 
 producer = k4FWCoreTest_CreateExampleEventData()
 
-
-out = PodioOutput("out")
-out.filename = "output_k4test_exampledata.root"
-out.outputCommands = ["keep *"]
-
-
 ApplicationMgr(
-    TopAlg=[producer, out],
+    TopAlg=[producer],
     EvtSel="NONE",
     EvtMax=100,
-    ExtSvc=[podioevent],
+    ExtSvc=[EventDataSvc()],
     OutputLevel=INFO,
     StopOnSignal=True,
 )
