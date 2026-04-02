@@ -140,24 +140,7 @@ void putCollectionParameter(const std::string& collName, const std::string& para
 ///                   pretty much all of the use cases
 template <typename GaudiComp = Gaudi::Algorithm>
 void putCellIDEncoding(const std::string& collName, const std::string& encoding, const GaudiComp* comp) {
-  putParameter(podio::collMetadataParamName(collName, edm4hep::labels::CellIDEncoding), encoding, comp);
-}
-
-/// @brief Get the CellID encoding string for a collection from the metadata
-///
-/// Internally builds the correct parameter name and then retrieves the encoding
-/// from the metadata frame via the MetadataSvc
-///
-/// @param collName The name of the collection for which the encoding should be
-///                 retrieved
-/// @param comp The Gaudi component (algorithm, tool) that is retrieving the
-///             encoding, typically "this"
-/// @tparam GaudiComp The type of the component. This will be deduced in
-///                   pretty much all of the use cases
-/// @return  The encoding string if it has been found or std::nullopt if not
-template <typename GaudiComp = Gaudi::Algorithm>
-std::optional<std::string> getCellIDEncoding(const std::string& collName, const GaudiComp* comp) {
-  return getParameter<std::string>(podio::collMetadataParamName(collName, edm4hep::labels::CellIDEncoding), comp);
+  putCollectionParameter(collName, edm4hep::labels::CellIDEncoding, encoding, comp);
 }
 
 /// @brief Get a metadata parameter associated with a collection from the metadata
@@ -179,6 +162,23 @@ template <typename T, typename GaudiComp = Gaudi::Algorithm>
 std::optional<T> getCollectionParameter(const std::string& collName, const std::string& paramName,
                                         const GaudiComp* comp) {
   return getParameter<T>(podio::collMetadataParamName(collName, paramName), comp);
+}
+
+/// @brief Get the CellID encoding string for a collection from the metadata
+///
+/// Internally builds the correct parameter name and then retrieves the encoding
+/// from the metadata frame via the MetadataSvc
+///
+/// @param collName The name of the collection for which the encoding should be
+///                 retrieved
+/// @param comp The Gaudi component (algorithm, tool) that is retrieving the
+///             encoding, typically "this"
+/// @tparam GaudiComp The type of the component. This will be deduced in
+///                   pretty much all of the use cases
+/// @return  The encoding string if it has been found or std::nullopt if not
+template <typename GaudiComp = Gaudi::Algorithm>
+std::optional<std::string> getCellIDEncoding(const std::string& collName, const GaudiComp* comp) {
+  return getCollectionParameter<std::string>(collName, edm4hep::labels::CellIDEncoding, comp);
 }
 
 } // namespace k4FWCore
