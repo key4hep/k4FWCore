@@ -84,10 +84,12 @@ struct ExampleParticleIDConsumer final
 
   StatusCode initialize() final {
     m_pidMeta1 =
-        k4FWCore::getParameter<edm4hep::utils::ParticleIDMeta>(inputLocations("ParticleIDCollection1")[0]).value();
+        k4FWCore::getParameter<edm4hep::utils::ParticleIDMeta>(inputLocations("ParticleIDCollection1")[0], this)
+            .value();
 
     m_pidMeta2 =
-        k4FWCore::getParameter<edm4hep::utils::ParticleIDMeta>(inputLocations("ParticleIDCollection2")[0]).value();
+        k4FWCore::getParameter<edm4hep::utils::ParticleIDMeta>(inputLocations("ParticleIDCollection2")[0], this)
+            .value();
 
     if (!checkAlgoMetadata(m_pidMeta1, m_pidAlgoName1, m_pidParamNames1) ||
         !checkAlgoMetadata(m_pidMeta2, m_pidAlgoName2, m_pidParamNames2)) {
