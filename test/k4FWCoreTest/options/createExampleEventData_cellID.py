@@ -16,18 +16,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from Gaudi.Configuration import INFO
+from Gaudi.Configuration import INFO, DEBUG
 
-from Configurables import k4DataSvc
 from Configurables import (
     k4FWCoreTest_cellID_writer,
     k4FWCoreTest_cellID_reader,
     MetadataSvc,
+    EventDataSvc,
 )
-from Configurables import PodioOutput
-from k4FWCore import ApplicationMgr
+from k4FWCore import ApplicationMgr, IOSvc
 
-podioevent = k4DataSvc("EventDataSvc")
+evtDataSvc = EventDataSvc("EventDataSvc")
+evtDataSvc.OutputLevel = DEBUG
 
 
 producer = k4FWCoreTest_cellID_writer(
@@ -40,20 +40,19 @@ producer = k4FWCoreTest_cellID_writer(
     vectorFloatProp2=[1.1, 2.2, 3.3, 4.4],
     vectorDoubleProp2=[1.1, 2.2, 3.3, 4.4],
     vectorStringProp2=["one", "two", "three", "four"],
+    OutputLevel=DEBUG,
 )
 consumer = k4FWCoreTest_cellID_reader()
 
-
-out = PodioOutput("out")
-out.filename = "output_k4test_exampledata_cellid.root"
-out.outputCommands = ["keep *"]
-
+iosvc = IOSvc()
+iosvc.Input = "output_k4test_exampledata_cellid.root"
+iosvc.outputCommands = ["keep *"]
 
 ApplicationMgr(
-    TopAlg=[producer, consumer, out],
+    TopAlg=[producer, consumer],
     EvtSel="NONE",
     EvtMax=10,
-    ExtSvc=[podioevent, MetadataSvc()],
+    ExtSvc=[evtDataSvc, MetadataSvc()],
     OutputLevel=INFO,
     StopOnSignal=True,
 )

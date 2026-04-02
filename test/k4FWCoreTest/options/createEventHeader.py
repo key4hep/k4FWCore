@@ -16,13 +16,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from Gaudi.Configuration import *
+from Gaudi.Configuration import DEBUG
 
-from Configurables import EventHeaderCreator
-from Configurables import k4DataSvc
-from Configurables import PodioOutput
-from Configurables import ExampleRNGSeedingAlg
-from k4FWCore import ApplicationMgr
+from Configurables import EventHeaderCreator, ExampleRNGSeedingAlg, EventDataSvc
+from k4FWCore import ApplicationMgr, IOSvc
 
 eventHeaderCreator = EventHeaderCreator(
     "eventHeaderCreator", runNumber=42, eventNumberOffset=42, OutputLevel=DEBUG
@@ -31,21 +28,14 @@ eventHeaderCreator = EventHeaderCreator(
 # algorithm using the header to seed a prng
 rngAlg = ExampleRNGSeedingAlg("ExampleRNGSeedingAlg")
 
-podioevent = k4DataSvc("EventDataSvc")
-
-
-out = PodioOutput("out")
-out.filename = "eventHeader.root"
+iosvc = IOSvc()
+iosvc.Output = "eventHeader.root"
 
 
 ApplicationMgr(
-    TopAlg=[
-        eventHeaderCreator,
-        rngAlg,
-        out,
-    ],
+    TopAlg=[eventHeaderCreator, rngAlg],
     EvtSel="NONE",
     EvtMax=2,
-    ExtSvc=[podioevent],
+    ExtSvc=[EventDataSvc()],
     StopOnSignal=True,
 )

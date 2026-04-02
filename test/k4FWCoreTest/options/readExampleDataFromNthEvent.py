@@ -18,28 +18,20 @@
 #
 from Gaudi.Configuration import DEBUG
 
-from Configurables import k4DataSvc
-from Configurables import PodioInput
-from Configurables import PodioOutput
-from k4FWCore import ApplicationMgr
+from Configurables import EventDataSvc
+from k4FWCore import ApplicationMgr, IOSvc
 
-podioevent = k4DataSvc("EventDataSvc")
-podioevent.input = "output_k4test_exampledata.root"
-podioevent.FirstEventEntry = 66
-
-
-inp = PodioInput()
-inp.collections = ["MCParticles", "SimTrackerHits", "Tracks"]
-
-
-oup = PodioOutput()
-oup.filename = "output_k4test_exampledata_3.root"
+iosvc = IOSvc()
+iosvc.Input = "output_k4test_exampledata.root"
+iosvc.FirstEventEntry = 66
+iosvc.CollectionNames = ["MCParticles", "SimTrackerHits", "Tracks"]
+iosvc.Output = "output_k4test_exampledata_3.root"
 
 
 ApplicationMgr(
-    TopAlg=[inp, oup],
+    TopAlg=[],
     EvtSel="NONE",
     EvtMax=5,
-    ExtSvc=[podioevent],
+    ExtSvc=[EventDataSvc()],
     OutputLevel=DEBUG,
 )

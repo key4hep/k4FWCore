@@ -18,10 +18,13 @@
 #
 from Gaudi.Configuration import INFO
 
-from k4FWCore import ApplicationMgr
-from Configurables import k4DataSvc
+from k4FWCore import ApplicationMgr, IOSvc
+from Configurables import EventDataSvc
 from Configurables import k4FWCoreTest_CreateExampleEventData
-from Configurables import PodioOutput
+
+iosvc = IOSvc()
+iosvc.Output = "output_k4test_exampledata_twoproducer.root"
+iosvc.outputCommands = ["keep *"]
 
 ApplicationMgr(
     EvtSel="NONE",
@@ -31,8 +34,7 @@ ApplicationMgr(
 )
 
 
-podioevent = k4DataSvc("EventDataSvc")
-ApplicationMgr().ExtSvc += [podioevent]
+ApplicationMgr().ExtSvc += [EventDataSvc("EventDataSvc")]
 
 
 producer1 = k4FWCoreTest_CreateExampleEventData("Producer1")
@@ -48,9 +50,3 @@ producer2.vectorfloat.Path = "vectorfloat2"
 producer2.recoparticles.Path = "recoparticles2"
 producer2.links.Path = "links"
 ApplicationMgr().TopAlg += [producer2]
-
-
-out = PodioOutput("out")
-out.filename = "output_k4test_exampledata_twoproducer.root"
-out.outputCommands = ["keep *"]
-ApplicationMgr().TopAlg += [out]
