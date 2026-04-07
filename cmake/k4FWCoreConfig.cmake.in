@@ -2,8 +2,7 @@
 # k4FWCore CMake Config
 #
 # Exported Targets
-#  - k4FWCore::k4FWCore         The core library containing the PodioDataSvc
-#                               and the KeepDropSwitch
+#  - k4FWCore::k4FWCore         The core library
 #  - k4FWCore::k4FWCorePlugins  The plugin library for the core plugins
 #                               provided by k4FWCore. Includes all major
 #                               services for I/O and as well as some utility
