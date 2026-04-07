@@ -25,18 +25,13 @@
 #include <GaudiKernel/Service.h>
 
 #include <ostream>
-#include <type_traits>
 
 namespace k4FWCore {
 
-namespace detail {
-  template <typename T, typename = void>
-  struct is_streamable : std::false_type {};
-
-  template <typename T>
-  struct is_streamable<T, std::void_t<decltype(std::declval<std::ostream&>() << std::declval<const T&>())>>
-      : std::true_type {};
-} // namespace detail
+template <typename T>
+concept Streamable = requires(std::ostream& os, const T& v) {
+  { os << v } -> std::convertible_to<std::ostream&>;
+};
 
 /// @brief Save a metadata parameter in the metadata frame
 /// @param name The name of the parameter
@@ -48,7 +43,7 @@ namespace detail {
 template <typename T, typename GaudiComp = Gaudi::Algorithm>
 void putParameter(const std::string& name, const T& value, const GaudiComp* comp) {
   comp->debug() << "Trying to put parameter '" << name << "'";
-  if constexpr (detail::is_streamable<T>::value) {
+  if constexpr (Streamable<T>) {
     comp->debug() << " (value = " << value << ")";
   }
   comp->debug() << endmsg;
