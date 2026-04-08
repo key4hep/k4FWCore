@@ -41,7 +41,7 @@ concept Streamable = requires(std::ostream& os, const T& v) {
 ///             parameter, typically "this"
 /// @tparam GaudiComp The type of the component. This will be deduced in
 ///                   pretty much all of the use cases
-template <typename T, typename GaudiComp = Gaudi::Algorithm>
+template <typename T, typename GaudiComp>
 void putParameter(const std::string& name, const T& value, const GaudiComp* comp) {
   comp->debug() << "Trying to put parameter '" << name << "'";
   if constexpr (Streamable<T>) {
@@ -77,7 +77,7 @@ putParameter(const std::string& name, const T& value) {
 /// @tparam GaudiComp The type of the component. This will be deduced in
 ///                   pretty much all of the use cases
 /// @return std::optional<T> The value of the parameter, if it exists or std::nullopt
-template <typename T, typename GaudiComp = Gaudi::Algorithm>
+template <typename T, typename GaudiComp>
 std::optional<T> getParameter(const std::string& name, const GaudiComp* comp) {
   comp->debug() << "Trying to get parameter '" << name << "'" << endmsg;
   auto metadataSvc = comp->template service<IMetadataSvc>("MetadataSvc", false);
