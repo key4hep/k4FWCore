@@ -24,6 +24,7 @@
 #include <Gaudi/Algorithm.h>
 #include <GaudiKernel/Service.h>
 
+#include <optional>
 #include <ostream>
 
 namespace k4FWCore {
