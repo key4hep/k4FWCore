@@ -36,6 +36,8 @@ struct ExampleFunctionalMetadataProducer final : k4FWCore::Producer<edm4hep::MCP
     k4FWCore::putParameter("ParticleTime", m_particleTime.value(), this);
     k4FWCore::putParameter("PDGValues", m_PDGValues.value(), this);
     k4FWCore::putParameter("MetadataString", m_metadataString.value(), this);
+    k4FWCore::putCollectionParameter("MCParticles", "CollectionIntParam", 42, this);
+    k4FWCore::putCellIDEncoding("MCParticles", "system:8,layer:4,module:8", this);
     return StatusCode::SUCCESS;
   }
 
