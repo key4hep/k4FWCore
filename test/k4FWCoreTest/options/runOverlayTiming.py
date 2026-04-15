@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2020-2024 Key4hep-Project.
+# Copyright (c) 2014-2024 Key4hep-Project.
 #
 # This file is part of Key4hep.
 # See https://key4hep.github.io/key4hep-doc/ for further info.
@@ -52,18 +52,24 @@ overlay.OutputCaloHitContributions = ["NewCaloHitCollection"]
 overlay.NumberBackground = [0.32, 15]
 overlay.Poisson_random_NOverlay = [True, False]
 overlay.BackgroundFileNames = [
-      ["background_group1_1.root"],
-      ["background_group2_1.root"],
+    ["background_group1_1.root"],
+    ["background_group2_1.root"],
 ]
-overlay.TimeWindows = {"MCParticle": [0, 23.5], "VertexBarrelCollection": [0, 23.5], "VertexEndcapCollection": [0, 23.5], "HCalRingCollection": [0, 23.5]}
+overlay.TimeWindows = {
+    "MCParticle": [0, 23.5],
+    "VertexBarrelCollection": [0, 23.5],
+    "VertexEndcapCollection": [0, 23.5],
+    "HCalRingCollection": [0, 23.5],
+}
 overlay.CopyCellIDMetadata = True
 
 # In case the original collections should be dropped
 # iosvc.outputCommands = ["drop MCParticles", "drop VertexBarrelCollection"]
 
-ApplicationMgr(TopAlg=[overlay],
-               EvtSel="NONE",
-               EvtMax=10,
-               ExtSvc=[eds],
-               OutputLevel=INFO,
-               )
+ApplicationMgr(
+    TopAlg=[overlay],
+    EvtSel="NONE",
+    EvtMax=10,
+    ExtSvc=[eds],
+    OutputLevel=INFO,
+)

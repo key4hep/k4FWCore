@@ -71,7 +71,9 @@ def check_metadata(filename, expected_metadata):
 
 check_collections("functional_transformer.root", ["EventHeader", "MCParticles", "NewMCParticles"])
 check_collections("gaudi_functional.root", ["EventHeader", "MCParticles", "NewMCParticles"])
-check_collections("functional_transformer_cli.root", ["EventHeader", "MCParticles", "NewMCParticles"])
+check_collections(
+    "functional_transformer_cli.root", ["EventHeader", "MCParticles", "NewMCParticles"]
+)
 check_collections(
     "functional_transformer_multiple.root",
     [
@@ -388,7 +390,9 @@ for frame in reader.get("events"):
         raise RuntimeError(
             f"Expected {n_signal_mc + n_background_mc} particles in OverlayMCParticles, got {len(overlaid_particles)}"
         )
-    particle_overlay_flags = [overlaid_particles[i].isOverlay() for i in range(len(overlaid_particles))]
+    particle_overlay_flags = [
+        overlaid_particles[i].isOverlay() for i in range(len(overlaid_particles))
+    ]
     if particle_overlay_flags[:n_signal_mc] != [False] * n_signal_mc:
         raise RuntimeError("Signal particles should not be flagged as overlay")
     if particle_overlay_flags[n_signal_mc:] != [True] * n_background_mc:
@@ -399,7 +403,9 @@ for frame in reader.get("events"):
         raise RuntimeError(
             f"Expected {n_signal_sim + n_background_sim} hits in OverlaySimTrackerHits, got {len(overlaid_sim_hits)}"
         )
-    sim_hit_overlay_flags = [overlaid_sim_hits[i].isOverlay() for i in range(len(overlaid_sim_hits))]
+    sim_hit_overlay_flags = [
+        overlaid_sim_hits[i].isOverlay() for i in range(len(overlaid_sim_hits))
+    ]
     if sim_hit_overlay_flags[:n_signal_sim] != [False] * n_signal_sim:
         raise RuntimeError("Signal sim tracker hits should not be flagged as overlay")
     if sim_hit_overlay_flags[n_signal_sim:] != [True] * n_background_sim:
