@@ -125,8 +125,7 @@ private:
       this, "BackgroundFileNames", {}, "List of groups of background input files, one group per overlay stream"};
 
   Gaudi::Property<std::vector<double>> m_Noverlay{
-      this, "NumberBackground", {},
-      "Number of background events to overlay per stream (fixed or Poisson mean)"};
+      this, "NumberBackground", {}, "Number of background events to overlay per stream (fixed or Poisson mean)"};
 
   Gaudi::Property<std::vector<bool>> m_Poisson{
       this,
@@ -134,9 +133,8 @@ private:
       {},
       "If true, draw the number of events from a Poisson distribution with mean NumberBackground"};
 
-  Gaudi::Property<std::string> m_MCParticleCollectionName{
-      this, "BackgroundMCParticleCollectionName", "MCParticle",
-      "Name of the MCParticle collection in the background files"};
+  Gaudi::Property<std::string> m_MCParticleCollectionName{this, "BackgroundMCParticleCollectionName", "MCParticle",
+                                                          "Name of the MCParticle collection in the background files"};
 
   Gaudi::Property<float> m_deltaT{this, "Delta_t", float(0.5), "Time between consecutive bunch crossings (ns)"};
 
@@ -147,8 +145,7 @@ private:
       "Map from collection name to [t_min, t_max] (ns) defining the acceptance window. Required for every "
       "SimTrackerHit and SimCalorimeterHit collection."};
   Gaudi::Property<bool> m_allowReusingBackgroundFiles{
-      this, "AllowReusingBackgroundFiles", false,
-      "If true, wrap around the background file when events are exhausted"};
+      this, "AllowReusingBackgroundFiles", false, "If true, wrap around the background file when events are exhausted"};
   Gaudi::Property<bool> m_copyCellIDMetadata{this, "CopyCellIDMetadata", false,
                                              "Copy cell ID encoding metadata from input to output collections"};
 
