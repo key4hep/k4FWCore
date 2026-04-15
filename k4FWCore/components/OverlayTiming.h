@@ -112,41 +112,45 @@ private:
   constexpr static int SIMCALOHIT_INDEX_POSITION = 3;
 
   Gaudi::Property<bool> m_randomBX{this, "RandomBx", false,
-                                   "Place the physics event at an random position in the train: overrides PhysicsBX"};
-  Gaudi::Property<int> m_physBX{this, "PhysicsBX", 1, "Number of the Bunch crossing of the physics event"};
-  Gaudi::Property<int> m_NBunchTrain{this, "NBunchtrain", 1, "Number of bunches in a bunch train"};
+                                   "If true, place the physics event at a random bunch crossing (overrides PhysicsBX)"};
+  Gaudi::Property<int> m_physBX{this, "PhysicsBX", 1, "Position of the physics event within the bunch train"};
+  Gaudi::Property<int> m_NBunchTrain{this, "NBunchtrain", 1, "Number of bunch crossings in the bunch train"};
   // Gaudi::Property<int>         m_startWithBackgroundFile{this, "StartBackgroundFileIndex", -1,
   //                                                "Which background file to startWith"};
   Gaudi::Property<int> m_startWithBackgroundEvent{this, "StartBackgroundEventIndex", -1,
-                                                  "Which background event to startWith"};
+                                                  "Index of the background event to start from (-1 means start from "
+                                                  "the beginning)"};
 
   Gaudi::Property<std::vector<std::vector<std::string>>> m_inputFileNames{
-      this, "BackgroundFileNames", {}, "Name of the edm4hep input file(s) with background."};
+      this, "BackgroundFileNames", {}, "List of groups of background input files, one group per overlay stream"};
 
   Gaudi::Property<std::vector<double>> m_Noverlay{
-      this, "NumberBackground", {}, "Number of Background events to overlay - either fixed or Poisson mean"};
+      this, "NumberBackground", {},
+      "Number of background events to overlay per stream (fixed or Poisson mean)"};
 
   Gaudi::Property<std::vector<bool>> m_Poisson{
       this,
       "Poisson_random_NOverlay",
       {},
-      "Draw random number of Events to overlay from Poisson distribution with mean value NumberBackground"};
+      "If true, draw the number of events from a Poisson distribution with mean NumberBackground"};
 
   Gaudi::Property<std::string> m_MCParticleCollectionName{
       this, "BackgroundMCParticleCollectionName", "MCParticle",
-      "The name of the MCParticle collection in the background files"};
+      "Name of the MCParticle collection in the background files"};
 
-  Gaudi::Property<float> m_deltaT{this, "Delta_t", float(0.5), "Time difference between BXs in the BXtrain"};
+  Gaudi::Property<float> m_deltaT{this, "Delta_t", float(0.5), "Time between consecutive bunch crossings (ns)"};
 
   mutable std::unique_ptr<EventHolder> m_bkgEvents{};
 
   Gaudi::Property<std::map<std::string, std::vector<float>>> m_timeWindows{
-      this, "TimeWindows", std::map<std::string, std::vector<float>>(), "Time windows for the different collections"};
+      this, "TimeWindows", std::map<std::string, std::vector<float>>(),
+      "Map from collection name to [t_min, t_max] (ns) defining the acceptance window. Required for every "
+      "SimTrackerHit and SimCalorimeterHit collection."};
   Gaudi::Property<bool> m_allowReusingBackgroundFiles{
-      this, "AllowReusingBackgroundFiles", false, "If true the same background file can be used for the same event"};
+      this, "AllowReusingBackgroundFiles", false,
+      "If true, wrap around the background file when events are exhausted"};
   Gaudi::Property<bool> m_copyCellIDMetadata{this, "CopyCellIDMetadata", false,
-                                             "If metadata is found in the signal file, copy it to the output file, "
-                                             "replacing the old names with the new names"};
+                                             "Copy cell ID encoding metadata from input to output collections"};
 
   // Gaudi::Property<int> m_maxCachedFrames{
   //   this, "MaxCachedFrames", 0, "Maximum number of frames cached from background files"};

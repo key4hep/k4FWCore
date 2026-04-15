@@ -38,27 +38,7 @@ Algorithm counting processed events and printing heart-bit.
 
 ### OverlayTiming
 
-Algorithm overlaying background events on top of signal events, used, for example, to simulate beam-induced backgrounds. Background events are read from one or more sets of input files independently of the main event loop.
-
-- `MCParticleCollection` from signal and background are merged into a single output collection. Background particles are flagged with `isOverlay = true`.
-- `SimTrackerHit` collections are cropped to a configurable time window and overlaid. Background hits are flagged with `isOverlay = true`.
-- `SimCalorimeterHit` collections are overlaid by merging hits that share the same cell ID. Their `CaloHitContribution` entries are filtered by the time window.
-
-Properties:
-
-| Property | Description |
-|----------|-------------|
-| `BackgroundFileNames` | List of groups of background input files, one group per overlay stream |
-| `NumberBackground` | Number of background events to overlay per stream (fixed or Poisson mean) |
-| `Poisson_random_NOverlay` | If true, draw the number of events from a Poisson distribution with mean `NumberBackground` |
-| `NBunchtrain` | Number of bunch crossings in the bunch train |
-| `PhysicsBX` | Position of the physics event within the bunch train |
-| `RandomBx` | If true, place the physics event at a random bunch crossing |
-| `Delta_t` | Time between consecutive bunch crossings (ns) |
-| `TimeWindows` | Map from collection name to `[t_min, t_max]` (ns) defining the acceptance window for `SimTrackerHit`s |
-| `BackgroundMCParticleCollectionName` | Name of the MCParticle collection in the background files |
-| `AllowReusingBackgroundFiles` | If true, wrap around the background file when events are exhausted |
-| `CopyCellIDMetadata` | Copy cell ID encoding metadata from input to output collections |
+Algorithm overlaying background events on top of signal events, used, for example, to simulate beam-induced backgrounds. See its [documentation](doc/OverlayTiming.md) for more information.
 
 ### UniqueIDGenSvc
 
