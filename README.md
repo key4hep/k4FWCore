@@ -36,6 +36,14 @@ Algorithm creating a new `edm4hep::EventHeaderCollection` data object.
 
 Algorithm counting processed events and printing heart-bit.
 
+### OverlayTiming
+
+Algorithm overlaying background events on top of signal events, used, for example, to simulate beam-induced backgrounds. Background events are read from one or more sets of input files independently of the main event loop.
+
+- `MCParticleCollection` from signal and background are merged into a single output collection. Background particles are flagged with `isOverlay = true`.
+- `SimTrackerHit` collections are cropped to a configurable time window and overlaid. Background hits are flagged with `isOverlay = true`.
+- `SimCalorimeterHit` collections are overlaid by merging hits that share the same cell ID. Their `CaloHitContribution` entries are filtered by the time window.
+
 ### UniqueIDGenSvc
 
 Service generating unique, reproducible numbers to be used for seeding RNG used by the algorithms. See the [documentation](doc/uniqueIDGen.md) for more information.
