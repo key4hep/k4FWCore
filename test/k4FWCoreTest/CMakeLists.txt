@@ -274,6 +274,8 @@ add_test_fwcore(ReadMarlinWrapperCollection options/readMarlinWrapperCollection.
 add_test_fwcore(InvalidOutputCommandsNoCrash options/invalidOutputCommandsNoCrash.py)
 set_tests_properties(InvalidOutputCommandsNoCrash PROPERTIES FIXTURES_REQUIRED ProducerFile PASS_REGULAR_EXPRESSION "ERROR 'abc' is not a valid command for the KeepDropSwitch")
 
+add_test_fwcore(OverlayTiming options/TestOverlayTiming.py ADD_TO_CHECK_FILES PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile)
+
 add_test(NAME check_broken_pipe
          COMMAND bash -c "[ $(${K4RUN} options/ExampleFunctionalProducer.py | head -n 2 | wc -l) = 2 ]"
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
