@@ -5,14 +5,6 @@ Gaudi Functional C++ Class Generator
 Generates boilerplate for Gaudi Functional algorithms in both the
 k4FWCore and native Gaudi::Functional frameworks.
 
-Refactoring notes (addressing PR #372 review by tmadlener):
-  - All CLI strings are parsed up-front into typed dataclasses (DataSpec,
-    RuntimeInputSpec, PropertySpec, AlgorithmSpec).  No re-parsing inside
-    generator methods.
-  - The functional type is inferred from the number of inputs / outputs when
-    not supplied explicitly on the command line.
-  - All C++ output is produced through Jinja2 templates, keeping Python logic
-    and string layout cleanly separated.
 """
 
 from __future__ import annotations
