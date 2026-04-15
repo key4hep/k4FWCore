@@ -55,6 +55,17 @@ struct ExampleFunctionalMetadataConsumer final : k4FWCore::Consumer<void(const e
       error() << "MetadataString expected to be 'hello' but is '" << m_metadataString << "'" << endmsg;
       return StatusCode::FAILURE;
     }
+    const auto collIntParam = k4FWCore::getCollectionParameter<int>("MCParticles", "CollectionIntParam", this);
+    if (!collIntParam.has_value() || collIntParam.value() != 42) {
+      error() << "CollectionIntParam expected to be 42 but got " << collIntParam.value_or(-1) << endmsg;
+      return StatusCode::FAILURE;
+    }
+    const auto cellIDEncoding = k4FWCore::getCellIDEncoding("MCParticles", this);
+    if (!cellIDEncoding.has_value() || cellIDEncoding.value() != "system:8,layer:4,module:8") {
+      error() << "CellIDEncoding expected to be 'system:8,layer:4,module:8' but got '"
+              << cellIDEncoding.value_or("<missing>") << "'" << endmsg;
+      return StatusCode::FAILURE;
+    }
     return StatusCode::SUCCESS;
   }
 
@@ -96,6 +107,17 @@ struct ExampleFunctionalMetadataConsumer final : k4FWCore::Consumer<void(const e
     auto finalizeMetadataInt = k4FWCore::getParameter<int>("FinalizeMetadataInt", this).value_or(-1);
     if (finalizeMetadataInt != 10) {
       error() << "FinalizeMetadataInt expected to be 10 but is " << finalizeMetadataInt << endmsg;
+      return StatusCode::FAILURE;
+    }
+    const auto collIntParam = k4FWCore::getCollectionParameter<int>("MCParticles", "CollectionIntParam", this);
+    if (!collIntParam.has_value() || collIntParam.value() != 42) {
+      error() << "CollectionIntParam expected to be 42 but got " << collIntParam.value_or(-1) << endmsg;
+      return StatusCode::FAILURE;
+    }
+    const auto cellIDEncoding = k4FWCore::getCellIDEncoding("MCParticles", this);
+    if (!cellIDEncoding.has_value() || cellIDEncoding.value() != "system:8,layer:4,module:8") {
+      error() << "CellIDEncoding expected to be 'system:8,layer:4,module:8' but got '"
+              << cellIDEncoding.value_or("<missing>") << "'" << endmsg;
       return StatusCode::FAILURE;
     }
 
