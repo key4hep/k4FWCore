@@ -22,10 +22,8 @@
 #include <stdexcept>
 #ifdef __cpp_lib_format
 #include <format>
-using std::format;
 #else
 #include <fmt/format.h>
-using fmt::format;
 #endif
 
 namespace {
@@ -78,7 +76,11 @@ KeepDropSwitch::KeepDropSwitch(const InputCommands& cmds) {
   for (const auto& cmdLine : cmds) {
     auto [cmd, kind, arg] = extractCommand(cmdLine);
     if (cmd == Cmd::INVALID) {
-      throw std::invalid_argument(format("'{}' is not a valid command for the KeepDropSwitch", cmdLine));
+#ifdef __cpp_lib_format
+      throw std::invalid_argument(std::format("'{}' is not a valid command for the KeepDropSwitch", cmdLine));
+#else
+      throw std::invalid_argument(fmt::format("'{}' is not a valid command for the KeepDropSwitch", cmdLine));
+#endif
     }
     m_outputCommands.emplace_back(cmd, kind, std::move(arg));
   }
