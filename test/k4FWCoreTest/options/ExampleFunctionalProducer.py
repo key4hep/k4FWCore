@@ -20,7 +20,7 @@
 # This is an example using a producer with a single output and saving that to a file
 
 from Gaudi.Configuration import INFO
-from Configurables import ExampleFunctionalProducer
+from Configurables import EventHeaderCreator, ExampleFunctionalProducer
 from Configurables import EventDataSvc
 from k4FWCore import ApplicationMgr, IOSvc
 from k4FWCore.parseArgs import parser
@@ -35,10 +35,11 @@ iosvc.Output = name
 # out.OutputCommands = ["drop *"]
 
 
+header = EventHeaderCreator("EventHeaderCreator")
 producer = ExampleFunctionalProducer("ExampleFunctionalProducer")
 
 ApplicationMgr(
-    TopAlg=[producer],
+    TopAlg=[header, producer],
     EvtSel="NONE",
     EvtMax=10 if not args[0].second else 20,
     ExtSvc=[EventDataSvc("EventDataSvc")],
