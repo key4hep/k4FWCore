@@ -217,7 +217,8 @@ add_test_fwcore(FunctionalTransformerRuntimeCollectionsMultiple options/ExampleF
 add_test_fwcore(FunctionalTransformerHist options/ExampleFunctionalTransformerHist.py ADD_TO_CHECK_FILES)
 add_test_fwcore(FunctionalCollectionMerger options/ExampleFunctionalCollectionMerger.py PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
 add_test_fwcore(FunctionalFilterFile options/ExampleFunctionalFilterFile.py ADD_TO_CHECK_FILES)
-add_test_fwcore(FunctionalMetadata options/ExampleFunctionalMetadata.py ADD_TO_CHECK_FILES PROPERTIES FIXTURES_SETUP FunctionalMetadataFile)
+add_test_fwcore(FunctionalMetadata options/ExampleFunctionalMetadata.py ADD_TO_CHECK_FILES PROPERTIES FIXTURES_SETUP FunctionalMetadataFile
+                  PASS_REGULAR_EXPRESSION "Metadata parameter '.*' is already set and will be overwritten")
 add_test_fwcore(FunctionalMetadataRead options/ExampleFunctionalMetadataRead.py PROPERTIES FIXTURES_REQUIRED FunctionalMetadataFile ADD_TO_CHECK_FILES)
 add_test_fwcore(FunctionalMetadataEventLoop options/ExampleFunctionalMetadataEventLoop.py
                   PROPERTIES PASS_REGULAR_EXPRESSION "putParameter cannot be called during the event loop")
