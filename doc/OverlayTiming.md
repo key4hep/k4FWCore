@@ -25,9 +25,9 @@ It uses [`UniqueIDGenSvc`](uniqueIDGen.md) to seed the internal random number ge
 
 ## Collections
 
--- `MCParticleCollection` from signal and background are merged into a single output collection. Background particles are flagged with `isOverlay = true`.
--- `SimTrackerHit` collections are cropped to a configurable time window and overlaid. Background hits are flagged with `isOverlay = true`.
--- `SimCalorimeterHit` collections are overlaid by merging hits that share the same cell ID. Their `CaloHitContribution` entries are filtered by the time window.
+- `MCParticleCollection` from signal and background are merged into a single output collection. Background particles are flagged with `isOverlay = true`.
+- `SimTrackerHit` collections are cropped to a configurable time window and overlaid. Background hits are flagged with `isOverlay = true`.
+- `SimCalorimeterHit` collections are overlaid by merging hits that share the same cell ID. Their `CaloHitContribution` entries are filtered by the time window.
 
 ## Properties
 
