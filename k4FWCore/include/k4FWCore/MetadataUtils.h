@@ -57,6 +57,9 @@ void putParameter(const std::string& name, const T& value, const GaudiComp* comp
     comp->error() << "MetadataSvc not found" << endmsg;
     return;
   }
+  if (metadataSvc->template get<T>(name).has_value()) {
+    comp->warning() << "Metadata parameter '" << name << "' is already set and will be overwritten" << endmsg;
+  }
   metadataSvc->template put<T>(name, value);
 }
 
