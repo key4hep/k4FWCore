@@ -35,7 +35,6 @@ public:
 
   template <typename T>
   void put(const std::string& name, const T& obj) {
-    throwIfRunning();
     getFrameForWrite()->putParameter(name, obj);
   }
 
@@ -55,6 +54,7 @@ protected:
 
 private:
   podio::Frame* getFrameForWrite() {
+    throwIfRunning();
     if (!getFrame()) {
       setFrame(podio::Frame());
     }
@@ -65,7 +65,6 @@ private:
 template <>
 inline void IMetadataSvc::put<edm4hep::utils::ParticleIDMeta>(const std::string& collName,
                                                               const edm4hep::utils::ParticleIDMeta& pidMetaInfo) {
-  throwIfRunning();
   edm4hep::utils::PIDHandler::setAlgoInfo(*getFrameForWrite(), collName, pidMetaInfo);
 }
 
