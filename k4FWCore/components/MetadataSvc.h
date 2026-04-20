@@ -43,6 +43,7 @@ protected:
   const podio::Frame* getFrame() const override;
   podio::Frame* getFrame() override;
   void setFrame(podio::Frame frame) override;
+  void throwIfRunning() const override;
 };
 
 #endif
