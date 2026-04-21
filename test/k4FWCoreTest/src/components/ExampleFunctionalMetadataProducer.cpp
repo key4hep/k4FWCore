@@ -42,8 +42,9 @@ struct ExampleFunctionalMetadataProducer final : k4FWCore::Producer<edm4hep::MCP
   }
 
   edm4hep::MCParticleCollection operator()() const override {
-    // Putting metadata in the main loop doesn't work
-    // k4FWCore::putParameter("EventMetadataInt", 5, this);
+    if (m_putMetadataInEventLoop) {
+      k4FWCore::putParameter("EventMetadataInt", 5, this);
+    }
     auto coll = edm4hep::MCParticleCollection();
     for (int i = 0; i < m_particleNum.value(); ++i) {
       auto particle = coll.create();
@@ -66,6 +67,8 @@ private:
       this, "PDGValues", {1, 2, 3, 4}, "Values of the PDG used for the particles"};
 
   // Some properties for the configuration metadata
+  Gaudi::Property<bool> m_putMetadataInEventLoop{this, "PutMetadataInEventLoop", false,
+                                                 "If true, attempt to put metadata during the event loop (will throw)"};
   Gaudi::Property<int> m_intProp{this, "intProp", 42, "An integer property"};
   Gaudi::Property<int> m_intProp2{this, "intProp2", 42, "An integer property"};
   Gaudi::Property<float> m_floatProp{this, "floatProp", 3.14, "A float property"};

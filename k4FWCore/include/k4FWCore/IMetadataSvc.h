@@ -50,9 +50,11 @@ public:
 protected:
   virtual podio::Frame* getFrame() = 0;
   virtual const podio::Frame* getFrame() const = 0;
+  virtual void throwIfRunning() const {}
 
 private:
   podio::Frame* getFrameForWrite() {
+    throwIfRunning();
     if (!getFrame()) {
       setFrame(podio::Frame());
     }
