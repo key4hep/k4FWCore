@@ -217,7 +217,7 @@ add_test_fwcore(FunctionalTransformerRuntimeCollectionsMultiple options/ExampleF
 add_test_fwcore(FunctionalTransformerHist options/ExampleFunctionalTransformerHist.py ADD_TO_CHECK_FILES)
 add_test_fwcore(FunctionalCollectionMerger options/ExampleFunctionalCollectionMerger.py PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
 add_test_fwcore(FunctionalFilterFile options/ExampleFunctionalFilterFile.py ADD_TO_CHECK_FILES)
-add_test_fwcore(FunctionalMetadata options/ExampleFunctionalMetadata.py ADD_TO_CHECK_FILES PROPERTIES FIXTURES_SETUP FunctionalMetadataFile)
+add_test_fwcore(FunctionalMetadata options/ExampleFunctionalMetadata.py --MetadataSvc.SkipIfSameValue True ADD_TO_CHECK_FILES PROPERTIES FIXTURES_SETUP FunctionalMetadataFile)
 add_test_fwcore(FunctionalMetadataThrow options/ExampleFunctionalMetadata.py --Producer2.ParticleTime 2.5
                   --IOSvc.Output functional_metadata_throw.root
                   PROPERTIES PASS_REGULAR_EXPRESSION "Metadata parameter '.*' is already set")

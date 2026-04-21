@@ -53,7 +53,7 @@ private:
   Gaudi::Property<bool> m_throwIfDuplicate{this, "ThrowIfDuplicate", true,
                                            "Throw an exception if a metadata parameter is already set"};
   Gaudi::Property<bool> m_skipIfSameValue{
-      this, "SkipIfSameValue", true,
+      this, "SkipIfSameValue", false,
       "Silently skip putting a metadata parameter if the existing value is the same as the new value"};
 };
 
