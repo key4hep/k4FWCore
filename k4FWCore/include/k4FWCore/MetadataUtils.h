@@ -30,6 +30,7 @@
 
 #include <GaudiKernel/GaudiException.h>
 
+#include <concepts>
 #include <optional>
 #include <ostream>
 
@@ -47,7 +48,7 @@ concept Streamable = requires(std::ostream& os, const T& v) {
 ///             parameter, typically "this"
 /// @tparam GaudiComp The type of the component. This will be deduced in
 ///                   pretty much all of the use cases
-template <typename T, typename GaudiComp>
+template <std::equality_comparable T, typename GaudiComp>
 void putParameter(const std::string& name, const T& value, const GaudiComp* comp) {
   comp->debug() << "Trying to put parameter '" << name << "'";
   if constexpr (Streamable<T>) {
