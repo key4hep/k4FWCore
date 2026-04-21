@@ -28,6 +28,8 @@
 
 #include <edm4hep/Constants.h>
 
+#include <GaudiKernel/GaudiException.h>
+
 #include <optional>
 #include <ostream>
 
@@ -57,7 +59,14 @@ void putParameter(const std::string& name, const T& value, const GaudiComp* comp
     comp->error() << "MetadataSvc not found" << endmsg;
     return;
   }
-  if (metadataSvc->template get<T>(name).has_value()) {
+  const auto existing = metadataSvc->template get<T>(name);
+  if (existing.has_value()) {
+    if (metadataSvc->skipIfSameValue() && *existing == value) {
+      return;
+    }
+    if (metadataSvc->throwIfDuplicate()) {
+      throw GaudiException("Metadata parameter '" + name + "' is already set", comp->name(), StatusCode::FAILURE);
+    }
     comp->warning() << "Metadata parameter '" << name << "' is already set and will be overwritten" << endmsg;
   }
   metadataSvc->template put<T>(name, value);

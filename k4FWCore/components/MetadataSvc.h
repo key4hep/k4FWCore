@@ -19,6 +19,7 @@
 #ifndef FWCORE_METADATASVC_H
 #define FWCORE_METADATASVC_H
 
+#include "Gaudi/Property.h"
 #include "GaudiKernel/IDataProviderSvc.h"
 #include "GaudiKernel/Service.h"
 
@@ -35,6 +36,9 @@ public:
   StatusCode initialize() override;
   StatusCode finalize() override;
 
+  bool throwIfDuplicate() const override { return m_throwIfDuplicate; }
+  bool skipIfSameValue() const override { return m_skipIfSameValue; }
+
 protected:
   SmartIF<IDataProviderSvc> m_dataSvc;
 
@@ -44,6 +48,13 @@ protected:
   podio::Frame* getFrame() override;
   void setFrame(podio::Frame frame) override;
   void throwIfRunning() const override;
+
+private:
+  Gaudi::Property<bool> m_throwIfDuplicate{this, "ThrowIfDuplicate", true,
+                                           "Throw an exception if a metadata parameter is already set"};
+  Gaudi::Property<bool> m_skipIfSameValue{
+      this, "SkipIfSameValue", true,
+      "Silently skip putting a metadata parameter if the existing value is the same as the new value"};
 };
 
 #endif
