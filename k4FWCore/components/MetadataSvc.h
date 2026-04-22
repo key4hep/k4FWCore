@@ -33,10 +33,13 @@ class MetadataSvc : public extends<Service, IMetadataSvc> {
 
 public:
   StatusCode initialize() override;
+  StatusCode start() override;
+  StatusCode stop() override;
   StatusCode finalize() override;
 
 protected:
   SmartIF<IDataProviderSvc> m_dataSvc;
+  bool m_inEventLoop{false};
 
   std::unique_ptr<podio::Frame> m_frame;
 

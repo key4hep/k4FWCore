@@ -25,8 +25,6 @@
 #include <GaudiKernel/GaudiException.h>
 #include <GaudiKernel/IDataProviderSvc.h>
 #include <GaudiKernel/Service.h>
-#include <GaudiKernel/StateMachine.h>
-
 #include <memory>
 
 StatusCode MetadataSvc::initialize() {
@@ -43,10 +41,20 @@ StatusCode MetadataSvc::initialize() {
   return StatusCode::SUCCESS;
 }
 
+StatusCode MetadataSvc::start() {
+  m_inEventLoop = true;
+  return Service::start();
+}
+
+StatusCode MetadataSvc::stop() {
+  m_inEventLoop = false;
+  return Service::stop();
+}
+
 StatusCode MetadataSvc::finalize() { return Service::finalize(); }
 
 void MetadataSvc::throwIfRunning() const {
-  if (FSMState() == Gaudi::StateMachine::RUNNING && targetFSMState() == Gaudi::StateMachine::RUNNING) {
+  if (m_inEventLoop) {
     throw GaudiException("putParameter cannot be called during the event loop", name(), StatusCode::FAILURE);
   }
 }
