@@ -56,7 +56,6 @@ positional arguments:
 
 options:
   --dry-run             Do not actually run the job, just parse the config files
-  -v, --verbose         Run job with verbose output
   -n NUM_EVENTS, --num-events NUM_EVENTS
                         Number of events to run
   -l, --list            Print all the configurable components available in the framework and exit
