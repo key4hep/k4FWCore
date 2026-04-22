@@ -99,7 +99,7 @@ DECLARE_COMPONENT(ExampleToolC)
 
 struct ExampleToolUser final : k4FWCore::Consumer<void()> {
 
-  ExampleToolUser(const std::string& name, ISvcLocator* svcLoc) : Consumer(name, svcLoc, {}) {}
+  ExampleToolUser(const std::string& name, ISvcLocator* svcLoc) : Consumer(name, svcLoc) {}
 
   StatusCode initialize() override {
     if (auto sc = Algorithm::initialize(); sc.isFailure()) {
