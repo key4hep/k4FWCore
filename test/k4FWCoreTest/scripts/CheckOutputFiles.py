@@ -434,4 +434,3 @@ check_metadata(
         "ToolFinalizeParam": 42,
     },
 )
-
