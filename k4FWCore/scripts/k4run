@@ -193,8 +193,6 @@ def main():
     # in the namespace since parsing of the file happens when the namespace
     # has already been filled
     opts = parser.parse_known_args()
-    if opts[0].verbose:
-        opts[0].log_level = "VERBOSE"
     logger = get_logger()
     set_log_level(opts[0].log_level or "INFO")
 
