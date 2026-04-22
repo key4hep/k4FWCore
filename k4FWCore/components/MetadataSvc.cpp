@@ -46,7 +46,7 @@ StatusCode MetadataSvc::initialize() {
 StatusCode MetadataSvc::finalize() { return Service::finalize(); }
 
 void MetadataSvc::throwIfRunning() const {
-  if (targetFSMState() == Gaudi::StateMachine::RUNNING) {
+  if (FSMState() == Gaudi::StateMachine::RUNNING && targetFSMState() == Gaudi::StateMachine::RUNNING) {
     throw GaudiException("putParameter cannot be called during the event loop", name(), StatusCode::FAILURE);
   }
 }
