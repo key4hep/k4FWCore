@@ -31,6 +31,7 @@ set(k4fwcoretest_plugin_sources
   src/components/ExampleFunctionalFilter.cpp
   src/components/ExampleFunctionalMetadataConsumer.cpp
   src/components/ExampleFunctionalMetadataProducer.cpp
+  src/components/ExampleTool.cpp
   src/components/ExampleFunctionalProducer.cpp
   src/components/ExampleFunctionalProducerMultiple.cpp
   src/components/ExampleFunctionalProducerRuntimeCollections.cpp
@@ -221,6 +222,7 @@ add_test_fwcore(FunctionalMetadataRead options/ExampleFunctionalMetadataRead.py 
 add_test_fwcore(FunctionalMetadataEventLoop options/ExampleFunctionalMetadataEventLoop.py
                   PROPERTIES PASS_REGULAR_EXPRESSION "putParameter cannot be called during the event loop")
 add_test_fwcore(FunctionalMetadataOldAlgorithm options/ExampleFunctionalMetadataOldAlgorithm.py ADD_TO_CHECK_FILES PROPERTIES FIXTURES_SETUP OldAlgorithmFile)
+add_test_fwcore(ExampleTool options/ExampleTool.py ADD_TO_CHECK_FILES)
 add_test_fwcore(createEventHeaderConcurrent options/createEventHeaderConcurrent.py ADD_TO_CHECK_FILES)
 add_test_fwcore(FunctionalMetadataReadOldAlgorithm options/ExampleFunctionalMetadataReadOldAlgorithm.py PROPERTIES FIXTURES_REQUIRED OldAlgorithmFile ADD_TO_CHECK_FILES)
 

@@ -426,3 +426,12 @@ for frame in frames:
     filtered_links = frame.get("FilteredLinks")
     if len(filtered_links) != 16:
         raise RuntimeError(f"Expected 16 links in FilteredLinks, got {len(filtered_links)}")
+
+check_metadata(
+    "example_tool.root",
+    {
+        "ToolInitParam": 99,
+        "ToolFinalizeParam": 42,
+    },
+)
+
