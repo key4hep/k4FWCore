@@ -18,6 +18,7 @@
  */
 
 #include "k4FWCore/Consumer.h"
+#include "k4FWCore/GaudiChecks.h"
 #include "k4FWCore/MetadataUtils.h"
 
 #include <Gaudi/Algorithm.h>
