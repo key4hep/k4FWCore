@@ -24,7 +24,6 @@
 
 #include <Gaudi/Property.h>
 
-
 #include <atomic>
 #include <format>
 #include <stdexcept>

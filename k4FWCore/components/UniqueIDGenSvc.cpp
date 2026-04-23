@@ -18,7 +18,6 @@
  */
 #include "UniqueIDGenSvc.h"
 
-
 #include <cstddef>
 #include <format>
 #include <stdexcept>
