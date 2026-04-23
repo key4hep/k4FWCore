@@ -31,7 +31,7 @@ set(k4fwcoretest_plugin_sources
   src/components/ExampleFunctionalFilter.cpp
   src/components/ExampleFunctionalMetadataConsumer.cpp
   src/components/ExampleFunctionalMetadataProducer.cpp
-  src/components/ExampleTool.cpp
+  src/components/ExampleToolFunctional.cpp
   src/components/ExampleFunctionalProducer.cpp
   src/components/ExampleFunctionalProducerMultiple.cpp
   src/components/ExampleFunctionalProducerRuntimeCollections.cpp
