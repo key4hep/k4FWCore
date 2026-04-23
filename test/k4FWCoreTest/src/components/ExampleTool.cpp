@@ -97,9 +97,9 @@ private:
 
 DECLARE_COMPONENT(ExampleToolC)
 
-struct ExampleToolUser final : k4FWCore::Consumer<void()> {
+struct ExampleToolFunctional final : k4FWCore::Consumer<void()> {
 
-  ExampleToolUser(const std::string& name, ISvcLocator* svcLoc) : Consumer(name, svcLoc) {}
+  ExampleToolFunctional(const std::string& name, ISvcLocator* svcLoc) : Consumer(name, svcLoc) {}
 
   StatusCode initialize() override {
     if (auto sc = Algorithm::initialize(); sc.isFailure()) {
@@ -145,4 +145,4 @@ struct ExampleToolUser final : k4FWCore::Consumer<void()> {
                                              "Expected return value of ToolC->getNumber()"};
 };
 
-DECLARE_COMPONENT(ExampleToolUser)
+DECLARE_COMPONENT(ExampleToolFunctional)

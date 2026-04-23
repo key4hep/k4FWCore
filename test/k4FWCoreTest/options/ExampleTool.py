@@ -18,14 +18,14 @@
 #
 
 from Gaudi.Configuration import INFO
-from Configurables import ExampleToolUser, ExampleToolA
+from Configurables import ExampleToolFunctional, ExampleToolA
 from k4FWCore import ApplicationMgr, IOSvc
 from Configurables import EventDataSvc
 
 iosvc = IOSvc()
 iosvc.Output = "example_tool.root"
 
-user = ExampleToolUser("ToolUser")
+user = ExampleToolFunctional("ToolUser")
 
 toolA = ExampleToolA("ToolA", Number=42)
 user.ToolA = toolA
