@@ -102,16 +102,11 @@ struct ExampleToolFunctional final : k4FWCore::Consumer<void()> {
   ExampleToolFunctional(const std::string& name, ISvcLocator* svcLoc) : Consumer(name, svcLoc) {}
 
   StatusCode initialize() override {
-    if (auto sc = Algorithm::initialize(); sc.isFailure()) {
-      return sc;
-    }
-    if (auto sc = m_toolA.retrieve(); sc.isFailure()) {
-      return sc;
-    }
-    if (auto sc = m_toolB.retrieve(); sc.isFailure()) {
-      return sc;
-    }
-    return m_toolC.retrieve();
+    K4_GAUDI_CHECK(Algorithm::initialize());
+    K4_GAUDI_CHECK(m_toolA.retrieve());
+    K4_GAUDI_CHECK(m_toolB.retrieve());
+    K4_GAUDI_CHECK(m_toolC.retrieve());
+    return StatusCode::SUCCESS;
   }
 
   void operator()() const override {
