@@ -18,9 +18,9 @@
  */
 #include "k4FWCore/KeepDropSwitch.h"
 
+#include <format>
 #include <sstream>
 #include <stdexcept>
-#include <format>
 
 namespace {
 int wildcmp(const char* wild, const char* string) noexcept {
