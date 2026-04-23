@@ -223,7 +223,7 @@ for i in range(len(merged_links)):
         )
 
 
-check_collections("functional_metadata.root", ["MCParticles"])
+check_collections("functional_metadata.root", ["MCParticles", "MCParticles2"])
 
 check_metadata(
     "functional_metadata.root",

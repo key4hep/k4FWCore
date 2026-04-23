@@ -28,6 +28,9 @@
 
 #include <edm4hep/Constants.h>
 
+#include <GaudiKernel/GaudiException.h>
+
+#include <concepts>
 #include <optional>
 #include <ostream>
 
@@ -45,7 +48,7 @@ concept Streamable = requires(std::ostream& os, const T& v) {
 ///             parameter, typically "this"
 /// @tparam GaudiComp The type of the component. This will be deduced in
 ///                   pretty much all of the use cases
-template <typename T, typename GaudiComp>
+template <std::equality_comparable T, typename GaudiComp>
 void putParameter(const std::string& name, const T& value, const GaudiComp* comp) {
   comp->debug() << "Trying to put parameter '" << name << "'";
   if constexpr (Streamable<T>) {
@@ -56,6 +59,16 @@ void putParameter(const std::string& name, const T& value, const GaudiComp* comp
   if (!metadataSvc) {
     comp->error() << "MetadataSvc not found" << endmsg;
     return;
+  }
+  const auto existing = metadataSvc->template get<T>(name);
+  if (existing.has_value()) {
+    if (metadataSvc->skipIfSameValue() && *existing == value) {
+      return;
+    }
+    if (metadataSvc->throwIfDuplicate()) {
+      throw GaudiException("Metadata parameter '" + name + "' is already set", comp->name(), StatusCode::FAILURE);
+    }
+    comp->warning() << "Metadata parameter '" << name << "' is already set and will be overwritten" << endmsg;
   }
   metadataSvc->template put<T>(name, value);
 }

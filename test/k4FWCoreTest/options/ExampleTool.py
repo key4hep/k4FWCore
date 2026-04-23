@@ -20,10 +20,12 @@
 from Gaudi.Configuration import INFO
 from Configurables import ExampleToolFunctional, ExampleToolA
 from k4FWCore import ApplicationMgr, IOSvc
-from Configurables import EventDataSvc
+from Configurables import EventDataSvc, MetadataSvc
 
 iosvc = IOSvc()
 iosvc.Output = "example_tool.root"
+metadatasvc = MetadataSvc("MetadataSvc")
+metadatasvc.ThrowIfDuplicate = False
 
 user = ExampleToolFunctional("ToolUser")
 

@@ -33,6 +33,9 @@ public:
 
   virtual void setFrame(podio::Frame frame) = 0;
 
+  virtual bool throwIfDuplicate() const = 0;
+  virtual bool skipIfSameValue() const = 0;
+
   template <typename T>
   void put(const std::string& name, const T& obj) {
     getFrameForWrite()->putParameter(name, obj);
