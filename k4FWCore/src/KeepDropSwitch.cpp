@@ -20,11 +20,7 @@
 
 #include <sstream>
 #include <stdexcept>
-#ifdef __cpp_lib_format
 #include <format>
-#else
-#include <fmt/format.h>
-#endif
 
 namespace {
 int wildcmp(const char* wild, const char* string) noexcept {
@@ -76,11 +72,7 @@ KeepDropSwitch::KeepDropSwitch(const InputCommands& cmds) {
   for (const auto& cmdLine : cmds) {
     auto [cmd, kind, arg] = extractCommand(cmdLine);
     if (cmd == Cmd::INVALID) {
-#ifdef __cpp_lib_format
       throw std::invalid_argument(std::format("'{}' is not a valid command for the KeepDropSwitch", cmdLine));
-#else
-      throw std::invalid_argument(fmt::format("'{}' is not a valid command for the KeepDropSwitch", cmdLine));
-#endif
     }
     m_outputCommands.emplace_back(cmd, kind, std::move(arg));
   }
