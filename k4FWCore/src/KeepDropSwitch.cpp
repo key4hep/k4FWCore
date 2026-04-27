@@ -18,15 +18,9 @@
  */
 #include "k4FWCore/KeepDropSwitch.h"
 
+#include <format>
 #include <sstream>
 #include <stdexcept>
-#ifdef __cpp_lib_format
-#include <format>
-using std::format;
-#else
-#include <fmt/format.h>
-using fmt::format;
-#endif
 
 namespace {
 int wildcmp(const char* wild, const char* string) noexcept {
@@ -78,7 +72,7 @@ KeepDropSwitch::KeepDropSwitch(const InputCommands& cmds) {
   for (const auto& cmdLine : cmds) {
     auto [cmd, kind, arg] = extractCommand(cmdLine);
     if (cmd == Cmd::INVALID) {
-      throw std::invalid_argument(format("'{}' is not a valid command for the KeepDropSwitch", cmdLine));
+      throw std::invalid_argument(std::format("'{}' is not a valid command for the KeepDropSwitch", cmdLine));
     }
     m_outputCommands.emplace_back(cmd, kind, std::move(arg));
   }

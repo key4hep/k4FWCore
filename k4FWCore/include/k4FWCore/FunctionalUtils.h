@@ -34,8 +34,7 @@
 
 // #include "GaudiKernel/CommonMessaging.h"
 
-#include <fmt/format.h>
-
+#include <format>
 #include <memory>
 #include <tuple>
 #include <type_traits>
@@ -199,7 +198,7 @@ namespace details {
             inputVector.push_back(typedCollection);
           } else {
             throw GaudiException(
-                fmt::format("Failed to cast collection {} to the required type {}, the type of the collection is {}",
+                std::format("Failed to cast collection {} to the required type {}, the type of the collection is {}",
                             handle.objKey(), typeid(EDM4hepType).name(),
                             collection ? collection->getTypeName() : "[undetermined]"),
                 thisClass->name(), StatusCode::FAILURE);
@@ -216,7 +215,7 @@ namespace details {
             std::get<Index>(inputTuple) = typedCollection;
           } else {
             throw GaudiException(
-                fmt::format("Failed to cast collection {} to the required type {}, the type of the collection is {}",
+                std::format("Failed to cast collection {} to the required type {}, the type of the collection is {}",
                             std::get<Index>(handles)[0].objKey(), typeid(EDM4hepType).name(),
                             collection ? collection->getTypeName() : "[undetermined]"),
                 thisClass->name(), StatusCode::FAILURE);
@@ -236,7 +235,7 @@ namespace details {
             // This is how the Marlin wrapper saves collections when converting from LCIO to EDM4hep
             const auto* marlinWrapper = dynamic_cast<const DataWrapper<podio::CollectionBase>*>(dataObject);
             if (!wrapper && !marlinWrapper) {
-              throw GaudiException(fmt::format("Failed to cast collection {} to the required type {}",
+              throw GaudiException(std::format("Failed to cast collection {} to the required type {}",
                                                std::get<Index>(handles)[0].objKey(), typeid(EDM4hepType).name()),
                                    thisClass->name(), StatusCode::FAILURE);
             }
@@ -264,7 +263,7 @@ namespace details {
       if constexpr (isVectorLike_v<std::tuple_element_t<Index, std::tuple<Out...>>>) {
         const auto& outputVector = std::get<Index>(outputs);
         if (outputHandles.size() != outputVector.size()) {
-          throw GaudiException(fmt::format("Size of the output vector {} with type {} does not match the expected size "
+          throw GaudiException(std::format("Size of the output vector {} with type {} does not match the expected size "
                                            "from the steering file {}",
                                            outputHandles.size(), typeid(outputHandles).name(), outputVector.size()),
                                thisClass->name(), StatusCode::FAILURE);
@@ -323,7 +322,7 @@ namespace details {
   const T& FunctionalDataObjectReadHandle<T>::get() const {
     const auto dataObj = this->fetch();
     if (!dataObj) {
-      throw GaudiException(fmt::format("Cannot retrieve '{}' from transient store [{}]", this->objKey(),
+      throw GaudiException(std::format("Cannot retrieve '{}' from transient store [{}]", this->objKey(),
                                        this->m_owner ? this->owner()->name() : "no owner"),
                            "FunctionalDataObjectReadHandle", StatusCode::FAILURE);
     }

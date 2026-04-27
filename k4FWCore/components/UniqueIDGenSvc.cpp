@@ -18,9 +18,8 @@
  */
 #include "UniqueIDGenSvc.h"
 
-#include <fmt/core.h>
-
 #include <cstddef>
+#include <format>
 #include <stdexcept>
 #include <string>
 
@@ -62,7 +61,7 @@ size_t UniqueIDGenSvc::getUniqueID(event_num_t evt_num, run_num_t run_num, const
     if (!inserted) {
       const auto& [id_evt, id_run, id_name] = it->second;
       throw std::runtime_error(
-          fmt::format("Duplicate ID for event number, run number and algorithm name: {}, {}, \"{}\". "
+          std::format("Duplicate ID for event number, run number and algorithm name: {}, {}, \"{}\". "
                       "ID already assigned to: {}, {}, \"{}\"",
                       evt_num, run_num, name, id_evt, id_run, id_name));
     }
