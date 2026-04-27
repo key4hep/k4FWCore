@@ -40,6 +40,16 @@ StatusCode MetadataSvc::initialize() {
     error() << "Unable to locate the EventDataSvc" << endmsg;
     return StatusCode::FAILURE;
   }
+  bool hasParameters = !m_intParameters.empty() || !m_floatParameters.empty() ||
+                       !m_doubleParameters.empty() || !m_stringParameters.value().empty();
+  if (hasParameters && !m_setAtFinalize) {
+    // If there is a reader, then the metadata frame will be set from the IOSvc
+    // to what is read from the Reader
+    if (!m_frame) {
+      m_frame = std::make_unique<podio::Frame>();
+    }
+    applyPropertyParameters();
+  }
   return StatusCode::SUCCESS;
 }
 
@@ -52,7 +62,39 @@ void MetadataSvc::throwIfRunning() const {
 }
 
 const podio::Frame* MetadataSvc::getFrame() const { return m_frame.get(); }
-podio::Frame* MetadataSvc::getFrame() { return m_frame.get(); }
-void MetadataSvc::setFrame(podio::Frame frame) { m_frame = std::make_unique<podio::Frame>(std::move(frame)); }
+
+podio::Frame* MetadataSvc::getFrame() {
+  if (m_setAtFinalize && !m_paramsApplied) {
+    if (!m_frame) {
+      m_frame = std::make_unique<podio::Frame>();
+    }
+    applyPropertyParameters();
+    m_paramsApplied = true;
+  }
+  return m_frame.get();
+}
+
+void MetadataSvc::setFrame(podio::Frame frame) {
+  m_frame = std::make_unique<podio::Frame>(std::move(frame));
+  m_paramsApplied = false;
+  if (!m_setAtFinalize) {
+    applyPropertyParameters();
+  }
+}
+
+void MetadataSvc::applyPropertyParameters() {
+  for (const auto& [key, val] : m_intParameters) {
+    m_frame->putParameter(key, val);
+  }
+  for (const auto& [key, val] : m_floatParameters) {
+    m_frame->putParameter<float>(key, static_cast<float>(val));
+  }
+  for (const auto& [key, val] : m_doubleParameters) {
+    m_frame->putParameter(key, val);
+  }
+  for (const auto& [key, val] : m_stringParameters) {
+    m_frame->putParameter(key, val);
+  }
+}
 
 DECLARE_COMPONENT(MetadataSvc)

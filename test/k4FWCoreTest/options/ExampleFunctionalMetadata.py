@@ -24,11 +24,23 @@ from Configurables import (
     ExampleFunctionalMetadataProducer,
     ExampleFunctionalMetadataConsumer,
 )
-from k4FWCore import ApplicationMgr, IOSvc
+from k4FWCore import ApplicationMgr, IOSvc, putMetadata
 from Configurables import EventDataSvc
 
 iosvc = IOSvc()
 iosvc.Output = "functional_metadata.root"
+
+putMetadata(
+    {
+        "PythonIntParam": 42,
+        "PythonDoubleParam": 3.14,
+        "PythonStringParam": "hello from python",
+    }
+)
+putMetadata({"PythonFloatParam": 3.0}, default_float_type="float")
+# Overwrite
+putMetadata({"PythonFloatParam": 4.0}, default_float_type="float")
+putMetadata({"PythonFinalizeParam": 99}, set_at_finalize=True)
 
 producer = ExampleFunctionalMetadataProducer(
     "Producer",

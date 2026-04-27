@@ -27,7 +27,9 @@
 
 #include "k4FWCore/IMetadataSvc.h"
 
+#include <map>
 #include <memory>
+#include <string>
 
 class MetadataSvc : public extends<Service, IMetadataSvc> {
   using extends::extends;
@@ -50,11 +52,27 @@ protected:
   void throwIfRunning() const override;
 
 private:
+  void applyPropertyParameters();
+
+  bool m_paramsApplied{false};
+
   Gaudi::Property<bool> m_throwIfDuplicate{this, "ThrowIfDuplicate", true,
                                            "Throw an exception if a metadata parameter is already set"};
   Gaudi::Property<bool> m_skipIfSameValue{
       this, "SkipIfSameValue", false,
       "Silently skip putting a metadata parameter if the existing value is the same as the new value"};
+  Gaudi::Property<bool> m_setAtFinalize{
+      this, "SetAtFinalize", false,
+      "When true, apply the Python-configured parameters at finalize time instead of at initialize time"};
+  Gaudi::Property<std::map<std::string, int>> m_intParameters{
+      this, "IntParameters", {}, "Metadata int parameters to be set directly from Python"};
+  // Stored as float in the frame; Gaudi has no parser for map<string,float> so the property uses double
+  Gaudi::Property<std::map<std::string, double>> m_floatParameters{
+      this, "FloatParameters", {}, "Metadata float parameters to be set directly from Python"};
+  Gaudi::Property<std::map<std::string, double>> m_doubleParameters{
+      this, "DoubleParameters", {}, "Metadata double parameters to be set directly from Python"};
+  Gaudi::Property<std::map<std::string, std::string>> m_stringParameters{
+      this, "StringParameters", {}, "Metadata string parameters to be set directly from Python"};
 };
 
 #endif
