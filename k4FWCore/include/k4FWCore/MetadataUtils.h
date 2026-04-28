@@ -73,20 +73,6 @@ void putParameter(const std::string& name, const T& value, const GaudiComp* comp
   metadataSvc->template put<T>(name, value);
 }
 
-/// @brief Save a metadata parameter in the metadata frame. Overload for compatibility
-/// with the MetadataHandle, don't use!
-/// @deprecated Use the overload taking a Gaudi::Algorithm* instead
-template <typename T>
-[[deprecated("Use the overload taking a Gaudi::Algorithm* as third argument instead")]] void
-putParameter(const std::string& name, const T& value) {
-  auto metadataSvc = Gaudi::svcLocator()->service<IMetadataSvc>("MetadataSvc", false);
-  if (!metadataSvc) {
-    std::cout << "MetadataSvc not found" << std::endl;
-    return;
-  }
-  return metadataSvc->put<T>(name, value);
-}
-
 /// @brief Get a metadata parameter from the metadata frame
 /// @param name The name of the parameter
 /// @param comp The Gaudi component (algorithm, tool) that is retrieving the
@@ -103,19 +89,6 @@ std::optional<T> getParameter(const std::string& name, const GaudiComp* comp) {
     return std::nullopt;
   }
   return metadataSvc->template get<T>(name);
-}
-
-/// @brief Get a metadata parameter from the metadata frame. Overload for compatibility
-/// with the MetadataHandle, don't use!
-/// @deprecated Use the overload taking a Gaudi::Algorithm* instead
-template <typename T>
-[[deprecated("Use the overload taking a Gaudi::Algorithm* as second argument instead")]] std::optional<T>
-getParameter(const std::string& name) {
-  auto metadataSvc = Gaudi::svcLocator()->service<IMetadataSvc>("MetadataSvc", false);
-  if (!metadataSvc) {
-    return std::nullopt;
-  }
-  return metadataSvc->get<T>(name);
 }
 
 /// @brief Put a metadata parameter associated with a collection into the metadata
@@ -192,6 +165,27 @@ std::optional<T> getCollectionParameter(const std::string& collName, const std::
 template <typename GaudiComp = Gaudi::Algorithm>
 std::optional<std::string> getCellIDEncoding(const std::string& collName, const GaudiComp* comp) {
   return getCollectionParameter<std::string>(collName, edm4hep::labels::CellIDEncoding, comp);
+}
+
+/// @brief Get a metadata parameter associated with a collection from the metadata
+///
+/// Internally builds the correct parameter name from the collection name and
+/// parameter name and then retrieves the value from the metadata frame via the
+/// MetadataSvc
+///
+/// @param collName The name of the collection for which the parameter should be
+///                 retrieved
+/// @param paramName The name of the parameter
+/// @param comp The Gaudi component (algorithm, tool) that is retrieving the
+///             parameter, typically "this"
+/// @tparam T The type of the parameter value
+/// @tparam GaudiComp The type of the component. This will be deduced in
+///                   pretty much all of the use cases
+/// @return The parameter value if it has been found or std::nullopt if not
+template <typename T, typename GaudiComp = Gaudi::Algorithm>
+std::optional<T> getCollectionParameter(const std::string& collName, const std::string& paramName,
+                                        const GaudiComp* comp) {
+  return getParameter<T>(podio::collMetadataParamName(collName, paramName), comp);
 }
 
 } // namespace k4FWCore

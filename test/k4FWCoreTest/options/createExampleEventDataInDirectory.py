@@ -17,25 +17,21 @@
 # limitations under the License.
 #
 from Gaudi.Configuration import INFO
-from k4FWCore import ApplicationMgr
-from Configurables import k4FWCoreTest_CreateExampleEventData
-from Configurables import k4DataSvc
-from Configurables import PodioOutput
-
-podioevent = k4DataSvc("EventDataSvc")
+from k4FWCore import ApplicationMgr, IOSvc
+from Configurables import k4FWCoreTest_CreateExampleEventData, EventDataSvc
 
 producer = k4FWCoreTest_CreateExampleEventData()
 
-out = PodioOutput("out")
-out.filename = "output/dir/output_k4test_exampledata.root"
-out.outputCommands = ["keep *"]
+iosvc = IOSvc()
+iosvc.Output = "output/dir/output_k4test_exampledata.root"
+iosvc.outputCommands = ["keep *"]
 
 
 ApplicationMgr(
-    TopAlg=[producer, out],
+    TopAlg=[producer],
     EvtSel="NONE",
     EvtMax=100,
-    ExtSvc=[podioevent],
+    ExtSvc=[EventDataSvc()],
     OutputLevel=INFO,
     StopOnSignal=True,
 )

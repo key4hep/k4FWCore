@@ -140,8 +140,6 @@ add_test_fwcore(CheckExampleEventData_unbounded options/checkExampleEventData.py
 add_test_fwcore(ReadExampleEventData options/readExampleEventData.py)
 set_property(TEST ReadExampleEventData APPEND PROPERTY FIXTURES_REQUIRED ExampleEventDataFile)
 add_test_fwcore(ReadExampleDataFromNthEvent options/readExampleDataFromNthEvent.py PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile)
-add_test_fwcore(ReadLimitedInputsk4DataSvc options/readLimitedSetOfCollectionsk4DataSvc.py ADD_TO_CHECK_FILES PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile)
-add_test_fwcore(ReadLimitedInputsAllEventsk4DataSvc options/readLimitedSetOfCollectionsk4DataSvc.py -n -1 --PodioOutput.filename "output_k4test_exampledata_limited_allevents.root" ADD_TO_CHECK_FILES PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile)
 
 add_test_fwcore(AlgorithmWithTFile options/TestAlgorithmWithTFile.py PROPERTIES FIXTURES_SETUP AlgorithmWithTFileFixture)
 set_property(TEST AlgorithmWithTFile PROPERTY WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
@@ -155,7 +153,7 @@ add_test(NAME AlgorithmWithTFileCheckMyTFileOutput
 set_property(TEST AlgorithmWithTFileCheckMyTFileOutput APPEND PROPERTY FIXTURES_REQUIRED AlgorithmWithTFileFixture)
 
 add_test_fwcore(CreateExampleEventData_cellID options/createExampleEventData_cellID.py ADD_TO_CHECK_FILES)
-add_test_fwcore(TwoProducers options/TwoProducers.py --filename output_k4fwcore_test_twoproducer.root
+add_test_fwcore(TwoProducers options/TwoProducers.py
                   --magicNumberOffset.Producer2 12345 --Producer1.magicNumberOffset 54321)
 add_test_fwcore(CheckCommandLineArguments options/createHelloWorld.py --HelloWorldAlg1.PerEventPrintMessage TwasBrilligAndTheSlithyToves
 PROPERTIES PASS_REGULAR_EXPRESSION "TwasBrilligAndTheSlithyToves"
@@ -206,7 +204,6 @@ add_test_fwcore(FunctionalSeveralInputFiles options/ExampleFunctionalSeveralInpu
 add_test_fwcore(FunctionalMTFile options/ExampleFunctionalMTFile.py PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
 add_test_fwcore(FunctionalMultipleFile options/ExampleFunctionalFileMultiple.py PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
 add_test_fwcore(FunctionalMix options/runFunctionalMix.py PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
-add_test_fwcore(FunctionalMixIOSvc options/runFunctionalMix.py --iosvc PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
 add_test_fwcore(FunctionalOutputCommands options/ExampleFunctionalOutputCommands.py PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
 add_test_fwcore(FunctionalConsumerRuntimeCollections options/ExampleFunctionalConsumerRuntimeCollections.py)
 add_test_fwcore(FunctionalConsumerRuntimeCollectionsMultiple options/ExampleFunctionalConsumerRuntimeCollectionsMultiple.py)

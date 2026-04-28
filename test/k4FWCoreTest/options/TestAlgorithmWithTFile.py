@@ -16,29 +16,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from Gaudi.Configuration import *
+from Gaudi.Configuration import INFO
 
-from Configurables import k4DataSvc
-from Configurables import PodioOutput
-from k4FWCore import ApplicationMgr
-from Configurables import k4FWCoreTest_AlgorithmWithTFile
-
-podioevent = k4DataSvc("EventDataSvc")
+from k4FWCore import ApplicationMgr, IOSvc
+from Configurables import k4FWCoreTest_AlgorithmWithTFile, EventDataSvc
 
 
 producer = k4FWCoreTest_AlgorithmWithTFile()
 
-
-out = PodioOutput("out")
-out.filename = "output_TestAlgorithmWithTFile_framework.root"
-out.outputCommands = ["keep *"]
+iosvc = IOSvc()
+iosvc.Output = "output_TestAlgorithmWithTFile_framework.root"
+iosvc.outputCommands = ["keep *"]
 
 
 ApplicationMgr(
-    TopAlg=[producer, out],
+    TopAlg=[producer],
     EvtSel="NONE",
     EvtMax=100,
-    ExtSvc=[podioevent],
+    ExtSvc=[EventDataSvc("EventDataSvc")],
     OutputLevel=INFO,
     StopOnSignal=True,
 )

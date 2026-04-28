@@ -20,7 +20,7 @@ from Gaudi.Configuration import INFO
 
 from Configurables import UniqueIDGenSvc
 from k4FWCore import ApplicationMgr
-from Configurables import k4DataSvc
+from Configurables import EventDataSvc
 from Configurables import TestUniqueIDGenSvc
 
 uid_svc = UniqueIDGenSvc(Seed=987, CheckDuplicates=True)
@@ -30,8 +30,8 @@ ApplicationMgr().EvtMax = 5
 ApplicationMgr().OutputLevel = INFO
 ApplicationMgr().StopOnSignal = True
 
-podioevent = k4DataSvc("EventDataSvc")
-ApplicationMgr().ExtSvc += [podioevent]
+evtDataSvc = EventDataSvc("EventDataSvc")
+ApplicationMgr().ExtSvc += [evtDataSvc]
 
 
 uniqueidtest = TestUniqueIDGenSvc()
