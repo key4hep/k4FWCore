@@ -67,6 +67,7 @@ private:
   Gaudi::Property<std::map<std::string, int>> m_intParameters{
       this, "IntParameters", {}, "Metadata int parameters to be set directly from Python"};
   // Stored as float in the frame; Gaudi has no parser for map<string,float> so the property uses double
+  // Compile work with fmt 12.1.0 and Gaudi master (instead of 40.2), with Clang 22 and GCC 15
   Gaudi::Property<std::map<std::string, double>> m_floatParameters{
       this, "FloatParameters", {}, "Metadata float parameters to be set directly from Python"};
   Gaudi::Property<std::map<std::string, double>> m_doubleParameters{
