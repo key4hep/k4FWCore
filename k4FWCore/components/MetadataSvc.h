@@ -66,7 +66,8 @@ private:
       "When true, apply the Python-configured parameters at finalize time instead of at initialize time"};
   Gaudi::Property<std::map<std::string, int>> m_intParameters{
       this, "IntParameters", {}, "Metadata int parameters to be set directly from Python"};
-  Gaudi::Property<std::map<std::string, float>> m_floatParameters{
+  // Stored as float in the frame; Gaudi has no parser for map<string,float> so the property uses double
+  Gaudi::Property<std::map<std::string, double>> m_floatParameters{
       this, "FloatParameters", {}, "Metadata float parameters to be set directly from Python"};
   Gaudi::Property<std::map<std::string, double>> m_doubleParameters{
       this, "DoubleParameters", {}, "Metadata double parameters to be set directly from Python"};
