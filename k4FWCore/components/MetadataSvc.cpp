@@ -87,7 +87,7 @@ void MetadataSvc::applyPropertyParameters() {
     m_frame->putParameter(key, val);
   }
   for (const auto& [key, val] : m_floatParameters) {
-    m_frame->putParameter(key, val);
+    m_frame->putParameter<float>(key, static_cast<float>(val));
   }
   for (const auto& [key, val] : m_doubleParameters) {
     m_frame->putParameter(key, val);
