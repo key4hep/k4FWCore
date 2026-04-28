@@ -18,4 +18,4 @@
 #
 from .ApplicationMgr import ApplicationMgr
 from .IOSvc import IOSvc
-from .MetadataUtils import putMetadata, readMetadata
+from .MetadataUtils import putMetadata
