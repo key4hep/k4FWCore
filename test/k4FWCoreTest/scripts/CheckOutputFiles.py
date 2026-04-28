@@ -233,25 +233,15 @@ check_metadata(
         "PDGValues": [1, 2, 3, 4],
         "MetadataString": "hello",
         "FinalizeMetadataInt": 10,
+        "PythonIntParam": 42,
+        "PythonFloatParam": 4.0,
+        "PythonDoubleParam": 3.14,
+        "PythonStringParam": "hello from python",
+        "PythonFinalizeParam": 99,
     },
 )
 
-reader = podio.reading.get_reader("functional_metadata.root")
-metadata = reader.get("metadata")[0]
-for key, value in zip(
-    [
-        "NumberOfParticles",
-        "ParticleTime",
-        "PDGValues",
-        "MetadataString",
-        "FinalizeMetadataInt",
-    ],
-    [3, 1.5, [1, 2, 3, 4], "hello", 10],
-):
-    if metadata.get_parameter(key) != value:
-        raise RuntimeError(
-            f"Metadata parameter {key} does not match the expected value, got {metadata.get_parameter(key)} but expected {value}"
-        )
+
 for rntuple in [
     "functional_producer_rntuple.root",
     "functional_producer_rntuple_file.root",
