@@ -46,13 +46,13 @@ header_producer = EventHeaderCreator("EventHeaderCreator")
 merger = CollectionMerger(
     "CollectionMerger",
     InputCollections=["MCParticles1"] * 10,
-    OutputCollection=["MergedMCParticles"],
+    OutputCollection="MergedMCParticles",
 )
 
 merger_links = CollectionMerger(
     "LinksMerger",
     InputCollections=["Links"] * 10,
-    OutputCollection=["MergedLinks"],
+    OutputCollection="MergedLinks",
 )
 
 filter_exact = EfficiencyFilter(
