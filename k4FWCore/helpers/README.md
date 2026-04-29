@@ -17,7 +17,31 @@ across the matrix of options.
 ## Requirements
 
 - Python 3.9+
-- `Jinja2` (`pip install jinja2`)
+- `Jinja2` (only needed for the plain-`python3` invocation path)
+
+The script ships a [PEP 723](https://peps.python.org/pep-0723/) inline
+metadata block, so [`uv`](https://docs.astral.sh/uv/) can run it directly
+without any manual environment setup. If you don't have `uv` installed,
+`pipx install uv` or follow the install instructions on the uv site.
+
+## How to run it
+
+There are three equivalent ways to invoke the script:
+
+```bash
+# 1. Recommended — uv resolves Python and Jinja2 from the PEP 723 block.
+uv run gaudi_gen.py MyProducer -o 'edm4hep::MCParticleCollection:MCParticles'
+
+# 2. Direct execution via the shebang (requires uv on PATH).
+chmod +x gaudi_gen.py
+./gaudi_gen.py MyProducer -o 'edm4hep::MCParticleCollection:MCParticles'
+
+# 3. Plain Python (you must have jinja2 installed in the active env).
+uv run gaudi_gen.py MyProducer -o 'edm4hep::MCParticleCollection:MCParticles'
+```
+
+The first two routes are self-contained: nothing needs to be installed in
+the system or active Python environment beyond `uv` itself.
 
 ---
 
@@ -25,7 +49,7 @@ across the matrix of options.
 
 ```bash
 # k4FWCore producer (functional type inferred from --outputs)
-python3 gaudi_gen.py MyProducer \
+uv run gaudi_gen.py MyProducer \
     -o 'edm4hep::MCParticleCollection:MCParticles'
 ```
 
@@ -33,7 +57,7 @@ That writes `MyProducer.cpp` in the current directory. Add `--cmake` to also
 emit a `CMakeLists.txt`:
 
 ```bash
-python3 gaudi_gen.py MyProducer \
+uv run gaudi_gen.py MyProducer \
     -o 'edm4hep::MCParticleCollection:MCParticles' \
     --cmake
 ```
@@ -93,7 +117,7 @@ file and the CMake file independently, so partial regeneration is fine
 
 | Flag             | Notes                                                                                              |
 | ---------------- | -------------------------------------------------------------------------------------------------- |
-| `-n`, `--namespace` | Wrap the generated class in `namespace <name> { ... }`.                                          |
+| `-n`, `--namespace` | Wrap the generated class in a **C++ namespace** — `namespace <name> { ... } // namespace <name>` around the class definition. Empty (default) leaves the class at global scope. Not to be confused with the Gaudi/k4FWCore framework namespace or the runtime algorithm instance name. |
 | `--framework`    | `k4fwcore` (default) or `gaudi` (vanilla `Gaudi::Functional`).                                      |
 | `--use-class`    | Generate `class ... { public: ... }` instead of the default `struct`.                              |
 | `--type-aliases` | Emit `using XxxColl = ...;` aliases for input collection types and use them in the operator signature. |
@@ -133,7 +157,7 @@ auto-promotes to `multitransformer`.
 ### Producer with multiple outputs and a property
 
 ```bash
-python3 gaudi_gen.py MyProducer \
+uv run gaudi_gen.py MyProducer \
     -o 'edm4hep::MCParticleCollection:MCParticles' \
        'edm4hep::TrackCollection:Tracks' \
     -p 'int:ExampleInt:3:An example integer property'
@@ -141,23 +165,33 @@ python3 gaudi_gen.py MyProducer \
 
 The output uses a `retType = std::tuple<...>` alias for readability.
 
-### Native Gaudi transformer with namespace
+### Native Gaudi transformer wrapped in a C++ namespace
 
 ```bash
-python3 gaudi_gen.py MySum \
+uv run gaudi_gen.py MySum \
     -i 'Input1:Loc1' 'Input2:Loc2' \
     -o 'Output:OutLoc' \
     --framework gaudi \
     -n MyNamespace
 ```
 
-This emits a `BaseClass_t = Gaudi::Functional::Traits::BaseClass_t<Gaudi::Algorithm>`
-typedef and uses `Gaudi::Functional::Transformer<...>` as the base.
+`-n MyNamespace` wraps the class definition in `namespace MyNamespace { ... }`.
+The output also emits a
+`BaseClass_t = Gaudi::Functional::Traits::BaseClass_t<Gaudi::Algorithm>`
+typedef and uses `Gaudi::Functional::Transformer<...>` as the base:
+
+```cpp
+namespace MyNamespace {
+struct MySum final : Gaudi::Functional::Transformer<Output(const Input1&, const Input2&), BaseClass_t> {
+    // ...
+};
+} // namespace MyNamespace
+```
 
 ### Variable-length / runtime inputs (k4FWCore)
 
 ```bash
-python3 gaudi_gen.py MyVarConsumer \
+uv run gaudi_gen.py MyVarConsumer \
     -i 'edm4hep::MCParticleCollection:Inputs' \
     --runtime-inputs 'edm4hep::MCParticleCollection:Inputs:MCParticles0,MCParticles1'
 ```
@@ -168,7 +202,7 @@ and `operator()` receives `const std::vector<const edm4hep::MCParticleCollection
 ### Dynamic output collections
 
 ```bash
-python3 gaudi_gen.py MyDynProducer \
+uv run gaudi_gen.py MyDynProducer \
     --runtime-outputs 'edm4hep::MCParticleCollection'
 ```
 
@@ -178,7 +212,7 @@ The constructor wires `KeyValues("OutputCollections", {"MCParticles"})` and
 ### Filter
 
 ```bash
-python3 gaudi_gen.py MyFilter filter \
+uv run gaudi_gen.py MyFilter filter \
     -i 'edm4hep::MCParticleCollection:MCParticles'
 ```
 
