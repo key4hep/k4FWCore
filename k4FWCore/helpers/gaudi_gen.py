@@ -750,7 +750,7 @@ Examples:
          'edm4hep::TrackCollection:Tracks' \\
       -p 'int:ExampleInt:3:An example integer property'
 
-  # Gaudi transformer with namespace (type inferred)
+  # Gaudi transformer wrapped in 'namespace MyNamespace { ... }' (type inferred)
   gaudi_gen.py MySum -i 'Input1:Loc1' 'Input2:Loc2' -o 'Output:OutLoc' \\
       --framework gaudi -n MyNamespace
 
@@ -808,8 +808,14 @@ Examples:
         ),
     )
     parser.add_argument(
-        "-n", "--namespace", default="",
-        help="C++ namespace to wrap the generated class in. Empty = no namespace.",
+        "-n", "--namespace", default="", metavar="NAME",
+        help=(
+            "Wrap the generated class in a C++ namespace, i.e. emit "
+            "'namespace NAME { ... } // namespace NAME' around the class "
+            "definition. Empty (default) leaves the class at global scope. "
+            "Note: this is the C++ namespace, not the Gaudi/k4FWCore framework "
+            "namespace and not the runtime algorithm instance name."
+        ),
     )
     parser.add_argument(
         "--framework", choices=["gaudi", "k4fwcore"], default="k4fwcore",
