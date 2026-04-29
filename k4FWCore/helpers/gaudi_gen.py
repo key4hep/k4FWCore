@@ -904,8 +904,8 @@ def main() -> None:
     try:
         spec = _build_spec(args)
     except ValueError as exc:
+        # parser.error() prints usage and calls sys.exit(2); never returns.
         parser.error(str(exc))
-        return
 
     cpp_source, cmake_source = generate(spec)
 
