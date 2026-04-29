@@ -9,6 +9,7 @@ import os
 import re
 import shlex
 import sys
+import textwrap
 from dataclasses import dataclass
 from typing import List, Optional
 
@@ -732,33 +733,33 @@ def _build_parser() -> argparse.ArgumentParser:
         prog="gaudi_gen.py",
         description="Generate Gaudi Functional C++ algorithm boilerplate.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""\
-Functional type is inferred from the number of inputs and outputs:
-  consumer         inputs > 0, outputs == 0
-  producer         inputs == 0, outputs >= 1
-  transformer      inputs >= 1, outputs == 1
-  multitransformer inputs >= 1, outputs > 1
-  filter           inputs >= 1, supply --type filter explicitly
+        epilog=textwrap.dedent("""\
+            Functional type is inferred from the number of inputs and outputs:
+              consumer         inputs > 0, outputs == 0
+              producer         inputs == 0, outputs >= 1
+              transformer      inputs >= 1, outputs == 1
+              multitransformer inputs >= 1, outputs > 1
+              filter           inputs >= 1, supply --type filter explicitly
 
-Examples:
-  # k4FWCore producer (type inferred)
-  gaudi_gen.py MyProducer -o 'edm4hep::MCParticleCollection:MCParticles'
+            Examples:
+              # k4FWCore producer (type inferred)
+              gaudi_gen.py MyProducer -o 'edm4hep::MCParticleCollection:MCParticles'
 
-  # k4FWCore multi-output producer with properties
-  gaudi_gen.py MyProducer \\
-      -o 'edm4hep::MCParticleCollection:MCParticles' \\
-         'edm4hep::TrackCollection:Tracks' \\
-      -p 'int:ExampleInt:3:An example integer property'
+              # k4FWCore multi-output producer with properties
+              gaudi_gen.py MyProducer \\
+                  -o 'edm4hep::MCParticleCollection:MCParticles' \\
+                     'edm4hep::TrackCollection:Tracks' \\
+                  -p 'int:ExampleInt:3:An example integer property'
 
-  # Gaudi transformer wrapped in 'namespace MyNamespace { ... }' (type inferred)
-  gaudi_gen.py MySum -i 'Input1:Loc1' 'Input2:Loc2' -o 'Output:OutLoc' \\
-      --framework gaudi -n MyNamespace
+              # Gaudi transformer wrapped in 'namespace MyNamespace { ... }' (type inferred)
+              gaudi_gen.py MySum -i 'Input1:Loc1' 'Input2:Loc2' -o 'Output:OutLoc' \\
+                  --framework gaudi -n MyNamespace
 
-  # Variable-length inputs (k4FWCore only)
-  gaudi_gen.py MyVarConsumer \\
-      -i 'edm4hep::MCParticleCollection:Inputs' \\
-      --runtime-inputs 'edm4hep::MCParticleCollection:Inputs:MCParticles0,MCParticles1'
-""",
+              # Variable-length inputs (k4FWCore only)
+              gaudi_gen.py MyVarConsumer \\
+                  -i 'edm4hep::MCParticleCollection:Inputs' \\
+                  --runtime-inputs 'edm4hep::MCParticleCollection:Inputs:MCParticles0,MCParticles1'
+        """),
     )
     parser.add_argument(
         "class_name",
