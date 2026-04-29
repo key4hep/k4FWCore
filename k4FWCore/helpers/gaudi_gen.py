@@ -780,7 +780,10 @@ Examples:
             "If KEY is omitted, a default is derived from the type name."
         ),
     )
-    parser.add_argument(
+    # --outputs and --runtime-outputs are alternative ways to declare outputs;
+    # let argparse enforce that at parse time.
+    out_group = parser.add_mutually_exclusive_group()
+    out_group.add_argument(
         "-o", "--outputs", nargs="*", default=[], metavar="TYPE:KEY",
         help=(
             "Output collections, one or more 'TYPE:KEY' specs. "
@@ -788,7 +791,7 @@ Examples:
             "Mutually exclusive with --runtime-outputs."
         ),
     )
-    parser.add_argument(
+    out_group.add_argument(
         "--runtime-outputs", dest="runtime_outputs", default=None, metavar="TYPE",
         help=(
             "Enable dynamic output collections returning std::vector<TYPE>. "
@@ -887,8 +890,8 @@ def main() -> None:
     parser = _build_parser()
     args = parser.parse_args()
 
-    if args.runtime_outputs and args.outputs:
-        parser.error("--runtime-outputs and --outputs are mutually exclusive.")
+    # --outputs vs --runtime-outputs is enforced by the mutually-exclusive
+    # group on the parser; only the framework constraint remains here.
     if args.runtime_outputs and args.framework != "k4fwcore":
         parser.error("--runtime-outputs is only supported with --framework k4fwcore.")
 
