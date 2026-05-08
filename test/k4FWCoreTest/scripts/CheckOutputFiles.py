@@ -430,3 +430,12 @@ check_metadata(
         "ToolFinalizeParam": 42,
     },
 )
+
+check_events("output_TestAlgorithmWithTFile_framework.root", 100)
+
+f_tfile = ROOT.TFile.Open("output_TestAlgorithmWithTFile_myTFile.root")
+mytree = f_tfile.Get("mytree")
+if mytree is None:
+    raise RuntimeError("output_TestAlgorithmWithTFile_myTFile.root has no TTree named mytree")
+if mytree.GetEntries() == 0:
+    raise RuntimeError("output_TestAlgorithmWithTFile_myTFile.root contains TTree mytree with no entries")

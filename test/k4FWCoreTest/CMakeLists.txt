@@ -141,16 +141,7 @@ add_test_fwcore(ReadExampleEventData options/readExampleEventData.py)
 set_property(TEST ReadExampleEventData APPEND PROPERTY FIXTURES_REQUIRED ExampleEventDataFile)
 add_test_fwcore(ReadExampleDataFromNthEvent options/readExampleDataFromNthEvent.py PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile)
 
-add_test_fwcore(AlgorithmWithTFile options/TestAlgorithmWithTFile.py PROPERTIES FIXTURES_SETUP AlgorithmWithTFileFixture)
-set_property(TEST AlgorithmWithTFile PROPERTY WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
-add_test(NAME AlgorithmWithTFileCheckFrameworkOutput
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND  python scripts/check_TestAlgorithmWithTFile_framework_nonempty.py)
-set_property(TEST AlgorithmWithTFileCheckFrameworkOutput APPEND PROPERTY FIXTURES_REQUIRED AlgorithmWithTFileFixture)
-add_test(NAME AlgorithmWithTFileCheckMyTFileOutput
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-         COMMAND  python scripts/check_TestAlgorithmWithTFile_myTFile_nonempty.py)
-set_property(TEST AlgorithmWithTFileCheckMyTFileOutput APPEND PROPERTY FIXTURES_REQUIRED AlgorithmWithTFileFixture)
+add_test_fwcore(AlgorithmWithTFile options/TestAlgorithmWithTFile.py ADD_TO_CHECK_FILES)
 
 add_test_fwcore(CreateExampleEventData_cellID options/createExampleEventData_cellID.py ADD_TO_CHECK_FILES)
 add_test_fwcore(TwoProducers options/TwoProducers.py
