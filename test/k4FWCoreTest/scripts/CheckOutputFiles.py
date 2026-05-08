@@ -438,4 +438,6 @@ mytree = f_tfile.Get("mytree")
 if mytree is None:
     raise RuntimeError("output_TestAlgorithmWithTFile_myTFile.root has no TTree named mytree")
 if mytree.GetEntries() == 0:
-    raise RuntimeError("output_TestAlgorithmWithTFile_myTFile.root contains TTree mytree with no entries")
+    raise RuntimeError(
+        "output_TestAlgorithmWithTFile_myTFile.root contains TTree mytree with no entries"
+    )
