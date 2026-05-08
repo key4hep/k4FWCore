@@ -45,7 +45,7 @@ producer = k4FWCoreTest_cellID_writer(
 consumer = k4FWCoreTest_cellID_reader()
 
 iosvc = IOSvc()
-iosvc.Input = "output_k4test_exampledata_cellid.root"
+iosvc.Output = "output_k4test_exampledata_cellid.root"
 iosvc.outputCommands = ["keep *"]
 
 ApplicationMgr(
