@@ -46,35 +46,35 @@ header_producer = EventHeaderCreator("EventHeaderCreator")
 merger = CollectionMerger(
     "CollectionMerger",
     InputCollections=["MCParticles1"] * 10,
-    OutputCollection=["MergedMCParticles"],
+    OutputCollection="MergedMCParticles",
 )
 
 merger_links = CollectionMerger(
     "LinksMerger",
     InputCollections=["Links"] * 10,
-    OutputCollection=["MergedLinks"],
+    OutputCollection="MergedLinks",
 )
 
 filter_exact = EfficiencyFilter(
     "Filter",
-    InputCollection=["MergedMCParticles"],
-    OutputCollection=["FilteredMCParticles"],
+    InputCollection="MergedMCParticles",
+    OutputCollection="FilteredMCParticles",
     Efficiency=0.8,
     Exact=True,  # If True, then 80% of the MCP, for each event, will be kept (for an event with 10 MCP, 8 will be kept always)
 )
 
 filter = EfficiencyFilter(
     "FilterNotExact",
-    InputCollection=["MergedMCParticles"],
-    OutputCollection=["FilteredNotExactMCParticles"],
+    InputCollection="MergedMCParticles",
+    OutputCollection="FilteredNotExactMCParticles",
     Efficiency=0.8,
     Exact=False,  # If False (default), every MCP will be kept with a probability of 0.8 (roll the dice for each MCP)
 )
 
 filter_links = EfficiencyFilter(
     "FilterLinks",
-    InputCollection=["MergedLinks"],
-    OutputCollection=["FilteredLinks"],
+    InputCollection="MergedLinks",
+    OutputCollection="FilteredLinks",
     Efficiency=0.8,
     Exact=True,
 )

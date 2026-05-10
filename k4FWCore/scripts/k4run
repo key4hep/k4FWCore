@@ -121,18 +121,6 @@ def add_arguments(parser, app_mgr):
     return option_db
 
 
-class DeprecatedStoreTrueAction(argparse.Action):
-    def __init__(self, option_strings, dest, nargs=0, **kwargs):
-        super().__init__(option_strings, dest, nargs=nargs, **kwargs)
-
-    def __call__(self, parser, namespace, values, option_string=None):
-        warnings.warn(
-            f"Argument '{self.dest}' is deprecated and will be removed in a future version.",
-            DeprecationWarning,
-        )
-        setattr(namespace, self.dest, True)
-
-
 def startInteractive(vars):
     """Start an interactive session"""
     import code
@@ -171,12 +159,6 @@ def main():
         action="store_true",
         help="Do not actually run the job, just parse the config files",
     )
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action=DeprecatedStoreTrueAction,
-        help="[deprecated: use --log-level=verbose] Run job with verbose output",
-    )
     parser.add_argument("-n", "--num-events", type=int, help="Number of events to run")
     parser.add_argument(
         "-l",
@@ -211,8 +193,6 @@ def main():
     # in the namespace since parsing of the file happens when the namespace
     # has already been filled
     opts = parser.parse_known_args()
-    if opts[0].verbose:
-        opts[0].log_level = "VERBOSE"
     logger = get_logger()
     set_log_level(opts[0].log_level or "INFO")
 

@@ -24,9 +24,6 @@
 
 // key4hep
 #include "k4FWCore/DataHandle.h"
-#include "k4FWCore/MetaDataHandle.h"
-
-#include "edm4hep/Constants.h"
 
 // datamodel
 #include "edm4hep/SimTrackerHitCollection.h"
@@ -52,8 +49,6 @@ private:
   /// Handle for the SimTrackerHits to be written
   mutable k4FWCore::DataHandle<edm4hep::SimTrackerHitCollection> m_simTrackerHitWriterHandle{
       "SimTrackerHits", Gaudi::DataHandle::Writer, this};
-  k4FWCore::MetaDataHandle<std::string> m_cellIDHandle{m_simTrackerHitWriterHandle, edm4hep::labels::CellIDEncoding,
-                                                       Gaudi::DataHandle::Writer};
 
   // Some properties for the configuration metadata
   Gaudi::Property<int> m_intProp{this, "intProp", 42, "An integer property"};

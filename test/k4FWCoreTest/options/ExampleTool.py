@@ -17,31 +17,32 @@
 # limitations under the License.
 #
 
-# This is an example using a producer with a single output and saving that to a file
-
 from Gaudi.Configuration import INFO
-from Configurables import EventHeaderCreator, ExampleFunctionalProducer
-from Configurables import EventDataSvc
+from Configurables import ExampleToolFunctional, ExampleToolA
 from k4FWCore import ApplicationMgr, IOSvc
-from k4FWCore.parseArgs import parser
+from Configurables import EventDataSvc, MetadataSvc
 
-parser.add_argument("--second", action="store_true")
-args = parser.parse_known_args()
+iosvc = IOSvc()
+iosvc.Output = "example_tool.root"
+metadatasvc = MetadataSvc("MetadataSvc")
+metadatasvc.ThrowIfDuplicate = False
 
-iosvc = IOSvc("IOSvc")
-name = "functional_producer.root" if not args[0].second else "functional_producer2.root"
-iosvc.Output = name
-# Collections can be dropped
-# out.OutputCommands = ["drop *"]
+user = ExampleToolFunctional("ToolUser")
 
+toolA = ExampleToolA("ToolA", Number=42)
+user.ToolA = toolA
+user.ExpectedToolANumber = 42
 
-header = EventHeaderCreator("EventHeaderCreator")
-producer = ExampleFunctionalProducer("ExampleFunctionalProducer")
+user.ToolB = "ExampleToolB/ToolB"
+user.ExpectedToolBNumber = 99
+
+# ToolC defaults to ExampleToolC (Number=77)
+user.ExpectedToolCNumber = 77
 
 ApplicationMgr(
-    TopAlg=[header, producer],
+    TopAlg=[user],
     EvtSel="NONE",
-    EvtMax=10 if not args[0].second else 20,
+    EvtMax=3,
     ExtSvc=[EventDataSvc("EventDataSvc")],
     OutputLevel=INFO,
 )

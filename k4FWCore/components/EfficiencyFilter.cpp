@@ -37,8 +37,8 @@ struct ConcatTypeLists<List<Ts...>, List<Us...>> {
 struct EfficiencyFilter final : k4FWCore::Transformer<podio::CollectionBase*(const podio::CollectionBase&,
                                                                              const edm4hep::EventHeaderCollection&)> {
   EfficiencyFilter(const std::string& name, ISvcLocator* svcLoc)
-      : Transformer(name, svcLoc, {KeyValues("InputCollection", {""}), KeyValues("EventHeader", {"EventHeader"})},
-                    {KeyValues("OutputCollection", {""})}) {}
+      : Transformer(name, svcLoc, {KeyValue("InputCollection", ""), KeyValue("EventHeader", "EventHeader")},
+                    {KeyValue("OutputCollection", "")}) {}
 
   StatusCode initialize() final {
     StatusCode sc = Transformer::initialize();

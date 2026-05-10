@@ -37,7 +37,7 @@ struct ExampleParticleIDProducer final
   StatusCode initialize() final {
     m_pidMeta = {m_pidAlgoName, m_pidParamNames};
     std::string collname = outputLocations("ParticleIDCollection")[0];
-    k4FWCore::putParameter(collname, m_pidMeta);
+    k4FWCore::putParameter(collname, m_pidMeta, this);
     return StatusCode::SUCCESS;
   }
 

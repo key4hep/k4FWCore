@@ -42,10 +42,15 @@ producer = ExampleFunctionalMetadataProducer(
     vectorStringProp2=["one", "two", "three", "four"],
     OutputCollection=["MCParticles"],
 )
+# Second producer using the same metadata parameter names to trigger overwrite warnings
+producer2 = ExampleFunctionalMetadataProducer(
+    "Producer2",
+    OutputCollection=["MCParticles2"],
+)
 consumer = ExampleFunctionalMetadataConsumer("Consumer", InputCollection=["MCParticles"])
 
 ApplicationMgr(
-    TopAlg=[producer, consumer],
+    TopAlg=[producer, producer2, consumer],
     EvtSel="NONE",
     EvtMax=10,
     ExtSvc=[EventDataSvc("EventDataSvc")],

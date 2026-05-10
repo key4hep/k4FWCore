@@ -31,6 +31,7 @@ set(k4fwcoretest_plugin_sources
   src/components/ExampleFunctionalFilter.cpp
   src/components/ExampleFunctionalMetadataConsumer.cpp
   src/components/ExampleFunctionalMetadataProducer.cpp
+  src/components/ExampleToolFunctional.cpp
   src/components/ExampleFunctionalProducer.cpp
   src/components/ExampleFunctionalProducerMultiple.cpp
   src/components/ExampleFunctionalProducerRuntimeCollections.cpp
@@ -216,9 +217,15 @@ add_test_fwcore(FunctionalTransformerRuntimeCollectionsMultiple options/ExampleF
 add_test_fwcore(FunctionalTransformerHist options/ExampleFunctionalTransformerHist.py ADD_TO_CHECK_FILES)
 add_test_fwcore(FunctionalCollectionMerger options/ExampleFunctionalCollectionMerger.py PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
 add_test_fwcore(FunctionalFilterFile options/ExampleFunctionalFilterFile.py ADD_TO_CHECK_FILES)
-add_test_fwcore(FunctionalMetadata options/ExampleFunctionalMetadata.py ADD_TO_CHECK_FILES PROPERTIES FIXTURES_SETUP FunctionalMetadataFile)
+add_test_fwcore(FunctionalMetadata options/ExampleFunctionalMetadata.py --MetadataSvc.SkipIfSameValue True ADD_TO_CHECK_FILES PROPERTIES FIXTURES_SETUP FunctionalMetadataFile)
+add_test_fwcore(FunctionalMetadataThrow options/ExampleFunctionalMetadata.py --Producer2.ParticleTime 2.5
+                  --IOSvc.Output functional_metadata_throw.root
+                  PROPERTIES PASS_REGULAR_EXPRESSION "Metadata parameter '.*' is already set")
 add_test_fwcore(FunctionalMetadataRead options/ExampleFunctionalMetadataRead.py PROPERTIES FIXTURES_REQUIRED FunctionalMetadataFile ADD_TO_CHECK_FILES)
+add_test_fwcore(FunctionalMetadataEventLoop options/ExampleFunctionalMetadataEventLoop.py
+                  PROPERTIES PASS_REGULAR_EXPRESSION "putParameter cannot be called during the event loop")
 add_test_fwcore(FunctionalMetadataOldAlgorithm options/ExampleFunctionalMetadataOldAlgorithm.py ADD_TO_CHECK_FILES PROPERTIES FIXTURES_SETUP OldAlgorithmFile)
+add_test_fwcore(ExampleTool options/ExampleTool.py ADD_TO_CHECK_FILES)
 add_test_fwcore(createEventHeaderConcurrent options/createEventHeaderConcurrent.py ADD_TO_CHECK_FILES)
 add_test_fwcore(FunctionalMetadataReadOldAlgorithm options/ExampleFunctionalMetadataReadOldAlgorithm.py PROPERTIES FIXTURES_REQUIRED OldAlgorithmFile ADD_TO_CHECK_FILES)
 
@@ -273,6 +280,8 @@ add_test_fwcore(ReadMarlinWrapperCollection options/readMarlinWrapperCollection.
 
 add_test_fwcore(InvalidOutputCommandsNoCrash options/invalidOutputCommandsNoCrash.py)
 set_tests_properties(InvalidOutputCommandsNoCrash PROPERTIES FIXTURES_REQUIRED ProducerFile PASS_REGULAR_EXPRESSION "ERROR 'abc' is not a valid command for the KeepDropSwitch")
+
+add_test_fwcore(OverlayTiming options/TestOverlayTiming.py ADD_TO_CHECK_FILES PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile)
 
 add_test(NAME check_broken_pipe
          COMMAND bash -c "[ $(${K4RUN} options/ExampleFunctionalProducer.py | head -n 2 | wc -l) = 2 ]"

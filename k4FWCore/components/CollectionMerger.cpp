@@ -48,7 +48,7 @@ struct CollectionMerger final
     : k4FWCore::Transformer<podio::CollectionBase*(const std::vector<const podio::CollectionBase*>&)> {
   CollectionMerger(const std::string& name, ISvcLocator* svcLoc)
       : Transformer(name, svcLoc, {KeyValues("InputCollections", {"MCParticles"})},
-                    {KeyValues("OutputCollection", {"NewMCParticles"})}) {
+                    {KeyValue("OutputCollection", "NewMCParticles")}) {
     if (System::cmdLineArgs()[0].find("genconf") != std::string::npos) {
       return;
     }

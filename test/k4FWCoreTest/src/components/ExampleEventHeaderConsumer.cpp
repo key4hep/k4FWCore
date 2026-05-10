@@ -24,9 +24,8 @@
 
 #include <Gaudi/Property.h>
 
-#include <fmt/core.h>
-
 #include <atomic>
+#include <format>
 #include <stdexcept>
 #include <string>
 
@@ -44,13 +43,13 @@ struct ExampleEventHeaderConsumer final : k4FWCore::Consumer<void(const edm4hep:
     }
 
     if (evtHeader.getRunNumber() != m_runNumber) {
-      throw std::runtime_error(fmt::format("Run number is not set correctly (expected {}, actual {})",
+      throw std::runtime_error(std::format("Run number is not set correctly (expected {}, actual {})",
                                            m_runNumber.value(), evtHeader.getRunNumber()));
     }
 
     const auto expectedEvent = m_evtCounter++ + m_eventNumberOffset;
     if (evtHeader.getEventNumber() != expectedEvent) {
-      throw std::runtime_error(fmt::format("Event number is not set correctly (expected {}, actual {})", expectedEvent,
+      throw std::runtime_error(std::format("Event number is not set correctly (expected {}, actual {})", expectedEvent,
                                            evtHeader.getEventNumber()));
     }
   }

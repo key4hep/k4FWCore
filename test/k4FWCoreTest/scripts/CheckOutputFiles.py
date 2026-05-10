@@ -69,9 +69,11 @@ def check_metadata(filename, expected_metadata):
             )
 
 
-check_collections("functional_transformer.root", ["MCParticles", "NewMCParticles"])
-check_collections("gaudi_functional.root", ["MCParticles", "NewMCParticles"])
-check_collections("functional_transformer_cli.root", ["MCParticles", "NewMCParticles"])
+check_collections("functional_transformer.root", ["EventHeader", "MCParticles", "NewMCParticles"])
+check_collections("gaudi_functional.root", ["EventHeader", "MCParticles", "NewMCParticles"])
+check_collections(
+    "functional_transformer_cli.root", ["EventHeader", "MCParticles", "NewMCParticles"]
+)
 check_collections(
     "functional_transformer_multiple.root",
     [
@@ -221,7 +223,7 @@ for i in range(len(merged_links)):
         )
 
 
-check_collections("functional_metadata.root", ["MCParticles"])
+check_collections("functional_metadata.root", ["MCParticles", "MCParticles2"])
 
 check_metadata(
     "functional_metadata.root",
@@ -360,6 +362,55 @@ for i, filename in enumerate(
             )
 
 
+check_collections(
+    "overlay_output.root",
+    [
+        "EventHeader",
+        "MCParticles1",
+        "MCParticles2",
+        "VectorFloat",
+        "SimTrackerHits",
+        "TrackerHits",
+        "Tracks",
+        "RecoParticles",
+        "Links",
+        "OverlayMCParticles",
+        "OverlaySimTrackerHits",
+    ],
+)
+
+reader = podio.reading.get_reader("overlay_output.root")
+n_signal_mc = 2
+n_background_mc = 2
+n_signal_sim = 1
+n_background_sim = 1
+for frame in reader.get("events"):
+    overlaid_particles = frame.get("OverlayMCParticles")
+    if len(overlaid_particles) != n_signal_mc + n_background_mc:
+        raise RuntimeError(
+            f"Expected {n_signal_mc + n_background_mc} particles in OverlayMCParticles, got {len(overlaid_particles)}"
+        )
+    particle_overlay_flags = [
+        overlaid_particles[i].isOverlay() for i in range(len(overlaid_particles))
+    ]
+    if particle_overlay_flags[:n_signal_mc] != [False] * n_signal_mc:
+        raise RuntimeError("Signal particles should not be flagged as overlay")
+    if particle_overlay_flags[n_signal_mc:] != [True] * n_background_mc:
+        raise RuntimeError("Background particles should be flagged as overlay")
+
+    overlaid_sim_hits = frame.get("OverlaySimTrackerHits")
+    if len(overlaid_sim_hits) != n_signal_sim + n_background_sim:
+        raise RuntimeError(
+            f"Expected {n_signal_sim + n_background_sim} hits in OverlaySimTrackerHits, got {len(overlaid_sim_hits)}"
+        )
+    sim_hit_overlay_flags = [
+        overlaid_sim_hits[i].isOverlay() for i in range(len(overlaid_sim_hits))
+    ]
+    if sim_hit_overlay_flags[:n_signal_sim] != [False] * n_signal_sim:
+        raise RuntimeError("Signal sim tracker hits should not be flagged as overlay")
+    if sim_hit_overlay_flags[n_signal_sim:] != [True] * n_background_sim:
+        raise RuntimeError("Background sim tracker hits should be flagged as overlay")
+
 reader = podio.reading.get_reader("functional_random_filter.root")
 frames = reader.get("events")
 for frame in frames:
@@ -375,3 +426,11 @@ for frame in frames:
     filtered_links = frame.get("FilteredLinks")
     if len(filtered_links) != 16:
         raise RuntimeError(f"Expected 16 links in FilteredLinks, got {len(filtered_links)}")
+
+check_metadata(
+    "example_tool.root",
+    {
+        "ToolInitParam": 99,
+        "ToolFinalizeParam": 42,
+    },
+)

@@ -32,24 +32,26 @@
 #include <stdexcept>
 #include <string>
 
-// Which type of collection we are reading
-using FloatColl = std::vector<const podio::UserDataCollection<float>*>;
-using ParticleColl = std::vector<const edm4hep::MCParticleCollection*>;
-using SimTrackerHitColl = std::vector<const edm4hep::SimTrackerHitCollection*>;
-using TrackerHitColl = std::vector<const edm4hep::TrackerHit3DCollection*>;
-using TrackColl = std::vector<const edm4hep::TrackCollection*>;
-using RecoColl = std::vector<const edm4hep::ReconstructedParticleCollection*>;
-using LinkColl = std::vector<const edm4hep::RecoMCParticleLinkCollection*>;
+// Which type of collection we are reading (vectors of pointers for runtime collections)
+using FloatCollVec = std::vector<const podio::UserDataCollection<float>*>;
+using ParticleCollVec = std::vector<const edm4hep::MCParticleCollection*>;
+using SimTrackerHitCollVec = std::vector<const edm4hep::SimTrackerHitCollection*>;
+using TrackerHitCollVec = std::vector<const edm4hep::TrackerHit3DCollection*>;
+using TrackCollVec = std::vector<const edm4hep::TrackCollection*>;
+using RecoCollVec = std::vector<const edm4hep::ReconstructedParticleCollection*>;
+using LinkCollVec = std::vector<const edm4hep::RecoMCParticleLinkCollection*>;
 
-using retType = std::tuple<std::vector<podio::UserDataCollection<float>>, std::vector<edm4hep::MCParticleCollection>,
-                           std::vector<edm4hep::MCParticleCollection>, std::vector<edm4hep::SimTrackerHitCollection>,
-                           std::vector<edm4hep::TrackerHit3DCollection>, std::vector<edm4hep::TrackCollection>,
-                           std::vector<edm4hep::ReconstructedParticleCollection>,
-                           std::vector<edm4hep::RecoMCParticleLinkCollection>>;
+using RuntimeMultipleRetType =
+    std::tuple<std::vector<podio::UserDataCollection<float>>, std::vector<edm4hep::MCParticleCollection>,
+               std::vector<edm4hep::MCParticleCollection>, std::vector<edm4hep::SimTrackerHitCollection>,
+               std::vector<edm4hep::TrackerHit3DCollection>, std::vector<edm4hep::TrackCollection>,
+               std::vector<edm4hep::ReconstructedParticleCollection>,
+               std::vector<edm4hep::RecoMCParticleLinkCollection>>;
 
 struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
-    : k4FWCore::MultiTransformer<retType(const FloatColl&, const ParticleColl&, const SimTrackerHitColl&,
-                                         const TrackerHitColl&, const TrackColl&, const RecoColl&, const LinkColl&)> {
+    : k4FWCore::MultiTransformer<RuntimeMultipleRetType(const FloatCollVec&, const ParticleCollVec&,
+                                                        const SimTrackerHitCollVec&, const TrackerHitCollVec&,
+                                                        const TrackCollVec&, const RecoCollVec&, const LinkCollVec&)> {
   // The pairs in KeyValue can be changed from python and they correspond
   // to the names of the input collections
   ExampleFunctionalTransformerRuntimeCollectionsMultiple(const std::string& name, ISvcLocator* svcLoc)
@@ -77,9 +79,10 @@ struct ExampleFunctionalTransformerRuntimeCollectionsMultiple final
   // This is the function that will be called to transform the data
   // Note that the function has to be const, as well as the collections
   // we get from the input
-  retType operator()(const FloatColl& floatVec, const ParticleColl& particlesVec,
-                     const SimTrackerHitColl& simTrackerHitVec, const TrackerHitColl& trackerHitVec,
-                     const TrackColl& trackVec, const RecoColl& recoVec, const LinkColl& linkVec) const override {
+  RuntimeMultipleRetType operator()(const FloatCollVec& floatVec, const ParticleCollVec& particlesVec,
+                                    const SimTrackerHitCollVec& simTrackerHitVec,
+                                    const TrackerHitCollVec& trackerHitVec, const TrackCollVec& trackVec,
+                                    const RecoCollVec& recoVec, const LinkCollVec& linkVec) const override {
     auto floatVecOut = std::vector<podio::UserDataCollection<float>>();
     auto particleVecOut = std::vector<edm4hep::MCParticleCollection>();
     auto particle2VecOut = std::vector<edm4hep::MCParticleCollection>();

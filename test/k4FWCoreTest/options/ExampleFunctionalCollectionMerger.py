@@ -52,7 +52,7 @@ merger = CollectionMerger(
     # List of collections to concatenate
     InputCollections=["MCParticles2", "MCParticles1", "MCParticles3"],
     # Name of the single output collection
-    OutputCollection=["NewMCParticles"],
+    OutputCollection="NewMCParticles",
     OutputLevel=DEBUG,
 )
 
@@ -61,7 +61,7 @@ link_merger = CollectionMerger(
     # List of collections to concatenate
     InputCollections=["Links", "Links"],
     # Name of the single output collection
-    OutputCollection=["NewLinks"],
+    OutputCollection="NewLinks",
 )
 
 # If we want to copy instead of creating a subset collection

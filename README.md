@@ -36,6 +36,10 @@ Algorithm creating a new `edm4hep::EventHeaderCollection` data object.
 
 Algorithm counting processed events and printing heart-bit.
 
+### OverlayTiming
+
+Algorithm overlaying background events on top of signal events, used, for example, to simulate beam-induced backgrounds. See its [documentation](doc/OverlayTiming.md) for more information.
+
 ### UniqueIDGenSvc
 
 Service generating unique, reproducible numbers to be used for seeding RNG used by the algorithms. See the [documentation](doc/uniqueIDGen.md) for more information.
@@ -52,7 +56,6 @@ positional arguments:
 
 options:
   --dry-run             Do not actually run the job, just parse the config files
-  -v, --verbose         Run job with verbose output
   -n NUM_EVENTS, --num-events NUM_EVENTS
                         Number of events to run
   -l, --list            Print all the configurable components available in the framework and exit

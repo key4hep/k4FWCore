@@ -1,3 +1,61 @@
+# v01-06
+
+* 2026-04-16 Juan Miguel Carceller ([PR#397](https://github.com/key4hep/k4FWCore/pull/397))
+  - Bump the version of k4FWCore for versioning the usage of new features
+
+* 2026-04-16 Juan Miguel Carceller ([PR#394](https://github.com/key4hep/k4FWCore/pull/394))
+  - Add the OverlayTiming algorithm, moved from k4Reco: https://github.com/key4hep/k4Reco/pull/55
+  - Add a test running the algorithm and checking its outputs
+
+* 2026-04-15 Thomas Madlener ([PR#395](https://github.com/key4hep/k4FWCore/pull/395))
+  - Remove the unused `.k4fwcore-ci.d/compile_and_test.sh`
+
+* 2026-04-15 Thomas Madlener ([PR#391](https://github.com/key4hep/k4FWCore/pull/391))
+  - Add `k4FWCore::putCollectionParameter` and `k4FWCore::getCollectionParameter` to facilitate setting and getting collection level parameters / metadata
+  - Add `k4FWCore::putCellIDEncoding` and `k4FWCore::getCellIDEncoding` to facilitate setting and getting CellID encoding strings
+  - Adapt some tests to use these instead of `MetaDataHandle`s
+
+* 2026-04-14 Thomas Madlener ([PR#390](https://github.com/key4hep/k4FWCore/pull/390))
+  - Generalize the `k4FWCore::putParameter` and `k4FWCore::getParameter` functions to also work with Gaudi components other than Algorithms (e.g. `AlgTool`s).
+  - Add slightly more debug output to these functions
+
+* 2026-04-12 Juan Miguel Carceller ([PR#387](https://github.com/key4hep/k4FWCore/pull/387))
+  - Delete the interfaces that are only used in k4RecCalorimeter
+
+* 2026-04-02 Thomas Madlener ([PR#389](https://github.com/key4hep/k4FWCore/pull/389))
+  - Deprecate the `k4FWCore::putParameter` and `k4FWCore::getParameter` functions that do not take a `Gaudi::Algorithm*` as argument as they are only intended for internal use and will be removed together with the `MetaDataHandle`.
+
+* 2026-04-01 Juan Miguel Carceller ([PR#388](https://github.com/key4hep/k4FWCore/pull/388))
+  - Add a compile-time warning for MetaDataHandle, who uses PodioDataSvc
+
+* 2026-03-30 Juan Miguel Carceller ([PR#386](https://github.com/key4hep/k4FWCore/pull/386))
+  - Delete the ISimG4* interface files, present in k4SimGeant4.
+
+* 2026-03-27 sss ([PR#384](https://github.com/key4hep/k4FWCore/pull/384))
+  - Add methods to ICalorimeterTool: cellIDs(), segmentation(), readoutName(), and id(). Also change prepareEmptyCells to be const.
+
+* 2026-03-24 Thomas Madlener ([PR#385](https://github.com/key4hep/k4FWCore/pull/385))
+  - Remove the `ITestDD4hepSvc` as it's unused
+
+* 2026-03-19 sss ([PR#383](https://github.com/key4hep/k4FWCore/pull/383))
+  - Add a method to INoiseConstTool to return both RMS and offset in a single call.
+
+* 2026-03-18 sss ([PR#377](https://github.com/key4hep/k4FWCore/pull/377))
+  - Add ICaloIndexer and ICalorimeterTool::indexer().
+
+* 2026-03-17 Juan Miguel Carceller ([PR#381](https://github.com/key4hep/k4FWCore/pull/381))
+  - Make Catch2 headers be part of the system include directories so that warnings from Catch2 are silenced when it is coming from the stack or the system
+
+* 2026-03-06 Juan Miguel Carceller ([PR#380](https://github.com/key4hep/k4FWCore/pull/380))
+  - Call `ROOT::EnableThreadSafety`, recommended by the ROOT documentation to make ROOT objects safe for multithreading.
+  - Use `std::atomic<int>` for `m_nextEntry`
+
+* 2026-02-24 Mateusz Jakub Fila ([PR#378](https://github.com/key4hep/k4FWCore/pull/378))
+  - Remove histogram interface compatibility with Gaudi versions older that v39
+
+* 2026-02-12 Juan Miguel Carceller ([PR#375](https://github.com/key4hep/k4FWCore/pull/375))
+  - Do not check for an exact formatting of the job options to fix test with a newer version of Gaudi
+
 # v01-05
 
 * 2026-01-19 Juan Miguel Carceller ([PR#373](https://github.com/key4hep/k4FWCore/pull/373))

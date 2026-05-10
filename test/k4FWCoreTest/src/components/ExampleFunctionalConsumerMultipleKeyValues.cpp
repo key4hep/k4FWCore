@@ -42,12 +42,12 @@ using TrackColl = edm4hep::TrackCollection;
 using RecoColl = edm4hep::ReconstructedParticleCollection;
 using LinkColl = edm4hep::RecoMCParticleLinkCollection;
 
-struct ExampleFunctionalConsumerMultiple final
+struct ExampleFunctionalConsumerMultipleKeyValues final
     : k4FWCore::Consumer<void(const FloatColl&, const ParticleColl&, const SimTrackerHitColl&, const TrackerHitColl&,
                               const TrackColl&, const RecoColl&, const LinkColl&)> {
   // The pairs in KeyValue can be changed from python and they correspond
   // to the names of the input collections
-  ExampleFunctionalConsumerMultiple(const std::string& name, ISvcLocator* svcLoc)
+  ExampleFunctionalConsumerMultipleKeyValues(const std::string& name, ISvcLocator* svcLoc)
       : Consumer(name, svcLoc,
                  {
                      KeyValues("InputCollectionFloat", {"VectorFloat"}),
@@ -129,4 +129,4 @@ private:
   Gaudi::Property<int> m_offset{this, "Offset", 10, "Integer to add to the dummy values written to the edm"};
 };
 
-DECLARE_COMPONENT(ExampleFunctionalConsumerMultiple)
+DECLARE_COMPONENT(ExampleFunctionalConsumerMultipleKeyValues)

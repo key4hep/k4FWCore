@@ -22,8 +22,10 @@
 #include "podio/Frame.h"
 
 #include <GaudiKernel/AnyDataWrapper.h>
+#include <GaudiKernel/GaudiException.h>
 #include <GaudiKernel/IDataProviderSvc.h>
 #include <GaudiKernel/Service.h>
+#include <GaudiKernel/StateMachine.h>
 
 #include <memory>
 
@@ -42,6 +44,12 @@ StatusCode MetadataSvc::initialize() {
 }
 
 StatusCode MetadataSvc::finalize() { return Service::finalize(); }
+
+void MetadataSvc::throwIfRunning() const {
+  if (targetFSMState() == Gaudi::StateMachine::RUNNING) {
+    throw GaudiException("putParameter cannot be called during the event loop", name(), StatusCode::FAILURE);
+  }
+}
 
 const podio::Frame* MetadataSvc::getFrame() const { return m_frame.get(); }
 podio::Frame* MetadataSvc::getFrame() { return m_frame.get(); }

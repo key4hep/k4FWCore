@@ -37,13 +37,14 @@ gaudi_add_module(k4FWCorePlugins
                    components/FCCDataSvc.cpp
                    components/IOSvc.cpp
                    components/MetadataSvc.cpp
+                   components/OverlayTiming.cpp
                    components/PodioInput.cpp
                    components/PodioOutput.cpp
                    components/Reader.cpp
                    components/UniqueIDGenSvc.cpp
                    components/Writer.cpp
                    components/k4DataSvc.cpp
-                 LINK Gaudi::GaudiKernel k4FWCore k4FWCore::k4Interface ROOT::Core ROOT::RIO ROOT::Tree EDM4HEP::edm4hep)
+                 LINK Gaudi::GaudiKernel k4FWCore k4FWCore::k4Interface ROOT::Core ROOT::RIO ROOT::Tree ROOT::MathCore EDM4HEP::edm4hep podio::podioIO)
 
 target_include_directories(k4FWCorePlugins PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
