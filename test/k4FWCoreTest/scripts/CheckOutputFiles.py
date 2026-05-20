@@ -125,10 +125,6 @@ check_collections(
 check_collections("functional_limited_input.root", ["MCParticles", "Links"])
 check_collections("functional_limited_input_all_events.root", ["MCParticles", "Links"])
 
-if podio.version.build_version > podio.version.parse("1.2.0"):
-    check_collections("output_k4test_exampledata_limited.root", ["MCParticles", "Links"])
-    check_collections("output_k4test_exampledata_limited_allevents.root", ["MCParticles", "Links"])
-
 mix_collections = [
     # From file
     "VectorFloat",
@@ -434,3 +430,14 @@ check_metadata(
         "ToolFinalizeParam": 42,
     },
 )
+
+check_events("output_TestAlgorithmWithTFile_framework.root", 100)
+
+f_tfile = ROOT.TFile.Open("output_TestAlgorithmWithTFile_myTFile.root")
+mytree = f_tfile.Get("mytree")
+if mytree is None:
+    raise RuntimeError("output_TestAlgorithmWithTFile_myTFile.root has no TTree named mytree")
+if mytree.GetEntries() == 0:
+    raise RuntimeError(
+        "output_TestAlgorithmWithTFile_myTFile.root contains TTree mytree with no entries"
+    )

@@ -38,7 +38,7 @@ class SimCaloHit;
 
 /** @class k4FWCoreTest_AlgorithmWithTFile
  *  Test producer to check that data can still be written to
- *  a user-declared TFile when using the PodioDataSvc
+ *  a user-declared TFile
  *
  */
 class k4FWCoreTest_AlgorithmWithTFile : public Gaudi::Algorithm {

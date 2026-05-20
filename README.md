@@ -9,16 +9,12 @@ k4FWCore also provides the `k4run` script used to run Gaudi steering files. See 
 
 ### Basic I/O
 
-| Current | Legacy | Description |
-|---------|--------|-|
-| IOSvc | k4DataSvc | Service handling the PODIO types and collections |
-| Reader | PodioInput | Algorithm to read data from input files on disk. |
-| Writer | PodioOutput | Algorithm to write data to an output file on disk. |
-| MetadataSvc | MetaDataHandle | Service/Handle handling user defined metadata |
-
-See the [documentation](doc/PodioInputOutput.md) for more information.
-
-### Auxiliary
+| Name | Description |
+|---------|-|
+| IOSvc | Service handling the PODIO types and collections |
+| Reader | Algorithm to read data from input files on disk. |
+| Writer | Algorithm to write data to an output file on disk. |
+| MetadataSvc | Service/Handle handling user defined metadata |
 
 ### Collection Merger
 
