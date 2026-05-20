@@ -30,47 +30,11 @@ from Configurables import (
     k4FWCoreTest_CreateExampleEventData,
 )
 from Configurables import k4FWCoreTest_CheckExampleEventData
-from k4FWCore import ApplicationMgr
-from Configurables import k4DataSvc
-from Configurables import PodioInput, PodioOutput
-from k4FWCore.parseArgs import parser
+from k4FWCore import ApplicationMgr, IOSvc
 
-parser.add_argument(
-    "--iosvc",
-    help="Use the IOSvc instead of PodioInput and PodioOutput",
-    action="store_true",
-    default=False,
-)
-args = parser.parse_known_args()[0]
-
-print(args.iosvc)
-
-if not args.iosvc:
-    podioevent = k4DataSvc("EventDataSvc")
-    podioevent.input = "functional_producer_multiple.root"
-
-    inp = PodioInput()
-    inp.collections = [
-        "VectorFloat",
-        "MCParticles1",
-        "MCParticles2",
-        "SimTrackerHits",
-        "TrackerHits",
-        "Tracks",
-        "RecoParticles",
-        "Links",
-    ]
-
-    out = PodioOutput()
-    out.filename = "functional_mix.root"
-    out.outputCommands = ["keep *"]
-
-else:
-    from k4FWCore import IOSvc, ApplicationMgr
-
-    iosvc = IOSvc("IOSvc")
-    iosvc.Input = "functional_producer_multiple.root"
-    iosvc.Output = "functional_mix_iosvc.root"
+iosvc = IOSvc("IOSvc")
+iosvc.Input = "functional_producer_multiple.root"
+iosvc.Output = "functional_mix_iosvc.root"
 
 # Check input with functional and old algorithms
 
@@ -153,8 +117,7 @@ transformer_functional = ExampleFunctionalTransformerMultiple(
 
 
 ApplicationMgr(
-    TopAlg=([inp] if not args.iosvc else [])
-    + [
+    TopAlg=[
         # Check we can read input
         consumer_input_functional,
         consumer_input_algorithm,
@@ -167,10 +130,9 @@ ApplicationMgr(
         consumer_produceralg_functional,
         consumer_produceralg_algorithm,
         transformer_functional,
-    ]
-    + ([out] if not args.iosvc else []),
+    ],
     EvtSel="NONE",
     EvtMax=10,
-    ExtSvc=[iosvc if args.iosvc else podioevent],
+    ExtSvc=[iosvc],
     OutputLevel=INFO,
 )

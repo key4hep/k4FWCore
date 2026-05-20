@@ -19,14 +19,11 @@
 #
 from Gaudi.Configuration import INFO
 
-from Configurables import k4DataSvc
-from Configurables import PodioInput
+from Configurables import EventDataSvc
 from k4FWCore.parseArgs import parser
 from Configurables import k4FWCoreTest_CheckExampleEventData
-from k4FWCore import ApplicationMgr
+from k4FWCore import ApplicationMgr, IOSvc
 
-podioevent = k4DataSvc("EventDataSvc")
-podioevent.input = "output_k4test_exampledata.root"
 
 parser.add_argument(
     "--collections",
@@ -37,17 +34,17 @@ parser.add_argument(
 )
 my_args = parser.parse_known_args()[0]
 
-inp = PodioInput()
-inp.collections = my_args.collections
-
+iosvc = IOSvc()
+iosvc.Input = "output_k4test_exampledata.root"
+iosvc.CollectionNames = my_args.collections
 
 checker = k4FWCoreTest_CheckExampleEventData()
 
 ApplicationMgr(
-    TopAlg=[inp, checker],
+    TopAlg=[checker],
     EvtSel="NONE",
     EvtMax=100,
-    ExtSvc=[podioevent],
+    ExtSvc=[EventDataSvc()],
     OutputLevel=INFO,
     StopOnSignal=True,
 )
