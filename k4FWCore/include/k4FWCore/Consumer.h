@@ -19,10 +19,10 @@
 #ifndef FWCORE_CONSUMER_H
 #define FWCORE_CONSUMER_H
 
+#include "GAUDI_VERSION.h"
 #include "Gaudi/Functional/details.h"
 #include "Gaudi/Functional/utilities.h"
 #include "GaudiKernel/FunctionalFilterDecision.h"
-#include "GAUDI_VERSION.h"
 
 // #include "GaudiKernel/CommonMessaging.h"
 

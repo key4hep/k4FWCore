@@ -19,9 +19,9 @@
 #ifndef FWCORE_TRANSFORMER_H
 #define FWCORE_TRANSFORMER_H
 
+#include "GAUDI_VERSION.h"
 #include "Gaudi/Functional/details.h"
 #include "Gaudi/Functional/utilities.h"
-#include "GAUDI_VERSION.h"
 
 #include "k4FWCore/FunctionalUtils.h"
 
