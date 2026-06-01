@@ -22,6 +22,7 @@
 #include "Gaudi/Functional/details.h"
 #include "Gaudi/Functional/utilities.h"
 #include "GaudiKernel/FunctionalFilterDecision.h"
+#include "GAUDI_VERSION.h"
 
 // #include "GaudiKernel/CommonMessaging.h"
 
@@ -37,15 +38,19 @@ namespace k4FWCore {
 
 namespace details {
 
+#if GAUDI_MAJOR_VERSION >= 41
+  using EmptyTypeList = Gaudi::Functional::details::type_list<>;
+#else
+  using EmptyTypeList = std::tuple<>;
+#endif
+
   template <typename Signature, typename Traits_>
   struct Consumer;
 
   template <typename... In, typename Traits_>
   struct Consumer<void(const In&...), Traits_>
-      : Gaudi::Functional::details::DataHandleMixin<Gaudi::Functional::details::type_list<>,
-                                                    Gaudi::Functional::details::type_list<>, Traits_> {
-    using Gaudi::Functional::details::DataHandleMixin<
-        Gaudi::Functional::details::type_list<>, Gaudi::Functional::details::type_list<>, Traits_>::DataHandleMixin;
+      : Gaudi::Functional::details::DataHandleMixin<EmptyTypeList, EmptyTypeList, Traits_> {
+    using Gaudi::Functional::details::DataHandleMixin<EmptyTypeList, EmptyTypeList, Traits_>::DataHandleMixin;
 
     static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike_v<In> ||
                     std::is_same_v<In, EventContext>) &&
@@ -54,8 +59,7 @@ namespace details {
 
     static constexpr size_t N_in = filter_evtcontext<In...>::size;
 
-    using base_class = Gaudi::Functional::details::DataHandleMixin<Gaudi::Functional::details::type_list<>,
-                                                                   Gaudi::Functional::details::type_list<>, Traits_>;
+    using base_class = Gaudi::Functional::details::DataHandleMixin<EmptyTypeList, EmptyTypeList, Traits_>;
 
     using KeyValue = base_class::KeyValue;
     using KeyValues = base_class::KeyValues;
