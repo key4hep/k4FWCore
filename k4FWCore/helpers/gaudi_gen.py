@@ -671,7 +671,9 @@ def _build_cmake_context(spec: AlgorithmSpec) -> dict:
     if has_edm4hep:
         find_packages.append("find_package(EDM4HEP REQUIRED)")
         link_libs.append("EDM4HEP::edm4hep")
-    if has_podio:
+    if has_podio and not spec.is_k4:
+        # For k4fwcore, podio is a transitive dependency of k4FWCore::k4FWCore
+        # (declared in k4FWCoreConfig.cmake.in), so no explicit find/link needed.
         find_packages.append("find_package(podio REQUIRED)")
         link_libs.append("podio::podio")
     return {"find_packages": find_packages, "link_libs": link_libs}

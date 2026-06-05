@@ -37,7 +37,7 @@ chmod +x gaudi_gen.py
 ./gaudi_gen.py MyProducer -o 'edm4hep::MCParticleCollection:MCParticles'
 
 # 3. Plain Python (you must have jinja2 installed in the active env).
-uv run gaudi_gen.py MyProducer -o 'edm4hep::MCParticleCollection:MCParticles'
+python3 gaudi_gen.py MyProducer -o 'edm4hep::MCParticleCollection:MCParticles'
 ```
 
 The first two routes are self-contained: nothing needs to be installed in
@@ -226,7 +226,7 @@ Returns `bool`.
 - Framework header (`k4FWCore/<Base>.h` or `Gaudi/Functional/<Base>.h`).
   For k4FWCore, `MultiTransformer` is included from `Transformer.h`.
 - Auto-detected `edm4hep/<Type>.h` headers and `podio/UserDataCollection.h`
-  when applicable.
+  when applicable (podio headers are available transitively through `k4FWCore`).
 - An optional `using BaseClass_t = ...;` for native Gaudi.
 - Optional `using retType = std::tuple<...>;` (k4FWCore multi-output).
 - Optional `using XxxColl = ...;` aliases (`--type-aliases`).
@@ -239,7 +239,9 @@ Returns `bool`.
 
 - `find_package(k4FWCore REQUIRED)` or `find_package(Gaudi REQUIRED)`.
 - `find_package(EDM4HEP REQUIRED)` if any collection type is from `edm4hep`.
-- `find_package(podio REQUIRED)` if `podio::UserDataCollection` is used.
+- `find_package(podio REQUIRED)` if `podio::UserDataCollection` is used with
+  `--framework gaudi` (for k4fwcore, podio is a transitive dependency of
+  `k4FWCore::k4FWCore` and no explicit find is needed).
 - `gaudi_add_module(<ClassName>Plugin SOURCES <ClassName>.cpp LINK ...)`
   with the matching link libraries.
 
