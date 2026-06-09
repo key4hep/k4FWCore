@@ -701,7 +701,7 @@ def _build_cmake_context(spec: AlgorithmSpec) -> dict:
         link_libs.append("k4FWCore::k4FWCore")
     else:
         find_packages.append("find_package(Gaudi REQUIRED)")
-        link_libs += ["Gaudi::GaudiAlgLib", "Gaudi::GaudiKernel"]
+        link_libs += ["Gaudi::GaudiKernel"]
     if has_edm4hep:
         find_packages.append("find_package(EDM4HEP REQUIRED)")
         link_libs.append("EDM4HEP::edm4hep")
