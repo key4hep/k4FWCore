@@ -11,9 +11,9 @@ Generates boilerplate for Gaudi Functional algorithms in both the
 k4FWCore and native Gaudi::Functional frameworks.
 
 Run with either:
-    uv run gaudi_gen.py [args...]      # uv resolves deps from the PEP 723 block
-    ./gaudi_gen.py [args...]           # uses the shebang (requires uv on PATH)
-    python3 gaudi_gen.py [args...]     # plain Python; needs jinja2 installed
+    uv run gaudiGen.py [args...]      # uv resolves deps from the PEP 723 block
+    ./gaudiGen.py [args...]           # uses the shebang (requires uv on PATH)
+    python3 gaudiGen.py [args...]     # plain Python; needs jinja2 installed
 """
 import argparse
 import os
@@ -89,10 +89,14 @@ class DataSpec:
     # Derived properties used in templates -----------------------------------
     @property
     def edm4hep_header(self) -> Optional[str]:
-        """Return the edm4hep header filename for this type, or None."""
+        """Return the edm4hep header filename for this type, or None.
+
+        Bug fix: keep 'Collection' in the filename.
+        edm4hep::MCParticleCollection -> edm4hep/MCParticleCollection.h
+        """
         m = re.search(r"edm4hep::(\w+Collection)", self.type_name)
         if m:
-            return re.sub(r"Collection$", "", m.group(1)) + ".h"
+            return m.group(1) + ".h"
         return None
 
     @property
@@ -164,8 +168,15 @@ class PropertySpec:
 
     @property
     def member_name(self) -> str:
+        """Return the C++ member variable name.
+
+        Bug fix: lowercase the first character of the name after the 'm_' prefix
+        so that e.g. 'Offset' -> 'm_offset', not 'm_Offset'.
+        """
         n = self.name
-        return n if n.startswith("m_") else f"m_{n}"
+        if n.startswith("m_"):
+            return n
+        return f"m_{n[0].lower()}{n[1:]}"
 
 
 @dataclass
@@ -444,22 +455,25 @@ namespace {{ spec.namespace }} {
 {{ op_body }}
   }
 
-{% if spec.properties %}
-{% if spec.private_props %}
+{% if spec.event_context %}
+  StatusCode finalize() override {
+    // TODO: finalise event-context state
+    return StatusCode::SUCCESS;
+  }
+
+{% endif %}
+{% if spec.properties or spec.event_context %}
+{% if spec.private_props or spec.event_context %}
 private:
 {% endif %}
 {% for prop in spec.properties %}
   Gaudi::Property<{{ prop.type_name }}> {{ prop.member_name }}{
       this, "{{ prop.name }}", {{ prop.default }}{{ ', "' + prop.description + '"' if prop.description else '' }}};
 {% endfor %}
-{% endif %}
 {% if spec.event_context %}
-  StatusCode finalize() override {
-    // TODO: finalise event-context state
-    return StatusCode::SUCCESS;
-  }
   mutable std::set<unsigned long> m_eventNumbersSeen{};
   mutable std::mutex              m_mutex{};
+{% endif %}
 {% endif %}
 };
 {% if spec.namespace %}
@@ -528,6 +542,7 @@ def _build_constructor(spec: AlgorithmSpec) -> str:
     cls  = spec.class_name
     base = spec.base_short
     rd   = spec.runtime_defaults
+    ft   = spec.functional_type
 
     def _kv(ds: DataSpec) -> str:
         if ds.is_vector:
@@ -535,22 +550,42 @@ def _build_constructor(spec: AlgorithmSpec) -> str:
             return f'KeyValues("{ds.key}", {{{defs_str}}})'
         return f'KeyValue("{ds.key}", "{ds.key}")'
 
-    # Input block
-    if not spec.inputs:
-        in_block = "{}"
-    elif len(spec.inputs) == 1:
-        in_block = _kv(spec.inputs[0])
-    else:
-        ind   = " " * 20
-        items = (",\n" + ind).join(_kv(inp) for inp in spec.inputs)
-        in_block = "{\n" + ind + items + ",\n" + " " * 16 + "}"
+    def _brace_block(items: list, indent: int = 20, base_indent: int = 16) -> str:
+        """Build a brace-wrapped list of KeyValues, always including the braces.
 
-    ft = spec.functional_type
+        Bug fix: single-item blocks are now emitted as '{KeyValue(...)}' rather
+        than bare 'KeyValue(...)'.  Consumer/filter pass through _bare_block
+        instead and are unaffected.
+        """
+        if not items:
+            return "{}"
+        if len(items) == 1:
+            return "{" + _kv(items[0]) + "}"
+        ind   = " " * indent
+        body  = (",\n" + ind).join(_kv(it) for it in items)
+        return "{\n" + ind + body + ",\n" + " " * base_indent + "}"
+
+    def _bare_block(items: list) -> str:
+        """For consumer/filter: single collection bare, multiple in braces."""
+        if not items:
+            return "{}"
+        if len(items) == 1:
+            return _kv(items[0])
+        ind  = " " * 20
+        body = (",\n" + ind).join(_kv(it) for it in items)
+        return "{\n" + ind + body + ",\n" + " " * 16 + "}"
+
+    # consumer / filter: inputs are passed bare (no outer braces for single)
     if ft in ("consumer", "filter"):
+        in_block = _bare_block(spec.inputs)
         return (
             f"  {cls}(const std::string& name, ISvcLocator* svcLoc)\n"
             f"      : {base}(name, svcLoc, {in_block}) {{}}"
         )
+
+    # producer / transformer / multitransformer: always use brace-wrapped blocks
+    in_block = _brace_block(spec.inputs)
+
     if spec.is_runtime:
         out_key   = spec.runtime_output.key
         out_block = f'{{KeyValues("OutputCollections", {{"{out_key}"}})}}'
@@ -563,20 +598,19 @@ def _build_constructor(spec: AlgorithmSpec) -> str:
             f"  {cls}(const std::string& name, ISvcLocator* svcLoc)\n"
             f"      : {base}(name, svcLoc, {in_block}, {{}}) {{}}"
         )
+
+    out_block = _brace_block(spec.outputs, indent=17, base_indent=17)
+
     if len(spec.outputs) == 1:
-        out_block = _kv(spec.outputs[0])
         return (
             f"  {cls}(const std::string& name, ISvcLocator* svcLoc)\n"
             f"      : {base}(name, svcLoc, {in_block}, {out_block}) {{}}"
         )
-    # Multiple fixed outputs — brace-list of KeyValues
-    ind2  = " " * 17
-    items = (",\n" + ind2).join(_kv(out) for out in spec.outputs)
+    # Multiple fixed outputs
     return (
         f"  {cls}(const std::string& name, ISvcLocator* svcLoc)\n"
         f"      : {base}(name, svcLoc, {in_block},\n"
-        f"                 {{\n"
-        f"                 {items}}}) {{}}"
+        f"                 {out_block}) {{}}"
     )
 
 
@@ -743,7 +777,7 @@ def _safe_write(path: str, content: str, force: bool, label: str) -> bool:
 # ---------------------------------------------------------------------------
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="gaudi_gen.py",
+        prog="gaudiGen.py",
         description="Generate Gaudi Functional C++ algorithm boilerplate.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=textwrap.dedent("""\
@@ -756,20 +790,20 @@ def _build_parser() -> argparse.ArgumentParser:
 
             Examples:
               # k4FWCore producer (type inferred)
-              gaudi_gen.py MyProducer -o 'edm4hep::MCParticleCollection:MCParticles'
+              gaudiGen.py MyProducer -o 'edm4hep::MCParticleCollection:MCParticles'
 
               # k4FWCore multi-output producer with properties
-              gaudi_gen.py MyProducer \\
+              gaudiGen.py MyProducer \\
                   -o 'edm4hep::MCParticleCollection:MCParticles' \\
                      'edm4hep::TrackCollection:Tracks' \\
                   -p 'int:ExampleInt:3:An example integer property'
 
               # Gaudi transformer wrapped in 'namespace MyNamespace { ... }' (type inferred)
-              gaudi_gen.py MySum -i 'Input1:Loc1' 'Input2:Loc2' -o 'Output:OutLoc' \\
+              gaudiGen.py MySum -i 'Input1:Loc1' 'Input2:Loc2' -o 'Output:OutLoc' \\
                   --framework gaudi -n MyNamespace
 
               # Variable-length inputs (k4FWCore only)
-              gaudi_gen.py MyVarConsumer \\
+              gaudiGen.py MyVarConsumer \\
                   -i 'edm4hep::MCParticleCollection:Inputs' \\
                   --runtime-inputs 'edm4hep::MCParticleCollection:Inputs:MCParticles0,MCParticles1'
         """),

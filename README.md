@@ -118,3 +118,51 @@ each one of the above-mentioned algorithms. In addition, there are tests that
 have either multiple inputs and / or multiple outputs (like
 `ExampleFunctionalProducerMultiple`) that can be used as a template for the more
 typical case when working with multiple inputs or outputs.
+
+### Generating boilerplate with gaudiGen.py
+
+`k4FWCore/helpers/gaudiGen.py` is a code generator that produces the C++
+boilerplate for a new functional algorithm. The functional type (Consumer,
+Producer, Transformer, MultiTransformer, FilterPredicate) is inferred
+automatically from the number of inputs and outputs, or can be set explicitly.
+
+Requirements: Python ≥ 3.9 and [jinja2](https://pypi.org/project/Jinja2/).
+With [uv](https://github.com/astral-sh/uv) installed, dependencies are
+resolved automatically via the PEP 723 script block.
+
+```bash
+# Producer with one output collection and one property
+python3 k4FWCore/helpers/gaudiGen.py MyProducer \
+    -o 'edm4hep::MCParticleCollection:OutputCollection' \
+    -p 'int:ExampleInt:3:An example integer property'
+
+# Transformer (inferred from 1 input + 1 output)
+python3 k4FWCore/helpers/gaudiGen.py MyTransformer \
+    -i 'edm4hep::MCParticleCollection:InputCollection' \
+    -o 'edm4hep::MCParticleCollection:OutputCollection' \
+    --private-properties
+
+# MultiTransformer with type aliases
+python3 k4FWCore/helpers/gaudiGen.py MyMulti \
+    -i 'edm4hep::MCParticleCollection:Particles' \
+       'edm4hep::TrackCollection:Tracks' \
+    -o 'edm4hep::MCParticleCollection:NewParticles' \
+       'podio::UserDataCollection<int>:Counter' \
+    --type-aliases
+
+# FilterPredicate (type must be specified explicitly)
+python3 k4FWCore/helpers/gaudiGen.py MyFilter filter \
+    -i 'edm4hep::MCParticleCollection:InputCollection'
+
+# Consumer with runtime (variable-length) input collections
+python3 k4FWCore/helpers/gaudiGen.py MyConsumer \
+    -i 'edm4hep::MCParticleCollection:Inputs' \
+    --runtime-inputs 'edm4hep::MCParticleCollection:Inputs:MCParticles0,MCParticles1'
+
+# Also emit a CMakeLists.txt skeleton
+python3 k4FWCore/helpers/gaudiGen.py MyProducer \
+    -o 'edm4hep::MCParticleCollection:OutputCollection' \
+    --cmake
+```
+
+Run `python3 k4FWCore/helpers/gaudiGen.py --help` for the full list of options.
