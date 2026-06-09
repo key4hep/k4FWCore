@@ -18,6 +18,8 @@ limitations under the License.
 ]]
 
 gaudi_install(SCRIPTS)
+install(PROGRAMS helpers/gaudiGen.py
+  DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 gaudi_add_library(k4FWCore
                   SOURCES src/KeepDropSwitch.cpp
