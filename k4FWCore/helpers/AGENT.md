@@ -1,6 +1,6 @@
 # AGENT.md — k4FWCore/helpers
 
-Context for AI agents working on `gaudiGen.py` and its test suite.
+Context for AI agents working on `generateFunctional` and its test suite.
 
 ---
 
@@ -8,7 +8,7 @@ Context for AI agents working on `gaudiGen.py` and its test suite.
 
 | File/Dir | Purpose |
 |---|---|
-| `gaudiGen.py` | Code generator: produces Gaudi Functional C++ boilerplate from CLI arguments |
+| `generateFunctional` | Code generator: produces Gaudi Functional C++ boilerplate from CLI arguments |
 | `README.md` | Full user-facing reference (arguments, examples, exit codes) |
 | `tests/` | Bash build-tests: generate → cmake → build for each algorithm type |
 | `tests/_test_common.sh` | Shared helpers sourced by every `test_*.sh` |
@@ -16,7 +16,7 @@ Context for AI agents working on `gaudiGen.py` and its test suite.
 
 ---
 
-## Architecture of gaudiGen.py
+## Architecture of generateFunctional
 
 The script is intentionally structured so that all string parsing happens once at the CLI boundary and never again:
 
@@ -124,7 +124,7 @@ Each script in `tests/` covers one feature axis:
 | `test_gaudi_framework.sh` | `--framework gaudi`, `--namespace` |
 
 Each script sources `_test_common.sh` which:
-- Finds `gaudiGen.py` (installed on `PATH` first, then `../gaudiGen.py` fallback)
+- Finds `generateFunctional` (installed on `PATH` first, then `../generateFunctional` fallback)
 - Creates a `mktemp -d` sandbox, cleaned up on `EXIT`
 - Provides `run_cmake_build <ClassName> [args...]` that runs generate → cmake configure → cmake build
 
@@ -139,14 +139,14 @@ bash k4FWCore/helpers/tests/run_all_tests.sh
 
 ## Installation
 
-`gaudiGen.py` is installed to `CMAKE_INSTALL_BINDIR` via `k4FWCore/CMakeLists.txt`:
+`generateFunctional` is installed to `CMAKE_INSTALL_BINDIR` via `k4FWCore/CMakeLists.txt`:
 
 ```cmake
-install(PROGRAMS helpers/gaudiGen.py
+install(PROGRAMS helpers/generateFunctional
   DESTINATION ${CMAKE_INSTALL_BINDIR})
 ```
 
-After `cmake --install`, `gaudiGen.py` is on `PATH` in the Key4hep environment.
+After `cmake --install`, `generateFunctional` is on `PATH` in the Key4hep environment.
 
 ---
 

@@ -18,7 +18,7 @@ limitations under the License.
 ]]
 
 gaudi_install(SCRIPTS)
-install(PROGRAMS helpers/gaudiGen.py
+install(PROGRAMS helpers/generateFunctional
   DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 gaudi_add_library(k4FWCore

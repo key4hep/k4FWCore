@@ -1,6 +1,6 @@
-# gaudiGen.py — Gaudi Functional C++ Class Generator
+# generateFunctional — Gaudi Functional C++ Class Generator
 
-`gaudiGen.py` writes the boilerplate for a Gaudi Functional algorithm: the
+`generateFunctional` writes the boilerplate for a Gaudi Functional algorithm: the
 `#include`s, the constructor with `KeyValue` / `KeyValues` wiring, the
 `operator()` signature, a placeholder body, optional `Gaudi::Property`
 members, and (optionally) a matching `CMakeLists.txt`. It supports both the
@@ -30,14 +30,14 @@ There are three equivalent ways to invoke the script:
 
 ```bash
 # 1. Recommended — uv resolves Python and Jinja2 from the PEP 723 block.
-uv run gaudiGen.py MyProducer -o 'edm4hep::MCParticleCollection:MCParticles'
+uv run generateFunctional MyProducer -o 'edm4hep::MCParticleCollection:MCParticles'
 
 # 2. Direct execution via the shebang (requires uv on PATH).
-chmod +x gaudiGen.py
-./gaudiGen.py MyProducer -o 'edm4hep::MCParticleCollection:MCParticles'
+chmod +x generateFunctional
+./generateFunctional MyProducer -o 'edm4hep::MCParticleCollection:MCParticles'
 
 # 3. Plain Python (you must have jinja2 installed in the active env).
-python3 gaudiGen.py MyProducer -o 'edm4hep::MCParticleCollection:MCParticles'
+python3 generateFunctional MyProducer -o 'edm4hep::MCParticleCollection:MCParticles'
 ```
 
 The first two routes are self-contained: nothing needs to be installed in
@@ -49,7 +49,7 @@ the system or active Python environment beyond `uv` itself.
 
 ```bash
 # k4FWCore producer (functional type inferred from --outputs)
-uv run gaudiGen.py MyProducer \
+uv run generateFunctional MyProducer \
     -o 'edm4hep::MCParticleCollection:MCParticles'
 ```
 
@@ -57,7 +57,7 @@ That writes `MyProducer.cpp` in the current directory. Add `--cmake` to also
 emit a `CMakeLists.txt`:
 
 ```bash
-uv run gaudiGen.py MyProducer \
+uv run generateFunctional MyProducer \
     -o 'edm4hep::MCParticleCollection:MCParticles' \
     --cmake
 ```
@@ -66,7 +66,7 @@ uv run gaudiGen.py MyProducer \
 
 ## File-overwrite policy
 
-`gaudiGen.py` **never silently overwrites an existing file**. If the target
+`generateFunctional` **never silently overwrites an existing file**. If the target
 `.cpp` or `CMakeLists.txt` already exists, the script prints a diagnostic
 and exits non-zero:
 
@@ -157,7 +157,7 @@ auto-promotes to `multitransformer`.
 ### Producer with multiple outputs and a property
 
 ```bash
-uv run gaudiGen.py MyProducer \
+uv run generateFunctional MyProducer \
     -o 'edm4hep::MCParticleCollection:MCParticles' \
        'edm4hep::TrackCollection:Tracks' \
     -p 'int:ExampleInt:3:An example integer property'
@@ -168,7 +168,7 @@ The output uses a `retType = std::tuple<...>` alias for readability.
 ### Native Gaudi transformer wrapped in a C++ namespace
 
 ```bash
-uv run gaudiGen.py MySum \
+uv run generateFunctional MySum \
     -i 'Input1:Loc1' 'Input2:Loc2' \
     -o 'Output:OutLoc' \
     --framework gaudi \
@@ -191,7 +191,7 @@ struct MySum final : Gaudi::Functional::Transformer<Output(const Input1&, const 
 ### Variable-length / runtime inputs (k4FWCore)
 
 ```bash
-uv run gaudiGen.py MyVarConsumer \
+uv run generateFunctional MyVarConsumer \
     -i 'edm4hep::MCParticleCollection:Inputs' \
     --runtime-inputs 'edm4hep::MCParticleCollection:Inputs:MCParticles0,MCParticles1'
 ```
@@ -202,7 +202,7 @@ and `operator()` receives `const std::vector<const edm4hep::MCParticleCollection
 ### Dynamic output collections
 
 ```bash
-uv run gaudiGen.py MyDynProducer \
+uv run generateFunctional MyDynProducer \
     --runtime-outputs 'edm4hep::MCParticleCollection'
 ```
 
@@ -212,7 +212,7 @@ The constructor wires `KeyValues("OutputCollections", {"MCParticles"})` and
 ### Filter
 
 ```bash
-uv run gaudiGen.py MyFilter filter \
+uv run generateFunctional MyFilter filter \
     -i 'edm4hep::MCParticleCollection:MCParticles'
 ```
 
