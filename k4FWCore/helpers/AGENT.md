@@ -158,3 +158,5 @@ After `cmake --install`, `generateFunctional` is on `PATH` in the Key4hep enviro
 - **Property member names must be lowercase after `m_`.** `PropertySpec.member_name` lowercases `n[0]`; do not change this or generated names diverge from k4FWCore conventions.
 - **`--runtime-outputs` is k4FWCore-only.** The parser enforces this, but the cmake template only adds podio explicitly for `--framework gaudi`; for k4fwcore it is a transitive dependency of `k4FWCore::k4FWCore`.
 - **Do not link `Gaudi::GaudiAlgLib` for `--framework gaudi`.** This target was removed in Gaudi 40.x. The cmake template links only `Gaudi::GaudiKernel`.
+- **Native Gaudi constructor takes separate input and output arguments, not a single merged list.** `_build_constructor_gaudi` passes `_arg(in_kvs), _arg(out_kvs)` as separate arguments. A single KV is bare; multiple KVs are `{kv1, kv2, ...}`.
+- **`DECLARE_COMPONENT` must use the fully qualified name when `--namespace` is set.** The template emits `DECLARE_COMPONENT(Ns::ClassName)` outside the namespace block.

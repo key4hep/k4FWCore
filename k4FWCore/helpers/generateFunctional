@@ -480,7 +480,7 @@ private:
 } // namespace {{ spec.namespace }}
 {% endif %}
 
-DECLARE_COMPONENT({{ cls }})
+DECLARE_COMPONENT({% if spec.namespace %}{{ spec.namespace }}::{% endif %}{{ cls }})
 """
 
 _CMAKE_TEMPLATE = """\
@@ -617,13 +617,30 @@ def _build_constructor(spec: AlgorithmSpec) -> str:
 def _build_constructor_gaudi(spec: AlgorithmSpec) -> str:
     cls  = spec.class_name
     base = spec.base_short
-    all_kvs = [f'KeyValue{{"{ds.key}", "{ds.key}"}}' for ds in spec.inputs + spec.outputs]
-    if not all_kvs:
-        sep, args_str = "", ""
-    elif len(all_kvs) == 1:
-        sep, args_str = ", ", all_kvs[0]
-    else:
-        sep, args_str = ", ", "{" + ", ".join(all_kvs) + "}"
+
+    def _kv(ds: DataSpec) -> str:
+        return f'KeyValue{{"{ds.key}", "{ds.key}"}}'
+
+    in_kvs  = [_kv(ds) for ds in spec.inputs]
+    out_kvs = [_kv(ds) for ds in spec.outputs]
+
+    # Native Gaudi Transformer constructor variants (details.h):
+    #   (name, svc, KeyValue_in,              KeyValue_out)              — 1 in, 1 out
+    #   (name, svc, KeyValue_in,              RepeatValues_<KV,N>_out)   — 1 in, N out
+    #   (name, svc, RepeatValues_<KV,N>_in,   KeyValue_out)              — N in, 1 out
+    #   (name, svc, RepeatValues_<KV,N>_in,   RepeatValues_<KV,M>_out)   — N in, M out
+    # RepeatValues_ is a tuple of pairs, passed as a braced list {kv1, kv2, ...}.
+    # Single KeyValues must NOT be wrapped in braces.
+    def _arg(kvs: list[str]) -> str:
+        if len(kvs) == 0:
+            return ""
+        if len(kvs) == 1:
+            return kvs[0]
+        return "{" + ", ".join(kvs) + "}"
+
+    parts = [p for p in [_arg(in_kvs), _arg(out_kvs)] if p]
+    sep = ", " if parts else ""
+    args_str = ", ".join(parts)
     return (
         f"  {cls}(const std::string& name, ISvcLocator* svcLoc)\n"
         f"      : {base}(name, svcLoc{sep}{args_str}) {{}}"
