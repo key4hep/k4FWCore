@@ -40,9 +40,7 @@ StatusCode MetadataSvc::initialize() {
     error() << "Unable to locate the EventDataSvc" << endmsg;
     return StatusCode::FAILURE;
   }
-  bool hasParameters = !m_intParameters.empty() || !m_floatParameters.empty() || !m_doubleParameters.empty() ||
-                       !m_stringParameters.empty();
-  if (hasParameters && !m_setAtFinalize) {
+  if (!m_setAtFinalize) {
     // If there is a reader, then the metadata frame will be set from the IOSvc
     // to what is read from the Reader
     if (!m_frame) {
