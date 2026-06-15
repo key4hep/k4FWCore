@@ -54,7 +54,7 @@ StatusCode MetadataSvc::initialize() {
 StatusCode MetadataSvc::finalize() { return Service::finalize(); }
 
 void MetadataSvc::applyDeferredParameters() {
-  if (m_setAtFinalize && !m_paramsApplied) {
+  if (m_setAtFinalize) {
     if (!m_frame) {
       m_frame = std::make_unique<podio::Frame>();
     }
@@ -92,7 +92,6 @@ void MetadataSvc::applyPropertyParameters() {
   for (const auto& [key, val] : m_stringParameters) {
     m_frame->putParameter(key, val);
   }
-  m_paramsApplied = true;
 }
 
 DECLARE_COMPONENT(MetadataSvc)

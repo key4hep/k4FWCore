@@ -55,8 +55,6 @@ protected:
 private:
   void applyPropertyParameters();
 
-  bool m_paramsApplied{false};
-
   Gaudi::Property<bool> m_throwIfDuplicate{this, "ThrowIfDuplicate", true,
                                            "Throw an exception if a metadata parameter is already set"};
   Gaudi::Property<bool> m_skipIfSameValue{
