@@ -23,6 +23,7 @@ from Gaudi.Configuration import INFO
 from Configurables import (
     ExampleFunctionalMetadataProducer,
     ExampleFunctionalMetadataConsumer,
+    MetadataSvc,
 )
 from k4FWCore import ApplicationMgr, IOSvc, putMetadata
 from Configurables import EventDataSvc
@@ -40,9 +41,8 @@ putMetadata(
 putMetadata({"PythonFloatParam": 3.0}, default_float_type="float")
 # Overwrite
 putMetadata({"PythonFloatParam": 4.0}, default_float_type="float")
-# This will make all parameters be set at finalize
-# Typically there won't be several calls of putMetadata
-putMetadata({"PythonFinalizeParam": 99}, set_at_finalize=True)
+MetadataSvc("MetadataSvc").SetAtFinalize = True
+putMetadata({"PythonFinalizeParam": 99})
 
 producer = ExampleFunctionalMetadataProducer(
     "Producer",

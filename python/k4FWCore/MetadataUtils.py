@@ -18,7 +18,7 @@
 #
 
 
-def putMetadata(parameters, default_float_type="double", set_at_finalize=False):
+def putMetadata(parameters, default_float_type="double"):
     if default_float_type not in ("float", "double"):
         raise ValueError(
             f"default_float_type must be 'float' or 'double', got '{default_float_type}'"
@@ -55,5 +55,3 @@ def putMetadata(parameters, default_float_type="double", set_at_finalize=False):
     svc.FloatParameters = float_params
     svc.DoubleParameters = double_params
     svc.StringParameters = str_params
-    if set_at_finalize:
-        svc.SetAtFinalize = True
