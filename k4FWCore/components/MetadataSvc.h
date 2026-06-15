@@ -40,6 +40,7 @@ public:
 
   bool throwIfDuplicate() const override { return m_throwIfDuplicate; }
   bool skipIfSameValue() const override { return m_skipIfSameValue; }
+  void applyDeferredParameters() override;
 
 protected:
   SmartIF<IDataProviderSvc> m_dataSvc;

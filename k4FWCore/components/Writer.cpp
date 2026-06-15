@@ -112,6 +112,7 @@ public:
   }
 
   StatusCode finalize() override {
+    m_metadataSvc->applyDeferredParameters();
     if (const auto* metadata_frame = m_metadataSvc->getFrame(); metadata_frame) {
       iosvc->getWriter().writeFrame(*metadata_frame, podio::Category::Metadata);
     }

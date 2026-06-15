@@ -55,6 +55,15 @@ StatusCode MetadataSvc::initialize() {
 
 StatusCode MetadataSvc::finalize() { return Service::finalize(); }
 
+void MetadataSvc::applyDeferredParameters() {
+  if (m_setAtFinalize && !m_paramsApplied) {
+    if (!m_frame) {
+      m_frame = std::make_unique<podio::Frame>();
+    }
+    applyPropertyParameters();
+  }
+}
+
 void MetadataSvc::throwIfRunning() const {
   if (targetFSMState() == Gaudi::StateMachine::RUNNING) {
     throw GaudiException("putParameter cannot be called during the event loop", name(), StatusCode::FAILURE);
@@ -63,15 +72,7 @@ void MetadataSvc::throwIfRunning() const {
 
 const podio::Frame* MetadataSvc::getFrame() const { return m_frame.get(); }
 
-podio::Frame* MetadataSvc::getFrame() {
-  if (m_setAtFinalize && !m_paramsApplied) {
-    if (!m_frame) {
-      m_frame = std::make_unique<podio::Frame>();
-    }
-    applyPropertyParameters();
-  }
-  return m_frame.get();
-}
+podio::Frame* MetadataSvc::getFrame() { return m_frame.get(); }
 
 void MetadataSvc::setFrame(podio::Frame frame) {
   m_frame = std::make_unique<podio::Frame>(std::move(frame));
