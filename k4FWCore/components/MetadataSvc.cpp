@@ -69,14 +69,12 @@ podio::Frame* MetadataSvc::getFrame() {
       m_frame = std::make_unique<podio::Frame>();
     }
     applyPropertyParameters();
-    m_paramsApplied = true;
   }
   return m_frame.get();
 }
 
 void MetadataSvc::setFrame(podio::Frame frame) {
   m_frame = std::make_unique<podio::Frame>(std::move(frame));
-  m_paramsApplied = false;
   if (!m_setAtFinalize) {
     applyPropertyParameters();
   }
@@ -95,6 +93,7 @@ void MetadataSvc::applyPropertyParameters() {
   for (const auto& [key, val] : m_stringParameters) {
     m_frame->putParameter(key, val);
   }
+  m_paramsApplied = true;
 }
 
 DECLARE_COMPONENT(MetadataSvc)
