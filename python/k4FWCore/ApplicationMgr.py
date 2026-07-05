@@ -78,7 +78,9 @@ class ApplicationMgr:
         # ROOT can read remote files that os.path.isfile cannot check.
         for f in iosvc_props[inp][0]:
             if "://" not in f and not os.path.isfile(f):
-                raise FileNotFoundError(f"Input file '{f}' does not exist or is not a regular file")
+                raise FileNotFoundError(
+                    f"Input file '{f}' does not exist or is not a regular file"
+                )
 
         collections = iosvc_props["CollectionNames"][0] or None
         n_events = self._mgr.EvtMax

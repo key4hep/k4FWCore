@@ -21,10 +21,8 @@
 DECLARE_COMPONENT(TestService)
 
 StatusCode TestService::initialize() {
-  info() << "TestService initialized -- if you see this the early exit did NOT work" << endmsg;
+  info() << "TestService initialized" << endmsg;
   return Service::initialize();
 }
 
-StatusCode TestService::finalize() {
-  return Service::finalize();
-}
+StatusCode TestService::finalize() { return Service::finalize(); }
