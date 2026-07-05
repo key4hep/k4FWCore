@@ -28,7 +28,6 @@ from k4FWCore import ApplicationMgr, IOSvc
 svc = IOSvc()
 svc.Input = "non_existing_file.root"
 
-earlyExit = TestService("TestService")
 testsvc = TestService("TestService")
 
 transformer = ExampleFunctionalTransformer(
