@@ -56,6 +56,7 @@ set(k4fwcoretest_plugin_sources
   src/components/k4FWCoreTest_CreateExampleEventData.cpp
   src/components/k4FWCoreTest_CreateMarlinWrapperCollection.cpp
   src/components/k4FWCoreTest_HelloWorldAlg.cpp
+  src/components/TestService.cpp
   src/components/TestUniqueIDGenSvc.cpp
   src/components/TypeMisMatchDemo.cpp
 )
@@ -218,7 +219,8 @@ add_test_fwcore(createEventHeaderConcurrent options/createEventHeaderConcurrent.
 add_test_fwcore(FunctionalMetadataReadOldAlgorithm options/ExampleFunctionalMetadataReadOldAlgorithm.py PROPERTIES FIXTURES_REQUIRED OldAlgorithmFile ADD_TO_CHECK_FILES)
 
 add_test_fwcore(FunctionalNonExistingFile options/ExampleFunctionalNonExistingFile.py)
-set_tests_properties(FunctionalNonExistingFile PROPERTIES PASS_REGULAR_EXPRESSION "does not exist")
+set_tests_properties(FunctionalNonExistingFile PROPERTIES PASS_REGULAR_EXPRESSION "does not exist"
+  FAIL_REGULAR_EXPRESSION "TestService initialized")
 add_test_fwcore(FunctionalNonExistingFileOverwritten options/ExampleFunctionalNonExistingFile.py --IOSvc.Input functional_producer.root PROPERTIES FIXTURES_REQUIRED ProducerFile)
 add_test_fwcore(FunctionalFileTooLong options/ExampleFunctionalFile.py -n 999 --IOSvc.Output toolong.root PROPERTIES FIXTURES_REQUIRED ProducerFile PASS_REGULAR_EXPRESSION
                   "Application Manager Terminated successfully with a user requested ScheduledStop")

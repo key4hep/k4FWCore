@@ -22,10 +22,14 @@
 from Gaudi.Configuration import INFO
 from Configurables import ExampleFunctionalTransformer
 from Configurables import EventDataSvc
+from Configurables import TestService
 from k4FWCore import ApplicationMgr, IOSvc
 
 svc = IOSvc()
 svc.Input = "non_existing_file.root"
+
+earlyExit = TestService("TestService")
+testsvc = TestService("TestService")
 
 transformer = ExampleFunctionalTransformer(
     "Transformer", InputCollection="MCParticles", OutputCollection="NewMCParticles"
@@ -35,6 +39,6 @@ mgr = ApplicationMgr(
     TopAlg=[transformer],
     EvtSel="NONE",
     EvtMax=-1,
-    ExtSvc=[EventDataSvc("EventDataSvc")],
+    ExtSvc=[EventDataSvc("EventDataSvc"), testsvc],
     OutputLevel=INFO,
 )
