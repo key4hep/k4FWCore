@@ -16,8 +16,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef K4FWCORETEST_TESTEARLYEXITSVC_H
-#define K4FWCORETEST_TESTEARLYEXITSVC_H
+#ifndef K4FWCORETEST_TESTSERVICE_H
+#define K4FWCORETEST_TESTSERVICE_H
 
 #include "GaudiKernel/Service.h"
 
