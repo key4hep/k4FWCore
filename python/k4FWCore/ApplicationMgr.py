@@ -23,6 +23,8 @@ from Configurables import Reader, Writer, IOSvc, Gaudi__Sequencer, EventLoopMgr
 from Gaudi.Configuration import WARNING, VERBOSE
 from k4FWCore.utils import get_logger
 
+import os
+
 logger = get_logger()
 
 
@@ -70,6 +72,15 @@ class ApplicationMgr:
         if not inp:
             # We have got nothing to do here, since there is no input
             return
+
+        # Verify all input files exist to fail early.
+        # Skip paths with a protocol scheme (e.g. root://, https://) since
+        # ROOT can read remote files that os.path.isfile cannot check.
+        for f in iosvc_props[inp][0]:
+            if "://" not in f and not os.path.isfile(f):
+                raise FileNotFoundError(
+                    f"Input file '{f}' does not exist or is not a regular file"
+                )
 
         collections = iosvc_props["CollectionNames"][0] or None
         n_events = self._mgr.EvtMax
