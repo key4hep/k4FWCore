@@ -36,6 +36,8 @@ public:
   virtual bool throwIfDuplicate() const = 0;
   virtual bool skipIfSameValue() const = 0;
 
+  virtual void applyDeferredParameters() {}
+
   template <typename T>
   void put(const std::string& name, const T& obj) {
     getFrameForWrite()->putParameter(name, obj);
