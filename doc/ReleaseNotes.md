@@ -1,10 +1,5 @@
 # v01-06
 
-* 2026-07-06 Federico Meloni
-  - Extend `OverlayTiming` with random background-file mixing: the new `RandomMixBackgroundFiles` option treats each file in a background group as an independent event source and picks a random file for every overlaid event, and `BackgroundFileNames` entries may now be directories (their `.root` files are used).
-  - Add the `MergeMCParticles` option to `OverlayTiming` (default `true`); when `false`, background MCParticles are not stored, tracker hits keep the momentum of their originating particle and calorimeter contributions get an empty particle.
-  - Serialize all background ROOT I/O on a dedicated worker thread so `OverlayTiming` is safe to run with intra-event multithreading.
-
 * 2026-04-16 Juan Miguel Carceller ([PR#397](https://github.com/key4hep/k4FWCore/pull/397))
   - Bump the version of k4FWCore for versioning the usage of new features
 
