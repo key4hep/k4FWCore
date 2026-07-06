@@ -31,9 +31,15 @@
 #include "k4FWCore/MetadataUtils.h"
 
 #include <TMath.h>
+#include <TROOT.h>
+
+#include <tbb/parallel_pipeline.h>
 
 #include <algorithm>
+#include <atomic>
+#include <cstdint>
 #include <filesystem>
+#include <memory>
 #include <numeric>
 #include <random>
 #include <utility>
@@ -74,6 +80,11 @@ StatusCode OverlayTiming::initialize() {
   if (!m_uidSvc) {
     error() << "Unable to get UniqueIDGenSvc" << endmsg;
   }
+
+  // Make ROOT's global state safe for concurrent reads. IOSvc already does this,
+  // but call it defensively so the OverlayThreads read pipeline is safe even if
+  // OverlayTiming is driven differently.
+  ROOT::EnableThreadSafety();
 
   // Expand any directory entries into their list of .root files. This is
   // typically used together with RandomMixBackgroundFiles, where each file is
@@ -132,6 +143,161 @@ StatusCode OverlayTiming::initialize() {
   }
 
   return StatusCode::SUCCESS;
+}
+
+void OverlayTiming::mergeBackgroundFrame(
+    const podio::Frame& backgroundEvent, float timeOffset, int BX_number_in_train, int physBX,
+    const std::vector<const edm4hep::SimTrackerHitCollection*>&           simTrackerHits,
+    const std::vector<const edm4hep::SimCalorimeterHitCollection*>&       simCaloHits,
+    edm4hep::MCParticleCollection&                                        oparticles,
+    std::vector<edm4hep::SimTrackerHitCollection>&                        osimTrackerHits,
+    std::map<int, std::map<uint64_t, edm4hep::MutableSimCalorimeterHit>>& cellIDsMap,
+    std::vector<edm4hep::CaloHitContributionCollection>&                  ocaloHitContribs) const {
+  const auto availableCollections = backgroundEvent.getAvailableCollections();
+
+  if (std::find(availableCollections.begin(), availableCollections.end(), m_MCParticleCollectionName) ==
+      availableCollections.end()) {
+    warning() << "Collection " << m_MCParticleCollectionName << " not found in background event" << endmsg;
+  }
+
+  // To fix the relations we will need to have a map from old to new particle index
+  std::map<int, int>                                           oldToNewMap;
+  std::map<int, std::pair<std::vector<int>, std::vector<int>>> parentDaughterMap;
+
+  if (m_mergeMCParticles) {
+    const auto& bgParticles = backgroundEvent.get<edm4hep::MCParticleCollection>(m_MCParticleCollectionName);
+    int         j           = oparticles.size();
+    for (size_t i = 0; i < bgParticles.size(); ++i) {
+      auto npart = bgParticles[i].clone(false);
+
+      npart.setTime(bgParticles[i].getTime() + timeOffset);
+      npart.setOverlay(true);
+      oparticles.push_back(npart);
+      for (const auto& parent : bgParticles[i].getParents()) {
+        parentDaughterMap[j].first.push_back(parent.getObjectID().index);
+      }
+      for (const auto& daughter : bgParticles[i].getDaughters()) {
+        parentDaughterMap[j].second.push_back(daughter.getObjectID().index);
+      }
+      oldToNewMap[i] = j;
+      j++;
+    }
+    for (const auto& [index, parentsDaughters] : parentDaughterMap) {
+      const auto& [parents, daughters] = parentsDaughters;
+      for (const auto& parent : parents) {
+        if (parentDaughterMap.find(oldToNewMap[parent]) == parentDaughterMap.end()) {
+          continue;
+        }
+        oparticles[index].addToParents(oparticles[oldToNewMap[parent]]);
+      }
+      for (const auto& daughter : daughters) {
+        if (parentDaughterMap.find(oldToNewMap[daughter]) == parentDaughterMap.end()) {
+          continue;
+        }
+        oparticles[index].addToDaughters(oparticles[oldToNewMap[daughter]]);
+      }
+    }
+  }
+
+  for (size_t i = 0; i < simTrackerHits.size(); ++i) {
+    const auto name = inputLocations(SIMTRACKERHIT_INDEX_POSITION)[i];
+    debug() << "Processing collection " << name << endmsg;
+    if (std::find(availableCollections.begin(), availableCollections.end(), name) == availableCollections.end()) {
+      warning() << "Collection " << name << " not found in background event" << endmsg;
+      continue;
+    }
+    const auto [this_start, this_stop] = define_time_windows(name);
+    // There are only contributions to the readout if the hits are in the integration window
+    if (this_stop <= (BX_number_in_train - physBX) * m_deltaT) {
+      info() << "Skipping collection " << name << " as it is not in the integration window" << endmsg;
+      continue;
+    }
+    auto& ocoll = osimTrackerHits[i];
+    for (const auto&& simTrackerHit : backgroundEvent.get<edm4hep::SimTrackerHitCollection>(name)) {
+      const float tof = time_of_flight(simTrackerHit.getPosition());
+
+      if (!((simTrackerHit.getTime() + timeOffset > this_start + tof) &&
+            (simTrackerHit.getTime() + timeOffset < this_stop + tof)))
+        continue;
+      auto nhit = simTrackerHit.clone(false);
+      nhit.setOverlay(true);
+      nhit.setTime(simTrackerHit.getTime() + timeOffset);
+      if (m_mergeMCParticles) {
+        nhit.setParticle(oparticles[oldToNewMap[simTrackerHit.getParticle().getObjectID().index]]);
+      } else {
+        edm4hep::MCParticle mcp = simTrackerHit.getParticle();
+        if (mcp.isAvailable()) {
+          // Preserve the momentum of the originating particle
+          edm4hep::Vector3d mom = mcp.getMomentum();
+          nhit.setMomentum({(float)mom.x, (float)mom.y, (float)mom.z});
+        }
+      }
+      ocoll.push_back(nhit);
+    }
+  }
+
+  for (size_t i = 0; i < simCaloHits.size(); ++i) {
+    const auto name = inputLocations(SIMCALOHIT_INDEX_POSITION)[i];
+    debug() << "Processing collection " << name << endmsg;
+    if (std::find(availableCollections.begin(), availableCollections.end(), name) == availableCollections.end()) {
+      warning() << "Collection " << name << " not found in background event" << endmsg;
+      continue;
+    }
+    const auto [this_start, this_stop] = define_time_windows(name);
+    // There are only contributions to the readout if the hits are in the integration window
+    if (this_stop <= (BX_number_in_train - physBX) * m_deltaT) {
+      info() << "Skipping collection " << name << " as it is not in the integration window" << endmsg;
+      continue;
+    }
+
+    auto& calHitMap      = cellIDsMap[i];
+    auto& calHitContribs = ocaloHitContribs[i];
+    for (const auto&& simCaloHit : backgroundEvent.get<edm4hep::SimCalorimeterHitCollection>(name)) {
+      if (calHitMap.find(simCaloHit.getCellID()) == calHitMap.end()) {
+        // There is no hit at this position. The new hit can be added, if it is not outside the window
+        auto calhit = edm4hep::MutableSimCalorimeterHit();
+        bool add    = false;
+        for (const auto& contrib : simCaloHit.getContributions()) {
+          if ((contrib.getTime() + timeOffset > this_start) && (contrib.getTime() + timeOffset < this_stop)) {
+            add = true;
+            // TODO: Make sure a contribution is not added twice
+            auto newContrib = contrib.clone(false);
+            if (m_mergeMCParticles) {
+              newContrib.setParticle(oparticles[oldToNewMap[contrib.getParticle().getObjectID().index]]);
+            } else {
+              newContrib.setParticle(edm4hep::MCParticle());
+            }
+            newContrib.setTime(contrib.getTime() + timeOffset);
+            calhit.addToContributions(newContrib);
+            calHitContribs.push_back(newContrib);
+          }
+        }
+        if (add) {
+          calhit.setCellID(simCaloHit.getCellID());
+          calhit.setEnergy(simCaloHit.getEnergy());
+          calhit.setPosition(simCaloHit.getPosition());
+          calHitMap[calhit.getCellID()] = calhit;
+        }
+      } else {
+        // there is already a hit at this position
+        auto& calhit = calHitMap[simCaloHit.getCellID()];
+        for (const auto& contrib : simCaloHit.getContributions()) {
+          if ((contrib.getTime() + timeOffset > this_start) && (contrib.getTime() + timeOffset < this_stop)) {
+            // TODO: Make sure a contribution is not added twice
+            auto newContrib = contrib.clone(false);
+            if (m_mergeMCParticles) {
+              newContrib.setParticle(oparticles[oldToNewMap[contrib.getParticle().getObjectID().index]]);
+            } else {
+              newContrib.setParticle(edm4hep::MCParticle());
+            }
+            newContrib.setTime(contrib.getTime() + timeOffset);
+            calhit.addToContributions(newContrib);
+            calHitContribs.push_back(newContrib);
+          }
+        }
+      }
+    }
+  }
 }
 
 retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
@@ -215,6 +381,20 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
   }
 
   auto physBX = m_physBX.value();
+
+  // Phase 1: draw all randomness and build the ordered list of background reads.
+  // Building it up front keeps the RNG sequence -- and therefore the result --
+  // identical whether the reads are later executed serially or in parallel.
+  struct BkgRead {
+    int    group;
+    int    fileIndex;
+    size_t entry;
+    float  timeOffset;
+    int    bxNumber;
+    int    physBX;
+  };
+  std::vector<BkgRead> reads;
+
   // Iterate over each group of files and parameters
   for (size_t groupIndex = 0; groupIndex < m_bkgEvents->size(); groupIndex++) {
     if (m_randomBX) {
@@ -270,166 +450,67 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
         warning() << "No background files available for group " << groupIndex << ", skipping overlay" << endmsg;
         continue;
       }
+      const float timeOffset = BX_number_in_train * m_deltaT;
       for (int k = 0; k < NOverlay_to_this_BX; ++k) {
         // In random-mix mode pick a random file of the group; in sequential mode
-        // the file index is ignored. All bounds checking, reading and cursor
-        // advancing happen thread-safely inside getFrame (serialized ROOT I/O).
-        const int fileIndex = m_randomMix ? fileIndices[k % fileIndices.size()] : 0;
-        debug() << "Overlaying background event from group " << groupIndex << " to BX " << bxInTrain << endmsg;
-        const auto backgroundEvent      = m_bkgEvents->getFrame(groupIndex, fileIndex);
-        const auto availableCollections = backgroundEvent.getAvailableCollections();
-
-        // Either 0 or negative
-        const auto timeOffset = BX_number_in_train * m_deltaT;
-
-        if (std::find(availableCollections.begin(), availableCollections.end(), m_MCParticleCollectionName) ==
-            availableCollections.end()) {
-          warning() << "Collection " << m_MCParticleCollectionName << " not found in background event" << endmsg;
-        }
-
-        // To fix the relations we will need to have a map from old to new particle index
-        std::map<int, int> oldToNewMap;
-        std::map<int, std::pair<std::vector<int>, std::vector<int>>> parentDaughterMap;
-
-        if (m_mergeMCParticles) {
-          const auto& bgParticles = backgroundEvent.get<edm4hep::MCParticleCollection>(m_MCParticleCollectionName);
-          int j = oparticles.size();
-          for (size_t i = 0; i < bgParticles.size(); ++i) {
-            auto npart = bgParticles[i].clone(false);
-
-            npart.setTime(bgParticles[i].getTime() + timeOffset);
-            npart.setOverlay(true);
-            oparticles.push_back(npart);
-            for (const auto& parent : bgParticles[i].getParents()) {
-              parentDaughterMap[j].first.push_back(parent.getObjectID().index);
-            }
-            for (const auto& daughter : bgParticles[i].getDaughters()) {
-              parentDaughterMap[j].second.push_back(daughter.getObjectID().index);
-            }
-            oldToNewMap[i] = j;
-            j++;
-          }
-          for (const auto& [index, parentsDaughters] : parentDaughterMap) {
-            const auto& [parents, daughters] = parentsDaughters;
-            for (const auto& parent : parents) {
-              if (parentDaughterMap.find(oldToNewMap[parent]) == parentDaughterMap.end()) {
-                // warning() << "Parent " << parent << " not found in background event" << endmsg;
-                continue;
-              }
-              oparticles[index].addToParents(oparticles[oldToNewMap[parent]]);
-            }
-            for (const auto& daughter : daughters) {
-              if (parentDaughterMap.find(oldToNewMap[daughter]) == parentDaughterMap.end()) {
-                // warning() << "Parent " << daughter << " not found in background event" << endmsg;
-                continue;
-              }
-              // info() << "Adding (daughter) " << daughter << " to " << index << endmsg;
-              oparticles[index].addToDaughters(oparticles[oldToNewMap[daughter]]);
-            }
-          }
-        }
-
-        for (size_t i = 0; i < simTrackerHits.size(); ++i) {
-          const auto name = inputLocations(SIMTRACKERHIT_INDEX_POSITION)[i];
-          debug() << "Processing collection " << name << endmsg;
-          if (std::find(availableCollections.begin(), availableCollections.end(), name) == availableCollections.end()) {
-            warning() << "Collection " << name << " not found in background event" << endmsg;
-            continue;
-          }
-          const auto [this_start, this_stop] = define_time_windows(name);
-          // There are only contributions to the readout if the hits are in the integration window
-          if (this_stop <= (BX_number_in_train - physBX) * m_deltaT) {
-            info() << "Skipping collection " << name << " as it is not in the integration window" << endmsg;
-            continue;
-          }
-          auto& ocoll = osimTrackerHits[i];
-          for (const auto&& simTrackerHit : backgroundEvent.get<edm4hep::SimTrackerHitCollection>(name)) {
-            const float tof = time_of_flight(simTrackerHit.getPosition());
-
-            if (!((simTrackerHit.getTime() + timeOffset > this_start + tof) &&
-                  (simTrackerHit.getTime() + timeOffset < this_stop + tof)))
-              continue;
-            auto nhit = simTrackerHit.clone(false);
-            nhit.setOverlay(true);
-            nhit.setTime(simTrackerHit.getTime() + timeOffset);
-            if (m_mergeMCParticles) {
-              nhit.setParticle(oparticles[oldToNewMap[simTrackerHit.getParticle().getObjectID().index]]);
-            } else {
-              edm4hep::MCParticle mcp = simTrackerHit.getParticle();
-              if (mcp.isAvailable()) {
-                // Preserve the momentum of the originating particle
-                edm4hep::Vector3d mom = mcp.getMomentum();
-                nhit.setMomentum({(float)mom.x, (float)mom.y, (float)mom.z});
-              }
-            }
-            ocoll.push_back(nhit);
-          }
-        }
-
-        for (size_t i = 0; i < simCaloHits.size(); ++i) {
-          const auto name = inputLocations(SIMCALOHIT_INDEX_POSITION)[i];
-          debug() << "Processing collection " << name << endmsg;
-          if (std::find(availableCollections.begin(), availableCollections.end(), name) == availableCollections.end()) {
-            warning() << "Collection " << name << " not found in background event" << endmsg;
-            continue;
-          }
-          const auto [this_start, this_stop] = define_time_windows(name);
-          // There are only contributions to the readout if the hits are in the integration window
-          if (this_stop <= (BX_number_in_train - physBX) * m_deltaT) {
-            info() << "Skipping collection " << name << " as it is not in the integration window" << endmsg;
-            continue;
-          }
-
-          auto& calHitMap = cellIDsMap[i];
-          auto& calHitContribs = ocaloHitContribs[i];
-          for (const auto&& simCaloHit : backgroundEvent.get<edm4hep::SimCalorimeterHitCollection>(name)) {
-            if (calHitMap.find(simCaloHit.getCellID()) == calHitMap.end()) {
-              // There is no hit at this position. The new hit can be added, if it is not outside the window
-              auto calhit = edm4hep::MutableSimCalorimeterHit();
-              bool add = false;
-              for (const auto& contrib : simCaloHit.getContributions()) {
-                if ((contrib.getTime() + timeOffset > this_start) && (contrib.getTime() + timeOffset < this_stop)) {
-                  add = true;
-                  // TODO: Make sure a contribution is not added twice
-                  auto newContrib = contrib.clone(false);
-                  if (m_mergeMCParticles) {
-                    newContrib.setParticle(oparticles[oldToNewMap[contrib.getParticle().getObjectID().index]]);
-                  } else {
-                    newContrib.setParticle(edm4hep::MCParticle());
-                  }
-                  newContrib.setTime(contrib.getTime() + timeOffset);
-                  calhit.addToContributions(newContrib);
-                  calHitContribs.push_back(newContrib);
-                }
-              }
-              if (add) {
-                calhit.setCellID(simCaloHit.getCellID());
-                calhit.setEnergy(simCaloHit.getEnergy());
-                calhit.setPosition(simCaloHit.getPosition());
-                calHitMap[calhit.getCellID()] = calhit;
-              }
-            } else {
-              // there is already a hit at this position
-              auto& calhit = calHitMap[simCaloHit.getCellID()];
-              for (const auto& contrib : simCaloHit.getContributions()) {
-                if ((contrib.getTime() + timeOffset > this_start) && (contrib.getTime() + timeOffset < this_stop)) {
-                  // TODO: Make sure a contribution is not added twice
-                  auto newContrib = contrib.clone(false);
-                  if (m_mergeMCParticles) {
-                    newContrib.setParticle(oparticles[oldToNewMap[contrib.getParticle().getObjectID().index]]);
-                  } else {
-                    newContrib.setParticle(edm4hep::MCParticle());
-                  }
-                  newContrib.setTime(contrib.getTime() + timeOffset);
-                  calhit.addToContributions(newContrib);
-                  calHitContribs.push_back(newContrib);
-                }
-              }
-            }
-          }
-        }
+        // the file index is ignored. reserve() advances the per-file cursor now
+        // (serially); the actual ROOT read happens in phase 2, possibly on
+        // several threads.
+        const int    fileIndex = m_randomMix ? fileIndices[k % fileIndices.size()] : 0;
+        const size_t entry     = m_bkgEvents->reserve(groupIndex, fileIndex);
+        reads.push_back({static_cast<int>(groupIndex), fileIndex, entry, timeOffset, BX_number_in_train, physBX});
       }
     }
+  }
+
+  // Phase 2 + 3: read (and decompress) the background frames -- optionally on
+  // several threads -- and merge them into the outputs in list order. The merge
+  // is always serial and in-order, so the result is independent of OverlayThreads.
+  if (m_overlayThreads <= 1) {
+    for (const auto& r : reads) {
+      const auto backgroundEvent = m_bkgEvents->readAt(r.group, r.fileIndex, r.entry);
+      mergeBackgroundFrame(backgroundEvent, r.timeOffset, r.bxNumber, r.physBX, simTrackerHits, simCaloHits, oparticles,
+                           osimTrackerHits, cellIDsMap, ocaloHitContribs);
+    }
+  } else {
+    // Parallel read + decompress (bounded by the number of in-flight tokens),
+    // serial in-order merge.
+    struct Item {
+      const BkgRead* read = nullptr;
+      podio::Frame   frame;
+    };
+    std::atomic<size_t> nextRead{0};
+    const size_t        ntokens = static_cast<size_t>(m_overlayThreads.value());
+    tbb::parallel_pipeline(
+        ntokens,
+        tbb::make_filter<void, std::shared_ptr<Item>>(
+            tbb::filter_mode::serial_in_order,
+            [&](tbb::flow_control& fc) -> std::shared_ptr<Item> {
+              const size_t idx = nextRead++;
+              if (idx >= reads.size()) {
+                fc.stop();
+                return {};
+              }
+              return std::make_shared<Item>(Item{&reads[idx], {}});
+            }) &
+            tbb::make_filter<std::shared_ptr<Item>, std::shared_ptr<Item>>(
+                tbb::filter_mode::parallel,
+                [&](std::shared_ptr<Item> item) -> std::shared_ptr<Item> {
+                  const auto& r = *item->read;
+                  item->frame   = m_bkgEvents->readAt(r.group, r.fileIndex, r.entry);
+                  // Force decompression/materialization here (in parallel) so the
+                  // serial merge only touches already in-memory data.
+                  for (const auto& name : item->frame.getAvailableCollections()) {
+                    item->frame.get(name);
+                  }
+                  return item;
+                }) &
+            tbb::make_filter<std::shared_ptr<Item>, void>(
+                tbb::filter_mode::serial_in_order, [&](std::shared_ptr<Item> item) {
+                  const auto& r = *item->read;
+                  mergeBackgroundFrame(item->frame, r.timeOffset, r.bxNumber, r.physBX, simTrackerHits, simCaloHits,
+                                       oparticles, osimTrackerHits, cellIDsMap, ocaloHitContribs);
+                }));
   }
   // Move the SimCalorimeterHitCollections to the output vector
   // So far they are stored in a map with the cellID as key
