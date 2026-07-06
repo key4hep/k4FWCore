@@ -32,9 +32,26 @@
 
 #include <TMath.h>
 
+#include <algorithm>
+#include <filesystem>
+#include <numeric>
 #include <random>
 #include <utility>
 #include <vector>
+
+namespace fs = std::filesystem;
+
+// Returns the .root files contained in a directory (non-recursive).
+static std::vector<std::string> filesInFolder(const std::string& folderPath) {
+  std::vector<std::string> files;
+  for (const auto& entry : fs::directory_iterator(folderPath)) {
+    if (fs::is_regular_file(entry.path()) && entry.path().extension() == ".root") {
+      files.push_back(entry.path().string());
+    }
+  }
+  std::sort(files.begin(), files.end());
+  return files;
+}
 
 template <typename T>
 inline float time_of_flight(const T& pos) {
@@ -58,33 +75,46 @@ StatusCode OverlayTiming::initialize() {
     error() << "Unable to get UniqueIDGenSvc" << endmsg;
   }
 
+  // Expand any directory entries into their list of .root files. This is
+  // typically used together with RandomMixBackgroundFiles, where each file is
+  // an independent pseudo-event source.
   std::vector<std::vector<std::string>> inputFiles;
-  inputFiles = m_inputFileNames.value();
-  // if (m_startWithBackgroundFile >= 0) {
-  //   inputFiles = std::vector<std::string>(m_inputFileNames.begin() + m_startWithBackgroundFile,
-  //   m_inputFileNames.end());
-  // } else {
-  //   inputFiles = m_inputFileNames;
-  // }
-  // TODO:: shuffle input files
-  // std::shuffle(inputFiles.begin(), inputFiles.end(), rng_engine);
-
-  m_bkgEvents = make_unique<EventHolder>(inputFiles);
-  for (auto& val : m_bkgEvents->m_totalNumberOfEvents) {
-    if (val == 0) {
-      std::string err = "No events found in the background files";
-      for (auto& file : m_inputFileNames.value()) {
-        err += " " + file[0];
+  for (const auto& group : m_inputFileNames.value()) {
+    std::vector<std::string> expanded;
+    for (const auto& entry : group) {
+      if (fs::is_directory(entry)) {
+        const auto found = filesInFolder(entry);
+        expanded.insert(expanded.end(), found.begin(), found.end());
+      } else {
+        expanded.push_back(entry);
       }
-      error() << err << endmsg;
-      return StatusCode::FAILURE;
     }
+    inputFiles.push_back(std::move(expanded));
   }
 
-  if (std::any_of(m_bkgEvents->m_totalNumberOfEvents.begin(), m_bkgEvents->m_totalNumberOfEvents.end(),
-                  [this](const int& val) { return this->m_startWithBackgroundEvent >= val; })) {
-    throw GaudiException("StartWithBackgroundEvent is larger than the number of events in the background files", name(),
-                         StatusCode::FAILURE);
+  m_bkgEvents = make_unique<EventHolder>(inputFiles, m_randomMix.value(), m_allowReusingBackgroundFiles.value(), name());
+
+  // In sequential mode the event counts are known upfront and can be validated
+  // here. In random-mix mode they are determined lazily on first read, so an
+  // empty file is reported at that point instead.
+  if (!m_randomMix) {
+    for (auto& counts : m_bkgEvents->m_totalNumberOfEvents) {
+      for (auto& val : counts) {
+        if (val == 0) {
+          std::string err = "No events found in the background files";
+          for (auto& file : m_inputFileNames.value()) {
+            err += " " + file[0];
+          }
+          error() << err << endmsg;
+          return StatusCode::FAILURE;
+        }
+      }
+      if (std::any_of(counts.begin(), counts.end(),
+                      [this](const size_t& val) { return this->m_startWithBackgroundEvent >= static_cast<int>(val); })) {
+        throw GaudiException("StartWithBackgroundEvent is larger than the number of events in the background files",
+                             name(), StatusCode::FAILURE);
+      }
+    }
   }
 
   if (m_Noverlay.empty()) {
@@ -202,14 +232,21 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
     }
     std::shuffle(permutation.begin(), permutation.end(), rng_engine);
 
+    // In random-mix mode pick which files of the group to read from, at random.
+    // In sequential mode the file index is ignored, so this stays trivial.
+    std::vector<int> fileIndices(m_bkgEvents->m_fileNames[groupIndex].size());
+    std::iota(fileIndices.begin(), fileIndices.end(), 0);
+    if (m_randomMix) {
+      std::shuffle(fileIndices.begin(), fileIndices.end(), rng_engine);
+    }
+
     // TODO: Check that there is anything to overlay
 
-    debug() << "Starting overlay at event: " << m_bkgEvents->m_nextEntry[groupIndex] << " for the background group "
-            << groupIndex << endmsg;
+    debug() << "Starting overlay for the background group " << groupIndex << endmsg;
 
     if (m_startWithBackgroundEvent >= 0) {
       info() << "Skipping to event: " << m_startWithBackgroundEvent << endmsg;
-      for (auto& entry : m_bkgEvents->m_nextEntry) {
+      for (auto& entry : m_bkgEvents->m_nextEntry[groupIndex]) {
         entry = m_startWithBackgroundEvent;
       }
     }
@@ -229,17 +266,17 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
       debug() << "Will overlay " << NOverlay_to_this_BX << " events to BX number " << BX_number_in_train + physBX
               << endmsg;
 
+      if (m_randomMix && fileIndices.empty()) {
+        warning() << "No background files available for group " << groupIndex << ", skipping overlay" << endmsg;
+        continue;
+      }
       for (int k = 0; k < NOverlay_to_this_BX; ++k) {
-        info() << "Overlaying background event " << m_bkgEvents->m_nextEntry[groupIndex] << " from group " << groupIndex
-               << " to BX " << bxInTrain << endmsg;
-        if (m_bkgEvents->m_nextEntry[groupIndex] >= m_bkgEvents->m_totalNumberOfEvents[groupIndex] &&
-            !m_allowReusingBackgroundFiles) {
-          throw GaudiException("No more events in background file", name(), StatusCode::FAILURE);
-        }
-        const auto backgroundEvent =
-            m_bkgEvents->m_rootFileReaders[groupIndex].readEvent(m_bkgEvents->m_nextEntry[groupIndex]);
-        m_bkgEvents->m_nextEntry[groupIndex]++;
-        m_bkgEvents->m_nextEntry[groupIndex] %= m_bkgEvents->m_totalNumberOfEvents[groupIndex];
+        // In random-mix mode pick a random file of the group; in sequential mode
+        // the file index is ignored. All bounds checking, reading and cursor
+        // advancing happen thread-safely inside getFrame (serialized ROOT I/O).
+        const int fileIndex = m_randomMix ? fileIndices[k % fileIndices.size()] : 0;
+        debug() << "Overlaying background event from group " << groupIndex << " to BX " << bxInTrain << endmsg;
+        const auto backgroundEvent      = m_bkgEvents->getFrame(groupIndex, fileIndex);
         const auto availableCollections = backgroundEvent.getAvailableCollections();
 
         // Either 0 or negative
@@ -254,39 +291,41 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
         std::map<int, int> oldToNewMap;
         std::map<int, std::pair<std::vector<int>, std::vector<int>>> parentDaughterMap;
 
-        const auto& bgParticles = backgroundEvent.get<edm4hep::MCParticleCollection>(m_MCParticleCollectionName);
-        int j = oparticles.size();
-        for (size_t i = 0; i < bgParticles.size(); ++i) {
-          auto npart = bgParticles[i].clone(false);
+        if (m_mergeMCParticles) {
+          const auto& bgParticles = backgroundEvent.get<edm4hep::MCParticleCollection>(m_MCParticleCollectionName);
+          int j = oparticles.size();
+          for (size_t i = 0; i < bgParticles.size(); ++i) {
+            auto npart = bgParticles[i].clone(false);
 
-          npart.setTime(bgParticles[i].getTime() + timeOffset);
-          npart.setOverlay(true);
-          oparticles.push_back(npart);
-          for (const auto& parent : bgParticles[i].getParents()) {
-            parentDaughterMap[j].first.push_back(parent.getObjectID().index);
-          }
-          for (const auto& daughter : bgParticles[i].getDaughters()) {
-            parentDaughterMap[j].second.push_back(daughter.getObjectID().index);
-          }
-          oldToNewMap[i] = j;
-          j++;
-        }
-        for (const auto& [index, parentsDaughters] : parentDaughterMap) {
-          const auto& [parents, daughters] = parentsDaughters;
-          for (const auto& parent : parents) {
-            if (parentDaughterMap.find(oldToNewMap[parent]) == parentDaughterMap.end()) {
-              // warning() << "Parent " << parent << " not found in background event" << endmsg;
-              continue;
+            npart.setTime(bgParticles[i].getTime() + timeOffset);
+            npart.setOverlay(true);
+            oparticles.push_back(npart);
+            for (const auto& parent : bgParticles[i].getParents()) {
+              parentDaughterMap[j].first.push_back(parent.getObjectID().index);
             }
-            oparticles[index].addToParents(oparticles[oldToNewMap[parent]]);
-          }
-          for (const auto& daughter : daughters) {
-            if (parentDaughterMap.find(oldToNewMap[daughter]) == parentDaughterMap.end()) {
-              // warning() << "Parent " << daughter << " not found in background event" << endmsg;
-              continue;
+            for (const auto& daughter : bgParticles[i].getDaughters()) {
+              parentDaughterMap[j].second.push_back(daughter.getObjectID().index);
             }
-            // info() << "Adding (daughter) " << daughter << " to " << index << endmsg;
-            oparticles[index].addToDaughters(oparticles[oldToNewMap[daughter]]);
+            oldToNewMap[i] = j;
+            j++;
+          }
+          for (const auto& [index, parentsDaughters] : parentDaughterMap) {
+            const auto& [parents, daughters] = parentsDaughters;
+            for (const auto& parent : parents) {
+              if (parentDaughterMap.find(oldToNewMap[parent]) == parentDaughterMap.end()) {
+                // warning() << "Parent " << parent << " not found in background event" << endmsg;
+                continue;
+              }
+              oparticles[index].addToParents(oparticles[oldToNewMap[parent]]);
+            }
+            for (const auto& daughter : daughters) {
+              if (parentDaughterMap.find(oldToNewMap[daughter]) == parentDaughterMap.end()) {
+                // warning() << "Parent " << daughter << " not found in background event" << endmsg;
+                continue;
+              }
+              // info() << "Adding (daughter) " << daughter << " to " << index << endmsg;
+              oparticles[index].addToDaughters(oparticles[oldToNewMap[daughter]]);
+            }
           }
         }
 
@@ -313,7 +352,16 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
             auto nhit = simTrackerHit.clone(false);
             nhit.setOverlay(true);
             nhit.setTime(simTrackerHit.getTime() + timeOffset);
-            nhit.setParticle(oparticles[oldToNewMap[simTrackerHit.getParticle().getObjectID().index]]);
+            if (m_mergeMCParticles) {
+              nhit.setParticle(oparticles[oldToNewMap[simTrackerHit.getParticle().getObjectID().index]]);
+            } else {
+              edm4hep::MCParticle mcp = simTrackerHit.getParticle();
+              if (mcp.isAvailable()) {
+                // Preserve the momentum of the originating particle
+                edm4hep::Vector3d mom = mcp.getMomentum();
+                nhit.setMomentum({(float)mom.x, (float)mom.y, (float)mom.z});
+              }
+            }
             ocoll.push_back(nhit);
           }
         }
@@ -344,7 +392,11 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
                   add = true;
                   // TODO: Make sure a contribution is not added twice
                   auto newContrib = contrib.clone(false);
-                  newContrib.setParticle(oparticles[oldToNewMap[contrib.getParticle().getObjectID().index]]);
+                  if (m_mergeMCParticles) {
+                    newContrib.setParticle(oparticles[oldToNewMap[contrib.getParticle().getObjectID().index]]);
+                  } else {
+                    newContrib.setParticle(edm4hep::MCParticle());
+                  }
                   newContrib.setTime(contrib.getTime() + timeOffset);
                   calhit.addToContributions(newContrib);
                   calHitContribs.push_back(newContrib);
@@ -363,7 +415,11 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
                 if ((contrib.getTime() + timeOffset > this_start) && (contrib.getTime() + timeOffset < this_stop)) {
                   // TODO: Make sure a contribution is not added twice
                   auto newContrib = contrib.clone(false);
-                  newContrib.setParticle(oparticles[oldToNewMap[contrib.getParticle().getObjectID().index]]);
+                  if (m_mergeMCParticles) {
+                    newContrib.setParticle(oparticles[oldToNewMap[contrib.getParticle().getObjectID().index]]);
+                  } else {
+                    newContrib.setParticle(edm4hep::MCParticle());
+                  }
                   newContrib.setTime(contrib.getTime() + timeOffset);
                   calhit.addToContributions(newContrib);
                   calHitContribs.push_back(newContrib);

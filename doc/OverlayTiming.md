@@ -33,7 +33,9 @@ It uses [`UniqueIDGenSvc`](uniqueIDGen.md) to seed the internal random number ge
 
 | Property | Default | Description |
 |----------|---------|-------------|
-| `BackgroundFileNames` | `[]` | List of groups of background input files, one group per overlay stream |
+| `BackgroundFileNames` | `[]` | List of groups of background input files, one group per overlay stream. Entries may also be directories, in which case their `.root` files are used. |
+| `RandomMixBackgroundFiles` | `false` | Treat each file in a background group as an independent event source and pick a random file for every overlaid event (one-event-per-file mixing) |
+| `MergeMCParticles` | `true` | Merge background MCParticles into the output. If `false`, background particles are not stored: tracker hits keep the momentum of their originating particle instead of a particle link, and calorimeter contributions get an empty particle |
 | `NumberBackground` | `[]` | Number of background events to overlay per stream (fixed or Poisson mean) |
 | `Poisson_random_NOverlay` | `[]` | If true, draw the number of events from a Poisson distribution with mean `NumberBackground` |
 | `NBunchtrain` | `1` | Number of bunch crossings in the bunch train |
@@ -93,3 +95,20 @@ ApplicationMgr(
     OutputLevel=INFO,
 )
 ```
+
+## Random background mixing
+
+For setups where the background is split across a large number of files, each
+containing a single event (e.g. Muon Collider beam-induced background), set
+`RandomMixBackgroundFiles = True`. Each file in a group is then treated as an
+independent event source, and a random file is chosen for every overlaid event.
+`BackgroundFileNames` entries may point at directories, whose `.root` files are
+collected automatically:
+
+```python
+overlay.RandomMixBackgroundFiles = True
+overlay.BackgroundFileNames = [["/path/to/bib_files/"]]
+```
+
+All background ROOT I/O is serialized on a dedicated worker thread, so the
+algorithm may be run with intra-event multithreading.

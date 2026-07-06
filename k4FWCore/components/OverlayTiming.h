@@ -44,35 +44,157 @@
 #include "k4FWCore/Transformer.h"
 #include "k4Interface/IUniqueIDGenSvc.h"
 
+#include "GaudiKernel/GaudiException.h"
+
 // Needed for some of the more complex properties
 #include "Gaudi/Parsers/Factory.h"
 #include "Gaudi/Property.h"
 
+#include <condition_variable>
+#include <future>
 #include <map>
+#include <mutex>
+#include <optional>
+#include <queue>
 #include <string>
+#include <thread>
 #include <vector>
 
+// Holds the background events and serializes all ROOT I/O on a single worker
+// thread. ROOT TFile access is not thread-safe, so routing every read through
+// one worker thread makes a shared EventHolder safe when the (const) overlay
+// operator() is scheduled concurrently under intra-event multi-threading.
+//
+// Two source strategies are supported, selected by m_randomMix:
+//   * sequential (default): each group is read as one logical stream through a
+//     persistent reader, advancing an internal cursor;
+//   * random mix: each file in a group is an independent event source, opened
+//     on demand, so the caller can pick a random file per overlay.
+//
+// Bookkeeping is stored per [group][file]. In sequential mode the file
+// dimension has a single slot per group.
 struct EventHolder {
   std::vector<std::vector<std::string>> m_fileNames;
+  bool                                  m_randomMix{false};
+  bool                                  m_allowReuse{false};
+  std::string                           m_algName;
+
+  // Sequential mode only: one persistent reader per group.
   std::vector<podio::Reader> m_rootFileReaders;
-  std::vector<size_t> m_totalNumberOfEvents;
-  std::map<int, podio::Frame> m_events;
 
-  std::vector<size_t> m_nextEntry;
+  // [group][file]. In sequential mode the inner vector has a single element.
+  // A total of 0 means "not yet determined" (filled lazily in random-mix mode).
+  std::vector<std::vector<size_t>> m_totalNumberOfEvents;
+  std::vector<std::vector<size_t>> m_nextEntry;
 
-  EventHolder(const std::vector<std::vector<std::string>>& fileNames) : m_fileNames(fileNames) {
-    for (auto& names : m_fileNames) {
-      m_rootFileReaders.emplace_back(podio::makeReader(names));
-      m_totalNumberOfEvents.push_back(m_rootFileReaders.back().getEntries("events"));
+  // Single worker thread serializing all ROOT I/O.
+  struct Request {
+    int                        groupIndex;
+    int                        fileIndex;
+    std::promise<podio::Frame> prom;
+  };
+  std::queue<Request>     m_requests;
+  std::mutex              m_queueMutex;
+  std::condition_variable m_queueCV;
+  std::thread             m_worker;
+  bool                    m_stop{false};
+
+  EventHolder(const std::vector<std::vector<std::string>>& fileNames, bool randomMix, bool allowReuse,
+              const std::string& algName)
+      : m_fileNames(fileNames), m_randomMix(randomMix), m_allowReuse(allowReuse), m_algName(algName) {
+    m_totalNumberOfEvents.resize(m_fileNames.size());
+    m_nextEntry.resize(m_fileNames.size());
+    for (size_t group = 0; group < m_fileNames.size(); ++group) {
+      if (m_randomMix) {
+        // One independent event source per file; counts are determined lazily.
+        m_totalNumberOfEvents[group].resize(m_fileNames[group].size(), 0);
+        m_nextEntry[group].resize(m_fileNames[group].size(), 0);
+      } else {
+        // The whole group is read as a single logical stream.
+        m_rootFileReaders.emplace_back(podio::makeReader(m_fileNames[group]));
+        m_totalNumberOfEvents[group].push_back(m_rootFileReaders.back().getEntries("events"));
+        m_nextEntry[group].push_back(0);
+      }
     }
-    m_nextEntry.resize(m_fileNames.size(), 0);
+
+    m_worker = std::thread([this]() {
+      while (true) {
+        Request req;
+        {
+          std::unique_lock<std::mutex> lock(m_queueMutex);
+          m_queueCV.wait(lock, [this]() { return m_stop || !m_requests.empty(); });
+          if (m_stop && m_requests.empty()) {
+            return;
+          }
+          req = std::move(m_requests.front());
+          m_requests.pop();
+        }
+        try {
+          req.prom.set_value(read(req.groupIndex, req.fileIndex));
+        } catch (...) {
+          req.prom.set_exception(std::current_exception());
+        }
+      }
+    });
   }
   EventHolder() = default;
 
-  // TODO: Cache functionality
-  // podio::Frame& read
+  ~EventHolder() {
+    {
+      std::lock_guard<std::mutex> lock(m_queueMutex);
+      m_stop = true;
+    }
+    m_queueCV.notify_all();
+    if (m_worker.joinable()) {
+      m_worker.join();
+    }
+  }
+
+  // Thread-safe: enqueue a read request and block until the worker fulfills it.
+  // In sequential mode fileIndex is ignored (always slot 0).
+  podio::Frame getFrame(int groupIndex, int fileIndex) {
+    Request req{groupIndex, m_randomMix ? fileIndex : 0, std::promise<podio::Frame>()};
+    auto     fut = req.prom.get_future();
+    {
+      std::lock_guard<std::mutex> lock(m_queueMutex);
+      m_requests.push(std::move(req));
+    }
+    m_queueCV.notify_one();
+    return fut.get();
+  }
 
   size_t size() const { return m_fileNames.size(); }
+
+private:
+  // Runs exclusively on the worker thread, so cursor bookkeeping needs no extra
+  // locking.
+  podio::Frame read(int group, int file) {
+    size_t& total = m_totalNumberOfEvents[group][file];
+    size_t& entry = m_nextEntry[group][file];
+
+    podio::Reader* reader = nullptr;
+    std::optional<podio::Reader> ondemand;
+    if (m_randomMix) {
+      ondemand.emplace(podio::makeReader(m_fileNames[group][file]));
+      reader = &ondemand.value();
+      if (total == 0) {
+        total = reader->getEntries("events");
+      }
+    } else {
+      reader = &m_rootFileReaders[group];
+    }
+
+    if (total == 0) {
+      throw GaudiException("No events found in background file " + m_fileNames[group][file], m_algName,
+                           StatusCode::FAILURE);
+    }
+    if (entry >= total && !m_allowReuse) {
+      throw GaudiException("No more events in background file", m_algName, StatusCode::FAILURE);
+    }
+    podio::Frame frame = reader->readEvent(entry % total);
+    entry              = (entry + 1) % total;
+    return frame;
+  }
 };
 
 using retType =
@@ -148,6 +270,18 @@ private:
       this, "AllowReusingBackgroundFiles", false, "If true, wrap around the background file when events are exhausted"};
   Gaudi::Property<bool> m_copyCellIDMetadata{this, "CopyCellIDMetadata", false,
                                              "Copy cell ID encoding metadata from input to output collections"};
+
+  Gaudi::Property<bool> m_randomMix{
+      this, "RandomMixBackgroundFiles", false,
+      "Treat each file in a background group as an independent event source and pick a random file for every "
+      "overlaid event (one-event-per-file mixing). Entries of BackgroundFileNames may also be directories, "
+      "whose .root files are used."};
+
+  Gaudi::Property<bool> m_mergeMCParticles{
+      this, "MergeMCParticles", true,
+      "Merge the background MCParticle collection into the output. If false, background particles are not "
+      "stored: tracker hits keep the momentum of their originating particle instead of a particle link, and "
+      "calorimeter contributions get an empty particle."};
 
   // Gaudi::Property<int> m_maxCachedFrames{
   //   this, "MaxCachedFrames", 0, "Maximum number of frames cached from background files"};

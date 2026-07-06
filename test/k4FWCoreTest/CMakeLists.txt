@@ -272,6 +272,8 @@ add_test_fwcore(InvalidOutputCommandsNoCrash options/invalidOutputCommandsNoCras
 set_tests_properties(InvalidOutputCommandsNoCrash PROPERTIES FIXTURES_REQUIRED ProducerFile PASS_REGULAR_EXPRESSION "ERROR 'abc' is not a valid command for the KeepDropSwitch")
 
 add_test_fwcore(OverlayTiming options/TestOverlayTiming.py ADD_TO_CHECK_FILES PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile)
+add_test_fwcore(OverlayTimingRandomMix options/TestOverlayTimingRandomMix.py ADD_TO_CHECK_FILES PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile)
+add_test_fwcore(OverlayTimingMT options/TestOverlayTimingMT.py ADD_TO_CHECK_FILES PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile)
 
 add_test(NAME check_broken_pipe
          COMMAND bash -c "[ $(${K4RUN} options/ExampleFunctionalProducer.py | head -n 2 | wc -l) = 2 ]"
