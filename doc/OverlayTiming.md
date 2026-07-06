@@ -36,6 +36,7 @@ It uses [`UniqueIDGenSvc`](uniqueIDGen.md) to seed the internal random number ge
 | `BackgroundFileNames` | `[]` | List of groups of background input files, one group per overlay stream. Entries may also be directories, in which case their `.root` files are used. |
 | `RandomMixBackgroundFiles` | `false` | Treat each file in a background group as an independent pseudo-event source and pick a random file for every overlaid pseudo-event (one-event-per-file mixing) |
 | `MergeMCParticles` | `true` | Merge background MCParticles into the output. If `false`, background particles are not stored: tracker hits keep the momentum of their originating particle instead of a particle link, and calorimeter contributions get an empty particle |
+| `OverlayThreads` | `1` | Number of worker threads used to read and decompress background files within a single event (`1` = serial). Only the reading is parallelized; the merge stays serial and in-order, so the result is unchanged and deterministic. Most effective with `RandomMixBackgroundFiles` and many input files |
 | `NumberBackground` | `[]` | Number of background events to overlay per stream (fixed or Poisson mean) |
 | `Poisson_random_NOverlay` | `[]` | If true, draw the number of events from a Poisson distribution with mean `NumberBackground` |
 | `NBunchtrain` | `1` | Number of bunch crossings in the bunch train |
@@ -111,5 +112,25 @@ overlay.RandomMixBackgroundFiles = True
 overlay.BackgroundFileNames = [["/path/to/bib_files/"]]
 ```
 
-All background ROOT I/O is serialized on a dedicated worker thread, so the
-algorithm may be run with intra-event multithreading.
+## Parallel background reading
+
+With many large background files the algorithm is dominated by reading and
+decompressing them. Set `OverlayThreads` to a value greater than 1 to read and
+decompress the background files of a single event on several threads:
+
+```python
+overlay.RandomMixBackgroundFiles = True
+overlay.OverlayThreads = 4
+```
+
+Only the reading is parallelized. The randomness (which files, how many, in
+which bunch crossing) is drawn up front, and the merging of the background hits
+into the output collections is always done serially and in the same order, so
+the result is **identical and deterministic** regardless of `OverlayThreads`.
+Because ROOT I/O is made thread-safe with `ROOT::EnableThreadSafety()`, the
+algorithm also remains safe to run under Gaudi's intra-event multithreading; the
+per-event parallelism composes with it via the shared task arena.
+
+The speed-up is largest when reading dominates (many large files, tight time
+windows that keep the merge cheap); when the merge is the bottleneck the gain is
+correspondingly smaller.

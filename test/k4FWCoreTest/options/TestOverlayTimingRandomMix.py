@@ -20,7 +20,8 @@
 # Tests the OverlayTiming algorithm in random-mix mode, using
 # functional_producer_multiple.root as both signal and background. Each
 # background file is treated as an independent event source and picked at
-# random, and MCParticles are not merged (MergeMCParticles = False).
+# random, MCParticles are not merged (MergeMCParticles = False), and the
+# background files are read on 2 threads (OverlayThreads = 2).
 
 from Gaudi.Configuration import INFO
 from Configurables import EventDataSvc, EventHeaderCreator, OverlayTiming, UniqueIDGenSvc
@@ -52,6 +53,8 @@ overlay.TimeWindows = {"SimTrackerHits": [-10000, 10000]}
 overlay.RandomMixBackgroundFiles = True
 overlay.MergeMCParticles = False
 overlay.AllowReusingBackgroundFiles = True
+# Exercise the parallel background reading (result is independent of this)
+overlay.OverlayThreads = 2
 
 ApplicationMgr(
     TopAlg=[header, overlay],
