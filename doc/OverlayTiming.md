@@ -101,7 +101,7 @@ ApplicationMgr(
 For setups where the background is split across a large number of files, each
 containing a single pseudo-event (e.g. Muon Collider beam-induced background), set
 `RandomMixBackgroundFiles = True`. Each file in a group is then treated as an
-independent event source, and a random number of files (set by NumberBackground) 
+independent event source, and a random number of files (set by NumberBackground)
 is chosen for every overlaid event.
 `BackgroundFileNames` entries may point at directories, whose `.root` files are
 collected automatically:

@@ -73,9 +73,9 @@
 // left at 0 ("unknown") and determined lazily at read time.
 struct EventHolder {
   std::vector<std::vector<std::string>> m_fileNames;
-  bool                                  m_randomMix{false};
-  bool                                  m_allowReuse{false};
-  std::string                           m_algName;
+  bool m_randomMix{false};
+  bool m_allowReuse{false};
+  std::string m_algName;
 
   // Sequential mode only: one persistent reader per group.
   std::vector<podio::Reader> m_rootFileReaders;
@@ -114,10 +114,10 @@ struct EventHolder {
   // does not limit read parallelism.
   size_t reserve(int group, int file) {
     std::lock_guard<std::mutex> lock(m_ioMutex);
-    size_t&                     entry = m_nextEntry[group][file];
-    const size_t                e     = entry;
-    const size_t                total = m_totalNumberOfEvents[group][file];
-    entry = (total > 0) ? (entry + 1) % total : entry + 1;  // wrap once the total is known
+    size_t& entry = m_nextEntry[group][file];
+    const size_t e = entry;
+    const size_t total = m_totalNumberOfEvents[group][file];
+    entry = (total > 0) ? (entry + 1) % total : entry + 1; // wrap once the total is known
     return e;
   }
 
@@ -127,7 +127,7 @@ struct EventHolder {
   podio::Frame readAt(int group, int file, size_t rawEntry) {
     if (m_randomMix) {
       podio::Reader reader = podio::makeReader(m_fileNames[group][file]);
-      const size_t  total  = reader.getEntries("events");
+      const size_t total = reader.getEntries("events");
       if (total == 0) {
         throw GaudiException("No events found in background file " + m_fileNames[group][file], m_algName,
                              StatusCode::FAILURE);
@@ -138,7 +138,7 @@ struct EventHolder {
       return reader.readEvent(rawEntry % total);
     }
     std::lock_guard<std::mutex> lock(m_ioMutex);
-    const size_t                total = m_totalNumberOfEvents[group][0];
+    const size_t total = m_totalNumberOfEvents[group][0];
     if (rawEntry >= total && !m_allowReuse) {
       throw GaudiException("No more events in background file", m_algName, StatusCode::FAILURE);
     }
@@ -188,10 +188,10 @@ struct OverlayTiming : public k4FWCore::MultiTransformer<retType(
   // the serial path and by the in-order output stage of the parallel pipeline),
   // so the result is independent of OverlayThreads.
   void mergeBackgroundFrame(const podio::Frame& backgroundEvent, float timeOffset, int BX_number_in_train, int physBX,
-                            const std::vector<const edm4hep::SimTrackerHitCollection*>&     simTrackerHits,
+                            const std::vector<const edm4hep::SimTrackerHitCollection*>& simTrackerHits,
                             const std::vector<const edm4hep::SimCalorimeterHitCollection*>& simCaloHits,
-                            edm4hep::MCParticleCollection&                                  oparticles,
-                            std::vector<edm4hep::SimTrackerHitCollection>&                  osimTrackerHits,
+                            edm4hep::MCParticleCollection& oparticles,
+                            std::vector<edm4hep::SimTrackerHitCollection>& osimTrackerHits,
                             std::map<int, std::map<uint64_t, edm4hep::MutableSimCalorimeterHit>>& cellIDsMap,
                             std::vector<edm4hep::CaloHitContributionCollection>& ocaloHitContribs) const;
 

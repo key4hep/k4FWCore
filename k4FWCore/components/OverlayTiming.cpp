@@ -103,7 +103,8 @@ StatusCode OverlayTiming::initialize() {
     inputFiles.push_back(std::move(expanded));
   }
 
-  m_bkgEvents = make_unique<EventHolder>(inputFiles, m_randomMix.value(), m_allowReusingBackgroundFiles.value(), name());
+  m_bkgEvents =
+      make_unique<EventHolder>(inputFiles, m_randomMix.value(), m_allowReusingBackgroundFiles.value(), name());
 
   // In sequential mode the event counts are known upfront and can be validated
   // here. In random-mix mode they are determined lazily on first read, so an
@@ -120,8 +121,9 @@ StatusCode OverlayTiming::initialize() {
           return StatusCode::FAILURE;
         }
       }
-      if (std::any_of(counts.begin(), counts.end(),
-                      [this](const size_t& val) { return this->m_startWithBackgroundEvent >= static_cast<int>(val); })) {
+      if (std::any_of(counts.begin(), counts.end(), [this](const size_t& val) {
+            return this->m_startWithBackgroundEvent >= static_cast<int>(val);
+          })) {
         throw GaudiException("StartWithBackgroundEvent is larger than the number of events in the background files",
                              name(), StatusCode::FAILURE);
       }
@@ -147,12 +149,11 @@ StatusCode OverlayTiming::initialize() {
 
 void OverlayTiming::mergeBackgroundFrame(
     const podio::Frame& backgroundEvent, float timeOffset, int BX_number_in_train, int physBX,
-    const std::vector<const edm4hep::SimTrackerHitCollection*>&           simTrackerHits,
-    const std::vector<const edm4hep::SimCalorimeterHitCollection*>&       simCaloHits,
-    edm4hep::MCParticleCollection&                                        oparticles,
-    std::vector<edm4hep::SimTrackerHitCollection>&                        osimTrackerHits,
+    const std::vector<const edm4hep::SimTrackerHitCollection*>& simTrackerHits,
+    const std::vector<const edm4hep::SimCalorimeterHitCollection*>& simCaloHits,
+    edm4hep::MCParticleCollection& oparticles, std::vector<edm4hep::SimTrackerHitCollection>& osimTrackerHits,
     std::map<int, std::map<uint64_t, edm4hep::MutableSimCalorimeterHit>>& cellIDsMap,
-    std::vector<edm4hep::CaloHitContributionCollection>&                  ocaloHitContribs) const {
+    std::vector<edm4hep::CaloHitContributionCollection>& ocaloHitContribs) const {
   const auto availableCollections = backgroundEvent.getAvailableCollections();
 
   if (std::find(availableCollections.begin(), availableCollections.end(), m_MCParticleCollectionName) ==
@@ -161,12 +162,12 @@ void OverlayTiming::mergeBackgroundFrame(
   }
 
   // To fix the relations we will need to have a map from old to new particle index
-  std::map<int, int>                                           oldToNewMap;
+  std::map<int, int> oldToNewMap;
   std::map<int, std::pair<std::vector<int>, std::vector<int>>> parentDaughterMap;
 
   if (m_mergeMCParticles) {
     const auto& bgParticles = backgroundEvent.get<edm4hep::MCParticleCollection>(m_MCParticleCollectionName);
-    int         j           = oparticles.size();
+    int j = oparticles.size();
     for (size_t i = 0; i < bgParticles.size(); ++i) {
       auto npart = bgParticles[i].clone(false);
 
@@ -250,13 +251,13 @@ void OverlayTiming::mergeBackgroundFrame(
       continue;
     }
 
-    auto& calHitMap      = cellIDsMap[i];
+    auto& calHitMap = cellIDsMap[i];
     auto& calHitContribs = ocaloHitContribs[i];
     for (const auto&& simCaloHit : backgroundEvent.get<edm4hep::SimCalorimeterHitCollection>(name)) {
       if (calHitMap.find(simCaloHit.getCellID()) == calHitMap.end()) {
         // There is no hit at this position. The new hit can be added, if it is not outside the window
         auto calhit = edm4hep::MutableSimCalorimeterHit();
-        bool add    = false;
+        bool add = false;
         for (const auto& contrib : simCaloHit.getContributions()) {
           if ((contrib.getTime() + timeOffset > this_start) && (contrib.getTime() + timeOffset < this_stop)) {
             add = true;
@@ -386,12 +387,12 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
   // Building it up front keeps the RNG sequence -- and therefore the result --
   // identical whether the reads are later executed serially or in parallel.
   struct BkgRead {
-    int    group;
-    int    fileIndex;
+    int group;
+    int fileIndex;
     size_t entry;
-    float  timeOffset;
-    int    bxNumber;
-    int    physBX;
+    float timeOffset;
+    int bxNumber;
+    int physBX;
   };
   std::vector<BkgRead> reads;
 
@@ -456,8 +457,8 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
         // the file index is ignored. reserve() advances the per-file cursor now
         // (serially); the actual ROOT read happens in phase 2, possibly on
         // several threads.
-        const int    fileIndex = m_randomMix ? fileIndices[k % fileIndices.size()] : 0;
-        const size_t entry     = m_bkgEvents->reserve(groupIndex, fileIndex);
+        const int fileIndex = m_randomMix ? fileIndices[k % fileIndices.size()] : 0;
+        const size_t entry = m_bkgEvents->reserve(groupIndex, fileIndex);
         reads.push_back({static_cast<int>(groupIndex), fileIndex, entry, timeOffset, BX_number_in_train, physBX});
       }
     }
@@ -477,40 +478,38 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
     // serial in-order merge.
     struct Item {
       const BkgRead* read = nullptr;
-      podio::Frame   frame;
+      podio::Frame frame;
     };
     std::atomic<size_t> nextRead{0};
-    const size_t        ntokens = static_cast<size_t>(m_overlayThreads.value());
+    const size_t ntokens = static_cast<size_t>(m_overlayThreads.value());
     tbb::parallel_pipeline(
-        ntokens,
-        tbb::make_filter<void, std::shared_ptr<Item>>(
-            tbb::filter_mode::serial_in_order,
-            [&](tbb::flow_control& fc) -> std::shared_ptr<Item> {
-              const size_t idx = nextRead++;
-              if (idx >= reads.size()) {
-                fc.stop();
-                return {};
-              }
-              return std::make_shared<Item>(Item{&reads[idx], {}});
-            }) &
-            tbb::make_filter<std::shared_ptr<Item>, std::shared_ptr<Item>>(
-                tbb::filter_mode::parallel,
-                [&](std::shared_ptr<Item> item) -> std::shared_ptr<Item> {
-                  const auto& r = *item->read;
-                  item->frame   = m_bkgEvents->readAt(r.group, r.fileIndex, r.entry);
-                  // Force decompression/materialization here (in parallel) so the
-                  // serial merge only touches already in-memory data.
-                  for (const auto& name : item->frame.getAvailableCollections()) {
-                    item->frame.get(name);
-                  }
-                  return item;
-                }) &
-            tbb::make_filter<std::shared_ptr<Item>, void>(
-                tbb::filter_mode::serial_in_order, [&](std::shared_ptr<Item> item) {
-                  const auto& r = *item->read;
-                  mergeBackgroundFrame(item->frame, r.timeOffset, r.bxNumber, r.physBX, simTrackerHits, simCaloHits,
-                                       oparticles, osimTrackerHits, cellIDsMap, ocaloHitContribs);
-                }));
+        ntokens, tbb::make_filter<void, std::shared_ptr<Item>>(tbb::filter_mode::serial_in_order,
+                                                               [&](tbb::flow_control& fc) -> std::shared_ptr<Item> {
+                                                                 const size_t idx = nextRead++;
+                                                                 if (idx >= reads.size()) {
+                                                                   fc.stop();
+                                                                   return {};
+                                                                 }
+                                                                 return std::make_shared<Item>(Item{&reads[idx], {}});
+                                                               }) &
+                     tbb::make_filter<std::shared_ptr<Item>, std::shared_ptr<Item>>(
+                         tbb::filter_mode::parallel,
+                         [&](std::shared_ptr<Item> item) -> std::shared_ptr<Item> {
+                           const auto& r = *item->read;
+                           item->frame = m_bkgEvents->readAt(r.group, r.fileIndex, r.entry);
+                           // Force decompression/materialization here (in parallel) so the
+                           // serial merge only touches already in-memory data.
+                           for (const auto& name : item->frame.getAvailableCollections()) {
+                             item->frame.get(name);
+                           }
+                           return item;
+                         }) &
+                     tbb::make_filter<std::shared_ptr<Item>, void>(
+                         tbb::filter_mode::serial_in_order, [&](std::shared_ptr<Item> item) {
+                           const auto& r = *item->read;
+                           mergeBackgroundFrame(item->frame, r.timeOffset, r.bxNumber, r.physBX, simTrackerHits,
+                                                simCaloHits, oparticles, osimTrackerHits, cellIDsMap, ocaloHitContribs);
+                         }));
   }
   // Move the SimCalorimeterHitCollections to the output vector
   // So far they are stored in a map with the cellID as key
