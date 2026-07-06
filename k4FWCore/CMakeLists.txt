@@ -21,6 +21,10 @@ gaudi_install(SCRIPTS)
 install(PROGRAMS helpers/generateFunctional
   DESTINATION ${CMAKE_INSTALL_BINDIR})
 
+if(BUILD_TESTING)
+  add_subdirectory(helpers/tests)
+endif()
+
 gaudi_add_library(k4FWCore
                   SOURCES src/KeepDropSwitch.cpp
                   LINK Gaudi::GaudiKernel podio::podioIO ROOT::Core ROOT::RIO ROOT::Tree EDM4HEP::utils

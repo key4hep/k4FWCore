@@ -10,8 +10,13 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Prefer the installed command; fall back to the source copy one level up.
-if command -v generateFunctional &>/dev/null; then
+# Resolve the generator:
+#   1. GENERATEFUNCTIONAL env var (set by CTest via CMakeLists.txt)
+#   2. Installed command on PATH
+#   3. Source copy one level above this directory
+if [[ -n "${GENERATEFUNCTIONAL:-}" ]]; then
+    GENERATOR="${GENERATEFUNCTIONAL}"
+elif command -v generateFunctional &>/dev/null; then
     GENERATOR="$(command -v generateFunctional)"
 else
     GENERATOR="${SCRIPT_DIR}/../generateFunctional"
