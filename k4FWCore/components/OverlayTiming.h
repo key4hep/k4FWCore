@@ -273,7 +273,7 @@ private:
 
   Gaudi::Property<bool> m_randomMix{
       this, "RandomMixBackgroundFiles", false,
-      "Treat each file in a background group as an independent event source and pick a random file for every "
+      "Treat each file in a background group as an independent (pseudo-)event source and pick a random file for every "
       "overlaid event (one-event-per-file mixing). Entries of BackgroundFileNames may also be directories, "
       "whose .root files are used."};
 
