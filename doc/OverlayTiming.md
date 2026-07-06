@@ -34,7 +34,7 @@ It uses [`UniqueIDGenSvc`](uniqueIDGen.md) to seed the internal random number ge
 | Property | Default | Description |
 |----------|---------|-------------|
 | `BackgroundFileNames` | `[]` | List of groups of background input files, one group per overlay stream. Entries may also be directories, in which case their `.root` files are used. |
-| `RandomMixBackgroundFiles` | `false` | Treat each file in a background group as an independent event source and pick a random file for every overlaid event (one-event-per-file mixing) |
+| `RandomMixBackgroundFiles` | `false` | Treat each file in a background group as an independent pseudo-event source and pick a random file for every overlaid pseudo-event (one-event-per-file mixing) |
 | `MergeMCParticles` | `true` | Merge background MCParticles into the output. If `false`, background particles are not stored: tracker hits keep the momentum of their originating particle instead of a particle link, and calorimeter contributions get an empty particle |
 | `NumberBackground` | `[]` | Number of background events to overlay per stream (fixed or Poisson mean) |
 | `Poisson_random_NOverlay` | `[]` | If true, draw the number of events from a Poisson distribution with mean `NumberBackground` |
