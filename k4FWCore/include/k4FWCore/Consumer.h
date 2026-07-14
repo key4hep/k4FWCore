@@ -39,7 +39,7 @@ namespace k4FWCore {
 namespace details {
 
 #if GAUDI_MAJOR_VERSION >= 41
-  using EmptyTypeList = Gaudi::Functional::Traits::type_list<>;
+  using EmptyTypeList = Gaudi::Functional::details::type_list<>;
 #else
   using EmptyTypeList = std::tuple<>;
 #endif
@@ -49,8 +49,8 @@ namespace details {
 
   template <typename... In, typename Traits_>
   struct Consumer<void(const In&...), Traits_>
-      : Gaudi::Functional::Traits::DataHandleMixin<EmptyTypeList, EmptyTypeList, Traits_> {
-    using Gaudi::Functional::Traits::DataHandleMixin<EmptyTypeList, EmptyTypeList, Traits_>::DataHandleMixin;
+      : Gaudi::Functional::details::DataHandleMixin<EmptyTypeList, EmptyTypeList, Traits_> {
+    using Gaudi::Functional::details::DataHandleMixin<EmptyTypeList, EmptyTypeList, Traits_>::DataHandleMixin;
 
     static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike_v<In> ||
                     std::is_same_v<In, EventContext>) &&
@@ -59,13 +59,13 @@ namespace details {
 
     static constexpr size_t N_in = filter_evtcontext<In...>::size;
 
-    using base_class = Gaudi::Functional::Traits::DataHandleMixin<EmptyTypeList, EmptyTypeList, Traits_>;
+    using base_class = Gaudi::Functional::details::DataHandleMixin<EmptyTypeList, EmptyTypeList, Traits_>;
 
     using KeyValue = base_class::KeyValue;
     using KeyValues = base_class::KeyValues;
 
     template <typename T>
-    using InputHandle_t = Gaudi::Functional::Traits::InputHandle_t<Traits_, T>;
+    using InputHandle_t = Gaudi::Functional::details::InputHandle_t<Traits_, T>;
 
     tuple_of_handle_vec_t<InputHandle_t, filter_evtcontext_t<In...>> m_inputs;
 
@@ -85,7 +85,7 @@ namespace details {
               std::get<I>(inputs), std::get<I>(m_inputs), this)...} {}
 
     Consumer(std::string name, ISvcLocator* locator,
-             const Gaudi::Functional::Traits::RepeatValues_<std::variant<KeyValue, KeyValues>, N_in>& inputs)
+             const Gaudi::Functional::details::RepeatValues_<std::variant<KeyValue, KeyValues>, N_in>& inputs)
         : Consumer(std::move(name), locator, inputs, std::make_index_sequence<N_in>{}) {}
 
     StatusCode execute(const EventContext& ctx) const final {
