@@ -38,27 +38,25 @@
 class Reader : public Gaudi::Algorithm {
   using Traits_ = Gaudi::Functional::Traits::useDefaults;
   using Out = std::unique_ptr<podio::CollectionBase>;
-  using base_class = Gaudi::Algorithm;
-  static_assert(std::is_base_of_v<Algorithm, base_class>, "BaseClass must inherit from Algorithm");
 
   template <typename T>
   using OutputHandle_t = Gaudi::Functional::details::OutputHandle_t<Traits_, std::remove_pointer_t<T>>;
 
 public:
   Reader(const std::string& name, ISvcLocator* svcLoc)
-      : base_class(name, svcLoc), m_inputCollections{this,
-                                                     "InputCollections",
-                                                     {},
-                                                     [this](Gaudi::Details::PropertyBase&) {
-                                                       const std::string cmd = System::cmdLineArgs()[0];
-                                                       if (cmd.find("genconf") != std::string::npos) {
-                                                         return;
-                                                       }
-                                                       for (const auto& c : m_inputCollections.value()) {
-                                                         m_outputs.emplace_back(c, this);
-                                                       }
-                                                     },
-                                                     Gaudi::Details::Property::ImmediatelyInvokeHandler{true}},
+      : Gaudi::Algorithm(name, svcLoc), m_inputCollections{this,
+                                                           "InputCollections",
+                                                           {},
+                                                           [this](Gaudi::Details::PropertyBase&) {
+                                                             const std::string cmd = System::cmdLineArgs()[0];
+                                                             if (cmd.find("genconf") != std::string::npos) {
+                                                               return;
+                                                             }
+                                                             for (const auto& c : m_inputCollections.value()) {
+                                                               m_outputs.emplace_back(c, this);
+                                                             }
+                                                           },
+                                                           Gaudi::Details::Property::ImmediatelyInvokeHandler{true}},
         m_iosvc{this, "IOSvc", "IOSvc"}, m_dataSvc{this, "EventDataSvc", "EventDataSvc"} {
     setProperty("Cardinality", 1).ignore();
   }
