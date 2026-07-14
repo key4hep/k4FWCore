@@ -38,7 +38,7 @@ namespace k4FWCore {
 namespace details {
 
 #if GAUDI_MAJOR_VERSION >= 41
-  using EmptyTypeList = Gaudi::Functional::details::type_list<>;
+  using EmptyTypeList = Gaudi::Functional::Traits::type_list<>;
 #else
   using EmptyTypeList = std::tuple<>;
 #endif
@@ -48,8 +48,8 @@ namespace details {
 
   template <typename Out, typename... In, typename Traits_>
   struct Transformer<Out(const In&...), Traits_>
-      : Gaudi::Functional::details::DataHandleMixin<EmptyTypeList, EmptyTypeList, Traits_> {
-    using Gaudi::Functional::details::DataHandleMixin<EmptyTypeList, EmptyTypeList, Traits_>::DataHandleMixin;
+      : Gaudi::Functional::Traits::DataHandleMixin<EmptyTypeList, EmptyTypeList, Traits_> {
+    using Gaudi::Functional::Traits::DataHandleMixin<EmptyTypeList, EmptyTypeList, Traits_>::DataHandleMixin;
 
     static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike_v<In> ||
                     std::is_same_v<In, EventContext>) &&
@@ -62,15 +62,15 @@ namespace details {
     static constexpr std::size_t N_in = filter_evtcontext<In...>::size;
     static constexpr std::size_t N_out = 1;
 
-    using base_class = Gaudi::Functional::details::DataHandleMixin<EmptyTypeList, EmptyTypeList, Traits_>;
+    using base_class = Gaudi::Functional::Traits::DataHandleMixin<EmptyTypeList, EmptyTypeList, Traits_>;
 
     using KeyValue = base_class::KeyValue;
     using KeyValues = base_class::KeyValues;
 
     template <typename T>
-    using InputHandle_t = Gaudi::Functional::details::InputHandle_t<Traits_, std::remove_pointer_t<T>>;
+    using InputHandle_t = Gaudi::Functional::Traits::InputHandle_t<Traits_, std::remove_pointer_t<T>>;
     template <typename T>
-    using OutputHandle_t = Gaudi::Functional::details::OutputHandle_t<Traits_, std::remove_pointer_t<T>>;
+    using OutputHandle_t = Gaudi::Functional::Traits::OutputHandle_t<Traits_, std::remove_pointer_t<T>>;
 
     tuple_of_handle_vec_t<InputHandle_t, filter_evtcontext_t<In...>> m_inputs;
     std::tuple<std::vector<OutputHandle_t<EventStoreType_t>>> m_outputs;
@@ -99,8 +99,8 @@ namespace details {
               std::get<0>(outputs), std::get<0>(m_outputs), this)} {}
 
     Transformer(std::string name, ISvcLocator* locator,
-                Gaudi::Functional::details::RepeatValues_<std::variant<KeyValue, KeyValues>, N_in> const& inputs,
-                Gaudi::Functional::details::RepeatValues_<std::variant<KeyValue, KeyValues>, N_out> const& outputs)
+                Gaudi::Functional::Traits::RepeatValues_<std::variant<KeyValue, KeyValues>, N_in> const& inputs,
+                Gaudi::Functional::Traits::RepeatValues_<std::variant<KeyValue, KeyValues>, N_out> const& outputs)
         : Transformer(std::move(name), locator, inputs, std::make_index_sequence<N_in>{}, outputs) {}
 
     StatusCode execute(const EventContext& ctx) const final {
@@ -208,8 +208,8 @@ namespace details {
 
   template <typename... Out, typename... In, typename Traits_>
   struct MultiTransformer<std::tuple<Out...>(const In&...), Traits_>
-      : Gaudi::Functional::details::DataHandleMixin<EmptyTypeList, EmptyTypeList, Traits_> {
-    using Gaudi::Functional::details::DataHandleMixin<EmptyTypeList, EmptyTypeList, Traits_>::DataHandleMixin;
+      : Gaudi::Functional::Traits::DataHandleMixin<EmptyTypeList, EmptyTypeList, Traits_> {
+    using Gaudi::Functional::Traits::DataHandleMixin<EmptyTypeList, EmptyTypeList, Traits_>::DataHandleMixin;
 
     static_assert(((std::is_base_of_v<podio::CollectionBase, In> || isVectorLike<In>::value ||
                     std::is_same_v<In, EventContext>) &&
@@ -221,15 +221,15 @@ namespace details {
     static constexpr std::size_t N_in = filter_evtcontext<In...>::size;
     static constexpr std::size_t N_out = sizeof...(Out);
 
-    using base_class = Gaudi::Functional::details::DataHandleMixin<EmptyTypeList, EmptyTypeList, Traits_>;
+    using base_class = Gaudi::Functional::Traits::DataHandleMixin<EmptyTypeList, EmptyTypeList, Traits_>;
 
     using KeyValue = base_class::KeyValue;
     using KeyValues = base_class::KeyValues;
 
     template <typename T>
-    using InputHandle_t = Gaudi::Functional::details::InputHandle_t<Traits_, std::remove_pointer_t<T>>;
+    using InputHandle_t = Gaudi::Functional::Traits::InputHandle_t<Traits_, std::remove_pointer_t<T>>;
     template <typename T>
-    using OutputHandle_t = Gaudi::Functional::details::OutputHandle_t<Traits_, std::remove_pointer_t<T>>;
+    using OutputHandle_t = Gaudi::Functional::Traits::OutputHandle_t<Traits_, std::remove_pointer_t<T>>;
 
     tuple_of_handle_vec_t<InputHandle_t, filter_evtcontext_t<In...>> m_inputs;
     std::tuple<std::vector<OutputHandle_t<typename EventStoreType<Out>::type>>...> m_outputs;
@@ -253,8 +253,8 @@ namespace details {
               std::get<J>(outputs), std::get<J>(m_outputs), this)...} {}
 
     MultiTransformer(std::string name, ISvcLocator* locator,
-                     Gaudi::Functional::details::RepeatValues_<std::variant<KeyValue, KeyValues>, N_in> const& inputs,
-                     Gaudi::Functional::details::RepeatValues_<std::variant<KeyValue, KeyValues>, N_out> const& outputs)
+                     Gaudi::Functional::Traits::RepeatValues_<std::variant<KeyValue, KeyValues>, N_in> const& inputs,
+                     Gaudi::Functional::Traits::RepeatValues_<std::variant<KeyValue, KeyValues>, N_out> const& outputs)
         : MultiTransformer(std::move(name), locator, inputs, std::make_index_sequence<N_in>{}, outputs,
                            std::make_index_sequence<N_out>{}) {}
 
