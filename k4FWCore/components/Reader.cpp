@@ -16,7 +16,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Gaudi/Functional/details.h"
 #include "Gaudi/Functional/utilities.h"
 #include "GaudiKernel/AnyDataWrapper.h"
 #include "GaudiKernel/FunctionalFilterDecision.h"
@@ -36,14 +35,14 @@
 #include <utility>
 #include <vector>
 
-class Reader : public Gaudi::Functional::Traits::BaseClass_t<Gaudi::Functional::Traits::useDefaults> {
+class Reader : public Gaudi::Algorithm {
   using Traits_ = Gaudi::Functional::Traits::useDefaults;
   using Out = std::unique_ptr<podio::CollectionBase>;
-  using base_class = Gaudi::Functional::Traits::BaseClass_t<Traits_>;
+  using base_class = Gaudi::Algorithm;
   static_assert(std::is_base_of_v<Algorithm, base_class>, "BaseClass must inherit from Algorithm");
 
   template <typename T>
-  using OutputHandle_t = Gaudi::Functional::Traits::OutputHandle_t<Traits_, std::remove_pointer_t<T>>;
+  using OutputHandle_t = Gaudi::Functional::details::OutputHandle_t<Traits_, std::remove_pointer_t<T>>;
 
 public:
   Reader(const std::string& name, ISvcLocator* svcLoc)
