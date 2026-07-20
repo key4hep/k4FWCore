@@ -73,11 +73,7 @@ protected:
 
   podio::Writer& getWriter() override {
     if (!m_writer) {
-      auto outputType = m_outputType.value();
-      if (outputType == "rntuple") {
-        outputType = "RNTuple";
-      }
-      m_writer = podio::makeWriter(m_writingFileName.value(), outputType);
+      m_writer = podio::makeWriter(m_writingFileName.value(), m_outputType);
     }
     return *m_writer;
   }
