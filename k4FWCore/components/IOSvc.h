@@ -57,7 +57,7 @@ protected:
   Gaudi::Property<std::vector<std::string>> m_outputCommands{
       this, "outputCommands", {"keep *"}, "A set of commands to declare which collections to keep or drop."};
   Gaudi::Property<std::string> m_outputType{this, "OutputType", "default",
-                                            "Type of the output file (ROOT or RNTuple, or default)"};
+                                            "Type of the output file (ROOT or rntuple, or default)"};
 
   Gaudi::Property<bool> m_importedFromk4FWCore{
       this, "ImportedFromk4FWCore", false,
