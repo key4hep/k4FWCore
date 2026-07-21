@@ -54,7 +54,7 @@ private:
 public:
   // This is a histogram with title, name and bins that can be set from python
   // The callback function is only needed for these histograms with configurable properties
-  void registerCallBack(Gaudi::StateMachine::Transition, std::function<void()>) {}
+  void registerCallBack(Gaudi::StateMachine::Transition, const std::function<void()>&) {}
   mutable Gaudi::Accumulators::RootHistogram<1> m_customHistogram{this, "CustomHistogram"};
 
   Gaudi::Property<bool> m_firstParticle{this, "FirstParticle", true};
