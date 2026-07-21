@@ -33,7 +33,10 @@ foreach(test
   add_test(NAME GenerateFunctional_${test}
     COMMAND bash "${GF_TESTS_DIR}/test_${test}.sh"
   )
+  # Forward the parent build's generator and C++ compiler so the inner
+  # cmake invocation in the test scripts doesn't fall back to "Unix Makefiles"
+  # (which fails in CI where only Ninja is available and make is not on PATH).
   set_tests_properties(GenerateFunctional_${test} PROPERTIES
-    ENVIRONMENT "GENERATEFUNCTIONAL=${GENERATE_FUNCTIONAL}"
+    ENVIRONMENT "GENERATEFUNCTIONAL=${GENERATE_FUNCTIONAL};CMAKE_GENERATOR=${CMAKE_GENERATOR};CXX=${CMAKE_CXX_COMPILER}"
   )
 endforeach()
