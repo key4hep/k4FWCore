@@ -48,7 +48,7 @@ concept Streamable = requires(std::ostream& os, const T& v) {
 ///             parameter, typically "this"
 /// @tparam GaudiComp The type of the component. This will be deduced in
 ///                   pretty much all of the use cases
-template <std::equality_comparable T, typename GaudiComp>
+template <typename T, typename GaudiComp>
 void putParameter(const std::string& name, const T& value, const GaudiComp* comp) {
   comp->debug() << "Trying to put parameter '" << name << "'";
   if constexpr (Streamable<T>) {
@@ -62,8 +62,10 @@ void putParameter(const std::string& name, const T& value, const GaudiComp* comp
   }
   const auto existing = metadataSvc->template get<T>(name);
   if (existing.has_value()) {
-    if (metadataSvc->skipIfSameValue() && *existing == value) {
-      return;
+    if constexpr (std::equality_comparable<T>) {
+      if (metadataSvc->skipIfSameValue() && *existing == value) {
+        return;
+      }
     }
     if (metadataSvc->throwIfDuplicate()) {
       throw GaudiException("Metadata parameter '" + name + "' is already set", comp->name(), StatusCode::FAILURE);
