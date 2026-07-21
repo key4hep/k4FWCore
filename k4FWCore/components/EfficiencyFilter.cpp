@@ -115,7 +115,7 @@ private:
 
     if (m_exact) {
       // If exact, we will keep exactly the number of elements given by the efficiency
-      const size_t nToKeep = static_cast<size_t>(static_cast<double>(sourceColl->size()) * m_efficiency);
+      const auto nToKeep = static_cast<size_t>(static_cast<double>(sourceColl->size()) * m_efficiency);
 
       std::vector<size_t> indexes(sourceColl->size());
       std::iota(indexes.begin(), indexes.end(), 0);
