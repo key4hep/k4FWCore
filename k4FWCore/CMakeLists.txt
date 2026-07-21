@@ -39,7 +39,7 @@ gaudi_add_module(k4FWCorePlugins
                    components/Reader.cpp
                    components/UniqueIDGenSvc.cpp
                    components/Writer.cpp
-                 LINK Gaudi::GaudiKernel k4FWCore k4FWCore::k4Interface ROOT::Core ROOT::RIO ROOT::Tree EDM4HEP::edm4hep)
+                 LINK Gaudi::GaudiKernel k4FWCore k4FWCore::k4Interface ROOT::Core ROOT::RIO ROOT::Tree EDM4HEP::edm4hep TBB::tbb)
 
 target_include_directories(k4FWCorePlugins PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>

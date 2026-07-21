@@ -31,10 +31,33 @@
 #include "k4FWCore/MetadataUtils.h"
 
 #include <TMath.h>
+#include <TROOT.h>
 
+#include <tbb/parallel_pipeline.h>
+
+#include <algorithm>
+#include <atomic>
+#include <cstdint>
+#include <filesystem>
+#include <memory>
+#include <numeric>
 #include <random>
 #include <utility>
 #include <vector>
+
+namespace fs = std::filesystem;
+
+// Returns the .root files contained in a directory (non-recursive).
+static std::vector<std::string> filesInFolder(const std::string& folderPath) {
+  std::vector<std::string> files;
+  for (const auto& entry : fs::directory_iterator(folderPath)) {
+    if (fs::is_regular_file(entry.path()) && entry.path().extension() == ".root") {
+      files.push_back(entry.path().string());
+    }
+  }
+  std::sort(files.begin(), files.end());
+  return files;
+}
 
 template <typename T>
 inline float time_of_flight(const T& pos) {
@@ -58,33 +81,53 @@ StatusCode OverlayTiming::initialize() {
     error() << "Unable to get UniqueIDGenSvc" << endmsg;
   }
 
-  std::vector<std::vector<std::string>> inputFiles;
-  inputFiles = m_inputFileNames.value();
-  // if (m_startWithBackgroundFile >= 0) {
-  //   inputFiles = std::vector<std::string>(m_inputFileNames.begin() + m_startWithBackgroundFile,
-  //   m_inputFileNames.end());
-  // } else {
-  //   inputFiles = m_inputFileNames;
-  // }
-  // TODO:: shuffle input files
-  // std::shuffle(inputFiles.begin(), inputFiles.end(), rng_engine);
+  // Make ROOT's global state safe for concurrent reads. IOSvc already does this,
+  // but call it defensively so the OverlayThreads read pipeline is safe even if
+  // OverlayTiming is driven differently.
+  ROOT::EnableThreadSafety();
 
-  m_bkgEvents = make_unique<EventHolder>(inputFiles);
-  for (auto& val : m_bkgEvents->m_totalNumberOfEvents) {
-    if (val == 0) {
-      std::string err = "No events found in the background files";
-      for (auto& file : m_inputFileNames.value()) {
-        err += " " + file[0];
+  // Expand any directory entries into their list of .root files. This is
+  // typically used together with RandomMixBackgroundFiles, where each file is
+  // an independent pseudo-event source.
+  std::vector<std::vector<std::string>> inputFiles;
+  for (const auto& group : m_inputFileNames.value()) {
+    std::vector<std::string> expanded;
+    for (const auto& entry : group) {
+      if (fs::is_directory(entry)) {
+        const auto found = filesInFolder(entry);
+        expanded.insert(expanded.end(), found.begin(), found.end());
+      } else {
+        expanded.push_back(entry);
       }
-      error() << err << endmsg;
-      return StatusCode::FAILURE;
     }
+    inputFiles.push_back(std::move(expanded));
   }
 
-  if (std::any_of(m_bkgEvents->m_totalNumberOfEvents.begin(), m_bkgEvents->m_totalNumberOfEvents.end(),
-                  [this](const int& val) { return this->m_startWithBackgroundEvent >= val; })) {
-    throw GaudiException("StartWithBackgroundEvent is larger than the number of events in the background files", name(),
-                         StatusCode::FAILURE);
+  m_bkgEvents =
+      make_unique<EventHolder>(inputFiles, m_randomMix.value(), m_allowReusingBackgroundFiles.value(), name());
+
+  // In sequential mode the event counts are known upfront and can be validated
+  // here. In random-mix mode they are determined lazily on first read, so an
+  // empty file is reported at that point instead.
+  if (!m_randomMix) {
+    for (auto& counts : m_bkgEvents->m_totalNumberOfEvents) {
+      for (auto& val : counts) {
+        if (val == 0) {
+          std::string err = "No events found in the background files";
+          for (auto& file : m_inputFileNames.value()) {
+            err += " " + file[0];
+          }
+          error() << err << endmsg;
+          return StatusCode::FAILURE;
+        }
+      }
+      if (std::any_of(counts.begin(), counts.end(), [this](const size_t& val) {
+            return this->m_startWithBackgroundEvent >= static_cast<int>(val);
+          })) {
+        throw GaudiException("StartWithBackgroundEvent is larger than the number of events in the background files",
+                             name(), StatusCode::FAILURE);
+      }
+    }
   }
 
   if (m_Noverlay.empty()) {
@@ -102,6 +145,160 @@ StatusCode OverlayTiming::initialize() {
   }
 
   return StatusCode::SUCCESS;
+}
+
+void OverlayTiming::mergeBackgroundFrame(
+    const podio::Frame& backgroundEvent, float timeOffset, int BX_number_in_train, int physBX,
+    const std::vector<const edm4hep::SimTrackerHitCollection*>& simTrackerHits,
+    const std::vector<const edm4hep::SimCalorimeterHitCollection*>& simCaloHits,
+    edm4hep::MCParticleCollection& oparticles, std::vector<edm4hep::SimTrackerHitCollection>& osimTrackerHits,
+    std::map<int, std::map<uint64_t, edm4hep::MutableSimCalorimeterHit>>& cellIDsMap,
+    std::vector<edm4hep::CaloHitContributionCollection>& ocaloHitContribs) const {
+  const auto availableCollections = backgroundEvent.getAvailableCollections();
+
+  if (std::find(availableCollections.begin(), availableCollections.end(), m_MCParticleCollectionName) ==
+      availableCollections.end()) {
+    warning() << "Collection " << m_MCParticleCollectionName << " not found in background event" << endmsg;
+  }
+
+  // To fix the relations we will need to have a map from old to new particle index
+  std::map<int, int> oldToNewMap;
+  std::map<int, std::pair<std::vector<int>, std::vector<int>>> parentDaughterMap;
+
+  if (m_mergeMCParticles) {
+    const auto& bgParticles = backgroundEvent.get<edm4hep::MCParticleCollection>(m_MCParticleCollectionName);
+    int j = oparticles.size();
+    for (size_t i = 0; i < bgParticles.size(); ++i) {
+      auto npart = bgParticles[i].clone(false);
+
+      npart.setTime(bgParticles[i].getTime() + timeOffset);
+      npart.setOverlay(true);
+      oparticles.push_back(npart);
+      for (const auto& parent : bgParticles[i].getParents()) {
+        parentDaughterMap[j].first.push_back(parent.getObjectID().index);
+      }
+      for (const auto& daughter : bgParticles[i].getDaughters()) {
+        parentDaughterMap[j].second.push_back(daughter.getObjectID().index);
+      }
+      oldToNewMap[i] = j;
+      j++;
+    }
+    for (const auto& [index, parentsDaughters] : parentDaughterMap) {
+      const auto& [parents, daughters] = parentsDaughters;
+      for (const auto& parent : parents) {
+        if (parentDaughterMap.find(oldToNewMap[parent]) == parentDaughterMap.end()) {
+          continue;
+        }
+        oparticles[index].addToParents(oparticles[oldToNewMap[parent]]);
+      }
+      for (const auto& daughter : daughters) {
+        if (parentDaughterMap.find(oldToNewMap[daughter]) == parentDaughterMap.end()) {
+          continue;
+        }
+        oparticles[index].addToDaughters(oparticles[oldToNewMap[daughter]]);
+      }
+    }
+  }
+
+  for (size_t i = 0; i < simTrackerHits.size(); ++i) {
+    const auto name = inputLocations(SIMTRACKERHIT_INDEX_POSITION)[i];
+    debug() << "Processing collection " << name << endmsg;
+    if (std::find(availableCollections.begin(), availableCollections.end(), name) == availableCollections.end()) {
+      warning() << "Collection " << name << " not found in background event" << endmsg;
+      continue;
+    }
+    const auto [this_start, this_stop] = define_time_windows(name);
+    // There are only contributions to the readout if the hits are in the integration window
+    if (this_stop <= (BX_number_in_train - physBX) * m_deltaT) {
+      info() << "Skipping collection " << name << " as it is not in the integration window" << endmsg;
+      continue;
+    }
+    auto& ocoll = osimTrackerHits[i];
+    for (const auto&& simTrackerHit : backgroundEvent.get<edm4hep::SimTrackerHitCollection>(name)) {
+      const float tof = time_of_flight(simTrackerHit.getPosition());
+
+      if (!((simTrackerHit.getTime() + timeOffset > this_start + tof) &&
+            (simTrackerHit.getTime() + timeOffset < this_stop + tof)))
+        continue;
+      auto nhit = simTrackerHit.clone(false);
+      nhit.setOverlay(true);
+      nhit.setTime(simTrackerHit.getTime() + timeOffset);
+      if (m_mergeMCParticles) {
+        nhit.setParticle(oparticles[oldToNewMap[simTrackerHit.getParticle().getObjectID().index]]);
+      } else {
+        edm4hep::MCParticle mcp = simTrackerHit.getParticle();
+        if (mcp.isAvailable()) {
+          // Preserve the momentum of the originating particle
+          edm4hep::Vector3d mom = mcp.getMomentum();
+          nhit.setMomentum({(float)mom.x, (float)mom.y, (float)mom.z});
+        }
+      }
+      ocoll.push_back(nhit);
+    }
+  }
+
+  for (size_t i = 0; i < simCaloHits.size(); ++i) {
+    const auto name = inputLocations(SIMCALOHIT_INDEX_POSITION)[i];
+    debug() << "Processing collection " << name << endmsg;
+    if (std::find(availableCollections.begin(), availableCollections.end(), name) == availableCollections.end()) {
+      warning() << "Collection " << name << " not found in background event" << endmsg;
+      continue;
+    }
+    const auto [this_start, this_stop] = define_time_windows(name);
+    // There are only contributions to the readout if the hits are in the integration window
+    if (this_stop <= (BX_number_in_train - physBX) * m_deltaT) {
+      info() << "Skipping collection " << name << " as it is not in the integration window" << endmsg;
+      continue;
+    }
+
+    auto& calHitMap = cellIDsMap[i];
+    auto& calHitContribs = ocaloHitContribs[i];
+    for (const auto&& simCaloHit : backgroundEvent.get<edm4hep::SimCalorimeterHitCollection>(name)) {
+      if (calHitMap.find(simCaloHit.getCellID()) == calHitMap.end()) {
+        // There is no hit at this position. The new hit can be added, if it is not outside the window
+        auto calhit = edm4hep::MutableSimCalorimeterHit();
+        bool add = false;
+        for (const auto& contrib : simCaloHit.getContributions()) {
+          if ((contrib.getTime() + timeOffset > this_start) && (contrib.getTime() + timeOffset < this_stop)) {
+            add = true;
+            // TODO: Make sure a contribution is not added twice
+            auto newContrib = contrib.clone(false);
+            if (m_mergeMCParticles) {
+              newContrib.setParticle(oparticles[oldToNewMap[contrib.getParticle().getObjectID().index]]);
+            } else {
+              newContrib.setParticle(edm4hep::MCParticle());
+            }
+            newContrib.setTime(contrib.getTime() + timeOffset);
+            calhit.addToContributions(newContrib);
+            calHitContribs.push_back(newContrib);
+          }
+        }
+        if (add) {
+          calhit.setCellID(simCaloHit.getCellID());
+          calhit.setEnergy(simCaloHit.getEnergy());
+          calhit.setPosition(simCaloHit.getPosition());
+          calHitMap[calhit.getCellID()] = calhit;
+        }
+      } else {
+        // there is already a hit at this position
+        auto& calhit = calHitMap[simCaloHit.getCellID()];
+        for (const auto& contrib : simCaloHit.getContributions()) {
+          if ((contrib.getTime() + timeOffset > this_start) && (contrib.getTime() + timeOffset < this_stop)) {
+            // TODO: Make sure a contribution is not added twice
+            auto newContrib = contrib.clone(false);
+            if (m_mergeMCParticles) {
+              newContrib.setParticle(oparticles[oldToNewMap[contrib.getParticle().getObjectID().index]]);
+            } else {
+              newContrib.setParticle(edm4hep::MCParticle());
+            }
+            newContrib.setTime(contrib.getTime() + timeOffset);
+            calhit.addToContributions(newContrib);
+            calHitContribs.push_back(newContrib);
+          }
+        }
+      }
+    }
+  }
 }
 
 retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
@@ -185,6 +382,20 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
   }
 
   auto physBX = m_physBX.value();
+
+  // Phase 1: draw all randomness and build the ordered list of background reads.
+  // Building it up front keeps the RNG sequence -- and therefore the result --
+  // identical whether the reads are later executed serially or in parallel.
+  struct BkgRead {
+    int group;
+    int fileIndex;
+    size_t entry;
+    float timeOffset;
+    int bxNumber;
+    int physBX;
+  };
+  std::vector<BkgRead> reads;
+
   // Iterate over each group of files and parameters
   for (size_t groupIndex = 0; groupIndex < m_bkgEvents->size(); groupIndex++) {
     if (m_randomBX) {
@@ -202,14 +413,21 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
     }
     std::shuffle(permutation.begin(), permutation.end(), rng_engine);
 
+    // In random-mix mode pick which files of the group to read from, at random.
+    // In sequential mode the file index is ignored, so this stays trivial.
+    std::vector<int> fileIndices(m_bkgEvents->m_fileNames[groupIndex].size());
+    std::iota(fileIndices.begin(), fileIndices.end(), 0);
+    if (m_randomMix) {
+      std::shuffle(fileIndices.begin(), fileIndices.end(), rng_engine);
+    }
+
     // TODO: Check that there is anything to overlay
 
-    debug() << "Starting overlay at event: " << m_bkgEvents->m_nextEntry[groupIndex] << " for the background group "
-            << groupIndex << endmsg;
+    debug() << "Starting overlay for the background group " << groupIndex << endmsg;
 
     if (m_startWithBackgroundEvent >= 0) {
       info() << "Skipping to event: " << m_startWithBackgroundEvent << endmsg;
-      for (auto& entry : m_bkgEvents->m_nextEntry) {
+      for (auto& entry : m_bkgEvents->m_nextEntry[groupIndex]) {
         entry = m_startWithBackgroundEvent;
       }
     }
@@ -229,151 +447,69 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
       debug() << "Will overlay " << NOverlay_to_this_BX << " events to BX number " << BX_number_in_train + physBX
               << endmsg;
 
+      if (m_randomMix && fileIndices.empty()) {
+        warning() << "No background files available for group " << groupIndex << ", skipping overlay" << endmsg;
+        continue;
+      }
+      const float timeOffset = BX_number_in_train * m_deltaT;
       for (int k = 0; k < NOverlay_to_this_BX; ++k) {
-        info() << "Overlaying background event " << m_bkgEvents->m_nextEntry[groupIndex] << " from group " << groupIndex
-               << " to BX " << bxInTrain << endmsg;
-        if (m_bkgEvents->m_nextEntry[groupIndex] >= m_bkgEvents->m_totalNumberOfEvents[groupIndex] &&
-            !m_allowReusingBackgroundFiles) {
-          throw GaudiException("No more events in background file", name(), StatusCode::FAILURE);
-        }
-        const auto backgroundEvent =
-            m_bkgEvents->m_rootFileReaders[groupIndex].readEvent(m_bkgEvents->m_nextEntry[groupIndex]);
-        m_bkgEvents->m_nextEntry[groupIndex]++;
-        m_bkgEvents->m_nextEntry[groupIndex] %= m_bkgEvents->m_totalNumberOfEvents[groupIndex];
-        const auto availableCollections = backgroundEvent.getAvailableCollections();
-
-        // Either 0 or negative
-        const auto timeOffset = BX_number_in_train * m_deltaT;
-
-        if (std::find(availableCollections.begin(), availableCollections.end(), m_MCParticleCollectionName) ==
-            availableCollections.end()) {
-          warning() << "Collection " << m_MCParticleCollectionName << " not found in background event" << endmsg;
-        }
-
-        // To fix the relations we will need to have a map from old to new particle index
-        std::map<int, int> oldToNewMap;
-        std::map<int, std::pair<std::vector<int>, std::vector<int>>> parentDaughterMap;
-
-        const auto& bgParticles = backgroundEvent.get<edm4hep::MCParticleCollection>(m_MCParticleCollectionName);
-        int j = oparticles.size();
-        for (size_t i = 0; i < bgParticles.size(); ++i) {
-          auto npart = bgParticles[i].clone(false);
-
-          npart.setTime(bgParticles[i].getTime() + timeOffset);
-          npart.setOverlay(true);
-          oparticles.push_back(npart);
-          for (const auto& parent : bgParticles[i].getParents()) {
-            parentDaughterMap[j].first.push_back(parent.getObjectID().index);
-          }
-          for (const auto& daughter : bgParticles[i].getDaughters()) {
-            parentDaughterMap[j].second.push_back(daughter.getObjectID().index);
-          }
-          oldToNewMap[i] = j;
-          j++;
-        }
-        for (const auto& [index, parentsDaughters] : parentDaughterMap) {
-          const auto& [parents, daughters] = parentsDaughters;
-          for (const auto& parent : parents) {
-            if (parentDaughterMap.find(oldToNewMap[parent]) == parentDaughterMap.end()) {
-              // warning() << "Parent " << parent << " not found in background event" << endmsg;
-              continue;
-            }
-            oparticles[index].addToParents(oparticles[oldToNewMap[parent]]);
-          }
-          for (const auto& daughter : daughters) {
-            if (parentDaughterMap.find(oldToNewMap[daughter]) == parentDaughterMap.end()) {
-              // warning() << "Parent " << daughter << " not found in background event" << endmsg;
-              continue;
-            }
-            // info() << "Adding (daughter) " << daughter << " to " << index << endmsg;
-            oparticles[index].addToDaughters(oparticles[oldToNewMap[daughter]]);
-          }
-        }
-
-        for (size_t i = 0; i < simTrackerHits.size(); ++i) {
-          const auto name = inputLocations(SIMTRACKERHIT_INDEX_POSITION)[i];
-          debug() << "Processing collection " << name << endmsg;
-          if (std::find(availableCollections.begin(), availableCollections.end(), name) == availableCollections.end()) {
-            warning() << "Collection " << name << " not found in background event" << endmsg;
-            continue;
-          }
-          const auto [this_start, this_stop] = define_time_windows(name);
-          // There are only contributions to the readout if the hits are in the integration window
-          if (this_stop <= (BX_number_in_train - physBX) * m_deltaT) {
-            info() << "Skipping collection " << name << " as it is not in the integration window" << endmsg;
-            continue;
-          }
-          auto& ocoll = osimTrackerHits[i];
-          for (const auto&& simTrackerHit : backgroundEvent.get<edm4hep::SimTrackerHitCollection>(name)) {
-            const float tof = time_of_flight(simTrackerHit.getPosition());
-
-            if (!((simTrackerHit.getTime() + timeOffset > this_start + tof) &&
-                  (simTrackerHit.getTime() + timeOffset < this_stop + tof)))
-              continue;
-            auto nhit = simTrackerHit.clone(false);
-            nhit.setOverlay(true);
-            nhit.setTime(simTrackerHit.getTime() + timeOffset);
-            nhit.setParticle(oparticles[oldToNewMap[simTrackerHit.getParticle().getObjectID().index]]);
-            ocoll.push_back(nhit);
-          }
-        }
-
-        for (size_t i = 0; i < simCaloHits.size(); ++i) {
-          const auto name = inputLocations(SIMCALOHIT_INDEX_POSITION)[i];
-          debug() << "Processing collection " << name << endmsg;
-          if (std::find(availableCollections.begin(), availableCollections.end(), name) == availableCollections.end()) {
-            warning() << "Collection " << name << " not found in background event" << endmsg;
-            continue;
-          }
-          const auto [this_start, this_stop] = define_time_windows(name);
-          // There are only contributions to the readout if the hits are in the integration window
-          if (this_stop <= (BX_number_in_train - physBX) * m_deltaT) {
-            info() << "Skipping collection " << name << " as it is not in the integration window" << endmsg;
-            continue;
-          }
-
-          auto& calHitMap = cellIDsMap[i];
-          auto& calHitContribs = ocaloHitContribs[i];
-          for (const auto&& simCaloHit : backgroundEvent.get<edm4hep::SimCalorimeterHitCollection>(name)) {
-            if (calHitMap.find(simCaloHit.getCellID()) == calHitMap.end()) {
-              // There is no hit at this position. The new hit can be added, if it is not outside the window
-              auto calhit = edm4hep::MutableSimCalorimeterHit();
-              bool add = false;
-              for (const auto& contrib : simCaloHit.getContributions()) {
-                if ((contrib.getTime() + timeOffset > this_start) && (contrib.getTime() + timeOffset < this_stop)) {
-                  add = true;
-                  // TODO: Make sure a contribution is not added twice
-                  auto newContrib = contrib.clone(false);
-                  newContrib.setParticle(oparticles[oldToNewMap[contrib.getParticle().getObjectID().index]]);
-                  newContrib.setTime(contrib.getTime() + timeOffset);
-                  calhit.addToContributions(newContrib);
-                  calHitContribs.push_back(newContrib);
-                }
-              }
-              if (add) {
-                calhit.setCellID(simCaloHit.getCellID());
-                calhit.setEnergy(simCaloHit.getEnergy());
-                calhit.setPosition(simCaloHit.getPosition());
-                calHitMap[calhit.getCellID()] = calhit;
-              }
-            } else {
-              // there is already a hit at this position
-              auto& calhit = calHitMap[simCaloHit.getCellID()];
-              for (const auto& contrib : simCaloHit.getContributions()) {
-                if ((contrib.getTime() + timeOffset > this_start) && (contrib.getTime() + timeOffset < this_stop)) {
-                  // TODO: Make sure a contribution is not added twice
-                  auto newContrib = contrib.clone(false);
-                  newContrib.setParticle(oparticles[oldToNewMap[contrib.getParticle().getObjectID().index]]);
-                  newContrib.setTime(contrib.getTime() + timeOffset);
-                  calhit.addToContributions(newContrib);
-                  calHitContribs.push_back(newContrib);
-                }
-              }
-            }
-          }
-        }
+        // In random-mix mode pick a random file of the group; in sequential mode
+        // the file index is ignored. reserve() advances the per-file cursor now
+        // (serially); the actual ROOT read happens in phase 2, possibly on
+        // several threads.
+        const int fileIndex = m_randomMix ? fileIndices[k % fileIndices.size()] : 0;
+        const size_t entry = m_bkgEvents->reserve(groupIndex, fileIndex);
+        reads.push_back({static_cast<int>(groupIndex), fileIndex, entry, timeOffset, BX_number_in_train, physBX});
       }
     }
+  }
+
+  // Phase 2 + 3: read (and decompress) the background frames -- optionally on
+  // several threads -- and merge them into the outputs in list order. The merge
+  // is always serial and in-order, so the result is independent of OverlayThreads.
+  if (m_overlayThreads <= 1) {
+    for (const auto& r : reads) {
+      const auto backgroundEvent = m_bkgEvents->readAt(r.group, r.fileIndex, r.entry);
+      mergeBackgroundFrame(backgroundEvent, r.timeOffset, r.bxNumber, r.physBX, simTrackerHits, simCaloHits, oparticles,
+                           osimTrackerHits, cellIDsMap, ocaloHitContribs);
+    }
+  } else {
+    // Parallel read + decompress (bounded by the number of in-flight tokens),
+    // serial in-order merge.
+    struct Item {
+      const BkgRead* read = nullptr;
+      podio::Frame frame;
+    };
+    std::atomic<size_t> nextRead{0};
+    const size_t ntokens = static_cast<size_t>(m_overlayThreads.value());
+    tbb::parallel_pipeline(
+        ntokens, tbb::make_filter<void, std::shared_ptr<Item>>(tbb::filter_mode::serial_in_order,
+                                                               [&](tbb::flow_control& fc) -> std::shared_ptr<Item> {
+                                                                 const size_t idx = nextRead++;
+                                                                 if (idx >= reads.size()) {
+                                                                   fc.stop();
+                                                                   return {};
+                                                                 }
+                                                                 return std::make_shared<Item>(Item{&reads[idx], {}});
+                                                               }) &
+                     tbb::make_filter<std::shared_ptr<Item>, std::shared_ptr<Item>>(
+                         tbb::filter_mode::parallel,
+                         [&](std::shared_ptr<Item> item) -> std::shared_ptr<Item> {
+                           const auto& r = *item->read;
+                           item->frame = m_bkgEvents->readAt(r.group, r.fileIndex, r.entry);
+                           // Force decompression/materialization here (in parallel) so the
+                           // serial merge only touches already in-memory data.
+                           for (const auto& name : item->frame.getAvailableCollections()) {
+                             item->frame.get(name);
+                           }
+                           return item;
+                         }) &
+                     tbb::make_filter<std::shared_ptr<Item>, void>(
+                         tbb::filter_mode::serial_in_order, [&](std::shared_ptr<Item> item) {
+                           const auto& r = *item->read;
+                           mergeBackgroundFrame(item->frame, r.timeOffset, r.bxNumber, r.physBX, simTrackerHits,
+                                                simCaloHits, oparticles, osimTrackerHits, cellIDsMap, ocaloHitContribs);
+                         }));
   }
   // Move the SimCalorimeterHitCollections to the output vector
   // So far they are stored in a map with the cellID as key

@@ -44,35 +44,112 @@
 #include "k4FWCore/Transformer.h"
 #include "k4Interface/IUniqueIDGenSvc.h"
 
+#include "GaudiKernel/GaudiException.h"
+
 // Needed for some of the more complex properties
 #include "Gaudi/Parsers/Factory.h"
 #include "Gaudi/Property.h"
 
 #include <map>
+#include <mutex>
 #include <string>
 #include <vector>
 
+// Holds the background events and provides thread-safe reads. ROOT TFile access
+// is made safe process-wide by ROOT::EnableThreadSafety() (called in
+// initialize()). In random-mix mode every read opens its own reader, so reads
+// of different files proceed concurrently -- this is what lets OverlayThreads
+// parallelize the (I/O-dominated) background reading. In sequential mode the
+// shared per-group reader is used under a mutex.
+//
+// Two source strategies are supported, selected by m_randomMix:
+//   * sequential (default): each group is read as one logical stream through a
+//     persistent reader, advancing an internal cursor;
+//   * random mix: each file in a group is an independent event source, opened
+//     on demand, so the caller can pick a random file per overlay.
+//
+// Bookkeeping is stored per [group][file]. In sequential mode the file
+// dimension has a single slot per group; in random-mix mode the event count is
+// left at 0 ("unknown") and determined lazily at read time.
 struct EventHolder {
   std::vector<std::vector<std::string>> m_fileNames;
+  bool m_randomMix{false};
+  bool m_allowReuse{false};
+  std::string m_algName;
+
+  // Sequential mode only: one persistent reader per group.
   std::vector<podio::Reader> m_rootFileReaders;
-  std::vector<size_t> m_totalNumberOfEvents;
-  std::map<int, podio::Frame> m_events;
 
-  std::vector<size_t> m_nextEntry;
+  // [group][file]. In sequential mode the inner vector has a single element.
+  std::vector<std::vector<size_t>> m_totalNumberOfEvents;
+  std::vector<std::vector<size_t>> m_nextEntry;
 
-  EventHolder(const std::vector<std::vector<std::string>>& fileNames) : m_fileNames(fileNames) {
-    for (auto& names : m_fileNames) {
-      m_rootFileReaders.emplace_back(podio::makeReader(names));
-      m_totalNumberOfEvents.push_back(m_rootFileReaders.back().getEntries("events"));
+  // Guards the cursors and the shared sequential-mode readers.
+  std::mutex m_ioMutex;
+
+  EventHolder(const std::vector<std::vector<std::string>>& fileNames, bool randomMix, bool allowReuse,
+              const std::string& algName)
+      : m_fileNames(fileNames), m_randomMix(randomMix), m_allowReuse(allowReuse), m_algName(algName) {
+    m_totalNumberOfEvents.resize(m_fileNames.size());
+    m_nextEntry.resize(m_fileNames.size());
+    for (size_t group = 0; group < m_fileNames.size(); ++group) {
+      if (m_randomMix) {
+        // One independent event source per file; counts are determined lazily.
+        m_totalNumberOfEvents[group].resize(m_fileNames[group].size(), 0);
+        m_nextEntry[group].resize(m_fileNames[group].size(), 0);
+      } else {
+        // The whole group is read as a single logical stream.
+        m_rootFileReaders.emplace_back(podio::makeReader(m_fileNames[group]));
+        m_totalNumberOfEvents[group].push_back(m_rootFileReaders.back().getEntries("events"));
+        m_nextEntry[group].push_back(0);
+      }
     }
-    m_nextEntry.resize(m_fileNames.size(), 0);
   }
   EventHolder() = default;
 
-  // TODO: Cache functionality
-  // podio::Frame& read
-
   size_t size() const { return m_fileNames.size(); }
+
+  // Advance the cursor for (group, file) and return the raw entry to read.
+  // Cheap and I/O-free, so calling it serially (during the work-list build)
+  // does not limit read parallelism.
+  size_t reserve(int group, int file) {
+    std::lock_guard<std::mutex> lock(m_ioMutex);
+    size_t& entry = m_nextEntry[group][file];
+    const size_t e = entry;
+    const size_t total = m_totalNumberOfEvents[group][file];
+    entry = (total > 0) ? (entry + 1) % total : entry + 1; // wrap once the total is known
+    return e;
+  }
+
+  // Read a specific (group, file, rawEntry). Thread-safe: in random-mix mode
+  // each call opens its own reader and can run concurrently; in sequential mode
+  // the shared per-group reader is used under the mutex.
+  podio::Frame readAt(int group, int file, size_t rawEntry) {
+    if (m_randomMix) {
+      podio::Reader reader = podio::makeReader(m_fileNames[group][file]);
+      const size_t total = reader.getEntries("events");
+      if (total == 0) {
+        throw GaudiException("No events found in background file " + m_fileNames[group][file], m_algName,
+                             StatusCode::FAILURE);
+      }
+      if (rawEntry >= total && !m_allowReuse) {
+        throw GaudiException("No more events in background file", m_algName, StatusCode::FAILURE);
+      }
+      return reader.readEvent(rawEntry % total);
+    }
+    std::lock_guard<std::mutex> lock(m_ioMutex);
+    const size_t total = m_totalNumberOfEvents[group][0];
+    if (rawEntry >= total && !m_allowReuse) {
+      throw GaudiException("No more events in background file", m_algName, StatusCode::FAILURE);
+    }
+    return m_rootFileReaders[group].readEvent(rawEntry % total);
+  }
+
+  // Serial convenience: reserve + read in one call (used by the serial path).
+  podio::Frame getFrame(int group, int fileIndex) {
+    const int file = m_randomMix ? fileIndex : 0;
+    return readAt(group, file, reserve(group, file));
+  }
 };
 
 using retType =
@@ -105,6 +182,18 @@ struct OverlayTiming : public k4FWCore::MultiTransformer<retType(
              const std::vector<const edm4hep::SimCalorimeterHitCollection*>& simCalorimeterHits) const final;
 
   std::pair<float, float> define_time_windows(const std::string& Collection_name) const;
+
+  // Merge one already-read background frame into the output accumulators. This
+  // is the per-pseudo-event work; it is called serially and in-order (both by
+  // the serial path and by the in-order output stage of the parallel pipeline),
+  // so the result is independent of OverlayThreads.
+  void mergeBackgroundFrame(const podio::Frame& backgroundEvent, float timeOffset, int BX_number_in_train, int physBX,
+                            const std::vector<const edm4hep::SimTrackerHitCollection*>& simTrackerHits,
+                            const std::vector<const edm4hep::SimCalorimeterHitCollection*>& simCaloHits,
+                            edm4hep::MCParticleCollection& oparticles,
+                            std::vector<edm4hep::SimTrackerHitCollection>& osimTrackerHits,
+                            std::map<int, std::map<uint64_t, edm4hep::MutableSimCalorimeterHit>>& cellIDsMap,
+                            std::vector<edm4hep::CaloHitContributionCollection>& ocaloHitContribs) const;
 
 private:
   // These correspond to the index position in the argument list
@@ -148,6 +237,25 @@ private:
       this, "AllowReusingBackgroundFiles", false, "If true, wrap around the background file when events are exhausted"};
   Gaudi::Property<bool> m_copyCellIDMetadata{this, "CopyCellIDMetadata", false,
                                              "Copy cell ID encoding metadata from input to output collections"};
+
+  Gaudi::Property<bool> m_randomMix{
+      this, "RandomMixBackgroundFiles", false,
+      "Treat each file in a background group as an independent (pseudo-)event source and pick a random file for every "
+      "overlaid event (one-event-per-file mixing). Entries of BackgroundFileNames may also be directories, "
+      "whose .root files are used."};
+
+  Gaudi::Property<bool> m_mergeMCParticles{
+      this, "MergeMCParticles", true,
+      "Merge the background MCParticle collection into the output. If false, background particles are not "
+      "stored: tracker hits keep the momentum of their originating particle instead of a particle link, and "
+      "calorimeter contributions get an empty particle."};
+
+  Gaudi::Property<int> m_overlayThreads{
+      this, "OverlayThreads", 1,
+      "Number of worker threads used to read and decompress background files within a single event (1 = "
+      "serial, current behaviour). Only the (I/O-dominated) reading is parallelized; the merge into the "
+      "output collections stays serial and in-order, so results are unchanged and deterministic. Most "
+      "effective with RandomMixBackgroundFiles and many input files."};
 
   // Gaudi::Property<int> m_maxCachedFrames{
   //   this, "MaxCachedFrames", 0, "Maximum number of frames cached from background files"};
