@@ -12,6 +12,12 @@ repos:
         entry: .github/scripts/clang-format-hook
         types: [c++]
         language: system
+      - id: clang-tidy
+        name: clang-tidy
+        entry: bash .github/scripts/clang-tidy-hook
+        files: '\.(cc|cpp|cxx)$'
+        language: system
+        require_serial: true
   - repo: https://github.com/johann-petrak/licenseheaders.git
     rev: 'v0.8.8'
     hooks:
