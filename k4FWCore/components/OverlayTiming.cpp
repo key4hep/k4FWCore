@@ -458,7 +458,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
         // the file index is ignored. reserve() advances the per-file cursor now
         // (serially); the actual ROOT read happens in phase 2, possibly on
         // several threads.
-        const int fileIndex = m_randomMix ? fileIndices[fileCursor++  % fileIndices.size()] : 0;
+        const int fileIndex = m_randomMix ? fileIndices[fileCursor++ % fileIndices.size()] : 0;
         const size_t entry = m_bkgEvents->reserve(groupIndex, fileIndex);
         reads.push_back({static_cast<int>(groupIndex), fileIndex, entry, timeOffset, BX_number_in_train, physBX});
       }
