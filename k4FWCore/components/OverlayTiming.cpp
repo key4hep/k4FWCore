@@ -459,7 +459,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
       const float timeOffset = BX_number_in_train * m_deltaT;
       for (int k = 0; k < NOverlay_to_this_BX; ++k) {
         // In random-mix mode walk the shuffled permutation so that consecutive
-        // overlaid events draw a distinct set of files. 
+        // overlaid events draw a distinct set of files.
         // Once the permutation is exhausted it is reshuffled, so every
         // pass is an independent random set instead of a replay of the same
         // order. In sequential mode the file index is ignored.
