@@ -20,7 +20,6 @@ repos:
         # test, so it is not part of the main build's compilation database.
         exclude: '^test/downstream-project-cmake-test/'
         language: system
-        require_serial: true
   - repo: https://github.com/johann-petrak/licenseheaders.git
     rev: 'v0.8.8'
     hooks:
