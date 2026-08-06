@@ -16,6 +16,9 @@ repos:
         name: clang-tidy
         entry: bash .github/scripts/clang-tidy-hook
         files: '\.(cc|cpp|cxx)$'
+        # This directory is configured as a standalone downstream project by a
+        # test, so it is not part of the main build's compilation database.
+        exclude: '^test/downstream-project-cmake-test/'
         language: system
         require_serial: true
   - repo: https://github.com/johann-petrak/licenseheaders.git
