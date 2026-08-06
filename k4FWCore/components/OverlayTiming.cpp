@@ -117,7 +117,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
   auto osimCaloHits = std::vector<edm4hep::SimCalorimeterHitCollection>();
   auto ocaloHitContribs = std::vector<edm4hep::CaloHitContributionCollection>();
   for (size_t i = 0; i < simCaloHits.size(); ++i) {
-    ocaloHitContribs.emplace_back(edm4hep::CaloHitContributionCollection());
+    ocaloHitContribs.emplace_back();
   }
 
   // Copy MCParticles for physics event into a new collection
@@ -144,8 +144,9 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
       const float tof = time_of_flight(simTrackerHit.getPosition());
       if ((simTrackerHit.getTime() > this_start + tof) && (simTrackerHit.getTime() < this_stop + tof)) {
         auto nhit = simTrackerHit.clone(false);
-        if (simTrackerHit.getParticle().getObjectID().index != -1)
+        if (simTrackerHit.getParticle().getObjectID().index != -1) {
           nhit.setParticle(oparticles[simTrackerHit.getParticle().getObjectID().index]);
+        }
         ocoll.push_back(nhit);
       }
     }
@@ -165,8 +166,9 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
       bool within_time_window = false;
       std::vector<int> thisContribs;
       for (const auto& contrib : simCaloHit.getContributions()) {
-        if (!((contrib.getTime() > this_start + tof) && (contrib.getTime() < this_stop + tof)))
+        if (!((contrib.getTime() > this_start + tof) && (contrib.getTime() < this_stop + tof))) {
           continue;
+        }
         within_time_window = true;
         // TODO: Make sure a contribution is not added twice
         auto newContrib = contrib.clone(false);
@@ -308,8 +310,9 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
             const float tof = time_of_flight(simTrackerHit.getPosition());
 
             if (!((simTrackerHit.getTime() + timeOffset > this_start + tof) &&
-                  (simTrackerHit.getTime() + timeOffset < this_stop + tof)))
+                  (simTrackerHit.getTime() + timeOffset < this_stop + tof))) {
               continue;
+            }
             auto nhit = simTrackerHit.clone(false);
             nhit.setOverlay(true);
             nhit.setTime(simTrackerHit.getTime() + timeOffset);
