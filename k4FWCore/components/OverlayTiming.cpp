@@ -435,7 +435,12 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
       }
     }
 
-    // Overlay the background events to each bunchcrossing in the bunch train
+    // Overlay the background events to each bunchcrossing in the bunch train.
+    // The file cursor is deliberately declared outside the BX loop: it has to
+    // keep advancing across bunch crossings, otherwise every BX would restart
+    // at the front of the permutation and reuse the same file for the whole
+    // train (which is what happens for NumberBackground = 1).
+    size_t fileCursor = 0;
     for (int bxInTrain = 0; bxInTrain < m_NBunchTrain; ++bxInTrain) {
       const int BX_number_in_train = permutation.at(bxInTrain);
 
@@ -456,11 +461,19 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
       }
       const float timeOffset = BX_number_in_train * m_deltaT;
       for (int k = 0; k < NOverlay_to_this_BX; ++k) {
-        // In random-mix mode pick a random file of the group; in sequential mode
-        // the file index is ignored. reserve() advances the per-file cursor now
-        // (serially); the actual ROOT read happens in phase 2, possibly on
-        // several threads.
-        const int fileIndex = m_randomMix ? fileIndices[k % fileIndices.size()] : 0;
+        // In random-mix mode walk the shuffled permutation so that consecutive
+        // overlaid events draw a distinct set of files.
+        // Once the permutation is exhausted it is reshuffled, so every
+        // pass is an independent random set instead of a replay of the same
+        // order. In sequential mode the file index is ignored.
+        int fileIndex = 0;
+        if (m_randomMix) {
+          if (fileCursor == fileIndices.size()) {
+            std::shuffle(fileIndices.begin(), fileIndices.end(), rng_engine);
+            fileCursor = 0;
+          }
+          fileIndex = fileIndices[fileCursor++];
+        }
         const size_t entry = m_bkgEvents->reserve(groupIndex, fileIndex);
         reads.push_back({static_cast<int>(groupIndex), fileIndex, entry, timeOffset, BX_number_in_train, physBX});
       }
