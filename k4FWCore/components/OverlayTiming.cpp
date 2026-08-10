@@ -460,6 +460,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
         continue;
       }
       const float timeOffset = BX_number_in_train * m_deltaT;
+      reads.reserve(reads.size() + NOverlay_to_this_BX);
       for (int k = 0; k < NOverlay_to_this_BX; ++k) {
         // In random-mix mode walk the shuffled permutation so that consecutive
         // overlaid events draw a distinct set of files.
@@ -510,7 +511,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
                                                                }) &
                      tbb::make_filter<std::shared_ptr<Item>, std::shared_ptr<Item>>(
                          tbb::filter_mode::parallel,
-                         [&](std::shared_ptr<Item> item) -> std::shared_ptr<Item> {
+                         [&](const std::shared_ptr<Item>& item) -> std::shared_ptr<Item> {
                            const auto& r = *item->read;
                            item->frame = m_bkgEvents->readAt(r.group, r.fileIndex, r.entry);
                            // Force decompression/materialization here (in parallel) so the
@@ -521,7 +522,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
                            return item;
                          }) &
                      tbb::make_filter<std::shared_ptr<Item>, void>(
-                         tbb::filter_mode::serial_in_order, [&](std::shared_ptr<Item> item) {
+                         tbb::filter_mode::serial_in_order, [&](const std::shared_ptr<Item>& item) {
                            const auto& r = *item->read;
                            mergeBackgroundFrame(item->frame, r.timeOffset, r.bxNumber, r.physBX, simTrackerHits,
                                                 simCaloHits, oparticles, osimTrackerHits, cellIDsMap, ocaloHitContribs);
