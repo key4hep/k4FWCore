@@ -498,7 +498,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
       podio::Frame frame;
     };
     std::atomic<size_t> nextRead{0};
-    const size_t ntokens = static_cast<size_t>(m_overlayThreads.value());
+    const auto ntokens = static_cast<size_t>(m_overlayThreads.value());
     tbb::parallel_pipeline(
         ntokens, tbb::make_filter<void, std::shared_ptr<Item>>(tbb::filter_mode::serial_in_order,
                                                                [&](tbb::flow_control& fc) -> std::shared_ptr<Item> {
