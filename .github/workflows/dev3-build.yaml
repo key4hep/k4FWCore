@@ -1,6 +1,6 @@
 # Based on
 # https://github.com/key4hep/key4hep-actions/blob/main/workflows/key4hep-build.yaml
-name: LCG build (dev3)
+name: LCG build
 
 on:
   push:
@@ -19,10 +19,8 @@ jobs:
   build:
     strategy:
       matrix:
-        include:
-          - build_type: dev3
-            image: alma9
-            stack: /cvmfs/sft-nightlies.cern.ch/lcg/views/dev3/latest/x86_64-el9-gcc14-opt/setup.sh
+        build_type: [dev3]
+        image: [alma9]
       fail-fast: false
     runs-on: ubuntu-latest
     container:
@@ -42,4 +40,4 @@ jobs:
       with:
         build_type: ${{ matrix.build_type }}
         image: ${{ matrix.image }}
-        stack: ${{ matrix.stack }}
+        stack: /cvmfs/sft-nightlies.cern.ch/lcg/views/dev3/latest/x86_64-el9-gcc14-opt/setup.sh
