@@ -40,4 +40,4 @@ jobs:
       with:
         build_type: ${{ matrix.build_type }}
         image: ${{ matrix.image }}
-        stack: /cvmfs/sft-nightlies.cern.ch/lcg/views/dev3/latest/x86_64-el9-gcc14-opt/setup.sh
+        stack: /cvmfs/sft-nightlies.cern.ch/lcg/views/dev3/latest/x86_64-el9-gcc16-opt/setup.sh
