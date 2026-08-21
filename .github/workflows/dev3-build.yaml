@@ -1,6 +1,6 @@
-# Oniginally copied from
+# Based on
 # https://github.com/key4hep/key4hep-actions/blob/main/workflows/key4hep-build.yaml
-name: LCG build (dev3)
+name: LCG build
 
 on:
   push:
@@ -17,11 +17,27 @@ concurrency:
 
 jobs:
   build:
+    strategy:
+      matrix:
+        build_type: [dev3]
+        image: [alma9]
+      fail-fast: false
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/key4hep/key4hep-images/${{ matrix.image }}-cvmfs
+      options: --privileged
+      volumes:
+        - /home/runner/.cache/ccache:/root/.cache/ccache
+    defaults:
+      run:
+        shell: bash
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
+    - name: Mount CVMFS
+      run: /mount.sh
+    - uses: key4hep/key4hep-actions/cache-external-data@main
     - uses: key4hep/key4hep-actions/key4hep-build@main
       with:
-        build_type: dev3
-        image: alma9
-        stack: /cvmfs/sft.cern.ch/lcg/views/dev3/latest/x86_64-el9-gcc14-opt/setup.sh
+        build_type: ${{ matrix.build_type }}
+        image: ${{ matrix.image }}
+        stack: /cvmfs/sft-nightlies.cern.ch/lcg/views/dev3/latest/x86_64-el9-gcc14-opt/setup.sh
