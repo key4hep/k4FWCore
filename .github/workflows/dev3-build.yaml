@@ -22,7 +22,7 @@ jobs:
         include:
           - build_type: dev3
             image: alma9
-            stack: /cvmfs/sft.cern.ch/lcg/views/dev3/latest/x86_64-el9-gcc14-opt/setup.sh
+            stack: /cvmfs/sft-nightlies.cern.ch/lcg/views/dev3/latest/x86_64-el9-gcc14-opt/setup.sh
       fail-fast: false
     runs-on: ubuntu-latest
     container:
