@@ -29,7 +29,7 @@ from k4FWCore import ApplicationMgr, IOSvc
 iosvc = IOSvc("IOSvc")
 iosvc.Input = "functional_producer.root"
 iosvc.Output = "functional_producer_rntuple_converted.root"
-iosvc.OutputType = "RNTuple"
+iosvc.OutputType = "rntuple"
 
 ApplicationMgr(
     TopAlg=[],

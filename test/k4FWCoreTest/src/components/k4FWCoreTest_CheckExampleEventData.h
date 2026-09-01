@@ -34,7 +34,7 @@ class MCParticleCollection;
 class k4FWCoreTest_CheckExampleEventData : public Gaudi::Algorithm {
 public:
   explicit k4FWCoreTest_CheckExampleEventData(const std::string&, ISvcLocator*);
-  ~k4FWCoreTest_CheckExampleEventData() = default;
+  ~k4FWCoreTest_CheckExampleEventData() override = default;
   /**  Execute.
    *   @return status code
    */

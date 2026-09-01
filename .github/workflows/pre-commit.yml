@@ -20,6 +20,11 @@ jobs:
           # fails
           git config --global --add safe.directory $(pwd)
           pip install pre-commit
+          # Generate a compilation database so the clang-tidy hook can resolve
+          # include paths. Configure-only, no compilation needed. Tests are
+          # enabled by default so the test components are also in the database.
+          cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -DCMAKE_CXX_COMPILER=clang++
           pre-commit run --show-diff-on-failure \
             --color=always \
             --all-files

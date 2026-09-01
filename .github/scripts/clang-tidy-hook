@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+# Thin wrapper around clang-tidy for use by pre-commit.
+
+clang-tidy -warnings-as-errors='*,-clang-diagnostic-deprecated-declarations' -p build "$@"
