@@ -107,11 +107,9 @@ StatusCode OverlayTiming::initialize() {
          {std::make_pair(inputLocations("SimTrackerHits"), outputLocations("OutputSimTrackerHits")),
           std::make_pair(inputLocations("SimCalorimeterHits"), outputLocations("OutputSimCalorimeterHits"))}) {
       for (size_t i = 0; i < input.size(); ++i) {
-        const auto value = k4FWCore::getParameter<std::string>(
-            podio::collMetadataParamName(input[i], edm4hep::labels::CellIDEncoding), this);
+        const auto value = k4FWCore::getCellIDEncoding(input[i], this);
         if (value.has_value()) {
-          k4FWCore::putParameter(podio::collMetadataParamName(output[i], edm4hep::labels::CellIDEncoding),
-                                 value.value(), this);
+          k4FWCore::putCellIDEncoding(output[i], value.value(), this);
         } else {
           warning() << "No metadata found for " << input[i] << " when copying CellID metadata was requested" << endmsg;
         }
