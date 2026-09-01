@@ -102,10 +102,6 @@ StatusCode OverlayTiming::initialize() {
   }
 
   // Copy the cellID encoding of the input collections over to the overlaid output collections.
-  // This has to happen here rather than in finalize(): the overlaid collections only come into
-  // existence at runtime, so a downstream algorithm that needs their encoding looks it up in its
-  // own initialize(), which runs long before this algorithm's finalize() would. Setting it here
-  // makes the encoding visible to those algorithms, and it still ends up in the output file.
   if (m_copyCellIDMetadata) {
     for (const auto& [input, output] :
          {std::make_pair(inputLocations("SimTrackerHits"), outputLocations("OutputSimTrackerHits")),
