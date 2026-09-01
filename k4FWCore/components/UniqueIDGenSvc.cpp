@@ -53,6 +53,10 @@ size_t UniqueIDGenSvc::getUniqueID(event_num_t evt_num, run_num_t run_num, const
 
   auto hash = std::hash<std::bitset<seed_digits + event_num_digits + run_num_digits + name_digits>>{}(combined_bits);
 
+  debug() << std::format("Generated ID {} for algorithm '{}' and evt_num={}, run_num={} (seed={})", hash, name, evt_num,
+                         run_num, m_seed.value())
+          << endmsg;
+
   if (m_checkDuplicates) {
     auto [it, inserted] = [=, this, &name]() {
       std::lock_guard<std::mutex> lock(m_mutex);
