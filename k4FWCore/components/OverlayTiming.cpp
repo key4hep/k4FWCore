@@ -101,6 +101,28 @@ StatusCode OverlayTiming::initialize() {
     m_Poisson = std::vector<bool>(m_bkgEvents->size(), false);
   }
 
+  // Copy the cellID encoding of the input collections over to the overlaid output collections.
+  // This has to happen here rather than in finalize(): the overlaid collections only come into
+  // existence at runtime, so a downstream algorithm that needs their encoding looks it up in its
+  // own initialize(), which runs long before this algorithm's finalize() would. Setting it here
+  // makes the encoding visible to those algorithms, and it still ends up in the output file.
+  if (m_copyCellIDMetadata) {
+    for (const auto& [input, output] :
+         {std::make_pair(inputLocations("SimTrackerHits"), outputLocations("OutputSimTrackerHits")),
+          std::make_pair(inputLocations("SimCalorimeterHits"), outputLocations("OutputSimCalorimeterHits"))}) {
+      for (size_t i = 0; i < input.size(); ++i) {
+        const auto value = k4FWCore::getParameter<std::string>(
+            podio::collMetadataParamName(input[i], edm4hep::labels::CellIDEncoding), this);
+        if (value.has_value()) {
+          k4FWCore::putParameter(podio::collMetadataParamName(output[i], edm4hep::labels::CellIDEncoding),
+                                 value.value(), this);
+        } else {
+          warning() << "No metadata found for " << input[i] << " when copying CellID metadata was requested" << endmsg;
+        }
+      }
+    }
+  }
+
   return StatusCode::SUCCESS;
 }
 
@@ -388,27 +410,6 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
 
   return std::make_tuple(std::move(oparticles), std::move(osimTrackerHits), std::move(osimCaloHits),
                          std::move(ocaloHitContribs));
-}
-
-StatusCode OverlayTiming::finalize() {
-  if (m_copyCellIDMetadata) {
-    for (const auto& [input, output] :
-         {std::make_pair(inputLocations("SimTrackerHits"), outputLocations("OutputSimTrackerHits")),
-          std::make_pair(inputLocations("SimCalorimeterHits"), outputLocations("OutputSimCalorimeterHits"))}) {
-      for (size_t i = 0; i < input.size(); ++i) {
-        const auto value = k4FWCore::getParameter<std::string>(
-            podio::collMetadataParamName(input[i], edm4hep::labels::CellIDEncoding), this);
-        if (value.has_value()) {
-          k4FWCore::putParameter(podio::collMetadataParamName(output[i], edm4hep::labels::CellIDEncoding),
-                                 value.value(), this);
-        } else {
-          warning() << "No metadata found for " << input[i] << " when copying CellID metadata was requested" << endmsg;
-        }
-      }
-    }
-  }
-
-  return Gaudi::Algorithm::finalize();
 }
 
 DECLARE_COMPONENT(OverlayTiming)

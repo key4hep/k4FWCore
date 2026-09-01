@@ -365,6 +365,16 @@ check_collections(
     ],
 )
 
+# The encoding is copied from the input collection by CopyCellIDMetadata and,
+# because OverlayTiming does that in initialize(), it is also visible to
+# downstream algorithms during the run, not just in this file
+check_metadata(
+    "overlay_output.root",
+    {
+        "OverlaySimTrackerHits__CellIDEncoding": "system:5,side:-2,layer:9,module:8,sensor:8",
+    },
+)
+
 reader = podio.reading.get_reader("overlay_output.root")
 n_signal_mc = 2
 n_background_mc = 2

@@ -19,10 +19,24 @@
 
 # Tests the OverlayTiming algorithm using functional_producer_multiple.root as
 # both signal and background. MCParticles and SimTrackerHits are overlaid.
+#
+# It also covers CopyCellIDMetadata: the encoding of the input collection is
+# pre-filled into the metadata, and ExampleCellIDEncodingInitConsumer checks
+# that OverlayTiming has published it for the overlaid output collection by the
+# time a downstream algorithm initializes.
 
 from Gaudi.Configuration import INFO
-from Configurables import EventDataSvc, EventHeaderCreator, OverlayTiming, UniqueIDGenSvc
+from Configurables import (
+    EventDataSvc,
+    EventHeaderCreator,
+    ExampleCellIDEncodingInitConsumer,
+    MetadataSvc,
+    OverlayTiming,
+    UniqueIDGenSvc,
+)
 from k4FWCore import ApplicationMgr, IOSvc
+
+ENCODING = "system:5,side:-2,layer:9,module:8,sensor:8"
 
 uid_svc = UniqueIDGenSvc("UniqueIDGenSvc")
 
@@ -31,6 +45,10 @@ iosvc.Input = "functional_producer_multiple.root"
 iosvc.Output = "overlay_output.root"
 
 header = EventHeaderCreator("EventHeaderCreator")
+
+# Stand in for an input file that carries the cellID encoding of SimTrackerHits
+metadata_svc = MetadataSvc("MetadataSvc")
+metadata_svc.StringParameters = {"SimTrackerHits__CellIDEncoding": ENCODING}
 
 overlay = OverlayTiming("OverlayTiming")
 overlay.MCParticles = "MCParticles1"
@@ -46,9 +64,16 @@ overlay.NumberBackground = [1]
 overlay.Poisson_random_NOverlay = [False]
 overlay.NBunchtrain = 1
 overlay.TimeWindows = {"SimTrackerHits": [-10000, 10000]}
+overlay.CopyCellIDMetadata = True
+
+# Fails to initialize if OverlayTiming has not published the encoding of
+# OverlaySimTrackerHits by the time this algorithm is initialized
+encoding_consumer = ExampleCellIDEncodingInitConsumer("EncodingConsumer")
+encoding_consumer.InputCollection = ["OverlaySimTrackerHits"]
+encoding_consumer.ExpectedEncoding = ENCODING
 
 ApplicationMgr(
-    TopAlg=[header, overlay],
+    TopAlg=[header, overlay, encoding_consumer],
     EvtSel="NONE",
     EvtMax=3,
     ExtSvc=[EventDataSvc("EventDataSvc"), uid_svc],

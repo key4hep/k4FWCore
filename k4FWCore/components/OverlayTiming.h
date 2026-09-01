@@ -97,7 +97,6 @@ struct OverlayTiming : public k4FWCore::MultiTransformer<retType(
   void overlayCollection(std::string collName, const podio::CollectionBase& inColl);
 
   virtual StatusCode initialize() final;
-  virtual StatusCode finalize() final;
 
   retType virtual
   operator()(const edm4hep::EventHeaderCollection& headers, const edm4hep::MCParticleCollection& mcParticles,
