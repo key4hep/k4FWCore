@@ -46,8 +46,11 @@ StatusCode IOSvc::initialize() {
     error() << "Use 'from k4FWCore import IOSvc' instead of 'from Configurables import IOSvc' to access the service"
             << endmsg;
   }
-  if (m_outputType != "default" && m_outputType != "ROOT" && m_outputType != "RNTuple") {
-    error() << "Unknown input type: " << m_outputType << ", expected ROOT, RNTuple or default" << endmsg;
+  if (m_outputType == "RNTuple") {
+    m_outputType = "rntuple";
+  }
+  if (m_outputType != "default" && m_outputType != "ROOT" && m_outputType != "rntuple") {
+    error() << "Unknown input type: " << m_outputType << ", expected ROOT, rntuple or default" << endmsg;
     return StatusCode::FAILURE;
   }
 
