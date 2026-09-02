@@ -36,7 +36,7 @@
 struct ExampleCellIDEncodingInitConsumer final
     : k4FWCore::Consumer<void(const edm4hep::SimTrackerHitCollection& input)> {
   ExampleCellIDEncodingInitConsumer(const std::string& name, ISvcLocator* svcLoc)
-      : Consumer(name, svcLoc, KeyValues("InputCollection", {"SimTrackerHits"})) {}
+      : Consumer(name, svcLoc, KeyValue("InputCollection", "SimTrackerHits")) {}
 
   StatusCode initialize() override {
     const auto collName = inputLocations("InputCollection")[0];

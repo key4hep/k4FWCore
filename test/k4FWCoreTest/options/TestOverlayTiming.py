@@ -69,7 +69,7 @@ overlay.CopyCellIDMetadata = True
 # Fails to initialize if OverlayTiming has not published the encoding of
 # OverlaySimTrackerHits by the time this algorithm is initialized
 encoding_consumer = ExampleCellIDEncodingInitConsumer("EncodingConsumer")
-encoding_consumer.InputCollection = ["OverlaySimTrackerHits"]
+encoding_consumer.InputCollection = "OverlaySimTrackerHits"
 encoding_consumer.ExpectedEncoding = ENCODING
 
 ApplicationMgr(
