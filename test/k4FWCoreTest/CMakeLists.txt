@@ -18,6 +18,7 @@ limitations under the License.
 ]]
 
 set(k4fwcoretest_plugin_sources
+  src/components/ExampleCellIDEncodingInitConsumer.cpp
   src/components/ExampleEventHeaderConsumer.cpp
   src/components/ExampleFailingConsumer.cpp
   src/components/ExampleFunctionalConsumer.cpp
