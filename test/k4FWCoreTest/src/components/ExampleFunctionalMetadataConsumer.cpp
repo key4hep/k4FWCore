@@ -30,46 +30,60 @@ struct ExampleFunctionalMetadataConsumer final : k4FWCore::Consumer<void(const e
       : Consumer(name, svcLoc, KeyValues("InputCollection", {"MCParticles"})) {}
 
   StatusCode initialize() override {
-    m_particleNum = k4FWCore::getParameter<int>("NumberOfParticles", this).value_or(0);
-    if (m_particleNum != 3) {
-      error() << "NumberOfParticles expected to be 3 but is " << m_particleNum << endmsg;
-      return StatusCode::FAILURE;
+    if (m_checkMetadata) {
+      m_particleNum = k4FWCore::getParameter<int>("NumberOfParticles", this).value_or(0);
+      if (m_particleNum != 3) {
+        error() << "NumberOfParticles expected to be 3 but is " << m_particleNum << endmsg;
+        return StatusCode::FAILURE;
+      }
+
+      m_particleTime = k4FWCore::getParameter<float>("ParticleTime", this).value_or(0);
+      if (m_particleTime != 1.5) {
+        error() << "ParticleTime expected to be 1.5 but is " << m_particleTime << endmsg;
+        return StatusCode::FAILURE;
+      }
+      m_PDGValues = k4FWCore::getParameter<std::vector<int>>("PDGValues", this).value_or(std::vector<int>{});
+      if (m_PDGValues != std::vector<int>{1, 2, 3, 4}) {
+        error() << "PDGValues expected to be {1, 2, 3, 4} but is {";
+        for (const auto& pdg : m_PDGValues) {
+          error() << pdg << ", ";
+        }
+        error() << "}" << endmsg;
+        return StatusCode::FAILURE;
+      }
+      m_metadataString = k4FWCore::getParameter<std::string>("MetadataString", this).value_or("");
+      if (m_metadataString != "hello") {
+        error() << "MetadataString expected to be 'hello' but is '" << m_metadataString << "'" << endmsg;
+        return StatusCode::FAILURE;
+      }
+      const auto collIntParam = k4FWCore::getCollectionParameter<int>("MCParticles", "CollectionIntParam", this);
+      if (!collIntParam.has_value() || collIntParam.value() != 42) {
+        error() << "CollectionIntParam expected to be 42 but got " << collIntParam.value_or(-1) << endmsg;
+        return StatusCode::FAILURE;
+      }
+      const auto cellIDEncoding = k4FWCore::getCellIDEncoding("MCParticles", this);
+      if (!cellIDEncoding.has_value() || cellIDEncoding.value() != "system:8,layer:4,module:8") {
+        error() << "CellIDEncoding expected to be 'system:8,layer:4,module:8' but got '"
+                << cellIDEncoding.value_or("<missing>") << "'" << endmsg;
+        return StatusCode::FAILURE;
+      }
     }
 
-    m_particleTime = k4FWCore::getParameter<float>("ParticleTime", this).value_or(0);
-    if (m_particleTime != 1.5) {
-      error() << "ParticleTime expected to be 1.5 but is " << m_particleTime << endmsg;
-      return StatusCode::FAILURE;
-    }
-    m_PDGValues = k4FWCore::getParameter<std::vector<int>>("PDGValues", this).value_or(std::vector<int>{});
-    if (m_PDGValues != std::vector<int>{1, 2, 3, 4}) {
-      error() << "PDGValues expected to be {1, 2, 3, 4} but is {";
-      for (const auto& pdg : m_PDGValues) {
-        error() << pdg << ", ";
+    if (!m_cellIDCollection.value().empty()) {
+      const auto cellIDEncoding = k4FWCore::getCellIDEncoding(m_cellIDCollection, this);
+      if (!cellIDEncoding.has_value() || cellIDEncoding.value() != m_expectedCellIDEncoding.value()) {
+        error() << "CellIDEncoding for " << m_cellIDCollection << " expected to be '" << m_expectedCellIDEncoding
+                << "' but got '" << cellIDEncoding.value_or("<missing>") << "'" << endmsg;
+        return StatusCode::FAILURE;
       }
-      error() << "}" << endmsg;
-      return StatusCode::FAILURE;
-    }
-    m_metadataString = k4FWCore::getParameter<std::string>("MetadataString", this).value_or("");
-    if (m_metadataString != "hello") {
-      error() << "MetadataString expected to be 'hello' but is '" << m_metadataString << "'" << endmsg;
-      return StatusCode::FAILURE;
-    }
-    const auto collIntParam = k4FWCore::getCollectionParameter<int>("MCParticles", "CollectionIntParam", this);
-    if (!collIntParam.has_value() || collIntParam.value() != 42) {
-      error() << "CollectionIntParam expected to be 42 but got " << collIntParam.value_or(-1) << endmsg;
-      return StatusCode::FAILURE;
-    }
-    const auto cellIDEncoding = k4FWCore::getCellIDEncoding("MCParticles", this);
-    if (!cellIDEncoding.has_value() || cellIDEncoding.value() != "system:8,layer:4,module:8") {
-      error() << "CellIDEncoding expected to be 'system:8,layer:4,module:8' but got '"
-              << cellIDEncoding.value_or("<missing>") << "'" << endmsg;
-      return StatusCode::FAILURE;
     }
     return StatusCode::SUCCESS;
   }
 
   void operator()(const edm4hep::MCParticleCollection& input) const override {
+    if (!m_checkMetadata) {
+      return;
+    }
     // Check that it's possible to get metadata parameters from the main loop
     auto particleNum = k4FWCore::getParameter<int>("NumberOfParticles", this).value_or(-1);
     if (input.size() != static_cast<size_t>(particleNum)) {
@@ -91,6 +105,9 @@ struct ExampleFunctionalMetadataConsumer final : k4FWCore::Consumer<void(const e
   }
 
   StatusCode finalize() override {
+    if (!m_checkMetadata) {
+      return StatusCode::SUCCESS;
+    }
     auto particleNum = k4FWCore::getParameter<int>("NumberOfParticles", this).value_or(-1);
     if (particleNum != 3) {
       error() << "NumberOfParticles expected to be 3 but is " << particleNum << endmsg;
@@ -125,6 +142,11 @@ struct ExampleFunctionalMetadataConsumer final : k4FWCore::Consumer<void(const e
   }
 
 private:
+  Gaudi::Property<bool> m_checkMetadata{this, "CheckMetadata", true, "Check the standard metadata parameters"};
+  Gaudi::Property<std::string> m_cellIDCollection{this, "CellIDCollection", "",
+                                                  "Collection whose cellID encoding is checked"};
+  Gaudi::Property<std::string> m_expectedCellIDEncoding{this, "ExpectedCellIDEncoding", "",
+                                                        "Expected cellID encoding for CellIDCollection"};
   int m_particleNum;
   float m_particleTime;
   std::string m_metadataString;

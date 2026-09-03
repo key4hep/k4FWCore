@@ -18,7 +18,6 @@ limitations under the License.
 ]]
 
 set(k4fwcoretest_plugin_sources
-  src/components/ExampleCellIDEncodingInitConsumer.cpp
   src/components/ExampleEventHeaderConsumer.cpp
   src/components/ExampleFailingConsumer.cpp
   src/components/ExampleFunctionalConsumer.cpp
@@ -36,6 +35,7 @@ set(k4fwcoretest_plugin_sources
   src/components/ExampleFunctionalProducer.cpp
   src/components/ExampleFunctionalProducerMultiple.cpp
   src/components/ExampleFunctionalProducerRuntimeCollections.cpp
+  src/components/ExampleFunctionalProducerWithTFile.cpp
   src/components/ExampleFunctionalTransformer.cpp
   src/components/ExampleFunctionalTransformerHist.cpp
   src/components/ExampleFunctionalTransformerMultiple.cpp
@@ -50,12 +50,10 @@ set(k4fwcoretest_plugin_sources
   src/components/ExampleParticleIDConsumer.cpp
   src/components/ExampleParticleIDProducer.cpp
   src/components/ExampleRNGSeedingAlg.cpp
-  src/components/k4FWCoreTest_AlgorithmWithTFile.cpp
   src/components/k4FWCoreTest_cellID_reader.cpp
   src/components/k4FWCoreTest_cellID_writer.cpp
   src/components/k4FWCoreTest_CheckExampleEventData.cpp
   src/components/k4FWCoreTest_CreateExampleEventData.cpp
-  src/components/k4FWCoreTest_CreateMarlinWrapperCollection.cpp
   src/components/k4FWCoreTest_HelloWorldAlg.cpp
   src/components/TestService.cpp
   src/components/TestUniqueIDGenSvc.cpp
