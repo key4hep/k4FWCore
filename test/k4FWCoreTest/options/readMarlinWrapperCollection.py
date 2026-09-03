@@ -20,11 +20,11 @@
 # This is an example producing, transforming and consuming data in memory
 
 from Gaudi.Configuration import INFO
-from Configurables import ExampleFunctionalConsumer, k4FWCoreTest_CreateMarlinWrapperCollection
+from Configurables import ExampleFunctionalConsumer, ExampleFunctionalProducer
 from k4FWCore import ApplicationMgr
 from Configurables import EventDataSvc
 
-producer = k4FWCoreTest_CreateMarlinWrapperCollection("Producer")
+producer = ExampleFunctionalProducer("Producer")
 consumer = ExampleFunctionalConsumer(
     "Consumer",
     InputCollection="MCParticles",
