@@ -24,7 +24,6 @@ from k4FWCore.parseArgs import parser
 from Configurables import k4FWCoreTest_CheckExampleEventData
 from k4FWCore import ApplicationMgr, IOSvc
 
-
 parser.add_argument(
     "--collections",
     action="extend",
