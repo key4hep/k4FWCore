@@ -126,8 +126,7 @@ StatusCode OverlayTiming::initialize() {
         if (value.has_value()) {
           k4FWCore::putCellIDEncoding(output[i], value.value(), this);
         } else {
-          warning() << "No metadata found for " << input[i] << " when copying CellID metadata was requested"
-                    << endmsg;
+          warning() << "No metadata found for " << input[i] << " when copying CellID metadata was requested" << endmsg;
         }
       }
     }
@@ -172,8 +171,8 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
 
   // Copy the SimTrackerHits and crop them
   for (size_t i = 0; i < simTrackerHits.size(); ++i) {
-    const auto& coll = simTrackerHits.at(i);
-    const auto name = inputLocations(SIMTRACKERHIT_INDEX_POSITION).at(i);
+    const auto& coll = simTrackerHits[i];
+    const auto name = inputLocations(SIMTRACKERHIT_INDEX_POSITION)[i];
     const auto [this_start, this_stop] = define_time_windows(name);
     auto ocoll = edm4hep::SimTrackerHitCollection();
     for (const auto&& simTrackerHit : *coll) {
@@ -192,12 +191,12 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
   // Copy the SimCalorimeterHits and crop them together with the contributions
   std::map<int, std::map<uint64_t, edm4hep::MutableSimCalorimeterHit>> cellIDsMap;
   for (size_t i = 0; i < simCaloHits.size(); ++i) {
-    const auto& coll = simCaloHits.at(i);
-    const auto name = inputLocations(SIMCALOHIT_INDEX_POSITION).at(i);
+    const auto& coll = simCaloHits[i];
+    const auto name = inputLocations(SIMCALOHIT_INDEX_POSITION)[i];
     const auto [this_start, this_stop] = define_time_windows(name);
     // operator[] on purpose: this is where the entry for this collection is created
     auto& calHitMap = cellIDsMap[i];
-    auto& caloHitContribs = ocaloHitContribs.at(i);
+    auto& caloHitContribs = ocaloHitContribs[i];
     for (const auto&& simCaloHit : *coll) {
       const float tof = time_of_flight(simCaloHit.getPosition());
       bool within_time_window = false;
@@ -273,8 +272,8 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
               << endmsg;
 
       for (int k = 0; k < NOverlay_to_this_BX; ++k) {
-        info() << "Overlaying background event " << m_bkgEvents->m_nextEntry[groupIndex] << " from group "
-               << groupIndex << " to BX " << bxInTrain << endmsg;
+        info() << "Overlaying background event " << m_bkgEvents->m_nextEntry[groupIndex] << " from group " << groupIndex
+               << " to BX " << bxInTrain << endmsg;
         if (m_bkgEvents->m_nextEntry[groupIndex] >= m_bkgEvents->m_totalNumberOfEvents[groupIndex] &&
             !m_allowReusingBackgroundFiles) {
           throw GaudiException("No more events in background file", name(), StatusCode::FAILURE);
@@ -336,7 +335,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
         }
 
         for (size_t i = 0; i < simTrackerHits.size(); ++i) {
-          const auto name = inputLocations(SIMTRACKERHIT_INDEX_POSITION).at(i);
+          const auto name = inputLocations(SIMTRACKERHIT_INDEX_POSITION)[i];
           debug() << "Processing collection " << name << endmsg;
           if (std::find(availableCollections.begin(), availableCollections.end(), name) == availableCollections.end()) {
             warning() << "Collection " << name << " not found in background event" << endmsg;
@@ -348,7 +347,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
             info() << "Skipping collection " << name << " as it is not in the integration window" << endmsg;
             continue;
           }
-          auto& ocoll = osimTrackerHits.at(i);
+          auto& ocoll = osimTrackerHits[i];
           for (const auto&& simTrackerHit : backgroundEvent.get<edm4hep::SimTrackerHitCollection>(name)) {
             const float tof = time_of_flight(simTrackerHit.getPosition());
 
@@ -368,7 +367,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
         }
 
         for (size_t i = 0; i < simCaloHits.size(); ++i) {
-          const auto name = inputLocations(SIMCALOHIT_INDEX_POSITION).at(i);
+          const auto name = inputLocations(SIMCALOHIT_INDEX_POSITION)[i];
           debug() << "Processing collection " << name << endmsg;
           if (std::find(availableCollections.begin(), availableCollections.end(), name) == availableCollections.end()) {
             warning() << "Collection " << name << " not found in background event" << endmsg;
@@ -381,8 +380,8 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
             continue;
           }
 
-          auto& calHitMap = cellIDsMap.at(i);
-          auto& calHitContribs = ocaloHitContribs.at(i);
+          auto& calHitMap = cellIDsMap[i];
+          auto& calHitContribs = ocaloHitContribs[i];
           for (const auto&& simCaloHit : backgroundEvent.get<edm4hep::SimCalorimeterHitCollection>(name)) {
             if (calHitMap.find(simCaloHit.getCellID()) == calHitMap.end()) {
               // There is no hit at this position. The new hit can be added, if it is not outside the window
@@ -410,7 +409,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
               }
             } else {
               // there is already a hit at this position
-              auto& calhit = calHitMap.at(simCaloHit.getCellID());
+              auto& calhit = calHitMap[simCaloHit.getCellID()];
               for (const auto& contrib : simCaloHit.getContributions()) {
                 if ((contrib.getTime() + timeOffset > this_start) && (contrib.getTime() + timeOffset < this_stop)) {
                   // TODO: Make sure a contribution is not added twice
