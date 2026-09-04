@@ -89,7 +89,7 @@ StatusCode OverlayTiming::initialize() {
     if (val == 0) {
       std::string err = "No events found in the background files";
       for (auto& file : m_inputFileNames.value()) {
-        err += " " + file.at(0);
+        err += " " + file[0];
       }
       error() << err << endmsg;
       return StatusCode::FAILURE;
@@ -122,11 +122,11 @@ StatusCode OverlayTiming::initialize() {
          {std::make_pair(inputLocations("SimTrackerHits"), outputLocations("OutputSimTrackerHits")),
           std::make_pair(inputLocations("SimCalorimeterHits"), outputLocations("OutputSimCalorimeterHits"))}) {
       for (size_t i = 0; i < input.size(); ++i) {
-        const auto value = k4FWCore::getCellIDEncoding(input.at(i), this);
+        const auto value = k4FWCore::getCellIDEncoding(input[i], this);
         if (value.has_value()) {
-          k4FWCore::putCellIDEncoding(output.at(i), value.value(), this);
+          k4FWCore::putCellIDEncoding(output[i], value.value(), this);
         } else {
-          warning() << "No metadata found for " << input.at(i) << " when copying CellID metadata was requested"
+          warning() << "No metadata found for " << input[i] << " when copying CellID metadata was requested"
                     << endmsg;
         }
       }
@@ -247,7 +247,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
 
     // TODO: Check that there is anything to overlay
 
-    debug() << "Starting overlay at event: " << m_bkgEvents->m_nextEntry.at(groupIndex) << " for the background group "
+    debug() << "Starting overlay at event: " << m_bkgEvents->m_nextEntry[groupIndex] << " for the background group "
             << groupIndex << endmsg;
 
     if (m_startWithBackgroundEvent >= 0) {
@@ -259,30 +259,30 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
 
     // Overlay the background events to each bunchcrossing in the bunch train
     for (int bxInTrain = 0; bxInTrain < m_NBunchTrain; ++bxInTrain) {
-      const int BX_number_in_train = permutation.at(bxInTrain);
+      const int BX_number_in_train = permutation[bxInTrain];
 
       int NOverlay_to_this_BX = 0;
 
-      if (m_Poisson.value().at(groupIndex)) {
-        NOverlay_to_this_BX = std::poisson_distribution<>(m_Noverlay.value().at(groupIndex))(rng_engine);
+      if (m_Poisson.value()[groupIndex]) {
+        NOverlay_to_this_BX = std::poisson_distribution<>(m_Noverlay.value()[groupIndex])(rng_engine);
       } else {
-        NOverlay_to_this_BX = m_Noverlay.value().at(groupIndex);
+        NOverlay_to_this_BX = m_Noverlay.value()[groupIndex];
       }
 
       debug() << "Will overlay " << NOverlay_to_this_BX << " events to BX number " << BX_number_in_train + physBX
               << endmsg;
 
       for (int k = 0; k < NOverlay_to_this_BX; ++k) {
-        info() << "Overlaying background event " << m_bkgEvents->m_nextEntry.at(groupIndex) << " from group "
+        info() << "Overlaying background event " << m_bkgEvents->m_nextEntry[groupIndex] << " from group "
                << groupIndex << " to BX " << bxInTrain << endmsg;
-        if (m_bkgEvents->m_nextEntry.at(groupIndex) >= m_bkgEvents->m_totalNumberOfEvents.at(groupIndex) &&
+        if (m_bkgEvents->m_nextEntry[groupIndex] >= m_bkgEvents->m_totalNumberOfEvents[groupIndex] &&
             !m_allowReusingBackgroundFiles) {
           throw GaudiException("No more events in background file", name(), StatusCode::FAILURE);
         }
         const auto backgroundEvent =
-            m_bkgEvents->m_rootFileReaders.at(groupIndex).readEvent(m_bkgEvents->m_nextEntry.at(groupIndex));
-        m_bkgEvents->m_nextEntry.at(groupIndex)++;
-        m_bkgEvents->m_nextEntry.at(groupIndex) %= m_bkgEvents->m_totalNumberOfEvents.at(groupIndex);
+            m_bkgEvents->m_rootFileReaders[groupIndex].readEvent(m_bkgEvents->m_nextEntry[groupIndex]);
+        m_bkgEvents->m_nextEntry[groupIndex]++;
+        m_bkgEvents->m_nextEntry[groupIndex] %= m_bkgEvents->m_totalNumberOfEvents[groupIndex];
         const auto availableCollections = backgroundEvent.getAvailableCollections();
 
         // Either 0 or negative
