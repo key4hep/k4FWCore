@@ -140,7 +140,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
                                   const edm4hep::MCParticleCollection& particles,
                                   const std::vector<const edm4hep::SimTrackerHitCollection*>& simTrackerHits,
                                   const std::vector<const edm4hep::SimCalorimeterHitCollection*>& simCaloHits) const {
-  const auto seed = m_uidSvc->getUniqueID(headers.at(0).getEventNumber(), headers.at(0).getRunNumber(), this->name());
+  const auto seed = m_uidSvc->getUniqueID(headers[0].getEventNumber(), headers[0].getRunNumber(), this->name());
   auto rng_engine = std::mt19937(seed);
 
   // Output collections
