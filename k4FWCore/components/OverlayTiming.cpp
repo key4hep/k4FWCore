@@ -60,7 +60,7 @@ inline int mapped_particle_index(const std::map<int, int>& oldToNewMap, int oldI
 
 std::pair<float, float> OverlayTiming::define_time_windows(const std::string& collection_name) const {
   try {
-    return {m_timeWindows.value().at(collection_name).at(0), m_timeWindows.value().at(collection_name).at(1)};
+    return {m_timeWindows.value().at(collection_name)[0], m_timeWindows.value().at(collection_name)[1]};
   } catch (const std::out_of_range& e) {
     error() << "No time window defined for collection " << collection_name << endmsg;
     throw e;
