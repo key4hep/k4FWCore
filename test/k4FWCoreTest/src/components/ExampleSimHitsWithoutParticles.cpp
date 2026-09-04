@@ -32,7 +32,7 @@
 // when the background particles were not kept, and it is also simply what a
 // SimCalorimeterHit built without a particle looks like. OverlayTiming has to
 // leave such relations unset instead of indexing its particle collection with the
-// -1 of the unset ObjectID.
+// negative index of the unset ObjectID.
 
 using retType = std::tuple<edm4hep::MCParticleCollection, edm4hep::SimTrackerHitCollection,
                            edm4hep::SimCalorimeterHitCollection, edm4hep::CaloHitContributionCollection>;
