@@ -208,8 +208,6 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
         within_time_window = true;
         // TODO: Make sure a contribution is not added twice
         auto newContrib = contrib.clone(false);
-        // The contribution may have no particle attached, in which case the
-        // relation is left unset rather than indexed with a negative index.
         if (const auto index = contrib.getParticle().getObjectID().index; index >= 0) {
           newContrib.setParticle(oparticles.at(index));
         }
