@@ -256,14 +256,14 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
 
     // Overlay the background events to each bunchcrossing in the bunch train
     for (int bxInTrain = 0; bxInTrain < m_NBunchTrain; ++bxInTrain) {
-      const int BX_number_in_train = permutation[bxInTrain];
+      const int BX_number_in_train = permutation.at(bxInTrain);  
+      
+      int NOverlay_to_this_BX = 0;  
 
-      int NOverlay_to_this_BX = 0;
-
-      if (m_Poisson.value()[groupIndex]) {
-        NOverlay_to_this_BX = std::poisson_distribution<>(m_Noverlay.value()[groupIndex])(rng_engine);
-      } else {
-        NOverlay_to_this_BX = m_Noverlay.value()[groupIndex];
+      if (m_Poisson.value()[groupIndex]) {  
+        NOverlay_to_this_BX = std::poisson_distribution<>(m_Noverlay[groupIndex])(rng_engine);  
+      } else {  
+        NOverlay_to_this_BX = m_Noverlay[groupIndex];  
       }
 
       debug() << "Will overlay " << NOverlay_to_this_BX << " events to BX number " << BX_number_in_train + physBX
@@ -297,15 +297,15 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
         const auto& bgParticles = backgroundEvent.get<edm4hep::MCParticleCollection>(m_MCParticleCollectionName);
         int j = oparticles.size();
         for (size_t i = 0; i < bgParticles.size(); ++i) {
-          auto npart = bgParticles.at(i).clone(false);
+          auto npart = bgParticles.[i]].clone(false);  
 
-          npart.setTime(bgParticles.at(i).getTime() + timeOffset);
-          npart.setOverlay(true);
-          oparticles.push_back(npart);
-          for (const auto& parent : bgParticles.at(i).getParents()) {
-            parentDaughterMap[j].first.push_back(parent.getObjectID().index);
-          }
-          for (const auto& daughter : bgParticles.at(i).getDaughters()) {
+          npart.setTime(bgParticles.[i].getTime() + timeOffset);  
+          npart.setOverlay(true);  
+          oparticles.push_back(npart);  
+          for (const auto& parent : bgParticles.[i].getParents()) {  
+            parentDaughterMap[j].first.push_back(parent.getObjectID().index);  
+          }  
+          for (const auto& daughter : bgParticles.[i].getDaughters()) {  
             parentDaughterMap[j].second.push_back(daughter.getObjectID().index);
           }
           oldToNewMap[i] = j;
