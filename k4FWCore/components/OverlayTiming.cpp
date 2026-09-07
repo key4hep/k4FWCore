@@ -43,13 +43,9 @@ inline float time_of_flight(const T& pos) {
   return std::sqrt((pos[0] * pos[0]) + (pos[1] * pos[1]) + (pos[2] * pos[2])) / TMath::C() * 1e6;
 }
 
-// Index of the copied background particle a relation should point at, or -1 when
-// the relation has to be left unset. An unset relation is any negative index, both
-// podio::ObjectID::untracked (-1) and podio::ObjectID::invalid (-2), which is why
-// oldIndex is tested against 0 rather than against -1. std::map::operator[] cannot
-// be used for the lookup either: it default-constructs a 0 for a missing key, which
-// would silently attach the hit to the first particle of the background event
-// instead of leaving the relation unset.
+// Index of the copied background particle a relation should point at, or <0 when
+// the relation has to be left unset. An unset relation could be both
+// podio::ObjectID::untracked (-1) and podio::ObjectID::invalid (-2).
 inline int mapped_particle_index(const std::map<int, int>& oldToNewMap, int oldIndex) {
   if (oldIndex < 0) {
     return -1;
