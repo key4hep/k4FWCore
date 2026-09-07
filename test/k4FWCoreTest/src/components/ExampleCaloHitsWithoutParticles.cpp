@@ -25,12 +25,7 @@
 #include <string>
 #include <tuple>
 
-// Produces calorimeter hits whose contributions have no MCParticle set. This is
-// what the hits of an event that has already been through an overlay look like
-// when the background particles were not kept, and it is also simply what a
-// contribution built without a particle looks like. OverlayTiming has to leave
-// such relations unset instead of indexing its particle collection with the
-// negative index of the unset ObjectID.
+// Produces calorimeter hits whose contributions have no MCParticle set.
 
 using retType = std::tuple<edm4hep::SimCalorimeterHitCollection, edm4hep::CaloHitContributionCollection>;
 
