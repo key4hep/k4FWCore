@@ -362,6 +362,10 @@ check_collections(
         "Links",
         "OverlayMCParticles",
         "OverlaySimTrackerHits",
+        "OverlayCaloHitContributions",
+        "OverlaySimCalorimeterHits",
+        "SimCalorimeterHits",
+        "CaloHitContributions"
     ],
 )
 
