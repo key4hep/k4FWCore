@@ -18,6 +18,7 @@ limitations under the License.
 ]]
 
 set(k4fwcoretest_plugin_sources
+  src/components/ExampleCaloHitsWithoutParticles.cpp
   src/components/ExampleCellIDEncodingInitConsumer.cpp
   src/components/ExampleEventHeaderConsumer.cpp
   src/components/ExampleFailingConsumer.cpp
@@ -36,7 +37,6 @@ set(k4fwcoretest_plugin_sources
   src/components/ExampleFunctionalProducer.cpp
   src/components/ExampleFunctionalProducerMultiple.cpp
   src/components/ExampleFunctionalProducerRuntimeCollections.cpp
-  src/components/ExampleSimHitsWithoutParticles.cpp
   src/components/ExampleFunctionalTransformer.cpp
   src/components/ExampleFunctionalTransformerHist.cpp
   src/components/ExampleFunctionalTransformerMultiple.cpp
@@ -274,9 +274,6 @@ add_test_fwcore(InvalidOutputCommandsNoCrash options/invalidOutputCommandsNoCras
 set_tests_properties(InvalidOutputCommandsNoCrash PROPERTIES FIXTURES_REQUIRED ProducerFile PASS_REGULAR_EXPRESSION "ERROR 'abc' is not a valid command for the KeepDropSwitch")
 
 add_test_fwcore(OverlayTiming options/TestOverlayTiming.py ADD_TO_CHECK_FILES PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile)
-
-add_test_fwcore(SimHitsWithoutParticles options/ExampleSimHitsWithoutParticles.py ADD_TO_CHECK_FILES PROPERTIES FIXTURES_SETUP SimHitsWithoutParticlesFile)
-add_test_fwcore(OverlayTimingNoParticles options/TestOverlayTimingNoParticles.py ADD_TO_CHECK_FILES PROPERTIES FIXTURES_REQUIRED SimHitsWithoutParticlesFile)
 
 add_test(NAME check_broken_pipe
          COMMAND bash -c "[ $(${K4RUN} options/ExampleFunctionalProducer.py | head -n 2 | wc -l) = 2 ]"
