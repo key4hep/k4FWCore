@@ -18,7 +18,12 @@
 #
 
 # Tests the OverlayTiming algorithm using functional_producer_multiple.root as
-# both signal and background. MCParticles and SimTrackerHits are overlaid.
+# both signal and background. SimTrackerHits and SimCalorimeterHits, plus their
+# relation-free counterparts, are overlaid.
+#
+# Indexing the output particle collection with the -1 of an unset ObjectID used
+# to produce a broken relation that crashed when the contributions were written
+# out.
 #
 # It also covers CopyCellIDMetadata: the encoding of the input collection is
 # pre-filled into the metadata, and ExampleCellIDEncodingInitConsumer checks
@@ -46,24 +51,49 @@ iosvc.Output = "overlay_output.root"
 
 header = EventHeaderCreator("EventHeaderCreator")
 
-# Stand in for an input file that carries the cellID encoding of SimTrackerHits
+# Stand in for an input file that carries the cellID encoding of the hits
 metadata_svc = MetadataSvc("MetadataSvc")
-metadata_svc.StringParameters = {"SimTrackerHits__CellIDEncoding": ENCODING}
+metadata_svc.StringParameters = {
+    "SimTrackerHits__CellIDEncoding": ENCODING,
+    "SimTrackerHitsWithoutParticleRelations__CellIDEncoding": ENCODING,
+    "SimCalorimeterHits__CellIDEncoding": ENCODING,
+    "SimCalorimeterHitsWithoutParticleRelations__CellIDEncoding": ENCODING,
+}
 
 overlay = OverlayTiming("OverlayTiming")
 overlay.MCParticles = "MCParticles1"
-overlay.SimTrackerHits = ["SimTrackerHits"]
-overlay.SimCalorimeterHits = []
+overlay.SimTrackerHits = [
+    "SimTrackerHits",
+    "SimTrackerHitsWithoutParticleRelations",
+]
+overlay.SimCalorimeterHits = [
+    "SimCalorimeterHits",
+    "SimCalorimeterHitsWithoutParticleRelations",
+]
 overlay.OutputMCParticles = "OverlayMCParticles"
-overlay.OutputSimTrackerHits = ["OverlaySimTrackerHits"]
-overlay.OutputSimCalorimeterHits = []
-overlay.OutputCaloHitContributions = []
+overlay.OutputSimTrackerHits = [
+    "OverlaySimTrackerHits",
+    "OverlaySimTrackerHitsWithoutParticleRelations",
+]
+overlay.OutputSimCalorimeterHits = [
+    "OverlaySimCalorimeterHits",
+    "OverlaySimCalorimeterHitsWithoutParticleRelations",
+]
+overlay.OutputCaloHitContributions = [
+    "OverlayCaloHitContributions",
+    "OverlayCaloHitContributionsWithoutParticleRelations",
+]
 overlay.BackgroundMCParticleCollectionName = "MCParticles1"
 overlay.BackgroundFileNames = [["functional_producer_multiple.root"]]
 overlay.NumberBackground = [1]
 overlay.Poisson_random_NOverlay = [False]
 overlay.NBunchtrain = 1
-overlay.TimeWindows = {"SimTrackerHits": [-10000, 10000]}
+overlay.TimeWindows = {
+    "SimTrackerHits": [-10000, 10000],
+    "SimTrackerHitsWithoutParticleRelations": [-10000, 10000],
+    "SimCalorimeterHits": [-10000, 10000],
+    "SimCalorimeterHitsWithoutParticleRelations": [-10000, 10000],
+}
 overlay.CopyCellIDMetadata = True
 
 # Fails to initialize if OverlayTiming has not published the encoding of

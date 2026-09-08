@@ -66,6 +66,19 @@ producer2 = ExampleFunctionalProducerMultiple(
     ExampleInt=5,
 )
 
+for index, producer in enumerate((producer0, producer1, producer2)):
+    producer.OutputCollectionSimTrackerHitsWithoutParticleRelations = [
+        f"SimTrackerHitsWithoutParticleRelations{index}"
+    ]
+    producer.OutputCollectionSimCalorimeterHits = [f"SimCalorimeterHits{index}"]
+    producer.OutputCollectionCaloHitContributions = [f"CaloHitContributions{index}"]
+    producer.OutputCollectionSimCalorimeterHitsWithoutParticleRelations = [
+        f"SimCalorimeterHitsWithoutParticleRelations{index}"
+    ]
+    producer.OutputCollectionCaloHitContributionsWithoutParticleRelations = [
+        f"CaloHitContributionsWithoutParticleRelations{index}"
+    ]
+
 consumer = ExampleFunctionalConsumerRuntimeCollectionsMultiple(
     "Consumer",
     Particles=[
