@@ -21,9 +21,11 @@
 
 #include "k4FWCore/Producer.h"
 
+#include "edm4hep/CaloHitContributionCollection.h"
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/RecoMCParticleLinkCollection.h"
 #include "edm4hep/ReconstructedParticleCollection.h"
+#include "edm4hep/SimCalorimeterHitCollection.h"
 #include "edm4hep/SimTrackerHitCollection.h"
 #include "edm4hep/TrackCollection.h"
 #include "edm4hep/TrackerHit3DCollection.h"
@@ -35,7 +37,9 @@
 
 using retType =
     std::tuple<podio::UserDataCollection<float>, edm4hep::MCParticleCollection, edm4hep::MCParticleCollection,
-               edm4hep::SimTrackerHitCollection, edm4hep::TrackerHit3DCollection, edm4hep::TrackCollection,
+               edm4hep::SimTrackerHitCollection, edm4hep::SimTrackerHitCollection, edm4hep::SimCalorimeterHitCollection,
+               edm4hep::CaloHitContributionCollection, edm4hep::SimCalorimeterHitCollection,
+               edm4hep::CaloHitContributionCollection, edm4hep::TrackerHit3DCollection, edm4hep::TrackCollection,
                edm4hep::ReconstructedParticleCollection, edm4hep::RecoMCParticleLinkCollection>;
 
 struct ExampleFunctionalProducerMultiple final : k4FWCore::Producer<retType()> {
@@ -47,6 +51,14 @@ struct ExampleFunctionalProducerMultiple final : k4FWCore::Producer<retType()> {
                   KeyValues("OutputCollectionParticles1", {"MCParticles1"}),
                   KeyValues("OutputCollectionParticles2", {"MCParticles2"}),
                   KeyValues("OutputCollectionSimTrackerHits", {"SimTrackerHits"}),
+                  KeyValues("OutputCollectionSimTrackerHitsWithoutParticleRelations",
+                            {"SimTrackerHitsWithoutParticleRelations"}),
+                  KeyValues("OutputCollectionSimCalorimeterHits", {"SimCalorimeterHits"}),
+                  KeyValues("OutputCollectionCaloHitContributions", {"CaloHitContributions"}),
+                  KeyValues("OutputCollectionSimCalorimeterHitsWithoutParticleRelations",
+                            {"SimCalorimeterHitsWithoutParticleRelations"}),
+                  KeyValues("OutputCollectionCaloHitContributionsWithoutParticleRelations",
+                            {"CaloHitContributionsWithoutParticleRelations"}),
                   KeyValues("OutputCollectionTrackerHits", {"TrackerHits"}),
                   KeyValues("OutputCollectionTracks", {"Tracks"}),
                   KeyValues("OutputCollectionRecoParticles", {"RecoParticles"}),
@@ -70,6 +82,41 @@ struct ExampleFunctionalProducerMultiple final : k4FWCore::Producer<retType()> {
     auto simTrackerHits = edm4hep::SimTrackerHitCollection();
     auto hit = simTrackerHits.create();
     hit.setPosition({3, 4, 5});
+    hit.setParticle(part1);
+
+    auto simTrackerHitsWithoutParticleRelations = edm4hep::SimTrackerHitCollection();
+    auto hitWithoutParticleRelations = simTrackerHitsWithoutParticleRelations.create();
+    hitWithoutParticleRelations.setPosition({3, 4, 5});
+
+    auto simCaloHits = edm4hep::SimCalorimeterHitCollection();
+    auto contributions = edm4hep::CaloHitContributionCollection();
+    for (int i = 0; i < 3; ++i) {
+      auto contribution = contributions.create();
+      contribution.setEnergy(1.f);
+      contribution.setTime(1.f);
+      contribution.setParticle(part1);
+
+      auto caloHit = simCaloHits.create();
+      caloHit.setCellID(i + 1);
+      caloHit.setEnergy(1.f);
+      caloHit.setPosition({0, 0, 0});
+      caloHit.addToContributions(contribution);
+    }
+
+    auto simCaloHitsWithoutParticleRelations = edm4hep::SimCalorimeterHitCollection();
+    auto contributionsWithoutParticleRelations = edm4hep::CaloHitContributionCollection();
+    for (int i = 0; i < 3; ++i) {
+      // No setParticle call: the relation stays unset.
+      auto contribution = contributionsWithoutParticleRelations.create();
+      contribution.setEnergy(1.f);
+      contribution.setTime(1.f);
+
+      auto caloHit = simCaloHitsWithoutParticleRelations.create();
+      caloHit.setCellID(i + 1);
+      caloHit.setEnergy(1.f);
+      caloHit.setPosition({0, 0, 0});
+      caloHit.addToContributions(contribution);
+    }
 
     auto trackerHits = edm4hep::TrackerHit3DCollection();
     auto trackerHit = trackerHits.create();
@@ -102,9 +149,11 @@ struct ExampleFunctionalProducerMultiple final : k4FWCore::Producer<retType()> {
       link.setTo(particles[i]);
     }
 
-    return std::make_tuple(std::move(floatVector), std::move(particles), edm4hep::MCParticleCollection(),
-                           std::move(simTrackerHits), std::move(trackerHits), std::move(tracks), std::move(recos),
-                           std::move(links));
+    return std::make_tuple(
+        std::move(floatVector), std::move(particles), edm4hep::MCParticleCollection(), std::move(simTrackerHits),
+        std::move(simTrackerHitsWithoutParticleRelations), std::move(simCaloHits), std::move(contributions),
+        std::move(simCaloHitsWithoutParticleRelations), std::move(contributionsWithoutParticleRelations),
+        std::move(trackerHits), std::move(tracks), std::move(recos), std::move(links));
   }
 
 private:

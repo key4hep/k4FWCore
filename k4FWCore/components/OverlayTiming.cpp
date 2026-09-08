@@ -256,7 +256,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
 
       int NOverlay_to_this_BX = 0;
 
-      if (m_Poisson.value()[groupIndex]) {
+      if (m_Poisson[groupIndex]) {
         NOverlay_to_this_BX = std::poisson_distribution<>(m_Noverlay[groupIndex])(rng_engine);
       } else {
         NOverlay_to_this_BX = m_Noverlay[groupIndex];

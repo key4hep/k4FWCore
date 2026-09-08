@@ -54,6 +54,17 @@ producer_functional = ExampleFunctionalProducerMultiple(
     OutputCollectionParticles1=["FunctionalMCParticles"],
     OutputCollectionParticles2=["FunctionalMCParticles2"],
     OutputCollectionSimTrackerHits=["FunctionalSimTrackerHits"],
+    OutputCollectionSimTrackerHitsWithoutParticleRelations=[
+        "FunctionalSimTrackerHitsWithoutParticleRelations"
+    ],
+    OutputCollectionSimCalorimeterHits=["FunctionalSimCalorimeterHits"],
+    OutputCollectionCaloHitContributions=["FunctionalCaloHitContributions"],
+    OutputCollectionSimCalorimeterHitsWithoutParticleRelations=[
+        "FunctionalSimCalorimeterHitsWithoutParticleRelations"
+    ],
+    OutputCollectionCaloHitContributionsWithoutParticleRelations=[
+        "FunctionalCaloHitContributionsWithoutParticleRelations"
+    ],
     OutputCollectionTrackerHits=["FunctionalTrackerHits"],
     OutputCollectionTracks=["FunctionalTracks"],
     OutputCollectionRecoParticles=["FunctionalRecos"],
