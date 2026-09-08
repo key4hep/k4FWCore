@@ -44,14 +44,12 @@ inline float time_of_flight(const T& pos) {
 }
 
 // Index of the copied background particle a relation should point at, or <0 when
-// the relation has to be left unset. An unset relation could be both
-// podio::ObjectID::untracked (-1) and podio::ObjectID::invalid (-2).
-inline int mapped_particle_index(const std::map<int, int>& oldToNewMap, int oldIndex) {
-  if (oldIndex < 0) {
-    return -1;
-  }
-  const auto it = oldToNewMap.find(oldIndex);
-  return it == oldToNewMap.end() ? -1 : it->second;
+// the relation has to be left unset. The background particles are copied in
+// order, so the copy of background particle oldIndex sits at offset + oldIndex.
+// An index outside the background collection leaves the relation unset, which
+// covers both podio::ObjectID::untracked (-1) and podio::ObjectID::invalid (-2).
+inline int overlaid_particle_index(int oldIndex, int offset, int nBgParticles) {
+  return (oldIndex >= 0 && oldIndex < nBgParticles) ? offset + oldIndex : -1;
 }
 
 std::pair<float, float> OverlayTiming::define_time_windows(const std::string& collection_name) const {
@@ -286,45 +284,33 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
           warning() << "Collection " << m_MCParticleCollectionName << " not found in background event" << endmsg;
         }
 
-        // To fix the relations we will need to have a map from old to new particle index
-        std::map<int, int> oldToNewMap;
-        std::map<int, std::pair<std::vector<int>, std::vector<int>>> parentDaughterMap;
-
         const auto& bgParticles = backgroundEvent.get<edm4hep::MCParticleCollection>(m_MCParticleCollectionName);
-        int j = oparticles.size();
-        for (size_t i = 0; i < bgParticles.size(); ++i) {
-          auto npart = bgParticles[i].clone(false);
+        // The background particles are copied in order, so the copy of background
+        // particle i ends up at offset + i and no old-to-new index map is needed.
+        const int offset = static_cast<int>(oparticles.size());
+        const int nBgParticles = static_cast<int>(bgParticles.size());
 
+        for (int i = 0; i < nBgParticles; ++i) {
+          auto npart = bgParticles[i].clone(false);
           npart.setTime(bgParticles[i].getTime() + timeOffset);
           npart.setOverlay(true);
           oparticles.push_back(npart);
+        }
+
+        // The relations can only be wired up once every particle has been copied.
+        // Relations pointing outside the background collection are left unset.
+        for (int i = 0; i < nBgParticles; ++i) {
           for (const auto& parent : bgParticles[i].getParents()) {
-            parentDaughterMap[j].first.push_back(parent.getObjectID().index);
+            if (const auto index = overlaid_particle_index(parent.getObjectID().index, offset, nBgParticles);
+                index >= 0) {
+              oparticles.at(offset + i).addToParents(oparticles.at(index));
+            }
           }
           for (const auto& daughter : bgParticles[i].getDaughters()) {
-            parentDaughterMap[j].second.push_back(daughter.getObjectID().index);
-          }
-          oldToNewMap[i] = j;
-          j++;
-        }
-        for (const auto& [index, parentsDaughters] : parentDaughterMap) {
-          const auto& [parents, daughters] = parentsDaughters;
-          for (const auto& parent : parents) {
-            const auto newIndex = mapped_particle_index(oldToNewMap, parent);
-            if (newIndex < 0 || parentDaughterMap.find(newIndex) == parentDaughterMap.end()) {
-              // warning() << "Parent " << parent << " not found in background event" << endmsg;
-              continue;
+            if (const auto index = overlaid_particle_index(daughter.getObjectID().index, offset, nBgParticles);
+                index >= 0) {
+              oparticles.at(offset + i).addToDaughters(oparticles.at(index));
             }
-            oparticles.at(index).addToParents(oparticles.at(newIndex));
-          }
-          for (const auto& daughter : daughters) {
-            const auto newIndex = mapped_particle_index(oldToNewMap, daughter);
-            if (newIndex < 0 || parentDaughterMap.find(newIndex) == parentDaughterMap.end()) {
-              // warning() << "Parent " << daughter << " not found in background event" << endmsg;
-              continue;
-            }
-            // info() << "Adding (daughter) " << daughter << " to " << index << endmsg;
-            oparticles.at(index).addToDaughters(oparticles.at(newIndex));
           }
         }
 
@@ -352,7 +338,8 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
             auto nhit = simTrackerHit.clone(false);
             nhit.setOverlay(true);
             nhit.setTime(simTrackerHit.getTime() + timeOffset);
-            if (const auto index = mapped_particle_index(oldToNewMap, simTrackerHit.getParticle().getObjectID().index);
+            if (const auto index =
+                    overlaid_particle_index(simTrackerHit.getParticle().getObjectID().index, offset, nBgParticles);
                 index >= 0) {
               nhit.setParticle(oparticles.at(index));
             }
@@ -386,7 +373,8 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
                   add = true;
                   // TODO: Make sure a contribution is not added twice
                   auto newContrib = contrib.clone(false);
-                  if (const auto index = mapped_particle_index(oldToNewMap, contrib.getParticle().getObjectID().index);
+                  if (const auto index =
+                          overlaid_particle_index(contrib.getParticle().getObjectID().index, offset, nBgParticles);
                       index >= 0) {
                     newContrib.setParticle(oparticles.at(index));
                   }
@@ -408,7 +396,8 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
                 if ((contrib.getTime() + timeOffset > this_start) && (contrib.getTime() + timeOffset < this_stop)) {
                   // TODO: Make sure a contribution is not added twice
                   auto newContrib = contrib.clone(false);
-                  if (const auto index = mapped_particle_index(oldToNewMap, contrib.getParticle().getObjectID().index);
+                  if (const auto index =
+                          overlaid_particle_index(contrib.getParticle().getObjectID().index, offset, nBgParticles);
                       index >= 0) {
                     newContrib.setParticle(oparticles.at(index));
                   }
