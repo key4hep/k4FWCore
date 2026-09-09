@@ -24,7 +24,7 @@ jobs:
           # include paths. Configure-only, no compilation needed. Tests are
           # enabled by default so the test components are also in the database.
           cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-            -DCMAKE_CXX_COMPILER=clang++
+            -DCMAKE_CXX_COMPILER=g++
           pre-commit run --show-diff-on-failure \
             --color=always \
             --all-files
