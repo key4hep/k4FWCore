@@ -32,11 +32,11 @@
 #include <string>
 #include <tuple>
 
-using retType =
+using TFileProducerReturnType =
     std::tuple<podio::UserDataCollection<float>, edm4hep::MCParticleCollection, edm4hep::SimTrackerHitCollection>;
 
 /// Produces framework data while managing a user-declared ROOT file.
-struct ExampleFunctionalProducerWithTFile final : k4FWCore::Producer<retType()> {
+struct ExampleFunctionalProducerWithTFile final : k4FWCore::Producer<TFileProducerReturnType()> {
   ExampleFunctionalProducerWithTFile(const std::string& name, ISvcLocator* svcLoc)
       : Producer(name, svcLoc, {},
                  {KeyValue("OutputCollectionFloat", "VectorFloat"),
@@ -58,7 +58,7 @@ struct ExampleFunctionalProducerWithTFile final : k4FWCore::Producer<retType()> 
     return StatusCode::SUCCESS;
   }
 
-  retType operator()() const override {
+  TFileProducerReturnType operator()() const override {
     auto floatVector = podio::UserDataCollection<float>();
     floatVector.push_back(125.);
     floatVector.push_back(25.);

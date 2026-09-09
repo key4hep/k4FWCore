@@ -33,6 +33,7 @@ set(k4fwcoretest_plugin_sources
   src/components/ExampleFunctionalMetadataProducer.cpp
   src/components/ExampleToolFunctional.cpp
   src/components/ExampleFunctionalProducer.cpp
+  src/components/ExampleFunctionalProducerWithMarlinWrapper.cpp
   src/components/ExampleFunctionalProducerMultiple.cpp
   src/components/ExampleFunctionalProducerRuntimeCollections.cpp
   src/components/ExampleFunctionalProducerWithTFile.cpp
