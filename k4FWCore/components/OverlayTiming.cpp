@@ -36,6 +36,7 @@
 #include <cassert>
 #include <filesystem>
 #include <limits>
+#include <numeric>
 #include <random>
 #include <utility>
 #include <vector>
@@ -265,6 +266,14 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
     }
     std::shuffle(permutation.begin(), permutation.end(), rng_engine);
 
+    // In random-mix mode the files of the group are drawn in a random order.
+    // In sequential mode the file index is ignored, so this stays trivial.
+    std::vector<int> fileIndices(m_bkgEvents->m_fileNames[groupIndex].size());
+    std::iota(fileIndices.begin(), fileIndices.end(), 0);
+    if (m_randomMix) {
+      std::shuffle(fileIndices.begin(), fileIndices.end(), rng_engine);
+    }
+
     // TODO: Check that there is anything to overlay
 
     debug() << "Starting overlay at event: " << m_bkgEvents->m_nextEntry[groupIndex].front()
@@ -279,7 +288,12 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
       }
     }
 
-    // Overlay the background events to each bunchcrossing in the bunch train
+    // Overlay the background events to each bunchcrossing in the bunch train.
+    // The file cursor is deliberately declared outside the BX loop: it has to
+    // keep advancing across bunch crossings, otherwise every BX would restart
+    // at the front of the permutation and reuse the same file for the whole
+    // train (which is what happens for NumberBackground = 1).
+    size_t fileCursor = 0;
     for (int bxInTrain = 0; bxInTrain < m_NBunchTrain; ++bxInTrain) {
       const int BX_number_in_train = permutation.at(bxInTrain);
 
@@ -294,11 +308,32 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
       debug() << "Will overlay " << NOverlay_to_this_BX << " events to BX number " << BX_number_in_train + physBX
               << endmsg;
 
+      if (m_randomMix && fileIndices.empty()) {
+        warning() << "No background files available for group " << groupIndex << ", skipping overlay" << endmsg;
+        continue;
+      }
+
       for (int k = 0; k < NOverlay_to_this_BX; ++k) {
-        debug() << "Overlaying a background event from group " << groupIndex << " to BX " << bxInTrain << endmsg;
-        // The file index is ignored in sequential mode; picking one at random is
-        // added together with the random-mix file selection.
-        const auto backgroundEvent = m_bkgEvents->getFrame(groupIndex, 0);
+        // In random-mix mode walk the shuffled permutation so that consecutive
+        // overlaid events draw distinct files. Once the permutation is
+        // exhausted it is reshuffled, so every pass is an independent random
+        // set instead of a replay of the same order. In sequential mode the
+        // file index is ignored.
+        int fileIndex = 0;
+        if (m_randomMix) {
+          if (fileCursor == fileIndices.size()) {
+            std::shuffle(fileIndices.begin(), fileIndices.end(), rng_engine);
+            fileCursor = 0;
+          }
+          fileIndex = fileIndices[fileCursor++];
+        }
+        if (m_randomMix) {
+          debug() << "Overlaying a background event from " << m_bkgEvents->m_fileNames[groupIndex][fileIndex]
+                  << " to BX " << bxInTrain << endmsg;
+        } else {
+          debug() << "Overlaying a background event from group " << groupIndex << " to BX " << bxInTrain << endmsg;
+        }
+        const auto backgroundEvent = m_bkgEvents->getFrame(groupIndex, fileIndex);
         const auto availableCollections = backgroundEvent.getAvailableCollections();
 
         // Either 0 or negative
