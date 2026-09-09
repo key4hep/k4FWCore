@@ -43,9 +43,7 @@ inline float time_of_flight(const T& pos) {
   return std::sqrt((pos[0] * pos[0]) + (pos[1] * pos[1]) + (pos[2] * pos[2])) / TMath::C() * 1e6;
 }
 
-// Index of the copied background particle a relation should point at, or <0 when
-// the relation has to be left unset. The background particles are copied in
-// order, so the copy of background particle oldIndex sits at offset + oldIndex.
+// Index of the copied background particle a relation should point at.
 // An index outside the background collection leaves the relation unset, which
 // covers both podio::ObjectID::untracked (-1) and podio::ObjectID::invalid (-2).
 inline int overlaid_particle_index(int oldIndex, int offset, int nBgParticles) {
