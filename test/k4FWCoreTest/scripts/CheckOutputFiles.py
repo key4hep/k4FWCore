@@ -71,8 +71,6 @@ def check_metadata(filename, expected_metadata):
 
 functional_transformer_collections = ["EventHeader", "MCParticles", "NewMCParticles"]
 
-# Define the output of the multiple transformer once. Configurations that filter
-# this output derive their expected collections from it.
 functional_transformer_multiple_collections = [
     "VectorFloat",
     "MCParticles1",
