@@ -344,36 +344,43 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
           warning() << "Collection " << m_MCParticleCollectionName << " not found in background event" << endmsg;
         }
 
-        const auto& bgParticles = backgroundEvent.get<edm4hep::MCParticleCollection>(m_MCParticleCollectionName);
         // The background particles are copied in order, so the copy of background
         // particle i ends up at offset + i and no old-to-new index map is needed.
-        const int offset = static_cast<int>(oparticles.size());
-        const int nBgParticles = static_cast<int>(bgParticles.size());
-        // podio collections are limited to the positive range of int anyway, so
-        // this only documents that the narrowing above and the offset + index
-        // arithmetic below cannot overflow.
-        assert(oparticles.size() + bgParticles.size() <= static_cast<size_t>(std::numeric_limits<int>::max()));
+        // Both stay 0 when the background particles are not merged, which leaves
+        // every relation into them unset.
+        int offset = 0;
+        int nBgParticles = 0;
 
-        for (int i = 0; i < nBgParticles; ++i) {
-          auto npart = bgParticles[i].clone(false);
-          npart.setTime(bgParticles[i].getTime() + timeOffset);
-          npart.setOverlay(true);
-          oparticles.push_back(npart);
-        }
+        if (m_mergeMCParticles) {
+          const auto& bgParticles = backgroundEvent.get<edm4hep::MCParticleCollection>(m_MCParticleCollectionName);
+          offset = static_cast<int>(oparticles.size());
+          nBgParticles = static_cast<int>(bgParticles.size());
+          // podio collections are limited to the positive range of int anyway, so
+          // this only documents that the narrowing above and the offset + index
+          // arithmetic below cannot overflow.
+          assert(oparticles.size() + bgParticles.size() <= static_cast<size_t>(std::numeric_limits<int>::max()));
 
-        // The relations can only be wired up once every particle has been copied.
-        // Relations pointing outside the background collection are left unset.
-        for (int i = 0; i < nBgParticles; ++i) {
-          for (const auto& parent : bgParticles[i].getParents()) {
-            if (const auto index = overlaid_particle_index(parent.getObjectID().index, offset, nBgParticles);
-                index >= 0) {
-              oparticles.at(offset + i).addToParents(oparticles.at(index));
-            }
+          for (int i = 0; i < nBgParticles; ++i) {
+            auto npart = bgParticles[i].clone(false);
+            npart.setTime(bgParticles[i].getTime() + timeOffset);
+            npart.setOverlay(true);
+            oparticles.push_back(npart);
           }
-          for (const auto& daughter : bgParticles[i].getDaughters()) {
-            if (const auto index = overlaid_particle_index(daughter.getObjectID().index, offset, nBgParticles);
-                index >= 0) {
-              oparticles.at(offset + i).addToDaughters(oparticles.at(index));
+
+          // The relations can only be wired up once every particle has been copied.
+          // Relations pointing outside the background collection are left unset.
+          for (int i = 0; i < nBgParticles; ++i) {
+            for (const auto& parent : bgParticles[i].getParents()) {
+              if (const auto index = overlaid_particle_index(parent.getObjectID().index, offset, nBgParticles);
+                  index >= 0) {
+                oparticles.at(offset + i).addToParents(oparticles.at(index));
+              }
+            }
+            for (const auto& daughter : bgParticles[i].getDaughters()) {
+              if (const auto index = overlaid_particle_index(daughter.getObjectID().index, offset, nBgParticles);
+                  index >= 0) {
+                oparticles.at(offset + i).addToDaughters(oparticles.at(index));
+              }
             }
           }
         }
@@ -402,10 +409,17 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
             auto nhit = simTrackerHit.clone(false);
             nhit.setOverlay(true);
             nhit.setTime(simTrackerHit.getTime() + timeOffset);
-            if (const auto index =
-                    overlaid_particle_index(simTrackerHit.getParticle().getObjectID().index, offset, nBgParticles);
-                index >= 0) {
-              nhit.setParticle(oparticles.at(index));
+            if (m_mergeMCParticles) {
+              if (const auto index =
+                      overlaid_particle_index(simTrackerHit.getParticle().getObjectID().index, offset, nBgParticles);
+                  index >= 0) {
+                nhit.setParticle(oparticles.at(index));
+              }
+            } else if (const auto mcp = simTrackerHit.getParticle(); mcp.isAvailable()) {
+              // Without the background particles there is nothing to point at, so
+              // preserve the momentum of the originating particle instead.
+              const auto mom = mcp.getMomentum();
+              nhit.setMomentum({static_cast<float>(mom.x), static_cast<float>(mom.y), static_cast<float>(mom.z)});
             }
             ocoll.push_back(nhit);
           }
@@ -437,10 +451,14 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
                   add = true;
                   // TODO: Make sure a contribution is not added twice
                   auto newContrib = contrib.clone(false);
-                  if (const auto index =
-                          overlaid_particle_index(contrib.getParticle().getObjectID().index, offset, nBgParticles);
-                      index >= 0) {
-                    newContrib.setParticle(oparticles.at(index));
+                  if (m_mergeMCParticles) {
+                    if (const auto index =
+                            overlaid_particle_index(contrib.getParticle().getObjectID().index, offset, nBgParticles);
+                        index >= 0) {
+                      newContrib.setParticle(oparticles.at(index));
+                    }
+                  } else {
+                    newContrib.setParticle(edm4hep::MCParticle());
                   }
                   newContrib.setTime(contrib.getTime() + timeOffset);
                   calhit.addToContributions(newContrib);
@@ -460,10 +478,14 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
                 if ((contrib.getTime() + timeOffset > this_start) && (contrib.getTime() + timeOffset < this_stop)) {
                   // TODO: Make sure a contribution is not added twice
                   auto newContrib = contrib.clone(false);
-                  if (const auto index =
-                          overlaid_particle_index(contrib.getParticle().getObjectID().index, offset, nBgParticles);
-                      index >= 0) {
-                    newContrib.setParticle(oparticles.at(index));
+                  if (m_mergeMCParticles) {
+                    if (const auto index =
+                            overlaid_particle_index(contrib.getParticle().getObjectID().index, offset, nBgParticles);
+                        index >= 0) {
+                      newContrib.setParticle(oparticles.at(index));
+                    }
+                  } else {
+                    newContrib.setParticle(edm4hep::MCParticle());
                   }
                   newContrib.setTime(contrib.getTime() + timeOffset);
                   calhit.addToContributions(newContrib);
