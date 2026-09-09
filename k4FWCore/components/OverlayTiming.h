@@ -145,6 +145,16 @@ private:
       "SimTrackerHit and SimCalorimeterHit collection."};
   Gaudi::Property<bool> m_allowReusingBackgroundFiles{
       this, "AllowReusingBackgroundFiles", false, "If true, wrap around the background file when events are exhausted"};
+  Gaudi::Property<bool> m_randomMix{
+      this, "RandomMixBackgroundFiles", false,
+      "Treat each file in a background group as an independent (pseudo-)event source and pick a random file for every "
+      "overlaid event (one-event-per-file mixing). Entries of BackgroundFileNames may also be directories, "
+      "whose .root files are used."};
+  Gaudi::Property<bool> m_mergeMCParticles{
+      this, "MergeMCParticles", true,
+      "Merge the background MCParticle collection into the output. If false, background particles are not "
+      "stored: tracker hits keep the momentum of their originating particle instead of a particle link, and "
+      "calorimeter contributions get an empty particle."};
   Gaudi::Property<bool> m_copyCellIDMetadata{this, "CopyCellIDMetadata", false,
                                              "Copy cell ID encoding metadata from input to output collections"};
 
