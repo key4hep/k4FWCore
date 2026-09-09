@@ -51,6 +51,7 @@
 #include "GaudiKernel/GaudiException.h"
 
 #include <map>
+#include <mutex>
 #include <optional>
 #include <string>
 #include <vector>
@@ -78,6 +79,12 @@ struct EventHolder {
   std::vector<std::vector<size_t>> m_totalNumberOfEvents;
   std::vector<std::vector<size_t>> m_nextEntry;
 
+  // Guards the cursors, the lazily filled event counts and the shared
+  // sequential-mode readers. operator() is const and Gaudi may run several
+  // events concurrently, in which case they share this EventHolder. ROOT file
+  // access is not thread-safe either, so the whole read is serialized.
+  std::mutex m_ioMutex;
+
   EventHolder(const std::vector<std::vector<std::string>>& fileNames, bool randomMix, bool allowReuse,
               const std::string& algName)
       : m_fileNames(fileNames), m_randomMix(randomMix), m_allowReuse(allowReuse), m_algName(algName) {
@@ -104,6 +111,7 @@ struct EventHolder {
   // In sequential mode fileIndex is ignored and the group's single stream is used.
   podio::Frame getFrame(int group, int fileIndex) {
     const int file = m_randomMix ? fileIndex : 0;
+    std::lock_guard<std::mutex> lock(m_ioMutex);
 
     size_t& total = m_totalNumberOfEvents[group][file];
     size_t& entry = m_nextEntry[group][file];
