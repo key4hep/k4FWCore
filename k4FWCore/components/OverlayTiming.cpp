@@ -98,22 +98,31 @@ StatusCode OverlayTiming::initialize() {
     inputFiles.push_back(std::move(expanded));
   }
 
-  m_bkgEvents = make_unique<EventHolder>(inputFiles);
-  for (auto& val : m_bkgEvents->m_totalNumberOfEvents) {
-    if (val == 0) {
-      std::string err = "No events found in the background files";
-      for (auto& file : m_inputFileNames.value()) {
-        err += " " + file[0];
-      }
-      error() << err << endmsg;
-      return StatusCode::FAILURE;
-    }
-  }
+  m_bkgEvents =
+      make_unique<EventHolder>(inputFiles, m_randomMix.value(), m_allowReusingBackgroundFiles.value(), name());
 
-  if (std::any_of(m_bkgEvents->m_totalNumberOfEvents.begin(), m_bkgEvents->m_totalNumberOfEvents.end(),
-                  [this](const int& val) { return this->m_startWithBackgroundEvent >= val; })) {
-    throw GaudiException("StartWithBackgroundEvent is larger than the number of events in the background files", name(),
-                         StatusCode::FAILURE);
+  // In sequential mode the event counts are known upfront and can be validated
+  // here. In random-mix mode they are only determined when a file is first
+  // read, so an empty file is reported at that point instead.
+  if (!m_randomMix) {
+    for (const auto& counts : m_bkgEvents->m_totalNumberOfEvents) {
+      for (const auto& val : counts) {
+        if (val == 0) {
+          std::string err = "No events found in the background files";
+          for (const auto& file : m_inputFileNames.value()) {
+            err += " " + file[0];
+          }
+          error() << err << endmsg;
+          return StatusCode::FAILURE;
+        }
+      }
+      if (std::any_of(counts.begin(), counts.end(), [this](const size_t& val) {
+            return this->m_startWithBackgroundEvent >= static_cast<int>(val);
+          })) {
+        throw GaudiException("StartWithBackgroundEvent is larger than the number of events in the background files",
+                             name(), StatusCode::FAILURE);
+      }
+    }
   }
 
   if (m_Noverlay.empty()) {
@@ -258,13 +267,15 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
 
     // TODO: Check that there is anything to overlay
 
-    debug() << "Starting overlay at event: " << m_bkgEvents->m_nextEntry[groupIndex] << " for the background group "
-            << groupIndex << endmsg;
+    debug() << "Starting overlay at event: " << m_bkgEvents->m_nextEntry[groupIndex].front()
+            << " for the background group " << groupIndex << endmsg;
 
     if (m_startWithBackgroundEvent >= 0) {
       info() << "Skipping to event: " << m_startWithBackgroundEvent << endmsg;
-      for (auto& entry : m_bkgEvents->m_nextEntry) {
-        entry = m_startWithBackgroundEvent;
+      for (auto& group : m_bkgEvents->m_nextEntry) {
+        for (auto& entry : group) {
+          entry = m_startWithBackgroundEvent;
+        }
       }
     }
 
@@ -284,16 +295,10 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
               << endmsg;
 
       for (int k = 0; k < NOverlay_to_this_BX; ++k) {
-        info() << "Overlaying background event " << m_bkgEvents->m_nextEntry[groupIndex] << " from group " << groupIndex
-               << " to BX " << bxInTrain << endmsg;
-        if (m_bkgEvents->m_nextEntry[groupIndex] >= m_bkgEvents->m_totalNumberOfEvents[groupIndex] &&
-            !m_allowReusingBackgroundFiles) {
-          throw GaudiException("No more events in background file", name(), StatusCode::FAILURE);
-        }
-        const auto backgroundEvent =
-            m_bkgEvents->m_rootFileReaders[groupIndex].readEvent(m_bkgEvents->m_nextEntry[groupIndex]);
-        m_bkgEvents->m_nextEntry[groupIndex]++;
-        m_bkgEvents->m_nextEntry[groupIndex] %= m_bkgEvents->m_totalNumberOfEvents[groupIndex];
+        debug() << "Overlaying a background event from group " << groupIndex << " to BX " << bxInTrain << endmsg;
+        // The file index is ignored in sequential mode; picking one at random is
+        // added together with the random-mix file selection.
+        const auto backgroundEvent = m_bkgEvents->getFrame(groupIndex, 0);
         const auto availableCollections = backgroundEvent.getAvailableCollections();
 
         // Either 0 or negative
