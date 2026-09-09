@@ -32,7 +32,9 @@
 
 #include <TMath.h>
 
+#include <algorithm>
 #include <cassert>
+#include <filesystem>
 #include <limits>
 #include <random>
 #include <utility>
@@ -43,6 +45,18 @@ inline float time_of_flight(const T& pos) {
   // Returns the time of flight to the radius in ns
   // Assumming positions in mm, then mm/m/s = 10^-3 s = 10^6 ns
   return std::sqrt((pos[0] * pos[0]) + (pos[1] * pos[1]) + (pos[2] * pos[2])) / TMath::C() * 1e6;
+}
+
+// Returns the .root files contained in a directory (non-recursive).
+static std::vector<std::string> filesInFolder(const std::string& folderPath) {
+  std::vector<std::string> files;
+  for (const auto& entry : std::filesystem::directory_iterator(folderPath)) {
+    if (std::filesystem::is_regular_file(entry.path()) && entry.path().extension() == ".root") {
+      files.push_back(entry.path().string());
+    }
+  }
+  std::sort(files.begin(), files.end());
+  return files;
 }
 
 // Index of the copied background particle a relation should point at.
@@ -67,16 +81,22 @@ StatusCode OverlayTiming::initialize() {
     error() << "Unable to get UniqueIDGenSvc" << endmsg;
   }
 
+  // Expand any directory entries into their list of .root files. This is
+  // typically used together with RandomMixBackgroundFiles, where each file is
+  // an independent pseudo-event source.
   std::vector<std::vector<std::string>> inputFiles;
-  inputFiles = m_inputFileNames.value();
-  // if (m_startWithBackgroundFile >= 0) {
-  //   inputFiles = std::vector<std::string>(m_inputFileNames.begin() + m_startWithBackgroundFile,
-  //   m_inputFileNames.end());
-  // } else {
-  //   inputFiles = m_inputFileNames;
-  // }
-  // TODO:: shuffle input files
-  // std::shuffle(inputFiles.begin(), inputFiles.end(), rng_engine);
+  for (const auto& group : m_inputFileNames.value()) {
+    std::vector<std::string> expanded;
+    for (const auto& entry : group) {
+      if (std::filesystem::is_directory(entry)) {
+        const auto found = filesInFolder(entry);
+        expanded.insert(expanded.end(), found.begin(), found.end());
+      } else {
+        expanded.push_back(entry);
+      }
+    }
+    inputFiles.push_back(std::move(expanded));
+  }
 
   m_bkgEvents = make_unique<EventHolder>(inputFiles);
   for (auto& val : m_bkgEvents->m_totalNumberOfEvents) {
