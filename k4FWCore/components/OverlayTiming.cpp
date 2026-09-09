@@ -96,6 +96,10 @@ StatusCode OverlayTiming::initialize() {
         expanded.push_back(entry);
       }
     }
+    if (expanded.empty()) {
+      error() << "Background group " << inputFiles.size() << " contains no .root files" << endmsg;
+      return StatusCode::FAILURE;
+    }
     inputFiles.push_back(std::move(expanded));
   }
 
@@ -307,11 +311,6 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
 
       debug() << "Will overlay " << NOverlay_to_this_BX << " events to BX number " << BX_number_in_train + physBX
               << endmsg;
-
-      if (m_randomMix && fileIndices.empty()) {
-        warning() << "No background files available for group " << groupIndex << ", skipping overlay" << endmsg;
-        continue;
-      }
 
       for (int k = 0; k < NOverlay_to_this_BX; ++k) {
         // In random-mix mode walk the shuffled permutation so that consecutive
