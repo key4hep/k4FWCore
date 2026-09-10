@@ -45,6 +45,8 @@ struct ExampleFunctionalProducerWithTFile final : k4FWCore::Producer<TFileProduc
     setProperty("Cardinality", 1).ignore();
   }
 
+  bool isReEntrant() const override { return false; }
+
   StatusCode initialize() override {
     if (Producer::initialize().isFailure()) {
       return StatusCode::FAILURE;
