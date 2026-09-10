@@ -32,14 +32,14 @@ struct ExampleFunctionalProducerWithMarlinWrapper final : k4FWCore::Producer<pod
 
   podio::CollectionBase* operator()() const override {
     auto coll = new edm4hep::MCParticleCollection();
-    coll->create(1, 2, 3, 4.f, 5.f, 6.f);
-    auto particle = coll->create(2, 3, 4, 5.f, 6.f, 7.f);
+    coll->create(1, 2, 3, 4.f, 5.f, 6.);
+    auto particle = coll->create(2, 3, 4, 5.f, 6.f, 7.);
     particle.setPDG(2);
     particle.setGeneratorStatus(3);
     particle.setSimulatorStatus(4);
     particle.setCharge(5.f);
     particle.setTime(6.f);
-    particle.setMass(7.f);
+    particle.setMass(7.);
     return coll;
   }
 };
