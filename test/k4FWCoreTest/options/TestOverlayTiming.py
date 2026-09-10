@@ -26,7 +26,7 @@
 # out.
 #
 # It also covers CopyCellIDMetadata: the encoding of the input collection is
-# pre-filled into the metadata, and ExampleCellIDEncodingInitConsumer checks
+# pre-filled into the metadata, and ExampleFunctionalMetadataConsumer checks
 # that OverlayTiming has published it for the overlaid output collection by the
 # time a downstream algorithm initializes.
 
@@ -34,7 +34,7 @@ from Gaudi.Configuration import INFO
 from Configurables import (
     EventDataSvc,
     EventHeaderCreator,
-    ExampleCellIDEncodingInitConsumer,
+    ExampleFunctionalMetadataConsumer,
     MetadataSvc,
     OverlayTiming,
     UniqueIDGenSvc,
@@ -98,9 +98,11 @@ overlay.CopyCellIDMetadata = True
 
 # Fails to initialize if OverlayTiming has not published the encoding of
 # OverlaySimTrackerHits by the time this algorithm is initialized
-encoding_consumer = ExampleCellIDEncodingInitConsumer("EncodingConsumer")
-encoding_consumer.InputCollection = "OverlaySimTrackerHits"
-encoding_consumer.ExpectedEncoding = ENCODING
+encoding_consumer = ExampleFunctionalMetadataConsumer("EncodingConsumer")
+encoding_consumer.InputCollection = ["OverlayMCParticles"]
+encoding_consumer.CheckMetadata = False
+encoding_consumer.CellIDCollection = "OverlaySimTrackerHits"
+encoding_consumer.ExpectedCellIDEncoding = ENCODING
 
 ApplicationMgr(
     TopAlg=[header, overlay, encoding_consumer],

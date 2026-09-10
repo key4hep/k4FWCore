@@ -19,10 +19,10 @@
 from Gaudi.Configuration import INFO
 
 from k4FWCore import ApplicationMgr, IOSvc
-from Configurables import k4FWCoreTest_AlgorithmWithTFile, EventDataSvc
+from Configurables import ExampleFunctionalProducerWithTFile, EventDataSvc
 
 
-producer = k4FWCoreTest_AlgorithmWithTFile()
+producer = ExampleFunctionalProducerWithTFile()
 
 iosvc = IOSvc()
 iosvc.Output = "output_TestAlgorithmWithTFile_framework.root"

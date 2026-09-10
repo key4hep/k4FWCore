@@ -69,48 +69,52 @@ def check_metadata(filename, expected_metadata):
             )
 
 
-check_collections("functional_transformer.root", ["EventHeader", "MCParticles", "NewMCParticles"])
-check_collections("gaudi_functional.root", ["EventHeader", "MCParticles", "NewMCParticles"])
-check_collections(
-    "functional_transformer_cli.root", ["EventHeader", "MCParticles", "NewMCParticles"]
-)
+functional_transformer_collections = ["EventHeader", "MCParticles", "NewMCParticles"]
+
+functional_transformer_multiple_collections = [
+    "VectorFloat",
+    "MCParticles1",
+    "MCParticles2",
+    "SimTrackerHits",
+    "SimTrackerHitsWithoutParticleRelations",
+    "SimCalorimeterHits",
+    "CaloHitContributions",
+    "SimCalorimeterHitsWithoutParticleRelations",
+    "CaloHitContributionsWithoutParticleRelations",
+    "TrackerHits",
+    "Tracks",
+    "Counter",
+    "NewMCParticles",
+    "RecoParticles",
+    "Links",
+    "NewLinks",
+]
+functional_transformer_multiple_output_commands_collections = [
+    collection
+    for collection in functional_transformer_multiple_collections
+    if collection not in {"Tracks", "Counter", "RecoParticles", "NewLinks"}
+]
+functional_transformer_mt_collections = [
+    collection
+    for collection in functional_transformer_multiple_collections
+    if collection not in {"Counter", "NewLinks"}
+]
+functional_limited_input_collections = ["MCParticles", "Links"]
+
+for filename in [
+    "functional_transformer.root",
+    "gaudi_functional.root",
+    "functional_transformer_cli.root",
+]:
+    check_collections(filename, functional_transformer_collections)
+
 check_collections(
     "functional_transformer_multiple.root",
-    [
-        "VectorFloat",
-        "MCParticles1",
-        "MCParticles2",
-        "SimTrackerHits",
-        "SimTrackerHitsWithoutParticleRelations",
-        "SimCalorimeterHits",
-        "CaloHitContributions",
-        "SimCalorimeterHitsWithoutParticleRelations",
-        "CaloHitContributionsWithoutParticleRelations",
-        "TrackerHits",
-        "Tracks",
-        "Counter",
-        "NewMCParticles",
-        "RecoParticles",
-        "Links",
-        "NewLinks",
-    ],
+    functional_transformer_multiple_collections,
 )
 check_collections(
     "functional_transformer_multiple_output_commands.root",
-    [
-        "VectorFloat",
-        "MCParticles1",
-        "MCParticles2",
-        "NewMCParticles",
-        "SimTrackerHits",
-        "SimTrackerHitsWithoutParticleRelations",
-        "SimCalorimeterHits",
-        "CaloHitContributions",
-        "SimCalorimeterHitsWithoutParticleRelations",
-        "CaloHitContributionsWithoutParticleRelations",
-        "TrackerHits",
-        "Links",
-    ],
+    functional_transformer_multiple_output_commands_collections,
 )
 check_collections("/tmp/a/b/c/functional_producer.root", ["MCParticles"])
 check_collections(
@@ -119,26 +123,14 @@ check_collections(
 )
 check_collections(
     "functional_transformerMT.root",
-    [
-        "VectorFloat",
-        "MCParticles1",
-        "MCParticles2",
-        "SimTrackerHits",
-        "SimTrackerHitsWithoutParticleRelations",
-        "SimCalorimeterHits",
-        "CaloHitContributions",
-        "SimCalorimeterHitsWithoutParticleRelations",
-        "CaloHitContributionsWithoutParticleRelations",
-        "TrackerHits",
-        "Tracks",
-        "NewMCParticles",
-        "RecoParticles",
-        "Links",
-    ],
+    functional_transformer_mt_collections,
 )
 
-check_collections("functional_limited_input.root", ["MCParticles", "Links"])
-check_collections("functional_limited_input_all_events.root", ["MCParticles", "Links"])
+for filename in [
+    "functional_limited_input.root",
+    "functional_limited_input_all_events.root",
+]:
+    check_collections(filename, functional_limited_input_collections)
 
 mix_collections = [
     # From file
