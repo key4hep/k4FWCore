@@ -400,6 +400,15 @@ check_collections(
     ],
 )
 
+
+def mc_relation_indices(particle):
+    """Indices of the parents and daughters of an MCParticle, as sorted lists."""
+    return (
+        sorted(p.getObjectID().index for p in particle.getParents()),
+        sorted(d.getObjectID().index for d in particle.getDaughters()),
+    )
+
+
 reader = podio.reading.get_reader("overlay_output.root")
 n_signal_mc = 2
 n_background_mc = 2
@@ -418,6 +427,22 @@ for frame in reader.get("events"):
         raise RuntimeError("Signal particles should not be flagged as overlay")
     if particle_overlay_flags[n_signal_mc:] != [True] * n_background_mc:
         raise RuntimeError("Background particles should be flagged as overlay")
+
+    # The producer makes part2 a daughter of part1 without filling in part2's own
+    # parent list. Both blocks, signal and overlaid background, have to come out
+    # with that same one-sided topology, with the background relation pointing
+    # inside the background block only.
+    for block_start in (0, n_signal_mc):
+        relations = {i: mc_relation_indices(overlaid_particles[block_start + i]) for i in range(2)}
+        expected = {
+            0: ([], [block_start + 1]),
+            1: ([], []),
+        }
+        if relations != expected:
+            raise RuntimeError(
+                f"Unexpected MCParticle relations in block starting at {block_start}: "
+                f"got {relations}, expected {expected}"
+            )
 
     overlaid_sim_hits = frame.get("OverlaySimTrackerHits")
     if len(overlaid_sim_hits) != n_signal_sim + n_background_sim:
