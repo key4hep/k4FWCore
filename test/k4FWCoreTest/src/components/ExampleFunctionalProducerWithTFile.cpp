@@ -41,7 +41,9 @@ struct ExampleFunctionalProducerWithTFile final : k4FWCore::Producer<TFileProduc
       : Producer(name, svcLoc, {},
                  {KeyValue("OutputCollectionFloat", "VectorFloat"),
                   KeyValue("OutputCollectionParticles", "MCParticles"),
-                  KeyValue("OutputCollectionSimTrackerHits", "SimTrackerHit")}) {}
+                  KeyValue("OutputCollectionSimTrackerHits", "SimTrackerHit")}) {
+    setProperty("Cardinality", 1).ignore();
+  }
 
   StatusCode initialize() override {
     if (Producer::initialize().isFailure()) {
