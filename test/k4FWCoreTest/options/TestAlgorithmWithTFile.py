@@ -21,7 +21,6 @@ from Gaudi.Configuration import INFO
 from k4FWCore import ApplicationMgr, IOSvc
 from Configurables import k4FWCoreTest_AlgorithmWithTFile, EventDataSvc
 
-
 producer = k4FWCoreTest_AlgorithmWithTFile()
 
 iosvc = IOSvc()

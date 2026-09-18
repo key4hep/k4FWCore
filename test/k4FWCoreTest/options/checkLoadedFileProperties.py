@@ -22,7 +22,6 @@
 
 from k4FWCore.parseArgs import parser
 
-
 parser.add_argument(
     "--with-error",
     action="store_true",

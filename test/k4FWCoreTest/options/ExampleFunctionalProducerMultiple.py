@@ -25,7 +25,6 @@ from Configurables import ExampleFunctionalProducerMultiple
 from k4FWCore import ApplicationMgr, IOSvc
 from Configurables import EventDataSvc
 
-
 iosvc = IOSvc("IOSvc")
 iosvc.Output = "functional_producer_multiple.root"
 # Collections can be dropped
