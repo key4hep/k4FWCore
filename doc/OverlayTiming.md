@@ -33,7 +33,7 @@ It uses [`UniqueIDGenSvc`](uniqueIDGen.md) to seed the internal random number ge
 
 | Property | Default | Description |
 |----------|---------|-------------|
-| `BackgroundFileNames` | `[]` | List of groups of background input files, one group per overlay stream |
+| `BackgroundFileNames` | `[]` | List of groups of background input files, one group per overlay stream. An entry may also be a directory, in which case the `.root` files directly inside it are used. |
 | `NumberBackground` | `[]` | Number of background events to overlay per stream (fixed or Poisson mean) |
 | `Poisson_random_NOverlay` | `[]` | If true, draw the number of events from a Poisson distribution with mean `NumberBackground` |
 | `NBunchtrain` | `1` | Number of bunch crossings in the bunch train |
@@ -43,8 +43,45 @@ It uses [`UniqueIDGenSvc`](uniqueIDGen.md) to seed the internal random number ge
 | `TimeWindows` | `{}` | Map from collection name to `[t_min, t_max]` (ns) defining the acceptance window. Required for every `SimTrackerHit` and `SimCalorimeterHit` collection. |
 | `BackgroundMCParticleCollectionName` | `"MCParticle"` | Name of the MCParticle collection in the background files |
 | `AllowReusingBackgroundFiles` | `false` | If true, wrap around the background file when events are exhausted |
+| `RandomMixBackgroundFiles` | `false` | Treat every file of a background group as an independent (pseudo-)event source and draw one at random for each overlaid event |
+| `MergeMCParticles` | `true` | Copy the background MCParticles into the output. If `false` they are left out entirely: tracker hits keep the momentum of their originating particle instead of a particle relation, and calorimeter contributions get an empty particle |
 | `CopyCellIDMetadata` | `false` | Copy cell ID encoding metadata from input to output collections |
 | `StartBackgroundEventIndex` | `-1` | Index of the background event to start from (`-1` means start from the beginning) |
+
+## Random background mixing
+
+Beam-induced background is often produced as a large number of files, each
+holding a single pseudo-event. Reading such a group as one sequential stream
+would walk the files in a fixed order, so a run that overlays fewer events than
+there are files would only ever see the first few.
+
+With `RandomMixBackgroundFiles = True` every file of a group is instead treated
+as an independent event source, and one file is drawn for each overlaid event.
+The draws come from a shuffled permutation of the group that is reshuffled once
+exhausted, so files are used evenly rather than independently at random, and
+each pass over the group is in a different order. Entries of
+`BackgroundFileNames` may point at directories, whose `.root` files are
+collected automatically:
+
+```python
+overlay.RandomMixBackgroundFiles = True
+overlay.BackgroundFileNames = [["/path/to/bib_files/"]]
+```
+
+Each file keeps its own event cursor, and its number of events is only
+determined the first time it is read, so a group may hold many files without
+opening them all up front. Note that `StartBackgroundEventIndex` cannot be
+validated against the file lengths in this mode for the same reason: an index
+past the end of a file is only reported when that file is first read.
+
+Background particles usually dominate the output size. If the background
+`MCParticle` collection is not needed downstream, `MergeMCParticles = False`
+leaves it out entirely. Tracker hits then keep the momentum of the particle they
+came from instead of a relation to it, and calorimeter contributions are given an
+empty particle.
+
+Reads from a background group are serialized internally, so the algorithm is
+safe to run with several Gaudi event slots in flight.
 
 ## Usage example
 
