@@ -125,7 +125,7 @@ namespace details {
      * @param i  The index of the input
      * @return   A range of the input locations
      */
-    auto inputLocations(const size_t i) const {
+    std::vector<std::string> inputLocations(const size_t i) const {
       if (i >= N_in) {
         throw std::out_of_range("Called inputLocations with an index out of range, index: " + std::to_string(i) +
                                 ", number of inputs: " + std::to_string(N_in));
@@ -145,7 +145,7 @@ namespace details {
      * @param name  The name of the input
      * @return      A range of the input locations
      */
-    auto inputLocations(std::string_view name) const {
+    std::vector<std::string> inputLocations(std::string_view name) const {
       std::vector<std::string> names;
       const auto it =
           std::ranges::find_if(m_inputLocationsVector, [&name](const auto& prop) { return prop.name() == name; });
@@ -169,7 +169,7 @@ namespace details {
      * @brief    Get the output locations
      * @return   A range of the output locations
      */
-    auto outputLocations() const {
+    std::vector<std::string> outputLocations() const {
       std::vector<std::string> names;
       if (!m_outputLocationsSingle.name().empty()) {
         names.push_back(m_outputLocationsSingle.value().key());
@@ -185,7 +185,7 @@ namespace details {
      * @param name  The name of the output
      * @return      A range of the output locations
      */
-    auto outputLocations(std::string_view name) const {
+    std::vector<std::string> outputLocations(std::string_view name) const {
       std::vector<std::string> names;
       if (m_outputLocationsSingle.name() == name) {
         names.push_back(m_outputLocationsSingle.value().key());
@@ -275,7 +275,7 @@ namespace details {
      * @param i  The index of the input
      * @return   A range of the input locations
      */
-    auto inputLocations(size_t i) const {
+    std::vector<std::string> inputLocations(size_t i) const {
       if (i >= N_in) {
         throw std::out_of_range("Called inputLocations with an index out of range, index: " + std::to_string(i) +
                                 ", number of inputs: " + std::to_string(N_in));
@@ -295,7 +295,7 @@ namespace details {
      * @param name  The name of the input
      * @return      A range of the input locations
      */
-    auto inputLocations(std::string_view name) const {
+    std::vector<std::string> inputLocations(std::string_view name) const {
       std::vector<std::string> names;
       const auto it =
           std::ranges::find_if(m_inputLocationsVector, [&name](const auto& prop) { return prop.name() == name; });
@@ -320,7 +320,7 @@ namespace details {
      * @param i  The index of the output
      * @return   A range of the output locations
      */
-    auto outputLocations(size_t i) const {
+    std::vector<std::string> outputLocations(size_t i) const {
       if (i >= N_out) {
         throw std::out_of_range("Called outputLocations with an index out of range");
       }
@@ -339,7 +339,7 @@ namespace details {
      * @param name  The name of the output
      * @return      A range of the output locations
      */
-    auto outputLocations(std::string_view name) const {
+    std::vector<std::string> outputLocations(std::string_view name) const {
       std::vector<std::string> names;
       const auto it =
           std::ranges::find_if(m_outputLocationsVector, [&name](const auto& prop) { return prop.name() == name; });
