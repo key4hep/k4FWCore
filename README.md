@@ -52,7 +52,7 @@ positional arguments:
 
 options:
   --dry-run             Do not actually run the job, just parse the config files
-  -n NUM_EVENTS, --num-events NUM_EVENTS
+  -n, --num-events, --evt-max NUM_EVENTS
                         Number of events to run
   -l, --list            Print all the configurable components available in the framework and exit
   --gdb                 Attach gdb debugger
