@@ -76,8 +76,8 @@ struct ExampleFunctionalProducerMultiple final : k4FWCore::Producer<retType()> {
 
     auto particles = edm4hep::MCParticleCollection();
     edm4hep::Vector3d v{0, 0, 0};
-    auto part1 = particles.create(1, 2, 3, 4.f, 5.f, 6.f, v, v, v);
-    auto part2 = particles.create(2, 3, 4, 5.f, 6.f, 7.f);
+    auto part1 = particles.create(1, 2, 3, 4.f, 5.f, 6., v, v, v);
+    auto part2 = particles.create(2, 3, 4, 5.f, 6.f, 7.);
 
     auto simTrackerHits = edm4hep::SimTrackerHitCollection();
     auto hit = simTrackerHits.create();
@@ -112,7 +112,7 @@ struct ExampleFunctionalProducerMultiple final : k4FWCore::Producer<retType()> {
       contribution.setTime(1.f);
 
       auto caloHit = simCaloHitsWithoutParticleRelations.create();
-      caloHit.setCellID(i + 1);
+      caloHit.setCellID(i + 1u);
       caloHit.setEnergy(1.f);
       caloHit.setPosition({0, 0, 0});
       caloHit.addToContributions(contribution);
@@ -127,7 +127,7 @@ struct ExampleFunctionalProducerMultiple final : k4FWCore::Producer<retType()> {
     auto track2 = tracks.create();
     // set members
     track.setType(1);
-    track.setChi2(2.1);
+    track.setChi2(2.1f);
     track.setNdf(3);
     track.addToSubdetectorHitNumbers(1);
     track.addToSubdetectorHitNumbers(4);
