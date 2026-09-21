@@ -164,6 +164,7 @@ def main():
         "--num-events",
         "--evt-max",
         type=int,
+        default=1,
         help="Number of events to run",
     )
     parser.add_argument(
@@ -265,8 +266,7 @@ def main():
                 f"{logging.getLevelName(logger.level)} (from log level {logger.level}) is not a valid OutputLevel for Gaudi"
             )
 
-    if opts.num_events is not None:
-        ApplicationMgr().EvtMax = opts.num_events
+    ApplicationMgr().EvtMax = opts.num_events
     # Allow graceful exit with Ctrl + C
     ApplicationMgr().StopOnSignal = True
 
