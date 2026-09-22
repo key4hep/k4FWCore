@@ -1,4 +1,4 @@
-#!/usr/bin/env -S uv run --script
+#!/usr/bin/env python3
 # /// script
 # requires-python = ">=3.9"
 # dependencies = [
@@ -10,10 +10,14 @@ Gaudi Functional C++ Class Generator
 Generates boilerplate for Gaudi Functional algorithms in both the
 k4FWCore and native Gaudi::Functional frameworks.
 
-Run with either:
-    uv run generateFunctional [args...]      # uv resolves deps from the PEP 723 block
-    ./generateFunctional [args...]           # uses the shebang (requires uv on PATH)
-    python3 generateFunctional [args...]     # plain Python; needs jinja2 installed
+Run with any of:
+    ./generateFunctional [args...]                # python3 shebang; needs jinja2 on the system
+    python3 generateFunctional [args...]          # same, explicit interpreter
+    uv run --script generateFunctional [args...]  # uv resolves deps from the PEP 723 block below
+
+The PEP 723 metadata block is kept so `uv run --script` remains available for
+anyone who wants an isolated, auto-provisioned environment, but uv is optional:
+the tool runs under any Python >= 3.9 that has jinja2 installed.
 """
 import argparse
 import os
@@ -24,7 +28,15 @@ import textwrap
 from dataclasses import dataclass
 from typing import List, Optional
 
-from jinja2 import Environment, StrictUndefined
+try:
+    from jinja2 import Environment, StrictUndefined
+except ImportError:
+    sys.exit(
+        "generateFunctional requires the 'jinja2' package, which was not found.\n"
+        "Install it into your environment (e.g. 'pip install jinja2'), or run the\n"
+        "script through uv, which provisions it automatically:\n"
+        "    uv run --script generateFunctional [args...]"
+    )
 
 # ---------------------------------------------------------------------------
 # Constants
