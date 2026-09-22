@@ -1,3 +1,64 @@
+# v01-07
+
+* 2026-08-06 Juan Miguel Carceller ([PR#416](https://github.com/key4hep/k4FWCore/pull/416))
+  - Apply a few suggestions from clang-tidy
+  - Add clang-tidy to pre-commit
+
+* 2026-07-30 Juan Miguel Carceller ([PR#419](https://github.com/key4hep/k4FWCore/pull/419))
+  - Fix `GAUDI_PLUGIN_PATH` environment variable line continuation in tests
+
+* 2026-07-20 Juan Miguel Carceller ([PR#415](https://github.com/key4hep/k4FWCore/pull/415))
+  - Prefer lowercase rntuple in k4FWCore (it's already allowed by the `podio::Reader` and `podio::Writer`. We can also use lower case rntuple in podio, so it makes sense to use it here too.
+
+* 2026-07-14 Juan Miguel Carceller ([PR#414](https://github.com/key4hep/k4FWCore/pull/414))
+  - Use `Gaudi::Algorithm` in Reader.cpp instead of details. details may be changed in the future.
+
+* 2026-07-06 Juan Miguel Carceller ([PR#412](https://github.com/key4hep/k4FWCore/pull/412))
+  - Set `GAUDI_PLUGIN_PATH`. This is needed to make Gaudi look first in the local builds to avoid loading twice the same library, once for the local build and another one for the stack. See https://gitlab.cern.ch/gaudi/Gaudi/-/work_items/398 and https://gitlab.cern.ch/gaudi/Gaudi/-/merge_requests/1951.
+
+* 2026-07-06 Juan Miguel Carceller ([PR#406](https://github.com/key4hep/k4FWCore/pull/406))
+  - Allow pre-filling parameters for the MetadataSvc, through int, float, double of str parameters
+  - Add a python function to allow passing a dictionary and letting Python infer which type is passed
+  - Modify a test checking that it is possible to pass parameters by hand or use the function to put them and also that overwriting happens and they are present in the resulting file
+
+* 2026-07-05 Juan Miguel Carceller ([PR#411](https://github.com/key4hep/k4FWCore/pull/411))
+  - Check for files that don't exist to exit early if any file doesn't exist
+  - Add a test service and make the test that checks for non existing files check that the test service was not initialized
+
+* 2026-06-01 Juan Miguel Carceller ([PR#410](https://github.com/key4hep/k4FWCore/pull/410))
+  - Update k4FWCore after DataHandleMixin has been deprecated. Use `Gaudi::Functional::details::type_list` instead. See https://gitlab.cern.ch/gaudi/Gaudi/-/merge_requests/1920
+
+* 2026-05-20 Thomas Madlener ([PR#392](https://github.com/key4hep/k4FWCore/pull/392))
+  - Remove the legacy podio I/O components and services (`PodioDataSvc`, `k4DataSvc`, `FCCDataSvc`, `PodioInput`, `PodioOutput` and `MetaDataHandle`). These have been marked as deprecated before.
+  - Switch all existing tests over to use `IOSvc` and `EventDataSvc` based I/O and TES instead
+  - Remove a few test cases which explicitly covered `k4DataSvc` functionality only and for which we have an equivalent test already for `IOSvc`
+
+* 2026-04-28 Thomas Madlener ([PR#408](https://github.com/key4hep/k4FWCore/pull/408))
+  - Make the `CollectionMerger.OutputCollection` accept a single collection (and disallow passing a list).
+  - Same for the `EfficiencyFilter`, for both its input and output collections.
+
+* 2026-04-27 Juan Miguel Carceller ([PR#396](https://github.com/key4hep/k4FWCore/pull/396))
+  - Changes to make `CMAKE_UNITY_BUILD` work:
+    - Rename a few aliases so they don't collide when combining `.cpp` files
+    - Use `std::format` instead of `fmt::format` when possible (not always necessary for Unity builds to work)
+    - Fix the name of an algorithm that was copied and pasted and kept the old name (now colliding)
+
+* 2026-04-23 Juan Miguel Carceller ([PR#405](https://github.com/key4hep/k4FWCore/pull/405))
+  - Remove the deprecated -v and --verbose args for k4run
+
+* 2026-04-23 Juan Miguel Carceller ([PR#404](https://github.com/key4hep/k4FWCore/pull/404))
+  - Add a test using Tools
+
+* 2026-04-23 Juan Miguel Carceller ([PR#399](https://github.com/key4hep/k4FWCore/pull/399))
+  - Add two properties, `ThrowIfDuplicate` and `SkipIfSameValue`. This will change the behaviour of existing code since now it will throw if there is a duplicate by default (although there are not many cases where the MetadataSvc is being used).
+
+* 2026-04-21 Juan Miguel Carceller ([PR#400](https://github.com/key4hep/k4FWCore/pull/400))
+  - Disallow setting metadata parameters in the event loop
+  - Add a test that checks that it is not possible
+
+* 2026-04-20 Juan Miguel Carceller ([PR#398](https://github.com/key4hep/k4FWCore/pull/398))
+  - Fix the display of a list of collections in the documentation
+
 # v01-06
 
 * 2026-04-16 Juan Miguel Carceller ([PR#397](https://github.com/key4hep/k4FWCore/pull/397))

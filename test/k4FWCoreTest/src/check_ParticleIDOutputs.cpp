@@ -34,7 +34,7 @@ bool checkPIDForAlgo(const edm4hep::utils::PIDHandler& pidHandler, const edm4hep
     fmt::print("Could not retrieve the {} PID object for reco particle {}", pidMeta.algoName, reco.id().index);
     return false;
   }
-  auto pid = maybePID.value();
+  const auto& pid = maybePID.value();
   auto paramVal = pid.getParameters()[paramIndex];
 
   // As set in the producer

@@ -33,8 +33,10 @@ set(k4fwcoretest_plugin_sources
   src/components/ExampleFunctionalMetadataProducer.cpp
   src/components/ExampleToolFunctional.cpp
   src/components/ExampleFunctionalProducer.cpp
+  src/components/ExampleFunctionalProducerWithMarlinWrapper.cpp
   src/components/ExampleFunctionalProducerMultiple.cpp
   src/components/ExampleFunctionalProducerRuntimeCollections.cpp
+  src/components/ExampleFunctionalProducerWithTFile.cpp
   src/components/ExampleFunctionalTransformer.cpp
   src/components/ExampleFunctionalTransformerHist.cpp
   src/components/ExampleFunctionalTransformerMultiple.cpp
@@ -49,12 +51,10 @@ set(k4fwcoretest_plugin_sources
   src/components/ExampleParticleIDConsumer.cpp
   src/components/ExampleParticleIDProducer.cpp
   src/components/ExampleRNGSeedingAlg.cpp
-  src/components/k4FWCoreTest_AlgorithmWithTFile.cpp
   src/components/k4FWCoreTest_cellID_reader.cpp
   src/components/k4FWCoreTest_cellID_writer.cpp
   src/components/k4FWCoreTest_CheckExampleEventData.cpp
   src/components/k4FWCoreTest_CreateExampleEventData.cpp
-  src/components/k4FWCoreTest_CreateMarlinWrapperCollection.cpp
   src/components/k4FWCoreTest_HelloWorldAlg.cpp
   src/components/TestService.cpp
   src/components/TestUniqueIDGenSvc.cpp
@@ -248,7 +248,7 @@ add_test_fwcore(CheckLoadedFilesHaveCorrectDunderFile options/checkLoadedFilePro
 # appear in the output
 add_test_fwcore(CheckLoadedFileCorrectPathOnError options/checkLoadedFileProperties.py --with-error)
 set_tests_properties(CheckLoadedFileCorrectPathOnError
-  PROPERTIES PASS_REGULAR_EXPRESSION [=[  File ".*/test/k4FWCoreTest/options/checkLoadedFileProperties.py", line 36, in <module>]=]
+  PROPERTIES PASS_REGULAR_EXPRESSION [=[  File ".*/test/k4FWCoreTest/options/checkLoadedFileProperties.py", line [0-9]+, in <module>]=]
 )
 
 add_test_fwcore(ParticleIDMetadataFramework options/ExampleParticleIDMetadata.py PROPERTIES FIXTURES_SETUP ParticleIDMetadataFile)
@@ -288,7 +288,7 @@ ${CMAKE_CURRENT_BINARY_DIR}:\
 ${CMAKE_CURRENT_BINARY_DIR}/genConfDir/${CURRENT_DIR_NAME}:\
 $ENV{LD_LIBRARY_PATH};\
 \
-GAUDI_PLUGIN_PATH=
+GAUDI_PLUGIN_PATH=\
 ${PROJECT_BINARY_DIR}:\
 ${PROJECT_BINARY_DIR}/${PROJECT_NAME}:\
 ${CMAKE_CURRENT_BINARY_DIR}:\

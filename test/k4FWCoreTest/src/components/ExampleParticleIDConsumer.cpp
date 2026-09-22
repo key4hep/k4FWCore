@@ -71,7 +71,7 @@ struct ExampleParticleIDConsumer final
       throw std::runtime_error(
           fmt::format("Could net retrieve the {} PID object for reco particle {}", pidMeta.algoName, reco.id().index));
     }
-    auto pid = maybePID.value();
+    const auto& pid = maybePID.value();
     auto paramVal = pid.getParameters()[paramIndex];
 
     // As set in the producer
