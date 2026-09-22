@@ -29,7 +29,8 @@ foreach(test
     runtime_consumer
     runtime_transformer
     event_context
-    gaudi_framework)
+    gaudi_framework
+    mixed_inputs)
   add_test(NAME GenerateFunctional_${test}
     COMMAND bash "${GF_TESTS_DIR}/test_${test}.sh"
   )
