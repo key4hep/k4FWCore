@@ -19,6 +19,7 @@ The PEP 723 metadata block is kept so `uv run --script` remains available for
 anyone who wants an isolated, auto-provisioned environment, but uv is optional:
 the tool runs under any Python >= 3.9 that has jinja2 installed.
 """
+
 import argparse
 import os
 import re
@@ -812,8 +813,7 @@ def _build_parser() -> argparse.ArgumentParser:
         prog="generateFunctional",
         description="Generate Gaudi Functional C++ algorithm boilerplate.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=textwrap.dedent(
-            """\
+        epilog=textwrap.dedent("""\
             Functional type is inferred from the number of inputs and outputs:
               consumer         inputs > 0, outputs == 0
               producer         inputs == 0, outputs >= 1
@@ -839,8 +839,7 @@ def _build_parser() -> argparse.ArgumentParser:
               generateFunctional MyVarConsumer \\
                   -i 'edm4hep::MCParticleCollection:Inputs' \\
                   --runtime-inputs 'edm4hep::MCParticleCollection:Inputs:MCParticles0,MCParticles1'
-        """
-        ),
+        """),
     )
     parser.add_argument(
         "class_name",
