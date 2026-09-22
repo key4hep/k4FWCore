@@ -43,14 +43,14 @@ except ImportError:
 # ---------------------------------------------------------------------------
 _FRAMEWORK_NS = {
     "k4fwcore": "k4FWCore",
-    "gaudi":    "Gaudi::Functional",
+    "gaudi": "Gaudi::Functional",
 }
 _BASE_CLASS = {
-    "consumer":         "Consumer",
-    "producer":         "Producer",
-    "transformer":      "Transformer",
+    "consumer": "Consumer",
+    "producer": "Producer",
+    "transformer": "Transformer",
     "multitransformer": "MultiTransformer",
-    "filter":           "FilterPredicate",
+    "filter": "FilterPredicate",
 }
 
 
@@ -60,8 +60,9 @@ _BASE_CLASS = {
 @dataclass
 class DataSpec:
     """One input or output collection: a C++ type and a collection-location key."""
+
     type_name: str
-    key:       str           # collection-location name used in KeyValue / KeyValues
+    key: str  # collection-location name used in KeyValue / KeyValues
     is_vector: bool = False  # True for std::vector<const T*> variable-length inputs
 
     @staticmethod
@@ -78,16 +79,17 @@ class DataSpec:
             elif ch == ">":
                 depth -= 1
             elif ch == ":" and depth == 0:
-                if not (i > 0 and spec[i - 1] == ":") and \
-                   not (i + 1 < len(spec) and spec[i + 1] == ":"):
+                if not (i > 0 and spec[i - 1] == ":") and not (
+                    i + 1 < len(spec) and spec[i + 1] == ":"
+                ):
                     last_sep = i
-        return (spec, "") if last_sep == -1 else (spec[:last_sep], spec[last_sep + 1:])
+        return (spec, "") if last_sep == -1 else (spec[:last_sep], spec[last_sep + 1 :])
 
     @staticmethod
     def _default_key(type_name: str) -> str:
         """edm4hep::MCParticleCollection  ->  MCParticles"""
         base = type_name.split("::")[-1]
-        base = re.sub(r"<.*>", "", base)           # strip template params
+        base = re.sub(r"<.*>", "", base)  # strip template params
         base = re.sub(r"Collection$", "", base)
         return base + "s"
 
@@ -126,7 +128,8 @@ class DataSpec:
 @dataclass
 class RuntimeInputSpec:
     """An input declared with KeyValues and received as std::vector<const T*>&."""
-    data:     DataSpec
+
+    data: DataSpec
     defaults: List[str]  # initial default location names
 
     @classmethod
@@ -142,29 +145,31 @@ class RuntimeInputSpec:
             elif ch == ">":
                 depth -= 1
             elif ch == ":" and depth == 0:
-                if not (i > 0 and spec[i - 1] == ":") and \
-                   not (i + 1 < len(spec) and spec[i + 1] == ":"):
+                if not (i > 0 and spec[i - 1] == ":") and not (
+                    i + 1 < len(spec) and spec[i + 1] == ":"
+                ):
                     seps.append(i)
         if not seps:
             key = DataSpec._default_key(spec)
             return cls(data=DataSpec(spec, key, is_vector=True), defaults=[key])
         if len(seps) == 1:
             p = seps[0]
-            type_name, key = spec[:p], spec[p + 1:]
+            type_name, key = spec[:p], spec[p + 1 :]
             return cls(data=DataSpec(type_name, key, is_vector=True), defaults=[key])
         p0, p1 = seps[0], seps[1]
         type_name = spec[:p0]
-        key       = spec[p0 + 1:p1]
-        defaults  = [d.strip() for d in spec[p1 + 1:].split(",")]
+        key = spec[p0 + 1 : p1]
+        defaults = [d.strip() for d in spec[p1 + 1 :].split(",")]
         return cls(data=DataSpec(type_name, key, is_vector=True), defaults=defaults)
 
 
 @dataclass
 class PropertySpec:
     """A Gaudi::Property<T> member declaration."""
-    type_name:   str
-    name:        str
-    default:     str
+
+    type_name: str
+    name: str
+    default: str
     description: str
 
     @classmethod
@@ -172,10 +177,10 @@ class PropertySpec:
         """Format:  type:name:default[:description]"""
         parts = spec.split(":", 3)
         return cls(
-            type_name   = parts[0],
-            name        = parts[1] if len(parts) > 1 else parts[0],
-            default     = parts[2] if len(parts) > 2 else "0",
-            description = parts[3] if len(parts) > 3 else "",
+            type_name=parts[0],
+            name=parts[1] if len(parts) > 1 else parts[0],
+            default=parts[2] if len(parts) > 2 else "0",
+            description=parts[3] if len(parts) > 3 else "",
         )
 
     @property
@@ -197,23 +202,24 @@ class AlgorithmSpec:
     Fully parsed, validated description of the algorithm to generate.
     This is the single object threaded through all generator methods.
     """
-    class_name:       str
-    functional_type:  str           # consumer | producer | transformer | multitransformer | filter
-    inputs:           List[DataSpec]
-    outputs:          List[DataSpec]
-    runtime_output:   Optional[DataSpec]    # set when --runtime-outputs is used
-    runtime_defaults: dict                  # key -> [default, ...] from --runtime-inputs
-    properties:       List[PropertySpec]
-    namespace:        Optional[str]
-    framework:        str           # k4fwcore | gaudi
-    use_class:        bool
-    type_aliases:     bool
-    private_props:    bool
-    all_keyvalues:    bool
-    event_context:    bool
-    generate_cmake:   bool
-    output_file:      str
-    command_line:     str
+
+    class_name: str
+    functional_type: str  # consumer | producer | transformer | multitransformer | filter
+    inputs: List[DataSpec]
+    outputs: List[DataSpec]
+    runtime_output: Optional[DataSpec]  # set when --runtime-outputs is used
+    runtime_defaults: dict  # key -> [default, ...] from --runtime-inputs
+    properties: List[PropertySpec]
+    namespace: Optional[str]
+    framework: str  # k4fwcore | gaudi
+    use_class: bool
+    type_aliases: bool
+    private_props: bool
+    all_keyvalues: bool
+    event_context: bool
+    generate_cmake: bool
+    output_file: str
+    command_line: str
 
     # --- Derived helpers (used by templates) --------------------------------
     @property
@@ -323,7 +329,7 @@ def _infer_functional_type(
     it is honoured (after auto-promoting transformer -> multitransformer).
     Otherwise the type is inferred from the number of inputs and outputs.
     """
-    n_in  = len(inputs)
+    n_in = len(inputs)
     n_out = len(outputs) + (1 if runtime_output else 0)
 
     if explicit:
@@ -342,9 +348,7 @@ def _infer_functional_type(
         return "transformer"
     if n_in > 0 and n_out > 1:
         return "multitransformer"
-    raise ValueError(
-        "Cannot infer functional type: supply at least one --inputs or --outputs."
-    )
+    raise ValueError("Cannot infer functional type: supply at least one --inputs or --outputs.")
 
 
 def _build_spec(args: argparse.Namespace) -> AlgorithmSpec:
@@ -357,17 +361,17 @@ def _build_spec(args: argparse.Namespace) -> AlgorithmSpec:
         RuntimeInputSpec.parse(s) for s in (args.runtime_inputs or [])
     ]
     runtime_input_keys = {rs.data.key for rs in runtime_input_specs}
-    runtime_defaults   = {rs.data.key: rs.defaults for rs in runtime_input_specs}
+    runtime_defaults = {rs.data.key: rs.defaults for rs in runtime_input_specs}
 
     # --- keyvalues-inputs overrides -----------------------------------------
     kvi_map: dict = {}
-    for s in (args.keyvalues_inputs or []):
+    for s in args.keyvalues_inputs or []:
         parts = s.split(":", 1)
         kvi_map[parts[0]] = parts[1] if len(parts) > 1 else parts[0]
 
     # --- inputs -------------------------------------------------------------
     inputs: List[DataSpec] = []
-    for raw in (args.inputs or []):
+    for raw in args.inputs or []:
         ds = DataSpec.parse(raw)
         if ds.key in runtime_input_keys:
             # Promote to the RuntimeInputSpec's DataSpec (is_vector=True)
@@ -391,28 +395,30 @@ def _build_spec(args: argparse.Namespace) -> AlgorithmSpec:
 
     # --- functional type (inferred or explicit) -----------------------------
     functional_type = _infer_functional_type(
-        inputs, outputs, runtime_output,
+        inputs,
+        outputs,
+        runtime_output,
         explicit=getattr(args, "functional_type", None),
     )
 
     return AlgorithmSpec(
-        class_name      = args.class_name,
-        functional_type = functional_type,
-        inputs          = inputs,
-        outputs         = outputs,
-        runtime_output  = runtime_output,
-        runtime_defaults= runtime_defaults,
-        properties      = properties,
-        namespace       = args.namespace or None,
-        framework       = args.framework,
-        use_class       = args.use_class,
-        type_aliases    = getattr(args, "type_aliases", False),
-        private_props   = getattr(args, "private_properties", False),
-        all_keyvalues   = getattr(args, "all_keyvalues", False),
-        event_context   = getattr(args, "event_context", False),
-        generate_cmake  = getattr(args, "cmake", False),
-        output_file     = args.output_file or f"{args.class_name}.cpp",
-        command_line    = " ".join(shlex.quote(a) for a in sys.argv),
+        class_name=args.class_name,
+        functional_type=functional_type,
+        inputs=inputs,
+        outputs=outputs,
+        runtime_output=runtime_output,
+        runtime_defaults=runtime_defaults,
+        properties=properties,
+        namespace=args.namespace or None,
+        framework=args.framework,
+        use_class=args.use_class,
+        type_aliases=getattr(args, "type_aliases", False),
+        private_props=getattr(args, "private_properties", False),
+        all_keyvalues=getattr(args, "all_keyvalues", False),
+        event_context=getattr(args, "event_context", False),
+        generate_cmake=getattr(args, "cmake", False),
+        output_file=args.output_file or f"{args.class_name}.cpp",
+        command_line=" ".join(shlex.quote(a) for a in sys.argv),
     )
 
 
@@ -518,8 +524,11 @@ gaudi_add_module({{ spec.class_name }}Plugin
 def _build_includes(spec: AlgorithmSpec) -> str:
     lines = []
     # Framework header — MultiTransformer lives in Transformer.h for k4FWCore
-    header_base = "Transformer" if spec.functional_type == "multitransformer" and spec.is_k4 \
-                  else spec.base_short
+    header_base = (
+        "Transformer"
+        if spec.functional_type == "multitransformer" and spec.is_k4
+        else spec.base_short
+    )
     if spec.is_k4:
         lines.append(f'#include "k4FWCore/{header_base}.h"')
     else:
@@ -551,10 +560,10 @@ def _build_includes(spec: AlgorithmSpec) -> str:
 
 def _build_constructor(spec: AlgorithmSpec) -> str:
     """Return the full constructor definition (k4FWCore style)."""
-    cls  = spec.class_name
+    cls = spec.class_name
     base = spec.base_short
-    rd   = spec.runtime_defaults
-    ft   = spec.functional_type
+    rd = spec.runtime_defaults
+    ft = spec.functional_type
 
     def _kv(ds: DataSpec) -> str:
         if ds.is_vector:
@@ -573,8 +582,8 @@ def _build_constructor(spec: AlgorithmSpec) -> str:
             return "{}"
         if len(items) == 1:
             return "{" + _kv(items[0]) + "}"
-        ind   = " " * indent
-        body  = (",\n" + ind).join(_kv(it) for it in items)
+        ind = " " * indent
+        body = (",\n" + ind).join(_kv(it) for it in items)
         return "{\n" + ind + body + ",\n" + " " * base_indent + "}"
 
     def _bare_block(items: list) -> str:
@@ -583,7 +592,7 @@ def _build_constructor(spec: AlgorithmSpec) -> str:
             return "{}"
         if len(items) == 1:
             return _kv(items[0])
-        ind  = " " * 20
+        ind = " " * 20
         body = (",\n" + ind).join(_kv(it) for it in items)
         return "{\n" + ind + body + ",\n" + " " * 16 + "}"
 
@@ -599,7 +608,7 @@ def _build_constructor(spec: AlgorithmSpec) -> str:
     in_block = _brace_block(spec.inputs)
 
     if spec.is_runtime:
-        out_key   = spec.runtime_output.key
+        out_key = spec.runtime_output.key
         out_block = f'{{KeyValues("OutputCollections", {{"{out_key}"}})}}'
         return (
             f"  {cls}(const std::string& name, ISvcLocator* svcLoc)\n"
@@ -627,13 +636,13 @@ def _build_constructor(spec: AlgorithmSpec) -> str:
 
 
 def _build_constructor_gaudi(spec: AlgorithmSpec) -> str:
-    cls  = spec.class_name
+    cls = spec.class_name
     base = spec.base_short
 
     def _kv(ds: DataSpec) -> str:
         return f'KeyValue{{"{ds.key}", "{ds.key}"}}'
 
-    in_kvs  = [_kv(ds) for ds in spec.inputs]
+    in_kvs = [_kv(ds) for ds in spec.inputs]
     out_kvs = [_kv(ds) for ds in spec.outputs]
 
     # Native Gaudi Transformer constructor variants (details.h):
@@ -701,10 +710,7 @@ def _build_op_body(spec: AlgorithmSpec) -> str:
     if ft == "filter":
         return "    // TODO: implement filter logic\n    return false;"
     if len(spec.outputs) == 1:
-        return (
-            f"    // TODO: implement\n"
-            f"    return {spec.outputs[0].type_name}{{}};"
-        )
+        return f"    // TODO: implement\n" f"    return {spec.outputs[0].type_name}{{}};"
     # Multiple outputs
     lines = []
     for i, out in enumerate(spec.outputs, 1):
@@ -722,7 +728,7 @@ def _build_op_body(spec: AlgorithmSpec) -> str:
 def _build_cmake_context(spec: AlgorithmSpec) -> dict:
     all_ds = spec.inputs + spec.outputs + ([spec.runtime_output] if spec.runtime_output else [])
     has_edm4hep = any(ds.edm4hep_header for ds in all_ds)
-    has_podio   = any(ds.needs_podio_header for ds in all_ds)
+    has_podio = any(ds.needs_podio_header for ds in all_ds)
 
     find_packages, link_libs = [], []
     if spec.is_k4:
@@ -756,19 +762,16 @@ def generate(spec: AlgorithmSpec) -> tuple:
         keep_trailing_newline=True,
         undefined=StrictUndefined,
     )
-    constructor = (
-        _build_constructor(spec) if spec.is_k4
-        else _build_constructor_gaudi(spec)
-    )
+    constructor = _build_constructor(spec) if spec.is_k4 else _build_constructor_gaudi(spec)
     cpp_ctx = {
-        "spec":         spec,
-        "cls":          spec.class_name,
-        "includes":     _build_includes(spec),
-        "constructor":  constructor,
+        "spec": spec,
+        "cls": spec.class_name,
+        "includes": _build_includes(spec),
+        "constructor": constructor,
         "op_signature": _build_op_signature(spec),
-        "op_body":      _build_op_body(spec),
-        "class_kw":     "struct" if not spec.use_class else "class",
-        "access_kw":    "public:\n" if spec.use_class else "",
+        "op_body": _build_op_body(spec),
+        "class_kw": "struct" if not spec.use_class else "class",
+        "access_kw": "public:\n" if spec.use_class else "",
     }
     cpp_source = env.from_string(_CPP_TEMPLATE).render(**cpp_ctx).lstrip("\n")
 
@@ -809,7 +812,8 @@ def _build_parser() -> argparse.ArgumentParser:
         prog="generateFunctional",
         description="Generate Gaudi Functional C++ algorithm boilerplate.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=textwrap.dedent("""\
+        epilog=textwrap.dedent(
+            """\
             Functional type is inferred from the number of inputs and outputs:
               consumer         inputs > 0, outputs == 0
               producer         inputs == 0, outputs >= 1
@@ -835,14 +839,16 @@ def _build_parser() -> argparse.ArgumentParser:
               generateFunctional MyVarConsumer \\
                   -i 'edm4hep::MCParticleCollection:Inputs' \\
                   --runtime-inputs 'edm4hep::MCParticleCollection:Inputs:MCParticles0,MCParticles1'
-        """),
+        """
+        ),
     )
     parser.add_argument(
         "class_name",
         help="Name of the C++ class to generate (e.g. MyProducer).",
     )
     parser.add_argument(
-        "functional_type", nargs="?",
+        "functional_type",
+        nargs="?",
         choices=["consumer", "producer", "transformer", "filter"],
         help=(
             "Functional type. Omit to infer from --inputs / --outputs counts; "
@@ -850,7 +856,11 @@ def _build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
-        "-i", "--inputs", nargs="*", default=[], metavar="TYPE:KEY",
+        "-i",
+        "--inputs",
+        nargs="*",
+        default=[],
+        metavar="TYPE:KEY",
         help=(
             "Input collections, one or more 'TYPE:KEY' specs. "
             "Example: 'edm4hep::MCParticleCollection:MCParticles'. "
@@ -861,7 +871,11 @@ def _build_parser() -> argparse.ArgumentParser:
     # let argparse enforce that at parse time.
     out_group = parser.add_mutually_exclusive_group()
     out_group.add_argument(
-        "-o", "--outputs", nargs="*", default=[], metavar="TYPE:KEY",
+        "-o",
+        "--outputs",
+        nargs="*",
+        default=[],
+        metavar="TYPE:KEY",
         help=(
             "Output collections, one or more 'TYPE:KEY' specs. "
             "Multiple outputs trigger MultiTransformer/tuple return generation. "
@@ -869,14 +883,20 @@ def _build_parser() -> argparse.ArgumentParser:
         ),
     )
     out_group.add_argument(
-        "--runtime-outputs", dest="runtime_outputs", default=None, metavar="TYPE",
+        "--runtime-outputs",
+        dest="runtime_outputs",
+        default=None,
+        metavar="TYPE",
         help=(
             "Enable dynamic output collections returning std::vector<TYPE>. "
             "k4FWCore-only. Mutually exclusive with --outputs."
         ),
     )
     parser.add_argument(
-        "-p", "--properties", nargs="*", default=[],
+        "-p",
+        "--properties",
+        nargs="*",
+        default=[],
         metavar="TYPE:NAME:DEFAULT[:DESC]",
         help=(
             "Gaudi::Property<T> members to declare. Format "
@@ -885,7 +905,10 @@ def _build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
-        "-n", "--namespace", default="", metavar="NAME",
+        "-n",
+        "--namespace",
+        default="",
+        metavar="NAME",
         help=(
             "Wrap the generated class in a C++ namespace, i.e. emit "
             "'namespace NAME { ... } // namespace NAME' around the class "
@@ -895,42 +918,60 @@ def _build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
-        "--framework", choices=["gaudi", "k4fwcore"], default="k4fwcore",
+        "--framework",
+        choices=["gaudi", "k4fwcore"],
+        default="k4fwcore",
         help=(
             "Target framework: 'k4fwcore' (default, for Key4hep / FCC) or "
             "'gaudi' (vanilla Gaudi::Functional)."
         ),
     )
     parser.add_argument(
-        "--use-class", dest="use_class", action="store_true", default=False,
+        "--use-class",
+        dest="use_class",
+        action="store_true",
+        default=False,
         help="Generate 'class ... { public: ... }' instead of the default 'struct'.",
     )
     parser.add_argument(
-        "-f", "--output-file", dest="output_file", default=None,
+        "-f",
+        "--output-file",
+        dest="output_file",
+        default=None,
         help="Path for the generated .cpp file. Default: <ClassName>.cpp in the cwd.",
     )
     parser.add_argument(
-        "--type-aliases", dest="type_aliases", action="store_true", default=False,
+        "--type-aliases",
+        dest="type_aliases",
+        action="store_true",
+        default=False,
         help=(
             "Emit 'using XxxColl = ...;' aliases for input collection types "
             "and use them in the operator() signature."
         ),
     )
     parser.add_argument(
-        "--private-properties", dest="private_properties",
-        action="store_true", default=False,
+        "--private-properties",
+        dest="private_properties",
+        action="store_true",
+        default=False,
         help="Place Gaudi::Property<T> members under a 'private:' access label.",
     )
     parser.add_argument(
-        "--all-keyvalues", dest="all_keyvalues",
-        action="store_true", default=False,
+        "--all-keyvalues",
+        dest="all_keyvalues",
+        action="store_true",
+        default=False,
         help=(
             "Treat every --inputs entry as a runtime KeyValues vector "
             "(std::vector<const T*>&) instead of a single KeyValue."
         ),
     )
     parser.add_argument(
-        "--keyvalues-inputs", dest="keyvalues_inputs", nargs="*", default=None,
+        "--keyvalues-inputs",
+        dest="keyvalues_inputs",
+        nargs="*",
+        default=None,
         metavar="KEY[:LABEL]",
         help=(
             "Per-input override: turn the named --inputs KEY(s) into KeyValues "
@@ -938,7 +979,10 @@ def _build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
-        "--runtime-inputs", dest="runtime_inputs", nargs="*", default=None,
+        "--runtime-inputs",
+        dest="runtime_inputs",
+        nargs="*",
+        default=None,
         metavar="TYPE:KEY:DEF1[,DEF2,...]",
         help=(
             "Declare runtime (variable-length) inputs with default location "
@@ -948,19 +992,25 @@ def _build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
-        "--event-context", dest="event_context",
-        action="store_true", default=False,
+        "--event-context",
+        dest="event_context",
+        action="store_true",
+        default=False,
         help=(
             "Add 'const EventContext&' as the first operator() argument and "
             "scaffold a finalize() override with mutable bookkeeping members."
         ),
     )
     parser.add_argument(
-        "--cmake", action="store_true", default=False,
+        "--cmake",
+        action="store_true",
+        default=False,
         help="Also emit a CMakeLists.txt next to the source (cwd).",
     )
     parser.add_argument(
-        "--force", action="store_true", default=False,
+        "--force",
+        action="store_true",
+        default=False,
         help=(
             "Allow overwriting existing files. Without this flag, the script "
             "refuses to clobber an existing .cpp or CMakeLists.txt."
