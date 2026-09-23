@@ -285,6 +285,9 @@ add_test_fwcore(OverlayTimingStartIndex options/TestOverlayTimingBackgroundCurso
 add_test_fwcore(OverlayTimingBackgroundExhausted options/TestOverlayTimingBackgroundCursor.py --IOSvc.Output overlay_background_exhausted.root
                 PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile PASS_REGULAR_EXPRESSION "No more events in background file\\(s\\) of group 0")
 
+add_test(NAME CreateOverlayBackgroundFiles COMMAND python3 ${CMAKE_CURRENT_LIST_DIR}/scripts/CreateOverlayBackgroundFiles.py)
+set_tests_properties(CreateOverlayBackgroundFiles PROPERTIES FIXTURES_SETUP OverlayBackgroundFiles)
+
 add_test(NAME check_broken_pipe
          COMMAND bash -c "[ $(${K4RUN} options/ExampleFunctionalProducer.py | head -n 2 | wc -l) = 2 ]"
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
