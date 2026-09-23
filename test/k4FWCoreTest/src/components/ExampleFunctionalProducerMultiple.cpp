@@ -79,6 +79,8 @@ struct ExampleFunctionalProducerMultiple final : k4FWCore::Producer<retType()> {
     auto part1 = particles.create(1, 2, 3, 4.f, 5.f, 6., v, v, v);
     auto part2 = particles.create(2, 3, 4, 5.f, 6.f, 7.);
 
+    part1.addToDaughters(part2);
+
     auto simTrackerHits = edm4hep::SimTrackerHitCollection();
     auto hit = simTrackerHits.create();
     hit.setPosition({3, 4, 5});
