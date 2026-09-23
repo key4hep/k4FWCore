@@ -289,10 +289,6 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
         // particle i ends up at offset + i and no old-to-new index map is needed.
         const int offset = static_cast<int>(oparticles.size());
         const int nBgParticles = static_cast<int>(bgParticles.size());
-        // podio collections are limited to the positive range of int anyway, so
-        // this only documents that the narrowing above and the offset + index
-        // arithmetic below cannot overflow.
-        assert(oparticles.size() + bgParticles.size() <= static_cast<size_t>(std::numeric_limits<int>::max()));
 
         for (int i = 0; i < nBgParticles; ++i) {
           auto npart = bgParticles[i].clone(false);
