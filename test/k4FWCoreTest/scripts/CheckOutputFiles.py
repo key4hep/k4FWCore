@@ -594,8 +594,28 @@ def check_random_mix_overlay(filename):
     return draws_per_event
 
 
-check_events("overlay_random_mix.root", 3)
-check_random_mix_overlay("overlay_random_mix.root")
+random_mix_draws = {}
+for filename in (
+    "overlay_random_mix.root",
+    "overlay_random_mix_repeat.root",
+    "overlay_random_mix_other_seed.root",
+):
+    check_events(filename, 3)
+    random_mix_draws[filename] = check_random_mix_overlay(filename)
+
+# The draws only depend on the seed of UniqueIDGenSvc, the event and run
+# numbers and the algorithm name, so rerunning the same configuration has to
+# overlay the same files in the same order, and a different seed must not
+if (
+    random_mix_draws["overlay_random_mix_repeat.root"]
+    != random_mix_draws["overlay_random_mix.root"]
+):
+    raise RuntimeError("Rerunning with the same seed overlaid a different sequence of files")
+if (
+    random_mix_draws["overlay_random_mix_other_seed.root"]
+    == random_mix_draws["overlay_random_mix.root"]
+):
+    raise RuntimeError("Running with a different seed overlaid the same sequence of files")
 
 reader = podio.reading.get_reader("functional_random_filter.root")
 frames = reader.get("events")

@@ -74,6 +74,17 @@ opening them all up front. Note that `StartBackgroundEventIndex` cannot be
 validated against the file lengths in this mode for the same reason: an index
 past the end of a file is only reported when that file is first read.
 
+The files are drawn with the random number generator that is seeded for every
+event through `UniqueIDGenSvc`, so the same `Seed` draws the same files for an
+event with the same event and run numbers, and a different `Seed` draws
+different ones. Which entry is then read from a drawn file depends on how often
+that file has been read before, and therefore on the order in which the events
+are processed. The overlay is only reproducible regardless of that order when
+every file holds a single event, as is typical for beam-induced background.
+Since the shuffling relies on the C++ standard library, whose algorithms are
+implementation-defined, identical results are only guaranteed with the same
+standard library.
+
 Background particles usually dominate the output size. If the background
 `MCParticle` collection is not needed downstream, `MergeMCParticles = False`
 leaves it out entirely. Tracker hits then keep the momentum of the particle they
