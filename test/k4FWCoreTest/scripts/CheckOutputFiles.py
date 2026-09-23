@@ -449,6 +449,28 @@ for frame in reader.get("events"):
     if sim_hit_overlay_flags[n_signal_sim:] != [True] * n_background_sim:
         raise RuntimeError("Background sim tracker hits should be flagged as overlay")
 
+# Both background groups start at event 95 of output_k4test_exampledata.root,
+# whose first particle of event n has a momentum of n along x. Group 0 overlays
+# two events per signal event and starts over from the first event once it has
+# read event 99, group 1 overlays one. The signal particles come first, then
+# the background ones in the order they were read, two particles per event.
+expected_events = [
+    [0, 95, 96, 95],
+    [1, 97, 98, 96],
+    [2, 99, 0, 97],
+    [3, 1, 2, 98],
+]
+check_events("overlay_start_index.root", len(expected_events))
+reader = podio.reading.get_reader("overlay_start_index.root")
+for i, (frame, expected) in enumerate(zip(reader.get("events"), expected_events)):
+    particles = frame.get("OverlayMCParticles")
+    events = [int(particles[j].getMomentum().x) for j in range(0, len(particles), 2)]
+    if events != expected:
+        raise RuntimeError(
+            f"Event {i} should overlay the background events {expected[1:]} on signal event "
+            f"{expected[0]}, got the events {events}"
+        )
+
 reader = podio.reading.get_reader("functional_random_filter.root")
 frames = reader.get("events")
 for frame in frames:
