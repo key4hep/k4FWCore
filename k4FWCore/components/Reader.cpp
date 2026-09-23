@@ -90,7 +90,7 @@ public:
     return StatusCode::SUCCESS;
   }
 
-  StatusCode execute(const EventContext& ctx) const final {
+  StatusCode execute([[maybe_unused]] const EventContext& ctx) const final {
     try {
       const auto readData = nextCollections();
 
