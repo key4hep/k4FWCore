@@ -275,6 +275,7 @@ add_test_fwcore(OverlayTiming options/TestOverlayTiming.py ADD_TO_CHECK_FILES PR
 
 add_test(NAME CreateOverlayBackgroundFiles COMMAND python3 ${CMAKE_CURRENT_LIST_DIR}/scripts/CreateOverlayBackgroundFiles.py)
 set_tests_properties(CreateOverlayBackgroundFiles PROPERTIES FIXTURES_SETUP OverlayBackgroundFiles)
+add_test_fwcore(OverlayTimingRandomMix options/TestOverlayTimingRandomMix.py ADD_TO_CHECK_FILES PROPERTIES FIXTURES_REQUIRED "ProducerMultipleFile\\\\;OverlayBackgroundFiles")
 
 add_test(NAME check_broken_pipe
          COMMAND bash -c "[ $(${K4RUN} options/ExampleFunctionalProducer.py | head -n 2 | wc -l) = 2 ]"

@@ -25,6 +25,18 @@ except ImportError:
     raise
 import ROOT
 
+from collections import Counter
+
+from CreateOverlayBackgroundFiles import (
+    GROUP_A,
+    GROUP_B,
+    HIT_MOMENTUM,
+    N_FILES_GROUP_A,
+    N_FILES_GROUP_B,
+    background_tag,
+    particle_momentum,
+)
+
 
 def check_collections(filename, names):
     print(f'Checking file "{filename}" for collections {names}')
@@ -448,6 +460,142 @@ for frame in reader.get("events"):
         raise RuntimeError("Signal sim tracker hits should not be flagged as overlay")
     if sim_hit_overlay_flags[n_signal_sim:] != [True] * n_background_sim:
         raise RuntimeError("Background sim tracker hits should be flagged as overlay")
+
+
+def check_random_mix_overlay(filename):
+    """Checks an output of the OverlayTimingRandomMix configuration and returns,
+    for every event, the background tags in the order they were drawn."""
+    print(f'Checking file "{filename}" for the random mix of background files')
+    n_bx = 6
+    # (group, number of files, number of draws per event) in the order of BackgroundFileNames
+    groups = [
+        (GROUP_A, N_FILES_GROUP_A, n_bx * 3),
+        (GROUP_B, N_FILES_GROUP_B + 1, n_bx * 1),
+    ]
+    n_draws = sum(n_group_draws for _, _, n_group_draws in groups)
+    n_signal_mc = 2
+    n_signal_sim = 1
+    n_signal_calo = 3
+
+    draws_per_event = []
+    group_a_reshuffled = False
+    for frame in podio.reading.get_reader(filename).get("events"):
+        # The background hits are appended in the order they are drawn, one hit
+        # per background event, after the signal hit
+        hits = frame.get("OverlaySimTrackerHits")
+        if len(hits) != n_signal_sim + n_draws:
+            raise RuntimeError(
+                f"Expected {n_signal_sim + n_draws} hits in OverlaySimTrackerHits, got {len(hits)}"
+            )
+        if hits[0].isOverlay() or hits[0].getParticle().getObjectID().index != 0:
+            raise RuntimeError("The signal hit should come first and point to the signal particle")
+        background_hits = [hits[i] for i in range(n_signal_sim, len(hits))]
+        tags = [hit.getCellID() for hit in background_hits]
+        draws_per_event.append(tags)
+
+        # Each group only draws from its own files, and only from the .root
+        # files directly inside its directories. Files are drawn from a
+        # shuffled list that is reshuffled once exhausted, so every full pass
+        # over a group uses each of its files exactly once.
+        start = 0
+        for group, n_files, n_group_draws in groups:
+            files = [tag - background_tag(group, 0) for tag in tags[start : start + n_group_draws]]
+            start += n_group_draws
+            if any(not 0 <= f < n_files for f in files):
+                raise RuntimeError(
+                    f"Group {group} drew files outside its {n_files} files: {files}"
+                )
+            passes = [files[p : p + n_files] for p in range(0, n_group_draws, n_files)]
+            for draw_pass in passes:
+                if len(set(draw_pass)) != len(draw_pass) or (
+                    len(draw_pass) == n_files and sorted(draw_pass) != list(range(n_files))
+                ):
+                    raise RuntimeError(
+                        f"Group {group} did not draw each file once per pass: {passes}"
+                    )
+            if group == GROUP_A and passes[0] != passes[1]:
+                group_a_reshuffled = True
+
+        # The background particles are appended in the same order, as a parent
+        # and its daughter per background event. The hit has to point to the
+        # daughter copied for the same draw.
+        particles = frame.get("OverlayMCParticles")
+        if len(particles) != n_signal_mc + 2 * n_draws:
+            raise RuntimeError(
+                f"Expected {n_signal_mc + 2 * n_draws} particles in OverlayMCParticles, got {len(particles)}"
+            )
+        if any(particles[i].isOverlay() for i in range(n_signal_mc)):
+            raise RuntimeError("Signal particles should not be flagged as overlay")
+        for draw, (hit, tag) in enumerate(zip(background_hits, tags)):
+            parent_index = n_signal_mc + 2 * draw
+            parent = particles[parent_index]
+            daughter = particles[parent_index + 1]
+            if (parent.getPDG(), daughter.getPDG()) != (tag, -tag) or not (
+                parent.isOverlay() and daughter.isOverlay()
+            ):
+                raise RuntimeError(f"Unexpected background particles for draw {draw} of tag {tag}")
+            relations = (mc_relation_indices(parent), mc_relation_indices(daughter))
+            expected = (([], [parent_index + 1]), ([parent_index], []))
+            if relations != expected:
+                raise RuntimeError(
+                    f"Unexpected MCParticle relations for draw {draw}: got {relations}, expected {expected}"
+                )
+            momentum = daughter.getMomentum()
+            if (momentum.x, momentum.y, momentum.z) != particle_momentum(tag):
+                raise RuntimeError(f"Unexpected momentum of the background particle of tag {tag}")
+
+            if not hit.isOverlay() or hit.getEDep() != tag:
+                raise RuntimeError(f"Unexpected background hit for draw {draw} of tag {tag}")
+            if hit.getParticle().getObjectID().index != parent_index + 1:
+                raise RuntimeError(
+                    f"The hit of draw {draw} points to particle {hit.getParticle().getObjectID().index}, "
+                    f"expected {parent_index + 1}"
+                )
+            # The particles are merged, so the hit keeps its own momentum
+            momentum = hit.getMomentum()
+            if (momentum.x, momentum.y, momentum.z) != HIT_MOMENTUM:
+                raise RuntimeError(f"The momentum of the hit of draw {draw} was changed")
+
+        # Background calorimeter hits are merged by cellID, so a file drawn
+        # several times gives one hit with a contribution per draw, each
+        # pointing to the daughter copied for that draw
+        draws_per_tag = Counter(tags)
+        calo_hits = frame.get("OverlaySimCalorimeterHits")
+        if len(calo_hits) != n_signal_calo + len(draws_per_tag):
+            raise RuntimeError(
+                f"Expected {n_signal_calo + len(draws_per_tag)} hits in OverlaySimCalorimeterHits, got {len(calo_hits)}"
+            )
+        contributions = frame.get("OverlayCaloHitContributions")
+        if len(contributions) != n_signal_calo + n_draws:
+            raise RuntimeError(
+                f"Expected {n_signal_calo + n_draws} contributions in OverlayCaloHitContributions, got {len(contributions)}"
+            )
+        background_calo_hits = {hit.getCellID(): hit for hit in calo_hits if hit.getCellID() > 3}
+        if set(background_calo_hits) != set(draws_per_tag):
+            raise RuntimeError(
+                f"Background calorimeter cells {sorted(background_calo_hits)} do not match the drawn files {sorted(draws_per_tag)}"
+            )
+        for tag, calo_hit in background_calo_hits.items():
+            contribs = calo_hit.getContributions()
+            if any(c.getPDG() != tag for c in contribs):
+                raise RuntimeError(f"Unexpected contributions in the calorimeter hit of tag {tag}")
+            indices = sorted(c.getParticle().getObjectID().index for c in contribs)
+            expected = [n_signal_mc + 2 * d + 1 for d, t in enumerate(tags) if t == tag]
+            if indices != expected:
+                raise RuntimeError(
+                    f"The contributions of tag {tag} point to particles {indices}, expected {expected}"
+                )
+
+    # Without the reshuffle every pass of an event would replay the same order
+    if not group_a_reshuffled:
+        raise RuntimeError("The files were not reshuffled once all of them had been drawn")
+    if all(tags == draws_per_event[0] for tags in draws_per_event):
+        raise RuntimeError("Every event overlaid the same sequence of background files")
+    return draws_per_event
+
+
+check_events("overlay_random_mix.root", 3)
+check_random_mix_overlay("overlay_random_mix.root")
 
 reader = podio.reading.get_reader("functional_random_filter.root")
 frames = reader.get("events")
