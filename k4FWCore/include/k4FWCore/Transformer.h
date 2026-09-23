@@ -109,9 +109,8 @@ namespace details {
           std::tuple<Out> tmp = filter_evtcontext<In...>::apply(*this, ctx, this->m_inputs);
           putVectorOutputs<0, Out>(std::move(tmp), m_outputs, this, ctx);
         } else {
-          putHandle(
-              ctx, std::get<0>(this->m_outputs)[0],
-              convertToUniquePtr(std::move(filter_evtcontext<In...>::apply(*this, ctx, this->m_inputs))));
+          putHandle(ctx, std::get<0>(this->m_outputs)[0],
+                    convertToUniquePtr(std::move(filter_evtcontext<In...>::apply(*this, ctx, this->m_inputs))));
         }
       } catch (GaudiException& e) {
         (e.code() ? this->warning() : this->error()) << e.tag() << " : " << e.message() << endmsg;
