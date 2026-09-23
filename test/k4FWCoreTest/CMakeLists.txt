@@ -279,6 +279,7 @@ add_test_fwcore(OverlayTimingRandomMix options/TestOverlayTimingRandomMix.py ADD
 # Same configuration again, with the same and with a different seed, to check that the draws are reproducible
 add_test_fwcore(OverlayTimingRandomMixRepeat options/TestOverlayTimingRandomMix.py --IOSvc.Output=overlay_random_mix_repeat.root ADD_TO_CHECK_FILES PROPERTIES FIXTURES_REQUIRED "ProducerMultipleFile\\\\;OverlayBackgroundFiles")
 add_test_fwcore(OverlayTimingRandomMixOtherSeed options/TestOverlayTimingRandomMix.py --IOSvc.Output=overlay_random_mix_other_seed.root --UniqueIDGenSvc.Seed=987654321 ADD_TO_CHECK_FILES PROPERTIES FIXTURES_REQUIRED "ProducerMultipleFile\\\\;OverlayBackgroundFiles")
+add_test_fwcore(OverlayTimingNoMCParticleMerge options/TestOverlayTimingNoMCParticleMerge.py ADD_TO_CHECK_FILES PROPERTIES FIXTURES_REQUIRED "ProducerMultipleFile\\\\;OverlayBackgroundFiles")
 
 add_test(NAME check_broken_pipe
          COMMAND bash -c "[ $(${K4RUN} options/ExampleFunctionalProducer.py | head -n 2 | wc -l) = 2 ]"
