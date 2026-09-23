@@ -159,7 +159,13 @@ def main():
         action="store_true",
         help="Do not actually run the job, just parse the config files",
     )
-    parser.add_argument("-n", "--num-events", type=int, help="Number of events to run")
+    parser.add_argument(
+        "-n",
+        "--num-events",
+        "--evt-max",
+        type=int,
+        help="Number of events to run (default: -1)",
+    )
     parser.add_argument(
         "-l",
         "--list",
