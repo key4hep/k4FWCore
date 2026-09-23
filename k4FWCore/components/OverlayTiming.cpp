@@ -286,7 +286,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
 
         const auto& bgParticles = backgroundEvent.get<edm4hep::MCParticleCollection>(m_MCParticleCollectionName);
         // The background particles are copied in order, so the copy of background
-        // particle i ends up at offset + i and no old-to-new index map is needed.
+        // particle i ends up at offset + i
         const int offset = static_cast<int>(oparticles.size());
         const int nBgParticles = static_cast<int>(bgParticles.size());
 
