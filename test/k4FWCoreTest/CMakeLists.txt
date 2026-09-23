@@ -153,6 +153,20 @@ PROPERTIES PASS_REGULAR_EXPRESSION "TwasBrilligAndTheSlithyToves"
 
 add_test_fwcore(TestUniqueIDGenSvc options/TestUniqueIDGenSvc.py -n 1)
 add_test_fwcore(TestUniqueIDGenSvcRepeated options/TestUniqueIDGenSvc.py -n 2 PROPERTIES PASS_REGULAR_EXPRESSION "Duplicate ID for event number, run number and algorithm name")
+# Boolean properties can be switched off from the command line, both when set in
+# the options file (CheckDuplicates) and when left at their default (ThrowIfDuplicate).
+# Without the duplicate check, the second event reaches the algorithm's own check
+add_test_fwcore(Testk4runBoolPropertyFalse options/TestUniqueIDGenSvc.py -n 2 --UniqueIDGenSvc.CheckDuplicates=False
+                  PROPERTIES PASS_REGULAR_EXPRESSION "Unique IDs are the same"
+                  FAIL_REGULAR_EXPRESSION "Duplicate ID for event number, run number and algorithm name")
+add_test_fwcore(Testk4runBoolPropertyDefaultFalse options/ExampleFunctionalMetadata.py --Producer2.ParticleTime 2.5
+                  --IOSvc.Output functional_metadata_nothrow.root --MetadataSvc.ThrowIfDuplicate false
+                  PROPERTIES PASS_REGULAR_EXPRESSION "Metadata parameter '.*' is already set and will be overwritten")
+# A bare boolean flag means True; without it the duplicated metadata would throw
+add_test_fwcore(Testk4runBoolPropertyBareFlag options/ExampleFunctionalMetadata.py
+                  --IOSvc.Output functional_metadata_bare_flag.root --MetadataSvc.SkipIfSameValue)
+add_test_fwcore(Testk4runBoolPropertyInvalid options/TestUniqueIDGenSvc.py --UniqueIDGenSvc.CheckDuplicates=maybe
+                  PROPERTIES PASS_REGULAR_EXPRESSION "invalid boolean value: 'maybe'")
 add_test_fwcore(TestEventHeaderFiller options/createEventHeader.py PROPERTIES FIXTURES_SETUP EventHeaderFillerFile)
 add_test_fwcore(EventHeaderCheck options/runEventHeaderCheck.py PROPERTIES FIXTURES_REQUIRED EventHeaderFillerFile)
 add_test(NAME TestExec WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR} COMMAND python options/TestExec.py)
