@@ -90,14 +90,18 @@ public:
     return StatusCode::SUCCESS;
   }
 
-  StatusCode execute(const EventContext&) const final {
+  StatusCode execute([[maybe_unused]] const EventContext& ctx) const final {
     try {
       const auto readData = nextCollections();
 
       auto readCollections = std::get<0>(readData);
 
       for (size_t i = 0; i != readCollections.size(); ++i) {
+#if GAUDI_MAJOR_VERSION >= 41
+        m_outputs[i].put(ctx, std::unique_ptr<podio::CollectionBase>(readCollections[i]));
+#else
         m_outputs[i].put(std::unique_ptr<podio::CollectionBase>(readCollections[i]));
+#endif
       }
       return Gaudi::Functional::FilterDecision::PASSED;
     } catch (GaudiException& e) {

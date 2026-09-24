@@ -107,11 +107,10 @@ namespace details {
       try {
         if constexpr (isVectorLike<Out>::value) {
           std::tuple<Out> tmp = filter_evtcontext<In...>::apply(*this, ctx, this->m_inputs);
-          putVectorOutputs<0, Out>(std::move(tmp), m_outputs, this);
+          putVectorOutputs<0, Out>(std::move(tmp), m_outputs, this, ctx);
         } else {
-          Gaudi::Functional::details::put(
-              std::get<0>(this->m_outputs)[0],
-              convertToUniquePtr(std::move(filter_evtcontext<In...>::apply(*this, ctx, this->m_inputs))));
+          putHandle(ctx, std::get<0>(this->m_outputs)[0],
+                    convertToUniquePtr(std::move(filter_evtcontext<In...>::apply(*this, ctx, this->m_inputs))));
         }
       } catch (GaudiException& e) {
         (e.code() ? this->warning() : this->error()) << e.tag() << " : " << e.message() << endmsg;
@@ -262,7 +261,7 @@ namespace details {
     StatusCode execute(const EventContext& ctx) const final {
       try {
         auto tmp = filter_evtcontext<In...>::apply(*this, ctx, this->m_inputs);
-        putVectorOutputs<0, Out...>(std::move(tmp), m_outputs, this);
+        putVectorOutputs<0, Out...>(std::move(tmp), m_outputs, this, ctx);
         return StatusCode::SUCCESS;
       } catch (GaudiException& e) {
         (e.code() ? this->warning() : this->error()) << e.tag() << " : " << e.message() << endmsg;
