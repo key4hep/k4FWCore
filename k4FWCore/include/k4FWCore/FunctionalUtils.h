@@ -19,6 +19,7 @@
 #ifndef FWCORE_FUNCTIONALUTILS_H
 #define FWCORE_FUNCTIONALUTILS_H
 
+#include "GAUDI_VERSION.h"
 #include "Gaudi/Functional/details.h"
 #include "GaudiKernel/AnyDataWrapper.h"
 #include "GaudiKernel/DataObjID.h"
@@ -129,12 +130,12 @@ namespace details {
           [&](const auto&... handle) { return algo(get(handle, algo, Gaudi::Hive::currentContext())...); }, handles);
     }
     template <typename Algorithm, typename Handles>
-    static auto apply(const Algorithm& algo, const EventContext&, Handles& handles) {
+    static auto apply(const Algorithm& algo, const EventContext& ctx, Handles& handles) {
       auto inputTuple = std::tuple<addPtrIfColl<In>...>();
 
       // Build the input tuple by picking up either std::vector with an arbitrary
       // number of collections or single collections
-      readVectorInputs<0, In...>(handles, &algo, inputTuple);
+      readVectorInputs<0, In...>(handles, &algo, ctx, inputTuple);
 
       return std::apply([&](const auto&... input) { return algo(maybeTransformToEDM4hep<decltype(input)>(input)...); },
                         inputTuple);
@@ -155,7 +156,7 @@ namespace details {
 
       // Build the input tuple by picking up either std::vector with an arbitrary
       // number of collections or single collections
-      readVectorInputs<0, In...>(handles, &algo, inputTuple);
+      readVectorInputs<0, In...>(handles, &algo, ctx, inputTuple);
 
       return std::apply(
           [&](const auto&... input) { return algo(ctx, maybeTransformToEDM4hep<decltype(input)>(input)...); },
@@ -182,8 +183,29 @@ namespace details {
   template <template <typename> class Handle, typename... Ts>
   using tuple_of_handle_vec_t = typename tuple_of_handle_vec<Handle, Ts...>::type;
 
+  template <typename Handle>
+  auto getHandle(const Handle& handle, const EventContext& ctx) {
+#if GAUDI_MAJOR_VERSION >= 41
+    return handle.get(ctx);
+#else
+    (void)ctx;
+    return handle.get();
+#endif
+  }
+
+  template <typename Handle, typename Value>
+  decltype(auto) putHandle(const EventContext& ctx, const Handle& handle, Value&& value) {
+#if GAUDI_MAJOR_VERSION >= 41
+    return Gaudi::Functional::details::put(ctx, handle, std::forward<Value>(value));
+#else
+    (void)ctx;
+    return Gaudi::Functional::details::put(handle, std::forward<Value>(value));
+#endif
+  }
+
   template <size_t Index, typename... In, typename... Handles, typename InputTuple>
-  void readVectorInputs(const std::tuple<Handles...>& handles, auto thisClass, InputTuple& inputTuple) {
+  void readVectorInputs(const std::tuple<Handles...>& handles, auto thisClass, const EventContext& ctx,
+                        InputTuple& inputTuple) {
     if constexpr (Index < sizeof...(Handles)) {
       using TupleType = std::tuple_element_t<Index, std::tuple<In...>>;
       if constexpr (isVectorLike_v<TupleType>) {
@@ -192,7 +214,7 @@ namespace details {
         auto inputVector = std::vector<const EDM4hepType*>();
         inputVector.reserve(std::get<Index>(handles).size());
         for (const auto& handle : std::get<Index>(handles)) {
-          podio::CollectionBase* collection = handle.get()->get();
+          podio::CollectionBase* collection = getHandle(handle, ctx)->get();
           auto* typedCollection = dynamic_cast<const EDM4hepType*>(collection);
           if (typedCollection) {
             inputVector.push_back(typedCollection);
@@ -209,7 +231,7 @@ namespace details {
         // Bare EDM4hep type, without pointers or const
         using EDM4hepType = std::remove_cv_t<std::remove_pointer_t<TupleType>>;
         try {
-          podio::CollectionBase* collection = std::get<Index>(handles)[0].get()->get();
+          podio::CollectionBase* collection = getHandle(std::get<Index>(handles)[0], ctx)->get();
           auto* typedCollection = dynamic_cast<EDM4hepType*>(collection);
           if (typedCollection) {
             std::get<Index>(inputTuple) = typedCollection;
@@ -229,7 +251,11 @@ namespace details {
                                << " to the requested type didn't work " << endmsg;
             DataObject* dataObject;
             IDataProviderSvc* eventDataSvc = thisClass->evtSvc();
+#if GAUDI_MAJOR_VERSION >= 41
+            eventDataSvc->retrieveObject(ctx, "/Event/" + std::get<Index>(handles)[0].objKey(), dataObject).ignore();
+#else
             eventDataSvc->retrieveObject("/Event/" + std::get<Index>(handles)[0].objKey(), dataObject).ignore();
+#endif
             // This is how Gaudi::Algorithms saves collections through the DataHandle
             const auto* wrapper = dynamic_cast<const DataWrapper<EDM4hepType>*>(dataObject);
             // This is how the Marlin wrapper saves collections when converting from LCIO to EDM4hep
@@ -252,12 +278,13 @@ namespace details {
       }
 
       // Recursive call for the next index
-      readVectorInputs<Index + 1, In...>(handles, thisClass, inputTuple);
+      readVectorInputs<Index + 1, In...>(handles, thisClass, ctx, inputTuple);
     }
   }
 
   template <size_t Index, typename... Out, typename... Handles>
-  void putVectorOutputs(std::tuple<Handles...>&& handles, const auto& outputs, auto thisClass) {
+  void putVectorOutputs(std::tuple<Handles...>&& handles, const auto& outputs, auto thisClass,
+                        const EventContext& ctx) {
     if constexpr (Index < sizeof...(Handles)) {
       auto& outputHandles = std::get<Index>(handles); // Can not be const to allow std::move(value) below
       if constexpr (isVectorLike_v<std::tuple_element_t<Index, std::tuple<Out...>>>) {
@@ -270,15 +297,15 @@ namespace details {
         }
         size_t index = 0;
         for (auto& value : outputHandles) {
-          Gaudi::Functional::details::put(outputVector[index], convertToUniquePtr(std::move(value)));
+          putHandle(ctx, outputVector[index], convertToUniquePtr(std::move(value)));
           ++index;
         }
       } else {
-        Gaudi::Functional::details::put(std::get<Index>(outputs)[0], convertToUniquePtr(std::move(outputHandles)));
+        putHandle(ctx, std::get<Index>(outputs)[0], convertToUniquePtr(std::move(outputHandles)));
       }
 
       // Recursive call for the next index
-      putVectorOutputs<Index + 1, Out...>(std::move(handles), outputs, thisClass);
+      putVectorOutputs<Index + 1, Out...>(std::move(handles), outputs, thisClass, ctx);
     }
   }
 
@@ -315,12 +342,21 @@ namespace details {
     FunctionalDataObjectReadHandle(std::tuple<Args...>&& args)
         : FunctionalDataObjectReadHandle(std::move(args), std::index_sequence_for<Args...>{}) {}
 
+#if GAUDI_MAJOR_VERSION >= 41
+    const T& get(const EventContext& ctx) const;
+#else
     const T& get() const;
+#endif
   };
 
   template <typename T>
+#if GAUDI_MAJOR_VERSION >= 41
+  const T& FunctionalDataObjectReadHandle<T>::get(const EventContext& ctx) const {
+    const auto dataObj = this->fetch(ctx);
+#else
   const T& FunctionalDataObjectReadHandle<T>::get() const {
     const auto dataObj = this->fetch();
+#endif
     if (!dataObj) {
       throw GaudiException(std::format("Cannot retrieve '{}' from transient store [{}]", this->objKey(),
                                        this->m_owner ? this->owner()->name() : "no owner"),
