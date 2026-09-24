@@ -117,8 +117,9 @@ private:
   // Gaudi::Property<int>         m_startWithBackgroundFile{this, "StartBackgroundFileIndex", -1,
   //                                                "Which background file to startWith"};
   Gaudi::Property<int> m_startWithBackgroundEvent{this, "StartBackgroundEventIndex", -1,
-                                                  "Index of the background event to start from (-1 means start from "
-                                                  "the beginning)"};
+                                                  "Index of the background event every group starts reading from, "
+                                                  "once at the beginning of the job (-1 means start from the "
+                                                  "beginning)"};
 
   Gaudi::Property<std::vector<std::vector<std::string>>> m_inputFileNames{
       this, "BackgroundFileNames", {}, "List of groups of background input files, one group per overlay stream"};
@@ -144,7 +145,9 @@ private:
       "Map from collection name to [t_min, t_max] (ns) defining the acceptance window. Required for every "
       "SimTrackerHit and SimCalorimeterHit collection."};
   Gaudi::Property<bool> m_allowReusingBackgroundFiles{
-      this, "AllowReusingBackgroundFiles", false, "If true, wrap around the background file when events are exhausted"};
+      this, "AllowReusingBackgroundFiles", false,
+      "If true, start over from the first event of a group once all of its events have been overlaid; otherwise "
+      "running out of background events is an error"};
   Gaudi::Property<bool> m_copyCellIDMetadata{this, "CopyCellIDMetadata", false,
                                              "Copy cell ID encoding metadata from input to output collections"};
 
