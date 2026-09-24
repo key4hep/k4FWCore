@@ -21,9 +21,11 @@
 
 #include "k4FWCore/DataWrapper.h"
 
+#include "GAUDI_VERSION.h"
 #include <GaudiKernel/AnyDataWrapper.h>
 #include <GaudiKernel/DataObjectHandle.h>
 #include <GaudiKernel/ServiceHandle.h>
+#include <GaudiKernel/ThreadLocalContext.h>
 
 #include <memory>
 #include <stdexcept>
@@ -53,18 +55,22 @@ public:
 
   /// Retrieve object from transient data store
   const T* get();
+  const T* get(const EventContext& ctx);
 
   /**
    * Register object in transient store
    */
   void put(T* object);
+  void put(const EventContext& ctx, T* object);
 
   T* put(std::unique_ptr<T> object);
+  T* put(const EventContext& ctx, std::unique_ptr<T> object);
 
   /**
    * Create and register object in transient store
    */
   T* createAndPut();
+  T* createAndPut(const EventContext& ctx);
 
 private:
   ServiceHandle<IDataProviderSvc> m_eds;
@@ -98,8 +104,18 @@ DataHandle<T>::DataHandle(const std::string& descriptor, Gaudi::DataHandle::Mode
  */
 template <typename T>
 const T* DataHandle<T>::get() {
+  return get(Gaudi::Hive::currentContext());
+}
+
+template <typename T>
+const T* DataHandle<T>::get(const EventContext& ctx) {
   DataObject* dataObjectp;
+#if GAUDI_MAJOR_VERSION >= 41
+  auto sc = m_eds->retrieveObject(ctx, DataObjectHandle<DataWrapper<T>>::fullKey().key(), dataObjectp);
+#else
+  (void)ctx;
   auto sc = m_eds->retrieveObject(DataObjectHandle<DataWrapper<T>>::fullKey().key(), dataObjectp);
+#endif
 
   if (sc.isFailure()) {
     std::string msg("Could not retrieve product " + DataObjectHandle<DataWrapper<T>>::pythonRepr());
@@ -125,6 +141,11 @@ const T* DataHandle<T>::get() {
 //---------------------------------------------------------------------------
 template <typename T>
 void DataHandle<T>::put(T* objectp) {
+  put(Gaudi::Hive::currentContext(), objectp);
+}
+
+template <typename T>
+void DataHandle<T>::put(const EventContext& ctx, T* objectp) {
   std::unique_ptr<DataWrapper<T>> dw = std::make_unique<DataWrapper<T>>();
   // in case T is of primitive type, we must not change the pointer address
   // (see comments in ctor) instead copy the value of T into allocated memory
@@ -134,13 +155,23 @@ void DataHandle<T>::put(T* objectp) {
     m_dataPtr = objectp;
   }
   dw->setData(objectp);
+#if GAUDI_MAJOR_VERSION >= 41
+  DataObjectHandle<DataWrapper<T>>::put(ctx, std::move(dw));
+#else
+  (void)ctx;
   DataObjectHandle<DataWrapper<T>>::put(std::move(dw));
+#endif
 }
 
 //---------------------------------------------------------------------------
 template <typename T>
 T* DataHandle<T>::put(std::unique_ptr<T> objectp) {
-  put(objectp.get());
+  return put(Gaudi::Hive::currentContext(), std::move(objectp));
+}
+
+template <typename T>
+T* DataHandle<T>::put(const EventContext& ctx, std::unique_ptr<T> objectp) {
+  put(ctx, objectp.get());
   return objectp.release();
 }
 
@@ -152,8 +183,13 @@ T* DataHandle<T>::put(std::unique_ptr<T> objectp) {
  */
 template <typename T>
 T* DataHandle<T>::createAndPut() {
+  return createAndPut(Gaudi::Hive::currentContext());
+}
+
+template <typename T>
+T* DataHandle<T>::createAndPut(const EventContext& ctx) {
   T* objectp = new T();
-  this->put(objectp);
+  this->put(ctx, objectp);
   return objectp;
 }
 } // namespace k4FWCore
