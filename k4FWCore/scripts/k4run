@@ -53,6 +53,25 @@ FILTER_GAUDI_PROPS = [
 ]
 
 
+def str_to_bool(value):
+    """
+    Parse a boolean command line value
+
+    argparse's type=bool would turn any non-empty string (including "False")
+    into True, so only accept explicit spellings and reject everything else
+    """
+    if isinstance(value, bool):
+        return value
+    lowered = value.strip().lower()
+    if lowered in ("true"):
+        return True
+    if lowered in ("false"):
+        return False
+    raise argparse.ArgumentTypeError(
+        f"invalid boolean value: '{value}' (use True/False or true/false)"
+    )
+
+
 def add_arguments(parser, app_mgr):
     """
     Add arguments to the parser for all properties of all configurables in the application manager
@@ -102,6 +121,14 @@ def add_arguments(parser, app_mgr):
                 else:
                     proptype = str
                 args = "+"
+            extra_kwargs = {}
+            # Properties not set in the options file hold propertyNoValue (a
+            # string), so look at the default value as well to detect booleans
+            if proptype is bool or isinstance(value, bool):
+                proptype = str_to_bool
+                # a bare flag (e.g. "--MetadataSvc.SkipIfSameValue") means True
+                if args == "?":
+                    extra_kwargs["const"] = True
 
             # add the argument twice, once as "--PodioOutput.filename"
             # and once as "--filename.PodioOutput"
@@ -117,6 +144,7 @@ def add_arguments(parser, app_mgr):
                 .strip(),
                 nargs=args,
                 default=value,
+                **extra_kwargs,
             )
     return option_db
 
