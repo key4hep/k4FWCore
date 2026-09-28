@@ -153,6 +153,15 @@ PROPERTIES PASS_REGULAR_EXPRESSION "TwasBrilligAndTheSlithyToves"
 
 add_test_fwcore(TestUniqueIDGenSvc options/TestUniqueIDGenSvc.py -n 1)
 add_test_fwcore(TestUniqueIDGenSvcRepeated options/TestUniqueIDGenSvc.py -n 2 PROPERTIES PASS_REGULAR_EXPRESSION "Duplicate ID for event number, run number and algorithm name")
+# Parse boolean properties without initializing or executing the application.
+add_test_fwcore(Testk4runBoolExplicit options/Testk4runBoolProperties.py --dry-run --MetadataSvc.SkipIfSameValue=False
+                  PROPERTIES PASS_REGULAR_EXPRESSION "Option name: MetadataSvc.SkipIfSameValue False")
+add_test_fwcore(Testk4runBoolDefault options/Testk4runBoolProperties.py --dry-run --MetadataSvc.ThrowIfDuplicate=false
+                  PROPERTIES PASS_REGULAR_EXPRESSION "Option name: MetadataSvc.ThrowIfDuplicate False")
+add_test_fwcore(Testk4runBoolBareFlag options/Testk4runBoolProperties.py --dry-run --MetadataSvc.SetAtFinalize
+                  PROPERTIES PASS_REGULAR_EXPRESSION "Option name: MetadataSvc.SetAtFinalize True")
+add_test_fwcore(Testk4runBoolInvalid options/Testk4runBoolProperties.py --dry-run --MetadataSvc.ThrowIfDuplicate=maybe
+                  PROPERTIES PASS_REGULAR_EXPRESSION "invalid boolean value: 'maybe'")
 add_test_fwcore(TestEventHeaderFiller options/createEventHeader.py PROPERTIES FIXTURES_SETUP EventHeaderFillerFile)
 add_test_fwcore(EventHeaderCheck options/runEventHeaderCheck.py PROPERTIES FIXTURES_REQUIRED EventHeaderFillerFile)
 add_test(NAME TestExec WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR} COMMAND python options/TestExec.py)
