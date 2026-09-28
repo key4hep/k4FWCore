@@ -16,6 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "GAUDI_VERSION.h"
 #include "Gaudi/Functional/utilities.h"
 #include "GaudiKernel/AnyDataWrapper.h"
 #include "GaudiKernel/FunctionalFilterDecision.h"
@@ -97,7 +98,7 @@ public:
       auto readCollections = std::get<0>(readData);
 
       for (size_t i = 0; i != readCollections.size(); ++i) {
-#if GAUDI_MAJOR_VERSION >= 41
+#if GAUDI_VERSION >= CALC_GAUDI_VERSION(41, 1)
         m_outputs[i].put(ctx, std::unique_ptr<podio::CollectionBase>(readCollections[i]));
 #else
         m_outputs[i].put(std::unique_ptr<podio::CollectionBase>(readCollections[i]));
