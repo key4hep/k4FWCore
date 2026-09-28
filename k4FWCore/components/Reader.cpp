@@ -16,6 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "GAUDI_VERSION.h"
 #include "Gaudi/Functional/utilities.h"
 #include "GaudiKernel/AnyDataWrapper.h"
 #include "GaudiKernel/FunctionalFilterDecision.h"
