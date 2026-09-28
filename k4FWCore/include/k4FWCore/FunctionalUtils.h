@@ -185,7 +185,7 @@ namespace details {
 
   template <typename Handle>
   auto getHandle(const Handle& handle, const EventContext& ctx) {
-#if GAUDI_MAJOR_VERSION >= 41
+#if GAUDI_VERSION >= CALC_GAUDI_VERSION(41, 1)
     return handle.get(ctx);
 #else
     (void)ctx;
@@ -195,7 +195,7 @@ namespace details {
 
   template <typename Handle, typename Value>
   decltype(auto) putHandle(const EventContext& ctx, const Handle& handle, Value&& value) {
-#if GAUDI_MAJOR_VERSION >= 41
+#if GAUDI_VERSION >= CALC_GAUDI_VERSION(41, 1)
     return Gaudi::Functional::details::put(ctx, handle, std::forward<Value>(value));
 #else
     (void)ctx;
@@ -251,7 +251,7 @@ namespace details {
                                << " to the requested type didn't work " << endmsg;
             DataObject* dataObject;
             IDataProviderSvc* eventDataSvc = thisClass->evtSvc();
-#if GAUDI_MAJOR_VERSION >= 41
+#if GAUDI_VERSION >= CALC_GAUDI_VERSION(41, 1)
             eventDataSvc->retrieveObject(ctx, "/Event/" + std::get<Index>(handles)[0].objKey(), dataObject).ignore();
 #else
             eventDataSvc->retrieveObject("/Event/" + std::get<Index>(handles)[0].objKey(), dataObject).ignore();
@@ -342,7 +342,7 @@ namespace details {
     FunctionalDataObjectReadHandle(std::tuple<Args...>&& args)
         : FunctionalDataObjectReadHandle(std::move(args), std::index_sequence_for<Args...>{}) {}
 
-#if GAUDI_MAJOR_VERSION >= 41
+#if GAUDI_VERSION >= CALC_GAUDI_VERSION(41, 1)
     const T& get(const EventContext& ctx) const;
 #else
     const T& get() const;
@@ -350,7 +350,7 @@ namespace details {
   };
 
   template <typename T>
-#if GAUDI_MAJOR_VERSION >= 41
+#if GAUDI_VERSION >= CALC_GAUDI_VERSION(41, 1)
   const T& FunctionalDataObjectReadHandle<T>::get(const EventContext& ctx) const {
     const auto dataObj = this->fetch(ctx);
 #else

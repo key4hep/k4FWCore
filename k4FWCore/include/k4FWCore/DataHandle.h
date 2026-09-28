@@ -110,7 +110,7 @@ const T* DataHandle<T>::get() {
 template <typename T>
 const T* DataHandle<T>::get(const EventContext& ctx) {
   DataObject* dataObjectp;
-#if GAUDI_MAJOR_VERSION >= 41
+#if GAUDI_VERSION >= CALC_GAUDI_VERSION(41, 1)
   auto sc = m_eds->retrieveObject(ctx, DataObjectHandle<DataWrapper<T>>::fullKey().key(), dataObjectp);
 #else
   (void)ctx;
@@ -155,7 +155,7 @@ void DataHandle<T>::put(const EventContext& ctx, T* objectp) {
     m_dataPtr = objectp;
   }
   dw->setData(objectp);
-#if GAUDI_MAJOR_VERSION >= 41
+#if GAUDI_VERSION >= CALC_GAUDI_VERSION(41, 1)
   DataObjectHandle<DataWrapper<T>>::put(ctx, std::move(dw));
 #else
   (void)ctx;
