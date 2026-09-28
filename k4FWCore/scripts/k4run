@@ -63,9 +63,9 @@ def str_to_bool(value):
     if isinstance(value, bool):
         return value
     lowered = value.strip().lower()
-    if lowered in ("true"):
+    if lowered == "true":
         return True
-    if lowered in ("false"):
+    if lowered == "false":
         return False
     raise argparse.ArgumentTypeError(
         f"invalid boolean value: '{value}' (use True/False or true/false)"
