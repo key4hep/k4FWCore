@@ -65,24 +65,24 @@ gaudi_add_module(k4FWCoreTestPlugins
                  SOURCES ${k4fwcoretest_plugin_sources}
                  LINK Gaudi::GaudiKernel k4FWCore k4FWCore::k4Interface ROOT::Core ROOT::RIO ROOT::Tree podio::podioIO EDM4HEP::edm4hep)
 
-set(K4RUN ${PROJECT_SOURCE_DIR}/k4FWCore/scripts/k4run)
-
-
 #[[
 add_test_fwcore
 -----------------
 
-Adds a test with custom properties and environment setup.
+Adds a k4run test for an options file in this directory, see
+k4fwcore_add_k4run_test in cmake/k4FWCoreTesting.cmake.
 
-.. command:: add_test_fwcore(testname [test_arguments...] [PROPERTIES property1 value1...] [ADD_TO_CHECK_FILES])
+.. command:: add_test_fwcore(testname options_file [k4run_arguments...] [PROPERTIES property1 value1...] [ADD_TO_CHECK_FILES] [NO_ERROR_CHECK])
 
   :param testname: Name of the test
-  :param test_arguments: Arguments passed to the test command
+  :param options_file: Options file, relative to this directory
+  :param k4run_arguments: Arguments passed to k4run
 
-  Supports two special keywords:
+  Supports three special keywords:
 
   - ``PROPERTIES``: Followed by property-value pairs to set on the test
   - ``ADD_TO_CHECK_FILES``: Adds the test to the 'FunctionalCheckFiles' test dependencies
+  - ``NO_ERROR_CHECK``: Do not fail the test when ERROR or FATAL messages are printed
 
   Key Features:
   * Uses k4run as the test command prefix
@@ -92,41 +92,35 @@ Adds a test with custom properties and environment setup.
 
     add_test_fwcore(FunctionalTest options/Example.py PROPERTIES TIMEOUT 300 ADD_TO_CHECK_FILES)
 ]]
-function(add_test_fwcore testname)
+function(add_test_fwcore testname options_file)
+  set(NO_ERROR_CHECK)
   foreach(arg ${ARGN})
     if(arg STREQUAL "PROPERTIES")
       set(TEST_PROPERTIES_FOUND TRUE)
     elseif(arg STREQUAL "ADD_TO_CHECK_FILES")
       set(ADD_TO_CHECK_FILES TRUE)
-    else()
+    elseif(arg STREQUAL "NO_ERROR_CHECK")
+      set(NO_ERROR_CHECK NO_ERROR_CHECK)
+    elseif(TEST_PROPERTIES_FOUND)
       # For tests that depend on multiple tests and the original cmake way is to
       # add a colon between them this should make it work
       string(REPLACE ";" "\\\\;" arg ${arg})
-      if(TEST_PROPERTIES_FOUND)
-        list(APPEND TEST_PROPERTIES ${arg})
-      else()
-        list(APPEND TEST_ARGUMENTS ${arg})
-      endif()
+      list(APPEND TEST_PROPERTIES ${arg})
+    else()
+      list(APPEND TEST_ARGUMENTS ${arg})
     endif()
   endforeach()
-  add_test(NAME ${testname}
-           # WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-           COMMAND ${K4RUN} ${CMAKE_CURRENT_LIST_DIR}/${TEST_ARGUMENTS})
+  k4fwcore_add_k4run_test(${testname} OPTIONS ${options_file} ARGS ${TEST_ARGUMENTS} ${NO_ERROR_CHECK})
   if(TEST_PROPERTIES_FOUND)
     set_tests_properties(${testname} PROPERTIES ${TEST_PROPERTIES})
   endif()
   if(ADD_TO_CHECK_FILES)
-    get_test_property(${testname} FIXTURES_SETUP existing_fixtures)
-    if(existing_fixtures AND NOT existing_fixtures STREQUAL "NOTFOUND")
-      set_tests_properties(${testname} PROPERTIES FIXTURES_SETUP "${existing_fixtures};TestFiles")
-    else()
-      set_tests_properties(${testname} PROPERTIES FIXTURES_SETUP TestFiles)
-    endif()
+    set_property(TEST ${testname} APPEND PROPERTY FIXTURES_SETUP TestFiles)
   endif()
 endfunction()
 
-add_test(NAME FunctionalCheckFiles COMMAND python3 ${CMAKE_CURRENT_LIST_DIR}/scripts/CheckOutputFiles.py)
-set_tests_properties(FunctionalCheckFiles PROPERTIES FIXTURES_REQUIRED TestFiles)
+k4fwcore_add_test(FunctionalCheckFiles COMMAND python3 ${CMAKE_CURRENT_LIST_DIR}/scripts/CheckOutputFiles.py
+                  FIXTURES_REQUIRED TestFiles)
 
 add_test_fwcore(CreateExampleEventData options/createExampleEventData.py)
 set_tests_properties(CreateExampleEventData PROPERTIES FIXTURES_SETUP ExampleEventDataFile)
@@ -152,7 +146,7 @@ PROPERTIES PASS_REGULAR_EXPRESSION "TwasBrilligAndTheSlithyToves"
 )
 
 add_test_fwcore(TestUniqueIDGenSvc options/TestUniqueIDGenSvc.py -n 1)
-add_test_fwcore(TestUniqueIDGenSvcRepeated options/TestUniqueIDGenSvc.py -n 2 PROPERTIES PASS_REGULAR_EXPRESSION "Duplicate ID for event number, run number and algorithm name")
+add_test_fwcore(TestUniqueIDGenSvcRepeated options/TestUniqueIDGenSvc.py -n 2 NO_ERROR_CHECK PROPERTIES PASS_REGULAR_EXPRESSION "Duplicate ID for event number, run number and algorithm name")
 # Parse boolean properties without initializing or executing the application.
 add_test_fwcore(Testk4runBoolExplicit options/Testk4runBoolProperties.py --dry-run --MetadataSvc.SkipIfSameValue=False
                   PROPERTIES PASS_REGULAR_EXPRESSION "Option name: MetadataSvc.SkipIfSameValue False")
@@ -164,10 +158,10 @@ add_test_fwcore(Testk4runBoolInvalid options/Testk4runBoolProperties.py --dry-ru
                   PROPERTIES PASS_REGULAR_EXPRESSION "invalid boolean value: 'maybe'")
 add_test_fwcore(TestEventHeaderFiller options/createEventHeader.py PROPERTIES FIXTURES_SETUP EventHeaderFillerFile)
 add_test_fwcore(EventHeaderCheck options/runEventHeaderCheck.py PROPERTIES FIXTURES_REQUIRED EventHeaderFillerFile)
-add_test(NAME TestExec WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR} COMMAND python options/TestExec.py)
+k4fwcore_add_test(TestExec COMMAND python options/TestExec.py WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 
-add_test(NAME Testk4runNoArgumentsHelp COMMAND ${K4RUN})
-set_tests_properties(Testk4runNoArgumentsHelp PROPERTIES PASS_REGULAR_EXPRESSION "Usage: k4run <options_file.py>, use --help to get a complete list of arguments")
+k4fwcore_add_test(Testk4runNoArgumentsHelp COMMAND k4run
+                  PROPERTIES PASS_REGULAR_EXPRESSION "Usage: k4run <options_file.py>, use --help to get a complete list of arguments")
 add_test_fwcore(Testk4runCustomArguments options/TestArgs.py --foo=42 PROPERTIES PASS_REGULAR_EXPRESSION "The answer is 42")
 add_test_fwcore(Testk4runVerboseOutput options/TestArgs.py --log-level=verbose PROPERTIES PASS_REGULAR_EXPRESSION " VERBOSE ")
 add_test_fwcore(Testk4runHelpOnly options/TestArgs.py --help PROPERTIES PASS_REGULAR_EXPRESSION "show this help message and exit")
@@ -194,10 +188,10 @@ add_test_fwcore(ExampleFailingSingleEvent options/ExampleFailingSingleEvent.py
 
 # PODIO_DEFAULT_WRITE_RNTUPLE needs to be unset because the test FunctionalMix reads through
 # PodioInput, which does not support RNTuple output
-add_test(NAME FunctionalProducerMultiple
-         COMMAND bash -c "unset PODIO_DEFAULT_WRITE_RNTUPLE; ${K4RUN} ${CMAKE_CURRENT_LIST_DIR}/options/ExampleFunctionalProducerMultiple.py"
-)
-set_tests_properties(FunctionalProducerMultiple PROPERTIES FIXTURES_SETUP ProducerMultipleFile)
+k4fwcore_add_test(FunctionalProducerMultiple
+                  COMMAND env -u PODIO_DEFAULT_WRITE_RNTUPLE k4run ${CMAKE_CURRENT_LIST_DIR}/options/ExampleFunctionalProducerMultiple.py
+                  CHECK_ERROR_MESSAGES
+                  FIXTURES_SETUP ProducerMultipleFile)
 
 add_test_fwcore(FunctionalProducerAbsolutePath options/ExampleFunctionalProducerAbsolutePath.py ADD_TO_CHECK_FILES)
 add_test_fwcore(FunctionalFile options/ExampleFunctionalFile.py PROPERTIES FIXTURES_REQUIRED ProducerFile ADD_TO_CHECK_FILES)
@@ -217,10 +211,10 @@ add_test_fwcore(FunctionalCollectionMerger options/ExampleFunctionalCollectionMe
 add_test_fwcore(FunctionalFilterFile options/ExampleFunctionalFilterFile.py ADD_TO_CHECK_FILES)
 add_test_fwcore(FunctionalMetadata options/ExampleFunctionalMetadata.py --MetadataSvc.SkipIfSameValue True ADD_TO_CHECK_FILES PROPERTIES FIXTURES_SETUP FunctionalMetadataFile)
 add_test_fwcore(FunctionalMetadataThrow options/ExampleFunctionalMetadata.py --Producer2.ParticleTime 2.5
-                  --IOSvc.Output functional_metadata_throw.root
+                  --IOSvc.Output functional_metadata_throw.root NO_ERROR_CHECK
                   PROPERTIES PASS_REGULAR_EXPRESSION "Metadata parameter '.*' is already set")
 add_test_fwcore(FunctionalMetadataRead options/ExampleFunctionalMetadataRead.py PROPERTIES FIXTURES_REQUIRED FunctionalMetadataFile ADD_TO_CHECK_FILES)
-add_test_fwcore(FunctionalMetadataEventLoop options/ExampleFunctionalMetadataEventLoop.py
+add_test_fwcore(FunctionalMetadataEventLoop options/ExampleFunctionalMetadataEventLoop.py NO_ERROR_CHECK
                   PROPERTIES PASS_REGULAR_EXPRESSION "putParameter cannot be called during the event loop")
 add_test_fwcore(FunctionalMetadataOldAlgorithm options/ExampleFunctionalMetadataOldAlgorithm.py ADD_TO_CHECK_FILES PROPERTIES FIXTURES_SETUP OldAlgorithmFile)
 add_test_fwcore(ExampleTool options/ExampleTool.py ADD_TO_CHECK_FILES)
@@ -270,58 +264,35 @@ add_test_fwcore(FunctionalConsumerInputOutputLocations options/ExampleFunctional
 
 add_executable(check_ParticleIDOutputs src/check_ParticleIDOutputs.cpp)
 target_link_libraries(check_ParticleIDOutputs PRIVATE podio::podioIO EDM4HEP::edm4hep EDM4HEP::utils fmt::fmt)
-add_test(NAME check_ParticleIDOutputs COMMAND check_ParticleIDOutputs example_with_particleids.root)
-set_tests_properties(check_ParticleIDOutputs PROPERTIES FIXTURES_REQUIRED ParticleIDMetadataFile)
-add_test_fwcore(TypeMisMatchDemo options/TypeMisMatchDemo.py PROPERTIES PASS_REGULAR_EXPRESSION "Failed to cast collection MCParticles to the required type")
+k4fwcore_add_test(check_ParticleIDOutputs COMMAND check_ParticleIDOutputs example_with_particleids.root
+                  FIXTURES_REQUIRED ParticleIDMetadataFile)
+add_test_fwcore(TypeMisMatchDemo options/TypeMisMatchDemo.py NO_ERROR_CHECK PROPERTIES PASS_REGULAR_EXPRESSION "Failed to cast collection MCParticles to the required type")
 
-add_test_fwcore(TypeMisMatchDemoMultiple options/TypeMisMatchDemoMultiple.py PROPERTIES PASS_REGULAR_EXPRESSION "Failed to cast collection MCParticles1 to the required type")
+add_test_fwcore(TypeMisMatchDemoMultiple options/TypeMisMatchDemoMultiple.py NO_ERROR_CHECK PROPERTIES PASS_REGULAR_EXPRESSION "Failed to cast collection MCParticles1 to the required type")
 add_test_fwcore(ReadMarlinWrapperCollection options/readMarlinWrapperCollection.py)
 
-add_test_fwcore(InvalidOutputCommandsNoCrash options/invalidOutputCommandsNoCrash.py)
+add_test_fwcore(InvalidOutputCommandsNoCrash options/invalidOutputCommandsNoCrash.py NO_ERROR_CHECK)
 set_tests_properties(InvalidOutputCommandsNoCrash PROPERTIES FIXTURES_REQUIRED ProducerFile PASS_REGULAR_EXPRESSION "ERROR 'abc' is not a valid command for the KeepDropSwitch")
 
 add_test_fwcore(OverlayTiming options/TestOverlayTiming.py ADD_TO_CHECK_FILES PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile)
 
-add_test(NAME check_broken_pipe
-         COMMAND bash -c "[ $(${K4RUN} options/ExampleFunctionalProducer.py | head -n 2 | wc -l) = 2 ]"
-         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-       )
+k4fwcore_add_test(check_broken_pipe
+                  COMMAND bash -c "[ $(k4run options/ExampleFunctionalProducer.py | head -n 2 | wc -l) = 2 ]"
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 
-get_filename_component(CURRENT_DIR_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
-
-set(test_environment "\
-LD_LIBRARY_PATH=\
-${PROJECT_BINARY_DIR}:\
-${PROJECT_BINARY_DIR}/${PROJECT_NAME}:\
-${CMAKE_CURRENT_BINARY_DIR}:\
-${CMAKE_CURRENT_BINARY_DIR}/genConfDir/${CURRENT_DIR_NAME}:\
-$ENV{LD_LIBRARY_PATH};\
-\
-GAUDI_PLUGIN_PATH=\
-${PROJECT_BINARY_DIR}:\
-${PROJECT_BINARY_DIR}/${PROJECT_NAME}:\
-${CMAKE_CURRENT_BINARY_DIR}:\
-${CMAKE_CURRENT_BINARY_DIR}/genConfDir/${CURRENT_DIR_NAME}:\
-$ENV{GAUDI_PLUGIN_PATH}:\
-$ENV{LD_LIBRARY_PATH};\
-\
-PYTHONPATH=\
-${PROJECT_BINARY_DIR}/${PROJECT_NAME}/genConfDir:\
-${CMAKE_CURRENT_BINARY_DIR}/genConfDir:\
-$ENV{PYTHONPATH};\
-"
-)
-get_property(test_names DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY TESTS)
-set_tests_properties(${test_names} PROPERTIES ENVIRONMENT "${test_environment}")
-
-# The following is done to make the tests work without installing the files in
-# the installation directory. The k4FWCore in the build directory is populated by
-# Gaudi so we can't just make a k4FWCore folder and put the python files there.
-# We put everything in one of the folders generated by Gaudi so that importing from
-# k4FWCore will give the right result
-add_custom_target(copy_directory ALL
-  COMMAND ${CMAKE_COMMAND} -E copy_directory
-          ${PROJECT_SOURCE_DIR}/python/k4FWCore/ ${PROJECT_BINARY_DIR}/k4FWCore/genConfDir/k4FWCore
-  COMMENT "Copying k4FWCore python package after building all the libraries and plugins"
-  DEPENDS k4FWCoreTestPlugins k4FWCore k4FWCorePlugins
-)
+# Tests for the helpers in cmake/k4FWCoreTesting.cmake
+# An ERROR message makes the test fail even if the exit code is 0
+k4fwcore_add_test(TestHelperErrorCheck
+                  COMMAND python3 -c "print('SomeAlgorithm        ERROR something went wrong')"
+                  CHECK_ERROR_MESSAGES
+                  PROPERTIES WILL_FAIL TRUE)
+# The output file is written to TestHelperPrivateWorkingDirectory.dir
+k4fwcore_add_k4run_test(TestHelperPrivateWorkingDirectory
+                        OPTIONS options/ExampleFunctionalProducer.py
+                        ARGS --IOSvc.Output private_working_directory.root
+                        PRIVATE_WORKING_DIRECTORY
+                        LABELS helpers)
+k4fwcore_add_test(TestHelperPrivateWorkingDirectoryOutput
+                  COMMAND test -f TestHelperPrivateWorkingDirectory.dir/private_working_directory.root)
+set_tests_properties(TestHelperPrivateWorkingDirectory PROPERTIES FIXTURES_SETUP PrivateWorkingDirectoryFile)
+set_tests_properties(TestHelperPrivateWorkingDirectoryOutput PROPERTIES FIXTURES_REQUIRED PrivateWorkingDirectoryFile)

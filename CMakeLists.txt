@@ -40,9 +40,13 @@ include(cmake/Key4hepConfig.cmake)
 include(GNUInstallDirs)
 include(CTest)
 
+include(cmake/k4FWCoreTesting.cmake)
+
 add_subdirectory(k4FWCore)
 add_subdirectory(k4Interface)
-add_subdirectory(python)
+# Called here and not in python/ so that the build-tree k4FWCore package also
+# picks up the configurables generated in k4FWCore/genConfDir
+gaudi_install(PYTHON)
 if(BUILD_TESTING)
   add_subdirectory(test)
 endif()

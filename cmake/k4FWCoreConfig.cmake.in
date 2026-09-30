@@ -27,6 +27,8 @@ if(NOT TARGET k4FWCore::k4FWCore)
   include("${CMAKE_CURRENT_LIST_DIR}/k4FWCoreTargets.cmake")
 endif()
 
+include("${CMAKE_CURRENT_LIST_DIR}/k4FWCoreTesting.cmake")
+
 check_required_components(k4FWCore)
 
 include(FindPackageHandleStandardArgs)
