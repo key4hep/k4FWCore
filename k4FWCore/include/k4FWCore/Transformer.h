@@ -37,7 +37,7 @@ namespace k4FWCore {
 
 namespace details {
 
-#if GAUDI_VERSION >= CALC_GAUDI_VERSION(41, 1)
+#if GAUDI_MAJOR_VERSION >= 41
   using EmptyTypeList = Gaudi::Functional::details::type_list<>;
 #else
   using EmptyTypeList = std::tuple<>;
