@@ -449,6 +449,67 @@ for frame in reader.get("events"):
     if sim_hit_overlay_flags[n_signal_sim:] != [True] * n_background_sim:
         raise RuntimeError("Background sim tracker hits should be flagged as overlay")
 
+# Check which background events OverlayTiming read (TestOverlayTimingBackgroundCursor.py).
+# Signal and background both come from output_k4test_exampledata.root, where
+# every event has two MCParticles:
+# - a tagged particle (PDG 1) whose momentum along x is the event number
+# - a filler particle (PDG 2) that is the same in every event
+# The output collection holds the signal particles first, then the background
+# particles of group 0 and then those of group 1, in the order they were read.
+PARTICLES_PER_EVENT = 2
+TAGGED_PDG = 1
+FILLER_PDG = 2
+
+
+def source_event_numbers(particles):
+    """Event number in output_k4test_exampledata.root of each event whose
+    particles were copied into the collection, in order"""
+    if len(particles) % PARTICLES_PER_EVENT != 0:
+        raise RuntimeError(
+            f"Expected a multiple of {PARTICLES_PER_EVENT} particles, got {len(particles)}"
+        )
+    event_numbers = []
+    for start in range(0, len(particles), PARTICLES_PER_EVENT):
+        tagged, filler = particles[start], particles[start + 1]
+        if tagged.getPDG() != TAGGED_PDG or filler.getPDG() != FILLER_PDG:
+            raise RuntimeError(
+                f"Expected particles {start} and {start + 1} to have the PDG values "
+                f"{TAGGED_PDG} and {FILLER_PDG}, got {tagged.getPDG()} and {filler.getPDG()}"
+            )
+        event_numbers.append(int(tagged.getMomentum().x))
+    return event_numbers
+
+
+# Both background groups start at event 95 and the file has 100 events.
+# Group 0 overlays 2 events per signal event, so it reads event 99 in the third
+# signal event and then starts over from event 0 (AllowReusingBackgroundFiles).
+# Group 1 overlays 1 event per signal event and never runs out.
+expected_overlays = [
+    {"signal": [0], "group 0": [95, 96], "group 1": [95]},
+    {"signal": [1], "group 0": [97, 98], "group 1": [96]},
+    {"signal": [2], "group 0": [99, 0], "group 1": [97]},  # group 0 wraps around
+    {"signal": [3], "group 0": [1, 2], "group 1": [98]},
+]
+check_events("overlay_start_index.root", len(expected_overlays))
+reader = podio.reading.get_reader("overlay_start_index.root")
+for i, (frame, expected) in enumerate(zip(reader.get("events"), expected_overlays)):
+    event_numbers = source_event_numbers(frame.get("OverlayMCParticles"))
+    n_expected = sum(len(events) for events in expected.values())
+    if len(event_numbers) != n_expected:
+        raise RuntimeError(
+            f"Event {i}: expected particles from {n_expected} events in OverlayMCParticles, "
+            f"got {len(event_numbers)} ({event_numbers})"
+        )
+    start = 0
+    for source, expected_numbers in expected.items():
+        read_numbers = event_numbers[start : start + len(expected_numbers)]
+        if read_numbers != expected_numbers:
+            raise RuntimeError(
+                f"Event {i}: expected the {source} particles to come from the events "
+                f"{expected_numbers}, got {read_numbers}"
+            )
+        start += len(expected_numbers)
+
 reader = podio.reading.get_reader("functional_random_filter.root")
 frames = reader.get("events")
 for frame in frames:
