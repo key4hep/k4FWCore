@@ -39,6 +39,7 @@ foreach(test
   # (which fails in CI where only Ninja is available and make is not on PATH).
   set_tests_properties(GenerateFunctional_${test} PROPERTIES
     ENVIRONMENT "GENERATEFUNCTIONAL=${GENERATE_FUNCTIONAL};CMAKE_GENERATOR=${CMAKE_GENERATOR};CXX=${CMAKE_CXX_COMPILER}"
+  )
   set_property(TEST GenerateFunctional_${test} APPEND PROPERTY ENVIRONMENT
     "k4FWCore_DIR=${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/cmake/k4FWCore"
   )
