@@ -289,7 +289,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
           nextEntry = 0;
         }
         debug() << "Overlaying background event " << nextEntry << " from group " << groupIndex << " to BX " << bxInTrain
-               << endmsg;
+                << endmsg;
         const auto backgroundEvent = m_bkgEvents->m_rootFileReaders[groupIndex].readEvent(nextEntry);
         ++nextEntry;
         const auto availableCollections = backgroundEvent.getAvailableCollections();
