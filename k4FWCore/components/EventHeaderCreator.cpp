@@ -30,7 +30,7 @@ StatusCode EventHeaderCreator::execute(const EventContext& ctx) const {
   auto eventNumber = ctx.evt();
   debug() << "Filling EventHeader with runNumber " << m_runNumber.value() << " and eventNumber "
           << eventNumber + m_eventNumberOffset << endmsg;
-  auto headers = m_headerCol.createAndPut();
+  auto headers = m_headerCol.createAndPut(ctx);
   auto header = headers->create();
   header.setRunNumber(m_runNumber);
   header.setEventNumber(eventNumber + m_eventNumberOffset);

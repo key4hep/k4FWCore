@@ -16,4 +16,4 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ]]
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/k4FWCore DESTINATION python)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/k4FWCore DESTINATION ${GAUDI_INSTALL_PYTHONDIR})
