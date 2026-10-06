@@ -67,6 +67,7 @@ StatusCode OverlayTiming::initialize() {
   m_uidSvc = service<IUniqueIDGenSvc>("UniqueIDGenSvc", true);
   if (!m_uidSvc) {
     error() << "Unable to get UniqueIDGenSvc" << endmsg;
+    return StatusCode::FAILURE;
   }
 
   std::vector<std::vector<std::string>> inputFiles;
@@ -94,8 +95,8 @@ StatusCode OverlayTiming::initialize() {
 
   if (std::any_of(m_bkgEvents->m_totalNumberOfEvents.begin(), m_bkgEvents->m_totalNumberOfEvents.end(),
                   [this](const int& val) { return this->m_startWithBackgroundEvent >= val; })) {
-    throw GaudiException("StartWithBackgroundEvent is larger than the number of events in the background files", name(),
-                         StatusCode::FAILURE);
+    error() << "StartBackgroundEventIndex is larger than the number of events in the background files" << endmsg;
+    return StatusCode::FAILURE;
   }
   // Every group starts reading at this index, and from there on advances with each background event read
   if (m_startWithBackgroundEvent >= 0) {
@@ -115,6 +116,18 @@ StatusCode OverlayTiming::initialize() {
               "Poisson_random_NOverlay"
            << endmsg;
     m_Poisson = std::vector<bool>(m_bkgEvents->size(), false);
+  }
+
+  // Check that the per-group settings have the right size
+  if (m_Noverlay.size() != m_bkgEvents->size()) {
+    error() << "NumberBackground has " << m_Noverlay.size() << " entries, but " << m_bkgEvents->size()
+            << " background groups were configured" << endmsg;
+    return StatusCode::FAILURE;
+  }
+  if (m_Poisson.size() != m_bkgEvents->size()) {
+    error() << "Poisson_random_NOverlay has " << m_Poisson.size() << " entries, but " << m_bkgEvents->size()
+            << " background groups were configured" << endmsg;
+    return StatusCode::FAILURE;
   }
 
   // Copy the cellID encoding of the input collections over to the overlaid output collections.
@@ -275,7 +288,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
           }
           nextEntry = 0;
         }
-        info() << "Overlaying background event " << nextEntry << " from group " << groupIndex << " to BX " << bxInTrain
+        debug() << "Overlaying background event " << nextEntry << " from group " << groupIndex << " to BX " << bxInTrain
                << endmsg;
         const auto backgroundEvent = m_bkgEvents->m_rootFileReaders[groupIndex].readEvent(nextEntry);
         ++nextEntry;
