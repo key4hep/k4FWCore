@@ -55,7 +55,8 @@ overlay.MergeMCParticles = False
 overlay.RandomMixBackgroundFiles = True
 overlay.BackgroundFileNames = [
     sorted(glob.glob("overlay_background/groupA/*.root")),
-    sorted(glob.glob("overlay_background/groupB/*.root")) + ["overlay_background/groupB_extra.root"],
+    sorted(glob.glob("overlay_background/groupB/*.root"))
+    + ["overlay_background/groupB_extra.root"],
 ]
 overlay.NumberBackground = [3, 1]
 overlay.Poisson_random_NOverlay = [False, False]
