@@ -19,7 +19,7 @@ jobs:
   build:
     strategy:
       matrix:
-        build_type: [dev3]
+        build_type: [dev3, dev4]
         image: [alma9]
       fail-fast: false
     runs-on: ubuntu-latest
@@ -40,4 +40,4 @@ jobs:
       with:
         build_type: ${{ matrix.build_type }}
         image: ${{ matrix.image }}
-        stack: /cvmfs/sft-nightlies.cern.ch/lcg/views/dev3/latest/x86_64-el9-gcc16-opt/setup.sh
+        stack: /cvmfs/sft-nightlies.cern.ch/lcg/views/${{ matrix.build_type }}/latest/x86_64-el9-gcc16-opt/setup.sh
