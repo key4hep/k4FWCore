@@ -22,10 +22,8 @@
 #
 #   overlay_background/
 #     groupA/bkg_000.root ... bkg_007.root   group 1, files 0-7
-#     groupA/README.txt                      not a .root file, must be ignored
-#     groupA/nested/bkg_000.root             group 9, subdirectories are not scanned
 #     groupB/bkg_000.root ... bkg_002.root   group 2, files 0-2
-#     groupB_extra.root                      group 2, file 3, meant to be listed explicitly
+#     groupB_extra.root                      group 2, file 3, listed next to the glob of groupB
 #
 # Every object in a file carries the tag 100 * group + file, so that each
 # overlaid object can be traced back to the file it was read from. The event
@@ -43,7 +41,6 @@ import edm4hep
 
 GROUP_A = 1
 GROUP_B = 2
-GROUP_NESTED = 9
 N_FILES_GROUP_A = 8
 N_FILES_GROUP_B = 3
 
@@ -118,8 +115,7 @@ def main():
     shutil.rmtree(args.output_dir, ignore_errors=True)
     group_a = os.path.join(args.output_dir, "groupA")
     group_b = os.path.join(args.output_dir, "groupB")
-    nested = os.path.join(group_a, "nested")
-    for directory in (group_a, group_b, nested):
+    for directory in (group_a, group_b):
         os.makedirs(directory)
 
     for i in range(N_FILES_GROUP_A):
@@ -134,9 +130,6 @@ def main():
         os.path.join(args.output_dir, "groupB_extra.root"),
         background_tag(GROUP_B, N_FILES_GROUP_B),
     )
-    write_background_file(os.path.join(nested, "bkg_000.root"), background_tag(GROUP_NESTED, 0))
-    with open(os.path.join(group_a, "README.txt"), "w") as readme:
-        readme.write("Not a background file, OverlayTiming has to skip it\n")
 
 
 if __name__ == "__main__":

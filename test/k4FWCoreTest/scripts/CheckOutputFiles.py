@@ -554,8 +554,7 @@ def check_random_mix_overlay(filename):
         tags = [hit.getCellID() for hit in background_hits]
         draws_per_event.append(tags)
 
-        # Each group only draws from its own files, and only from the .root
-        # files directly inside its directories. Files are drawn from a
+        # Each group only draws from its own files. Files are drawn from a
         # shuffled list that is reshuffled once exhausted, so every full pass
         # over a group uses each of its files exactly once.
         start = 0

@@ -26,6 +26,8 @@
 # bunch crossings, group A draws 18 events from its 8 files and group B 6 from
 # its 4, so both wrap around their shuffled list of files at least once.
 
+import glob
+
 from Gaudi.Configuration import INFO
 from Configurables import (
     EventDataSvc,
@@ -54,8 +56,8 @@ overlay.OutputCaloHitContributions = ["OverlayCaloHitContributions"]
 overlay.BackgroundMCParticleCollectionName = "MCParticles"
 overlay.RandomMixBackgroundFiles = True
 overlay.BackgroundFileNames = [
-    ["overlay_background/groupA"],
-    ["overlay_background/groupB", "overlay_background/groupB_extra.root"],
+    sorted(glob.glob("overlay_background/groupA/*.root")),
+    sorted(glob.glob("overlay_background/groupB/*.root")) + ["overlay_background/groupB_extra.root"],
 ]
 overlay.NumberBackground = [3, 1]
 overlay.Poisson_random_NOverlay = [False, False]

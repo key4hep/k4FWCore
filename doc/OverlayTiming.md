@@ -33,7 +33,7 @@ It uses [`UniqueIDGenSvc`](uniqueIDGen.md) to seed the internal random number ge
 
 | Property | Default | Description |
 |----------|---------|-------------|
-| `BackgroundFileNames` | `[]` | List of groups of background input files, one group per overlay stream. An entry may also be a directory, in which case the `.root` files directly inside it are used. |
+| `BackgroundFileNames` | `[]` | List of groups of background input files, one group per overlay stream. |
 | `NumberBackground` | `[]` | Number of background events to overlay per stream (fixed or Poisson mean) |
 | `Poisson_random_NOverlay` | `[]` | If true, draw the number of events from a Poisson distribution with mean `NumberBackground` |
 | `NBunchtrain` | `1` | Number of bunch crossings in the bunch train |
@@ -59,13 +59,15 @@ With `RandomMixBackgroundFiles = True` every file of a group is instead treated
 as an independent event source, and one file is drawn for each overlaid event.
 The draws come from a shuffled permutation of the group that is reshuffled once
 exhausted, so files are used evenly rather than independently at random, and
-each pass over the group is in a different order. Entries of
-`BackgroundFileNames` may point at directories, whose `.root` files are
-collected automatically:
+each pass over the group is in a different order. The files of a group are
+typically collected in the options file, e.g. with `glob`. Sorting the result
+keeps the file order, and therefore the draws, independent of the file system:
 
 ```python
+import glob
+
 overlay.RandomMixBackgroundFiles = True
-overlay.BackgroundFileNames = [["/path/to/bib_files/"]]
+overlay.BackgroundFileNames = [sorted(glob.glob("/path/to/bib_files/*.root"))]
 ```
 
 Each file keeps its own event cursor, and its number of events is only

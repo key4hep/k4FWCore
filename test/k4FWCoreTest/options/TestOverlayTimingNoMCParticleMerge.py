@@ -23,6 +23,8 @@
 # momentum of the particle they came from, and the background calorimeter
 # contributions an empty particle, while everything else is kept.
 
+import glob
+
 from Gaudi.Configuration import INFO
 from Configurables import (
     EventDataSvc,
@@ -52,8 +54,8 @@ overlay.BackgroundMCParticleCollectionName = "MCParticles"
 overlay.MergeMCParticles = False
 overlay.RandomMixBackgroundFiles = True
 overlay.BackgroundFileNames = [
-    ["overlay_background/groupA"],
-    ["overlay_background/groupB", "overlay_background/groupB_extra.root"],
+    sorted(glob.glob("overlay_background/groupA/*.root")),
+    sorted(glob.glob("overlay_background/groupB/*.root")) + ["overlay_background/groupB_extra.root"],
 ]
 overlay.NumberBackground = [3, 1]
 overlay.Poisson_random_NOverlay = [False, False]
