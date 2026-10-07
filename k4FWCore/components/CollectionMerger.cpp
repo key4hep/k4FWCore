@@ -37,6 +37,7 @@
 
 #include "edm4hep/edm4hep.h"
 
+#include "k4FWCore/GaudiChecks.h"
 #include "k4FWCore/Transformer.h"
 
 #include <map>
@@ -59,10 +60,7 @@ struct CollectionMerger final
   }
 
   StatusCode initialize() override {
-    const auto sc = Transformer::initialize();
-    if (sc.isFailure()) {
-      return sc;
-    }
+    K4_GAUDI_CHECK(Transformer::initialize());
     if (inputLocations(0).empty()) {
       error() << "InputCollections must contain at least one collection" << endmsg;
       return StatusCode::FAILURE;
@@ -115,6 +113,8 @@ private:
     const auto ptr = static_cast<T*>(ret.get());
     const auto sourceColl = static_cast<const T*>(source);
     if (m_copy) {
+      // Insert clones directly: std::back_inserter converts them to immutable
+      // handles via T::value_type, which owning collections reject.
       for (const auto& elem : *sourceColl) {
         ptr->push_back(elem.clone());
       }
