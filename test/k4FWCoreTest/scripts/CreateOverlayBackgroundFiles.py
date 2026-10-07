@@ -89,10 +89,11 @@ def write_background_file(path, tag):
     contribution.setParticle(daughter)
     calo_hit = calo_hits.create()
     # OverlayTiming merges calorimeter hits by cellID: a background hit landing
-    # on an occupied cell (signal or background) only adds its contributions to
-    # the existing hit. Using the tag as cellID therefore gives one output hit
-    # per drawn file, holding one contribution per draw, and keeps background
-    # contributions out of the signal hits, which use cellIDs 1-3
+    # on an occupied cell only adds its contributions to the existing hit. Using
+    # the tag as cellID gives one output hit per drawn file, holding one
+    # contribution per draw. The tags never coincide with the signal cellIDs
+    # (1-3), which keeps the checks simple; merging into signal hits is not
+    # tested here.
     calo_hit.setCellID(tag)
     calo_hit.addToContributions(contribution)
 
