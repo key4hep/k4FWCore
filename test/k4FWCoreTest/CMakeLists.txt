@@ -214,6 +214,8 @@ add_test_fwcore(FunctionalTransformerRuntimeEmpty options/ExampleFunctionalTrans
 add_test_fwcore(FunctionalTransformerRuntimeCollectionsMultiple options/ExampleFunctionalTransformerRuntimeCollectionsMultiple.py)
 add_test_fwcore(FunctionalTransformerHist options/ExampleFunctionalTransformerHist.py ADD_TO_CHECK_FILES)
 add_test_fwcore(FunctionalCollectionMerger options/ExampleFunctionalCollectionMerger.py PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
+add_test_fwcore(FunctionalCollectionMergerEmpty options/ExampleFunctionalCollectionMergerEmpty.py
+                  PROPERTIES PASS_REGULAR_EXPRESSION "InputCollections must contain at least one collection")
 add_test_fwcore(FunctionalFilterFile options/ExampleFunctionalFilterFile.py ADD_TO_CHECK_FILES)
 add_test_fwcore(FunctionalMetadata options/ExampleFunctionalMetadata.py --MetadataSvc.SkipIfSameValue True ADD_TO_CHECK_FILES PROPERTIES FIXTURES_SETUP FunctionalMetadataFile)
 add_test_fwcore(FunctionalMetadataThrow options/ExampleFunctionalMetadata.py --Producer2.ParticleTime 2.5

@@ -40,6 +40,7 @@
 #include "k4FWCore/Transformer.h"
 
 #include <map>
+#include <memory>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -57,8 +58,20 @@ struct CollectionMerger final
     addToMapAll(edm4hep::edm4hepLinkTypes{});
   }
 
+  StatusCode initialize() override {
+    const auto sc = Transformer::initialize();
+    if (sc.isFailure()) {
+      return sc;
+    }
+    if (inputLocations(0).empty()) {
+      error() << "InputCollections must contain at least one collection" << endmsg;
+      return StatusCode::FAILURE;
+    }
+    return StatusCode::SUCCESS;
+  }
+
   podio::CollectionBase* operator()(const std::vector<const podio::CollectionBase*>& input) const override {
-    podio::CollectionBase* ret = nullptr;
+    std::unique_ptr<podio::CollectionBase> ret;
     debug() << "Merging " << input.size() << " collections" << endmsg;
     std::string_view type = "";
     for (const auto& coll : input) {
@@ -71,11 +84,12 @@ struct CollectionMerger final
       }
       (this->*m_map.at(coll->getTypeName()))(coll, ret);
     }
-    return ret;
+    return ret.release();
   }
 
 private:
-  using MergeType = void (CollectionMerger::*)(const podio::CollectionBase*, podio::CollectionBase*&) const;
+  using MergeType = void (CollectionMerger::*)(const podio::CollectionBase*,
+                                               std::unique_ptr<podio::CollectionBase>&) const;
   std::map<std::string_view, MergeType> m_map;
   Gaudi::Property<bool> m_copy{this, "Copy", false,
                                "Copy the elements of the collections instead of creating a subset collection"};
@@ -91,17 +105,20 @@ private:
   }
 
   template <typename T>
-  void mergeCollections(const podio::CollectionBase* source, podio::CollectionBase*& ret) const {
+  void mergeCollections(const podio::CollectionBase* source, std::unique_ptr<podio::CollectionBase>& ret) const {
     if (!ret) {
-      ret = new T();
+      ret = std::make_unique<T>();
       if (!m_copy) {
         ret->setSubsetCollection();
       }
     }
-    const auto ptr = static_cast<T*>(ret);
+    const auto ptr = static_cast<T*>(ret.get());
     const auto sourceColl = static_cast<const T*>(source);
     if (m_copy) {
-      std::ranges::transform(*sourceColl, std::back_inserter(*ptr), [](const auto& elem) { return elem.clone(); });
+      // back_inserter converts clones to immutable handles via T::value_type.
+      for (const auto& elem : *sourceColl) {
+        ptr->push_back(elem.clone());
+      }
     } else {
       std::ranges::copy(*sourceColl, std::back_inserter(*ptr));
     }

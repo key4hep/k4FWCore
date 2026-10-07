@@ -39,6 +39,9 @@ svc.outputCommands = [
     "keep SimTrackerHits",
     "keep Links",
     "keep NewLinks",
+    "keep RecoParticles",
+    "keep CopiedMCParticles",
+    "keep CopiedLinks",
 ]
 
 
@@ -64,11 +67,22 @@ link_merger = CollectionMerger(
     OutputCollection="NewLinks",
 )
 
-# If we want to copy instead of creating a subset collection
-# merger.Copy = True
+particle_copier = CollectionMerger(
+    "ParticleCollectionCopier",
+    InputCollections=["MCParticles2", "MCParticles1", "MCParticles3"],
+    OutputCollection="CopiedMCParticles",
+    Copy=True,
+)
+
+link_copier = CollectionMerger(
+    "LinkCollectionCopier",
+    InputCollections=["Links", "Links"],
+    OutputCollection="CopiedLinks",
+    Copy=True,
+)
 
 mgr = ApplicationMgr(
-    TopAlg=[particle_producer, merger, link_merger],
+    TopAlg=[particle_producer, merger, link_merger, particle_copier, link_copier],
     EvtSel="NONE",
     EvtMax=-1,
     ExtSvc=[EventDataSvc("EventDataSvc")],
