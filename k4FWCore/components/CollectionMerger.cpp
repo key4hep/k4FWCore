@@ -115,7 +115,6 @@ private:
     const auto ptr = static_cast<T*>(ret.get());
     const auto sourceColl = static_cast<const T*>(source);
     if (m_copy) {
-      // back_inserter converts clones to immutable handles via T::value_type.
       for (const auto& elem : *sourceColl) {
         ptr->push_back(elem.clone());
       }
