@@ -25,12 +25,20 @@
 #     groupB/bkg_000.root ... bkg_002.root   group 2, files 0-2
 #     groupB_extra.root                      group 2, file 3, listed next to the glob of groupB
 #
-# Every object in a file carries the tag 100 * group + file, so that each
-# overlaid object can be traced back to the file it was read from. The event
-# holds a parent particle and its daughter; the tracker hit and the calorimeter
-# contribution are linked to the daughter, so a relation that ignores the
-# offset of the overlaid block points at the wrong particle. The momentum of
-# the hit is deliberately different from that of its particle.
+# Each file is identified by the tag 100 * group + file, so that every overlaid
+# object can be traced back to the file it was read from. Each object stores
+# the tag in a different field:
+#
+#   MCParticle (parent)    PDG = tag
+#   MCParticle (daughter)  PDG = -tag, momentum = particle_momentum(tag)
+#   SimTrackerHit          cellID = tag
+#   SimCalorimeterHit      cellID = tag
+#   CaloHitContribution    PDG = tag
+#
+# The tracker hit and the calorimeter contribution are linked to the daughter,
+# so a relation that ignores the offset of the overlaid block points at the
+# wrong particle. The momentum of the hit (HIT_MOMENTUM) is deliberately
+# different from that of its particle.
 
 import argparse
 import os
