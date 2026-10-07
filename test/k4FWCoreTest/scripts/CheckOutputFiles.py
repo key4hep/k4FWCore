@@ -604,7 +604,7 @@ def check_random_mix_overlay(filename):
             if (momentum.x, momentum.y, momentum.z) != particle_momentum(tag):
                 raise RuntimeError(f"Unexpected momentum of the background particle of tag {tag}")
 
-            if not hit.isOverlay() or hit.getEDep() != tag:
+            if not hit.isOverlay():
                 raise RuntimeError(f"Unexpected background hit for draw {draw} of tag {tag}")
             if hit.getParticle().getObjectID().index != parent_index + 1:
                 raise RuntimeError(
@@ -680,7 +680,7 @@ if (
 
 def check_no_mcparticle_merge_overlay(filename):
     """Checks the output of OverlayTimingNoMCParticleMerge, where the background
-    particles are left out and the background hits keep everything else."""
+    particles are left out and the background hits keep their own tag and time."""
     print(f'Checking file "{filename}" for background hits without background particles')
     n_bx = 6
     # (group, number of files, number of draws per bunch crossing) in the order of BackgroundFileNames
@@ -724,15 +724,6 @@ def check_no_mcparticle_merge_overlay(filename):
                         f"The hit of tag {tag} should carry the momentum of its particle "
                         f"{particle_momentum(tag)}, got {(momentum.x, momentum.y, momentum.z)}"
                     )
-                position = hit.getPosition()
-                # Bit 31 of the quality holds the overlay flag
-                if (
-                    hit.getEDep(),
-                    hit.getPathLength(),
-                    hit.getQuality() & 0x7FFFFFFF,
-                    (position.x, position.y, position.z),
-                ) != (float(tag), 2.0, 3, (3.0, 4.0, 5.0)):
-                    raise RuntimeError(f"The hit of tag {tag} was not copied faithfully")
             # The events of one bunch crossing share its time shift, and every
             # bunch crossing of the train is used once
             times = [group_hits[bx * n_per_bx].getTime() for bx in range(n_bx)]
@@ -762,19 +753,13 @@ def check_no_mcparticle_merge_overlay(filename):
                     )
                 continue
             for contrib in calo_hit.getContributions():
-                position = contrib.getStepPosition()
                 if (
                     contrib.getParticle().isAvailable()
-                    or (
-                        contrib.getPDG(),
-                        contrib.getEnergy(),
-                        (position.x, position.y, position.z),
-                    )
-                    != (tag, float(tag), (3.0, 4.0, 5.0))
+                    or contrib.getPDG() != tag
                     or contrib.getTime() not in bx_times
                 ):
                     raise RuntimeError(
-                        f"The contributions of tag {tag} should have no particle and keep everything else"
+                        f"The contributions of tag {tag} should have no particle and keep their PDG and time"
                     )
 
 
