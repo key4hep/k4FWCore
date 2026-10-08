@@ -219,6 +219,9 @@ check_collections(
         "SimTrackerHits",
         "Links",
         "NewLinks",
+        "RecoParticles",
+        "CopiedMCParticles",
+        "CopiedLinks",
     ],
 )
 
@@ -246,6 +249,29 @@ for i in range(len(merged_links)):
         raise RuntimeError(
             f"merged links do not match, expected [{link.id().collectionID}, {link.id().index}], actual [{merged_link.id().collectionID}, {merged_link.id().index}]"
         )
+
+
+copied_mcs = ev.get("CopiedMCParticles")
+if copied_mcs.isSubsetCollection() or len(copied_mcs) != len(new_mcs):
+    raise RuntimeError("CopiedMCParticles must own a copy of every merged particle")
+for copied_mc, orig_mc in zip(copied_mcs, new_mcs):
+    if copied_mc.id() == orig_mc.id() or copied_mc.getPDG() != orig_mc.getPDG():
+        raise RuntimeError("Copied particle must have a new ID and preserve its PDG")
+    if [p.id() for p in copied_mc.getDaughters()] != [p.id() for p in orig_mc.getDaughters()]:
+        raise RuntimeError("Copied particle daughters must refer to the original objects")
+
+copied_links = ev.get("CopiedLinks")
+if copied_links.isSubsetCollection() or len(copied_links) != len(merged_links):
+    raise RuntimeError("CopiedLinks must own a copy of every merged link")
+for copied_link, orig_link in zip(copied_links, merged_links):
+    if copied_link.id() == orig_link.id():
+        raise RuntimeError("Copied link must have a new ID")
+    if (
+        copied_link.getWeight() != orig_link.getWeight()
+        or copied_link.getFrom().id() != orig_link.getFrom().id()
+        or copied_link.getTo().id() != orig_link.getTo().id()
+    ):
+        raise RuntimeError("Copied link must preserve its weight and original endpoints")
 
 
 check_collections("functional_metadata.root", ["MCParticles", "MCParticles2"])
