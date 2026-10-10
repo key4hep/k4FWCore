@@ -61,29 +61,27 @@ The draws come from a shuffled permutation of the group that is reshuffled once
 exhausted, so files are used evenly rather than independently at random, and
 each pass over the group is in a different order. Files are reused in this way
 whatever `AllowReusingBackgroundFiles` is set to. The files of a group are
-typically collected in the options file, e.g. with `glob`. Sorting the result
-each pass over the group is in a different order. For example:
+typically collected in the options file, for example:
 
 ```python
 import glob
 
 overlay.RandomMixBackgroundFiles = True
+# Sorted, so that the order of the files, and with it the files that are drawn,
+# does not depend on the file system
 overlay.BackgroundFileNames = [sorted(glob.glob("/path/to/bib_files/*.root"))]
 ```
-
 
 The files are drawn with the random number generator that is seeded for every
 event through `UniqueIDGenSvc`, so the same `Seed` draws the same files for an
 event with the same event and run numbers. The entries from each file are read
-sequentially. Hence, the background overlay is only fully reproducible event by event 
-if there is exactly one pseudo-event in each file.
+sequentially. Hence, the background overlay is only fully reproducible event by
+event if there is exactly one pseudo-event in each file.
 
 Background particles usually dominate the output size. If the background
 `MCParticle` collection is not needed downstream, `MergeMCParticles = False`
-leaves it out entirely. Tracker hits then keep the momentum of the particle they
-came from instead of a relation to it, and calorimeter contributions are given an
-empty particle.
-
+leaves it out entirely. The property table above describes what this means for
+the background hits.
 
 ## Usage example
 
