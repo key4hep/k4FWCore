@@ -137,8 +137,9 @@ struct EventHolder {
     }
 
     if (total == 0) {
-      throw GaudiException("No events found in background file " + m_fileNames[group][file], m_algName,
-                           StatusCode::FAILURE);
+      throw GaudiException("No events found in background file " + m_fileNames[group][file] + " of group " +
+                               std::to_string(group),
+                           m_algName, StatusCode::FAILURE);
     }
     // The cursor is only wrapped around here, once the source is exhausted,
     // so that running out of background events can be detected

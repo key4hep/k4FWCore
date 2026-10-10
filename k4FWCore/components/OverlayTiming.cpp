@@ -86,21 +86,23 @@ StatusCode OverlayTiming::initialize() {
   // here. In random-mix mode they are only determined when a file is first
   // read, so an empty file is reported at that point instead.
   if (!m_randomMix) {
-    for (const auto& counts : m_bkgEvents->m_totalNumberOfEvents) {
-      for (const auto& val : counts) {
-        if (val == 0) {
-          std::string err = "No events found in the background files";
-          for (const auto& file : m_inputFileNames.value()) {
-            err += " " + file[0];
-          }
-          error() << err << endmsg;
-          return StatusCode::FAILURE;
+    for (size_t group = 0; group < m_bkgEvents->size(); ++group) {
+      // A group is read as a single stream here, so this is the number of
+      // events in all of its files together
+      const auto nEvents = m_bkgEvents->m_totalNumberOfEvents[group].front();
+      if (nEvents == 0) {
+        std::string err =
+            "No events found in background group " + std::to_string(group) + ", none of its files has any:";
+        for (const auto& file : m_bkgEvents->m_fileNames[group]) {
+          err += " " + file;
         }
+        error() << err << endmsg;
+        return StatusCode::FAILURE;
       }
-      if (std::any_of(counts.begin(), counts.end(), [this](const size_t& val) {
-            return this->m_startWithBackgroundEvent >= static_cast<int>(val);
-          })) {
-        error() << "StartBackgroundEventIndex is larger than the number of events in the background files" << endmsg;
+      if (m_startWithBackgroundEvent >= static_cast<int>(nEvents)) {
+        error() << "StartBackgroundEventIndex (" << m_startWithBackgroundEvent.value()
+                << ") is not smaller than the number of events (" << nEvents << ") in background group " << group
+                << endmsg;
         return StatusCode::FAILURE;
       }
     }
