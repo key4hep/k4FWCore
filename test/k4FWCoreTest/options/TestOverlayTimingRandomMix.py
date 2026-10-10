@@ -41,6 +41,11 @@ from Configurables import (
 )
 from k4FWCore import ApplicationMgr, IOSvc
 
+# The parameters that the checks of the output depend on are shared with
+# CheckOutputFiles.py. The module is in the scripts directory, which the tests
+# have on their PYTHONPATH.
+from OverlayRandomMixConfig import DELTA_T, N_BX, N_EVENTS, NUMBER_BACKGROUND
+
 uid_svc = UniqueIDGenSvc("UniqueIDGenSvc")
 
 iosvc = IOSvc("IOSvc")
@@ -64,9 +69,10 @@ overlay.BackgroundFileNames = [
     sorted(glob.glob("overlay_background/groupB/*.root"))
     + ["overlay_background/groupB_extra.root"],
 ]
-overlay.NumberBackground = [3, 1]
+overlay.NumberBackground = NUMBER_BACKGROUND
 overlay.Poisson_random_NOverlay = [False, False]
-overlay.NBunchtrain = 6
+overlay.NBunchtrain = N_BX
+overlay.Delta_t = DELTA_T
 overlay.TimeWindows = {
     "SimTrackerHits": [-10000, 10000],
     "SimCalorimeterHits": [-10000, 10000],
@@ -75,7 +81,7 @@ overlay.TimeWindows = {
 ApplicationMgr(
     TopAlg=[header, overlay],
     EvtSel="NONE",
-    EvtMax=3,
+    EvtMax=N_EVENTS,
     ExtSvc=[EventDataSvc("EventDataSvc"), uid_svc],
     OutputLevel=INFO,
 )

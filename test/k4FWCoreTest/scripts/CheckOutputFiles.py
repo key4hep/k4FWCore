@@ -36,6 +36,14 @@ from CreateOverlayBackgroundFiles import (
     background_tag,
     particle_momentum,
 )
+from OverlayRandomMixConfig import DELTA_T, N_BX, N_EVENTS, NUMBER_BACKGROUND
+
+# (group, number of files, number of draws per bunch crossing) of the background
+# overlaid by TestOverlayTimingRandomMix.py, in the order of BackgroundFileNames
+RANDOM_MIX_GROUPS = [
+    (GROUP_A, N_FILES_GROUP_A, NUMBER_BACKGROUND[0]),
+    (GROUP_B, N_FILES_GROUP_B + 1, NUMBER_BACKGROUND[1]),
+]
 
 
 def check_collections(filename, names):
@@ -553,12 +561,8 @@ def check_random_mix_overlay(filename):
     """Checks an output of the OverlayTimingRandomMix configuration and returns,
     for every event, the background tags in the order they were drawn."""
     print(f'Checking file "{filename}" for the random mix of background files')
-    n_bx = 6
     # (group, number of files, number of draws per event) in the order of BackgroundFileNames
-    groups = [
-        (GROUP_A, N_FILES_GROUP_A, n_bx * 3),
-        (GROUP_B, N_FILES_GROUP_B + 1, n_bx * 1),
-    ]
+    groups = [(group, n_files, N_BX * n_per_bx) for group, n_files, n_per_bx in RANDOM_MIX_GROUPS]
     n_draws = sum(n_group_draws for _, _, n_group_draws in groups)
     n_signal_mc = 2
     n_signal_sim = 1
@@ -656,7 +660,9 @@ def check_random_mix_overlay(filename):
             raise RuntimeError(
                 f"Expected {n_signal_calo + n_draws} contributions in OverlayCaloHitContributions, got {len(contributions)}"
             )
-        background_calo_hits = {hit.getCellID(): hit for hit in calo_hits if hit.getCellID() > 3}
+        background_calo_hits = {
+            hit.getCellID(): hit for hit in calo_hits if hit.getCellID() > n_signal_calo
+        }
         if set(background_calo_hits) != set(draws_per_tag):
             raise RuntimeError(
                 f"Background calorimeter cells {sorted(background_calo_hits)} do not match the drawn files {sorted(draws_per_tag)}"
@@ -686,7 +692,7 @@ for filename in (
     "overlay_random_mix_repeat.root",
     "overlay_random_mix_other_seed.root",
 ):
-    check_events(filename, 3)
+    check_events(filename, N_EVENTS)
     random_mix_draws[filename] = check_random_mix_overlay(filename)
 
 # The draws only depend on the seed of UniqueIDGenSvc, the event and run
@@ -708,13 +714,11 @@ def check_no_mcparticle_merge_overlay(filename):
     """Checks the output of OverlayTimingNoMCParticleMerge, where the background
     particles are left out and the background hits keep their own tag and time."""
     print(f'Checking file "{filename}" for background hits without background particles')
-    n_bx = 6
-    # (group, number of files, number of draws per bunch crossing) in the order of BackgroundFileNames
-    groups = [(GROUP_A, N_FILES_GROUP_A, 3), (GROUP_B, N_FILES_GROUP_B + 1, 1)]
-    n_draws = n_bx * sum(n_per_bx for _, _, n_per_bx in groups)
+    groups = RANDOM_MIX_GROUPS
+    n_draws = N_BX * sum(n_per_bx for _, _, n_per_bx in groups)
     n_signal_calo = 3
-    # The background hits have a time of 1 ns, shifted by 0.5 ns per bunch crossing
-    bx_times = [1.0 + 0.5 * bx for bx in range(n_bx)]
+    # The background hits have a time of 1 ns, shifted by DELTA_T per bunch crossing
+    bx_times = [1.0 + DELTA_T * bx for bx in range(N_BX)]
 
     for frame in podio.reading.get_reader(filename).get("events"):
         particles = frame.get("OverlayMCParticles")
@@ -734,8 +738,8 @@ def check_no_mcparticle_merge_overlay(filename):
             raise RuntimeError("The signal hit should still point to the signal particle")
         start = 1
         for group, n_files, n_per_bx in groups:
-            group_hits = [hits[i] for i in range(start, start + n_bx * n_per_bx)]
-            start += n_bx * n_per_bx
+            group_hits = [hits[i] for i in range(start, start + N_BX * n_per_bx)]
+            start += N_BX * n_per_bx
             for hit in group_hits:
                 tag = hit.getCellID()
                 if not 0 <= tag - background_tag(group, 0) < n_files:
@@ -752,10 +756,10 @@ def check_no_mcparticle_merge_overlay(filename):
                     )
             # The events of one bunch crossing share its time shift, and every
             # bunch crossing of the train is used once
-            times = [group_hits[bx * n_per_bx].getTime() for bx in range(n_bx)]
+            times = [group_hits[bx * n_per_bx].getTime() for bx in range(N_BX)]
             if sorted(times) != bx_times or any(
                 hit.getTime() != times[bx]
-                for bx in range(n_bx)
+                for bx in range(N_BX)
                 for hit in group_hits[bx * n_per_bx : (bx + 1) * n_per_bx]
             ):
                 raise RuntimeError(
@@ -789,7 +793,7 @@ def check_no_mcparticle_merge_overlay(filename):
                     )
 
 
-check_events("overlay_no_mcparticle_merge.root", 3)
+check_events("overlay_no_mcparticle_merge.root", N_EVENTS)
 check_no_mcparticle_merge_overlay("overlay_no_mcparticle_merge.root")
 
 reader = podio.reading.get_reader("functional_random_filter.root")
