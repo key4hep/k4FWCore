@@ -406,8 +406,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
         }
 
         // Copies a background contribution, shifted in time and pointing to the
-        // copy of its particle. The clone carries no relations, so the particle
-        // simply stays unset when the background particles are not merged.
+        // copy of its particle. The clone carries no relations.
         const auto cloneContribution = [&](const edm4hep::CaloHitContribution& contrib) {
           auto newContrib = contrib.clone(false);
           if (m_mergeMCParticles) {
