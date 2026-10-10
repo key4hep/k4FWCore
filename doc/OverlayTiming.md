@@ -61,7 +61,7 @@ The draws come from a shuffled permutation of the group that is reshuffled once
 exhausted, so files are used evenly rather than independently at random, and
 each pass over the group is in a different order. The files of a group are
 typically collected in the options file, e.g. with `glob`. Sorting the result
-keeps the file order, and therefore the draws, independent of the file system:
+each pass over the group is in a different order. For example:
 
 ```python
 import glob
@@ -70,22 +70,12 @@ overlay.RandomMixBackgroundFiles = True
 overlay.BackgroundFileNames = [sorted(glob.glob("/path/to/bib_files/*.root"))]
 ```
 
-Each file keeps its own event cursor, and its number of events is only
-determined the first time it is read, so a group may hold many files without
-opening them all up front. Note that `StartBackgroundEventIndex` cannot be
-validated against the file lengths in this mode for the same reason: an index
-past the end of a file is only reported when that file is first read.
 
 The files are drawn with the random number generator that is seeded for every
 event through `UniqueIDGenSvc`, so the same `Seed` draws the same files for an
-event with the same event and run numbers, and a different `Seed` draws
-different ones. Which entry is then read from a drawn file depends on how often
-that file has been read before, and therefore on the order in which the events
-are processed. The overlay is only reproducible regardless of that order when
-every file holds a single event, as is typical for beam-induced background.
-Since the shuffling relies on the C++ standard library, whose algorithms are
-implementation-defined, identical results are only guaranteed with the same
-standard library.
+event with the same event and run numbers. The entries from each file are read
+sequentially. Hence, the background overlay is only fully reproducible event by event 
+if there is exactly one pseudo-event in each file.
 
 Background particles usually dominate the output size. If the background
 `MCParticle` collection is not needed downstream, `MergeMCParticles = False`
@@ -93,8 +83,6 @@ leaves it out entirely. Tracker hits then keep the momentum of the particle they
 came from instead of a relation to it, and calorimeter contributions are given an
 empty particle.
 
-Reads from a background group are serialized internally, so the algorithm is
-safe to run with several Gaudi event slots in flight.
 
 ## Usage example
 
