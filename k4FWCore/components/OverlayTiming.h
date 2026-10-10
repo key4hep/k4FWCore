@@ -107,6 +107,13 @@ struct EventHolder {
 
   size_t size() const { return m_fileNames.size(); }
 
+  // Index of the event the next read of a group returns. Only meaningful in
+  // sequential mode, where a group has a single cursor.
+  size_t nextEntry(int group) {
+    std::lock_guard<std::mutex> lock(m_ioMutex);
+    return m_nextEntry[group].front();
+  }
+
   // Reads the next event of (group, fileIndex) and advances that file's cursor.
   // In sequential mode fileIndex is ignored and the group's single stream is used.
   podio::Frame getFrame(int group, int fileIndex) {

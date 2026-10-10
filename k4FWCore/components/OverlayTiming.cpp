@@ -275,8 +275,12 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
 
     // TODO: Check that there is anything to overlay
 
-    debug() << "Starting overlay at event: " << m_bkgEvents->m_nextEntry[groupIndex].front()
-            << " for the background group " << groupIndex << endmsg;
+    // In random-mix mode every file has its own cursor and the file is only
+    // drawn below, where it is reported for each overlaid event
+    if (!m_randomMix && msgLevel(MSG::DEBUG)) {
+      debug() << "Starting overlay at event: " << m_bkgEvents->nextEntry(groupIndex) << " for the background group "
+              << groupIndex << endmsg;
+    }
 
     // Overlay the background events to each bunchcrossing in the bunch train.
     // The file cursor is deliberately declared outside the BX loop: it has to
