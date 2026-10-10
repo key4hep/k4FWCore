@@ -42,7 +42,7 @@ It uses [`UniqueIDGenSvc`](uniqueIDGen.md) to seed the internal random number ge
 | `Delta_t` | `0.5` | Time between consecutive bunch crossings (ns) |
 | `TimeWindows` | `{}` | Map from collection name to `[t_min, t_max]` (ns) defining the acceptance window. Required for every `SimTrackerHit` and `SimCalorimeterHit` collection. |
 | `BackgroundMCParticleCollectionName` | `"MCParticle"` | Name of the MCParticle collection in the background files |
-| `AllowReusingBackgroundFiles` | `false` | If true, start over from the first event of a group once all of its events have been overlaid. If false, running out of background events is an error |
+| `AllowReusingBackgroundFiles` | `false` | If true, start over from the first event of a group once all of its events have been overlaid. If false, running out of background events is an error. With `RandomMixBackgroundFiles` the files of a group are drawn again once all of them have been used, regardless of this option |
 | `RandomMixBackgroundFiles` | `false` | Treat every file of a background group as an independent (pseudo-)event source and draw one at random for each overlaid event |
 | `MergeMCParticles` | `true` | Copy the background MCParticles into the output. If `false` they are left out entirely: tracker hits keep the momentum of their originating particle instead of a particle relation, and calorimeter contributions get an empty particle |
 | `CopyCellIDMetadata` | `false` | Copy cell ID encoding metadata from input to output collections |
@@ -59,7 +59,8 @@ With `RandomMixBackgroundFiles = True` every file of a group is instead treated
 as an independent event source, and one file is drawn for each overlaid event.
 The draws come from a shuffled permutation of the group that is reshuffled once
 exhausted, so files are used evenly rather than independently at random, and
-each pass over the group is in a different order. The files of a group are
+each pass over the group is in a different order. Files are reused in this way
+whatever `AllowReusingBackgroundFiles` is set to. The files of a group are
 typically collected in the options file, e.g. with `glob`. Sorting the result
 each pass over the group is in a different order. For example:
 

@@ -235,7 +235,8 @@ private:
   Gaudi::Property<bool> m_allowReusingBackgroundFiles{
       this, "AllowReusingBackgroundFiles", false,
       "If true, start over from the first event of a group once all of its events have been overlaid; otherwise "
-      "running out of background events is an error"};
+      "running out of background events is an error. With RandomMixBackgroundFiles the files of a group are drawn "
+      "again once all of them have been used, regardless of this option"};
   Gaudi::Property<bool> m_randomMix{
       this, "RandomMixBackgroundFiles", false,
       "Treat each file in a background group as an independent (pseudo-)event source and pick a random file for every "
