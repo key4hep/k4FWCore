@@ -45,6 +45,7 @@
 #include "k4Interface/IUniqueIDGenSvc.h"
 
 // Needed for some of the more complex properties
+#include "Gaudi/Accumulators.h"
 #include "Gaudi/Parsers/Factory.h"
 #include "Gaudi/Property.h"
 
@@ -251,4 +252,10 @@ private:
 
 private:
   SmartIF<IUniqueIDGenSvc> m_uidSvc;
+
+  // Only printed once, as this would otherwise be repeated for every overlaid
+  // background event. The limit of 2 includes the notice that the message is
+  // suppressed from then on.
+  mutable Gaudi::Accumulators::MsgCounter<MSG::WARNING> m_missingBackgroundMCParticles{
+      this, "The collection set as BackgroundMCParticleCollectionName was not found in a background event", 2};
 };

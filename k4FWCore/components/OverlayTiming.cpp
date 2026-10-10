@@ -328,18 +328,22 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
         // Either 0 or negative
         const auto timeOffset = BX_number_in_train * m_deltaT;
 
-        if (std::find(availableCollections.begin(), availableCollections.end(), m_MCParticleCollectionName) ==
-            availableCollections.end()) {
-          warning() << "Collection " << m_MCParticleCollectionName << " not found in background event" << endmsg;
-        }
-
         // The background particles are copied in order, so the copy of background
         // particle i ends up at offset + i. Both stay 0 when the background
         // particles are not merged, which leaves every relation into them unset.
         int offset = 0;
         int nBgParticles = 0;
 
-        if (m_mergeMCParticles) {
+        // The background particles are only looked up when they are merged. If
+        // their collection is missing nothing is copied, and the background
+        // hits are left without a particle.
+        const bool hasBgParticles = std::find(availableCollections.begin(), availableCollections.end(),
+                                              m_MCParticleCollectionName) != availableCollections.end();
+        if (m_mergeMCParticles && !hasBgParticles) {
+          ++m_missingBackgroundMCParticles;
+        }
+
+        if (m_mergeMCParticles && hasBgParticles) {
           const auto& bgParticles = backgroundEvent.get<edm4hep::MCParticleCollection>(m_MCParticleCollectionName);
           offset = static_cast<int>(oparticles.size());
           nBgParticles = static_cast<int>(bgParticles.size());
