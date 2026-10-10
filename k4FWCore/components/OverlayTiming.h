@@ -45,34 +45,122 @@
 #include "k4Interface/IUniqueIDGenSvc.h"
 
 // Needed for some of the more complex properties
+#include "Gaudi/Accumulators.h"
 #include "Gaudi/Parsers/Factory.h"
 #include "Gaudi/Property.h"
 
+#include "GaudiKernel/GaudiException.h"
+
 #include <map>
+#include <mutex>
+#include <optional>
 #include <string>
 #include <vector>
 
+// Holds the background events. Two source strategies are supported, selected by
+// randomMix:
+//   * sequential (default): each group is read as one logical stream through a
+//     persistent reader, advancing an internal cursor;
+//   * random mix: each file in a group is an independent event source, opened
+//     on demand, so the caller can pick a random file for every overlaid event.
+//
+// Bookkeeping is stored per [group][file]. In sequential mode the file
+// dimension has a single slot per group; in random-mix mode the event count of
+// a file is left at 0 ("not yet determined") until that file is first read.
 struct EventHolder {
   std::vector<std::vector<std::string>> m_fileNames;
+  bool m_randomMix{false};
+  bool m_allowReuse{false};
+  std::string m_algName;
+
+  // Sequential mode only: one persistent reader per group.
   std::vector<podio::Reader> m_rootFileReaders;
-  std::vector<size_t> m_totalNumberOfEvents;
-  std::map<int, podio::Frame> m_events;
 
-  std::vector<size_t> m_nextEntry;
+  // [group][file]. In sequential mode the inner vector has a single element.
+  std::vector<std::vector<size_t>> m_totalNumberOfEvents;
+  std::vector<std::vector<size_t>> m_nextEntry;
 
-  EventHolder(const std::vector<std::vector<std::string>>& fileNames) : m_fileNames(fileNames) {
-    for (auto& names : m_fileNames) {
-      m_rootFileReaders.emplace_back(podio::makeReader(names));
-      m_totalNumberOfEvents.push_back(m_rootFileReaders.back().getEntries("events"));
+  // Guards the cursors, the lazily filled event counts and the shared
+  // sequential-mode readers. operator() is const and Gaudi may run several
+  // events concurrently, in which case they share this EventHolder. ROOT file
+  // access is not thread-safe either, so the whole read is serialized.
+  std::mutex m_ioMutex;
+
+  EventHolder(const std::vector<std::vector<std::string>>& fileNames, bool randomMix, bool allowReuse,
+              const std::string& algName)
+      : m_fileNames(fileNames), m_randomMix(randomMix), m_allowReuse(allowReuse), m_algName(algName) {
+    m_totalNumberOfEvents.resize(m_fileNames.size());
+    m_nextEntry.resize(m_fileNames.size());
+    for (size_t group = 0; group < m_fileNames.size(); ++group) {
+      if (m_randomMix) {
+        // One independent event source per file; the counts are filled in lazily.
+        m_totalNumberOfEvents[group].resize(m_fileNames[group].size(), 0);
+        m_nextEntry[group].resize(m_fileNames[group].size(), 0);
+      } else {
+        // The whole group is read as a single logical stream.
+        m_rootFileReaders.emplace_back(podio::makeReader(m_fileNames[group]));
+        m_totalNumberOfEvents[group].push_back(m_rootFileReaders.back().getEntries("events"));
+        m_nextEntry[group].push_back(0);
+      }
     }
-    m_nextEntry.resize(m_fileNames.size(), 0);
   }
   EventHolder() = default;
 
-  // TODO: Cache functionality
-  // podio::Frame& read
-
   size_t size() const { return m_fileNames.size(); }
+
+  // Index of the event the next read of a group returns. Only meaningful in
+  // sequential mode, where a group has a single cursor.
+  size_t nextEntry(int group) {
+    std::lock_guard<std::mutex> lock(m_ioMutex);
+    return m_nextEntry[group].front();
+  }
+
+  // Reads the next event of (group, fileIndex) and advances that file's cursor.
+  // In sequential mode fileIndex is ignored and the group's single stream is used.
+  podio::Frame getFrame(int group, int fileIndex) {
+    const int file = m_randomMix ? fileIndex : 0;
+    std::lock_guard<std::mutex> lock(m_ioMutex);
+
+    size_t& total = m_totalNumberOfEvents[group][file];
+    size_t& entry = m_nextEntry[group][file];
+
+    podio::Reader* reader = nullptr;
+    std::optional<podio::Reader> ondemand;
+    if (m_randomMix) {
+      ondemand.emplace(podio::makeReader(m_fileNames[group][file]));
+      reader = &ondemand.value();
+      if (total == 0) {
+        total = reader->getEntries("events");
+      }
+    } else {
+      reader = &m_rootFileReaders[group];
+    }
+
+    if (total == 0) {
+      throw GaudiException("No events found in background file " + m_fileNames[group][file] + " of group " +
+                               std::to_string(group),
+                           m_algName, StatusCode::FAILURE);
+    }
+    // The cursor is only wrapped around here, once the source is exhausted,
+    // so that running out of background events can be detected
+    if (entry >= total) {
+      if (!m_allowReuse) {
+        throw GaudiException("No more events in background file(s) of group " + std::to_string(group) +
+                                 ", set AllowReusingBackgroundFiles to start over from the first event",
+                             m_algName, StatusCode::FAILURE);
+      }
+      entry = 0;
+    }
+    podio::Frame frame = reader->readEvent(entry);
+    ++entry;
+    // In random-mix mode a file is drawn again whenever the shuffled permutation
+    // comes back to it, so its cursor wraps around right away. Only a start
+    // index past the end of the file is then reported above.
+    if (m_randomMix) {
+      entry %= total;
+    }
+    return frame;
+  }
 };
 
 using retType =
@@ -147,7 +235,18 @@ private:
   Gaudi::Property<bool> m_allowReusingBackgroundFiles{
       this, "AllowReusingBackgroundFiles", false,
       "If true, start over from the first event of a group once all of its events have been overlaid; otherwise "
-      "running out of background events is an error"};
+      "running out of background events is an error. With RandomMixBackgroundFiles the files of a group are drawn "
+      "again once all of them have been used, regardless of this option"};
+  Gaudi::Property<bool> m_randomMix{
+      this, "RandomMixBackgroundFiles", false,
+      "Treat each file in a background group as an independent (pseudo-)event source and pick a random file for every "
+      "overlaid event (one-event-per-file mixing)"};
+  Gaudi::Property<bool> m_mergeMCParticles{
+      this, "MergeMCParticles", true,
+      "Merge the background MCParticle collection into the output. If false, background particles are not "
+      "stored: the momentum of a background tracker hit (the momentum at the hit) is replaced by the momentum of "
+      "its originating particle (the momentum at production), as the link to that particle is lost, and "
+      "calorimeter contributions have no particle link."};
   Gaudi::Property<bool> m_copyCellIDMetadata{this, "CopyCellIDMetadata", false,
                                              "Copy cell ID encoding metadata from input to output collections"};
 
@@ -156,4 +255,10 @@ private:
 
 private:
   SmartIF<IUniqueIDGenSvc> m_uidSvc;
+
+  // Only printed once, as this would otherwise be repeated for every overlaid
+  // background event. The limit of 2 includes the notice that the message is
+  // suppressed from then on.
+  mutable Gaudi::Accumulators::MsgCounter<MSG::WARNING> m_missingBackgroundMCParticles{
+      this, "The collection set as BackgroundMCParticleCollectionName was not found in a background event", 2};
 };

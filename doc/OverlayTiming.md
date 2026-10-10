@@ -33,7 +33,7 @@ It uses [`UniqueIDGenSvc`](uniqueIDGen.md) to seed the internal random number ge
 
 | Property | Default | Description |
 |----------|---------|-------------|
-| `BackgroundFileNames` | `[]` | List of groups of background input files, one group per overlay stream |
+| `BackgroundFileNames` | `[]` | List of groups of background input files, one group per overlay stream. |
 | `NumberBackground` | `[]` | Number of background events to overlay per stream (fixed or Poisson mean) |
 | `Poisson_random_NOverlay` | `[]` | If true, draw the number of events from a Poisson distribution with mean `NumberBackground` |
 | `NBunchtrain` | `1` | Number of bunch crossings in the bunch train |
@@ -42,9 +42,46 @@ It uses [`UniqueIDGenSvc`](uniqueIDGen.md) to seed the internal random number ge
 | `Delta_t` | `0.5` | Time between consecutive bunch crossings (ns) |
 | `TimeWindows` | `{}` | Map from collection name to `[t_min, t_max]` (ns) defining the acceptance window. Required for every `SimTrackerHit` and `SimCalorimeterHit` collection. |
 | `BackgroundMCParticleCollectionName` | `"MCParticle"` | Name of the MCParticle collection in the background files |
-| `AllowReusingBackgroundFiles` | `false` | If true, start over from the first event of a group once all of its events have been overlaid. If false, running out of background events is an error |
+| `AllowReusingBackgroundFiles` | `false` | If true, start over from the first event of a group once all of its events have been overlaid. If false, running out of background events is an error. With `RandomMixBackgroundFiles` the files of a group are drawn again once all of them have been used, regardless of this option |
+| `RandomMixBackgroundFiles` | `false` | Treat every file of a background group as an independent (pseudo-)event source and draw one at random for each overlaid event |
+| `MergeMCParticles` | `true` | Copy the background MCParticles into the output. If `false` they are left out entirely and background hits have no particle relation. The momentum stored in a background tracker hit, i.e. the momentum of the particle at the hit, is then replaced by the momentum of its originating particle at production, which would otherwise be lost. Calorimeter contributions are otherwise unchanged |
 | `CopyCellIDMetadata` | `false` | Copy cell ID encoding metadata from input to output collections |
 | `StartBackgroundEventIndex` | `-1` | Index of the background event every group starts reading from, once at the beginning of the job (`-1` means start from the beginning) |
+
+## Random background mixing
+
+Beam-induced background is often produced as a large number of files, each
+holding a single pseudo-event. Reading such a group as one sequential stream
+would walk the files in a fixed order, so a run that overlays fewer events than
+there are files would only ever see the first few.
+
+With `RandomMixBackgroundFiles = True` every file of a group is instead treated
+as an independent event source, and one file is drawn for each overlaid event.
+The draws come from a shuffled permutation of the group that is reshuffled once
+exhausted, so files are used evenly rather than independently at random, and
+each pass over the group is in a different order. Files are reused in this way
+whatever `AllowReusingBackgroundFiles` is set to. The files of a group are
+typically collected in the options file, for example:
+
+```python
+import glob
+
+overlay.RandomMixBackgroundFiles = True
+# Sorted, so that the order of the files, and with it the files that are drawn,
+# does not depend on the file system
+overlay.BackgroundFileNames = [sorted(glob.glob("/path/to/bib_files/*.root"))]
+```
+
+The files are drawn with the random number generator that is seeded for every
+event through `UniqueIDGenSvc`, so the same `Seed` draws the same files for an
+event with the same event and run numbers. The entries from each file are read
+sequentially. Hence, the background overlay is only fully reproducible event by
+event if there is exactly one pseudo-event in each file.
+
+Background particles usually dominate the output size. If the background
+`MCParticle` collection is not needed downstream, `MergeMCParticles = False`
+leaves it out entirely. The property table above describes what this means for
+the background hits.
 
 ## Usage example
 
