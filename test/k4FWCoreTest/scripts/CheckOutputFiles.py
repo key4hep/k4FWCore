@@ -712,7 +712,8 @@ if (
 
 def check_no_mcparticle_merge_overlay(filename):
     """Checks the output of OverlayTimingNoMCParticleMerge, where the background
-    particles are left out and the background hits keep their own tag and time."""
+    particles are left out and the background hits keep their tag and get the
+    time shift of their bunch crossing."""
     print(f'Checking file "{filename}" for background hits without background particles')
     groups = RANDOM_MIX_GROUPS
     n_draws = N_BX * sum(n_per_bx for _, _, n_per_bx in groups)
