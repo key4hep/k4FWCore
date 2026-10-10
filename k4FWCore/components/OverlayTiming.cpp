@@ -405,6 +405,23 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
           }
         }
 
+        // Copies a background contribution, shifted in time and pointing to the
+        // copy of its particle
+        const auto cloneContribution = [&](const edm4hep::CaloHitContribution& contrib) {
+          auto newContrib = contrib.clone(false);
+          if (m_mergeMCParticles) {
+            if (const auto index =
+                    overlaid_particle_index(contrib.getParticle().getObjectID().index, offset, nBgParticles);
+                index >= 0) {
+              newContrib.setParticle(oparticles.at(index));
+            }
+          } else {
+            newContrib.setParticle(edm4hep::MCParticle());
+          }
+          newContrib.setTime(contrib.getTime() + timeOffset);
+          return newContrib;
+        };
+
         for (size_t i = 0; i < simCaloHits.size(); ++i) {
           const auto name = inputLocations(SIMCALOHIT_INDEX_POSITION)[i];
           debug() << "Processing collection " << name << endmsg;
@@ -430,17 +447,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
                 if ((contrib.getTime() + timeOffset > this_start) && (contrib.getTime() + timeOffset < this_stop)) {
                   add = true;
                   // TODO: Make sure a contribution is not added twice
-                  auto newContrib = contrib.clone(false);
-                  if (m_mergeMCParticles) {
-                    if (const auto index =
-                            overlaid_particle_index(contrib.getParticle().getObjectID().index, offset, nBgParticles);
-                        index >= 0) {
-                      newContrib.setParticle(oparticles.at(index));
-                    }
-                  } else {
-                    newContrib.setParticle(edm4hep::MCParticle());
-                  }
-                  newContrib.setTime(contrib.getTime() + timeOffset);
+                  auto newContrib = cloneContribution(contrib);
                   calhit.addToContributions(newContrib);
                   calHitContribs.push_back(newContrib);
                 }
@@ -457,17 +464,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
               for (const auto& contrib : simCaloHit.getContributions()) {
                 if ((contrib.getTime() + timeOffset > this_start) && (contrib.getTime() + timeOffset < this_stop)) {
                   // TODO: Make sure a contribution is not added twice
-                  auto newContrib = contrib.clone(false);
-                  if (m_mergeMCParticles) {
-                    if (const auto index =
-                            overlaid_particle_index(contrib.getParticle().getObjectID().index, offset, nBgParticles);
-                        index >= 0) {
-                      newContrib.setParticle(oparticles.at(index));
-                    }
-                  } else {
-                    newContrib.setParticle(edm4hep::MCParticle());
-                  }
-                  newContrib.setTime(contrib.getTime() + timeOffset);
+                  auto newContrib = cloneContribution(contrib);
                   calhit.addToContributions(newContrib);
                   calHitContribs.push_back(newContrib);
                 }
