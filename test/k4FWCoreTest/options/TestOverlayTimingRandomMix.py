@@ -21,10 +21,14 @@
 # single-event background files written by CreateOverlayBackgroundFiles.py on
 # top of functional_producer_multiple.root.
 #
-# Group A is given as a directory, which has to be expanded into its .root
-# files only. Group B mixes a directory with an explicitly listed file. With 6
-# bunch crossings, group A draws 18 events from its 8 files and group B 6 from
-# its 4, so both wrap around their shuffled list of files at least once.
+# Group A is the .root files of a directory. Group B mixes the files of a
+# directory with an explicitly listed file. With 6 bunch crossings, group A
+# draws 18 events from its 8 files and group B 6 from its 4, so both wrap around
+# their shuffled list of files at least once.
+#
+# The tests OverlayTimingRandomMixRepeat, OverlayTimingRandomMixOtherSeed and
+# OverlayTimingNoMCParticleMerge run this same file with another output file
+# and, respectively, the same seed, another seed and MergeMCParticles = False.
 
 import glob
 
