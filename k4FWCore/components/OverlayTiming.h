@@ -244,8 +244,9 @@ private:
   Gaudi::Property<bool> m_mergeMCParticles{
       this, "MergeMCParticles", true,
       "Merge the background MCParticle collection into the output. If false, background particles are not "
-      "stored: tracker hits keep the momentum of their originating particle instead of a particle link, and "
-      "calorimeter contributions get an empty particle."};
+      "stored: the momentum of a background tracker hit (the momentum at the hit) is replaced by the momentum of "
+      "its originating particle (the momentum at production), as the link to that particle is lost, and "
+      "calorimeter contributions have no particle link."};
   Gaudi::Property<bool> m_copyCellIDMetadata{this, "CopyCellIDMetadata", false,
                                              "Copy cell ID encoding metadata from input to output collections"};
 

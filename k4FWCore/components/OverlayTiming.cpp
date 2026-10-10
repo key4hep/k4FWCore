@@ -407,7 +407,9 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
               }
             } else if (const auto mcp = simTrackerHit.getParticle(); mcp.isAvailable()) {
               // Without the background particles there is nothing to point at, so
-              // preserve the momentum of the originating particle instead.
+              // preserve the momentum of the originating particle instead. This
+              // replaces the momentum stored in the hit, i.e. the one the particle
+              // had at the hit, with the one it had at its production.
               const auto mom = mcp.getMomentum();
               nhit.setMomentum({static_cast<float>(mom.x), static_cast<float>(mom.y), static_cast<float>(mom.z)});
             }
