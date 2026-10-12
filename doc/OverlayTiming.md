@@ -42,9 +42,9 @@ It uses [`UniqueIDGenSvc`](uniqueIDGen.md) to seed the internal random number ge
 | `Delta_t` | `0.5` | Time between consecutive bunch crossings (ns) |
 | `TimeWindows` | `{}` | Map from collection name to `[t_min, t_max]` (ns) defining the acceptance window. Required for every `SimTrackerHit` and `SimCalorimeterHit` collection. |
 | `BackgroundMCParticleCollectionName` | `"MCParticle"` | Name of the MCParticle collection in the background files |
-| `AllowReusingBackgroundFiles` | `false` | If true, wrap around the background file when events are exhausted |
+| `AllowReusingBackgroundFiles` | `false` | If true, start over from the first event of a group once all of its events have been overlaid. If false, running out of background events is an error |
 | `CopyCellIDMetadata` | `false` | Copy cell ID encoding metadata from input to output collections |
-| `StartBackgroundEventIndex` | `-1` | Index of the background event to start from (`-1` means start from the beginning) |
+| `StartBackgroundEventIndex` | `-1` | Index of the background event every group starts reading from, once at the beginning of the job (`-1` means start from the beginning) |
 
 ## Usage example
 

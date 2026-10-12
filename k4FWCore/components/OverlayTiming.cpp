@@ -32,9 +32,11 @@
 
 #include <TMath.h>
 
+#include <algorithm>
 #include <cassert>
 #include <limits>
 #include <random>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -65,6 +67,7 @@ StatusCode OverlayTiming::initialize() {
   m_uidSvc = service<IUniqueIDGenSvc>("UniqueIDGenSvc", true);
   if (!m_uidSvc) {
     error() << "Unable to get UniqueIDGenSvc" << endmsg;
+    return StatusCode::FAILURE;
   }
 
   std::vector<std::vector<std::string>> inputFiles;
@@ -92,8 +95,13 @@ StatusCode OverlayTiming::initialize() {
 
   if (std::any_of(m_bkgEvents->m_totalNumberOfEvents.begin(), m_bkgEvents->m_totalNumberOfEvents.end(),
                   [this](const int& val) { return this->m_startWithBackgroundEvent >= val; })) {
-    throw GaudiException("StartWithBackgroundEvent is larger than the number of events in the background files", name(),
-                         StatusCode::FAILURE);
+    error() << "StartBackgroundEventIndex is larger than the number of events in the background files" << endmsg;
+    return StatusCode::FAILURE;
+  }
+  // Every group starts reading at this index, and from there on advances with each background event read
+  if (m_startWithBackgroundEvent >= 0) {
+    info() << "Starting every background group at event " << m_startWithBackgroundEvent << endmsg;
+    std::ranges::fill(m_bkgEvents->m_nextEntry, static_cast<size_t>(m_startWithBackgroundEvent.value()));
   }
 
   if (m_Noverlay.empty()) {
@@ -108,6 +116,18 @@ StatusCode OverlayTiming::initialize() {
               "Poisson_random_NOverlay"
            << endmsg;
     m_Poisson = std::vector<bool>(m_bkgEvents->size(), false);
+  }
+
+  // Check that the per-group settings have the right size
+  if (m_Noverlay.size() != m_bkgEvents->size()) {
+    error() << "NumberBackground has " << m_Noverlay.size() << " entries, but " << m_bkgEvents->size()
+            << " background groups were configured" << endmsg;
+    return StatusCode::FAILURE;
+  }
+  if (m_Poisson.size() != m_bkgEvents->size()) {
+    error() << "Poisson_random_NOverlay has " << m_Poisson.size() << " entries, but " << m_bkgEvents->size()
+            << " background groups were configured" << endmsg;
+    return StatusCode::FAILURE;
   }
 
   // Copy the cellID encoding of the input collections over to the overlaid output collections.
@@ -241,13 +261,6 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
     debug() << "Starting overlay at event: " << m_bkgEvents->m_nextEntry[groupIndex] << " for the background group "
             << groupIndex << endmsg;
 
-    if (m_startWithBackgroundEvent >= 0) {
-      info() << "Skipping to event: " << m_startWithBackgroundEvent << endmsg;
-      for (auto& entry : m_bkgEvents->m_nextEntry) {
-        entry = m_startWithBackgroundEvent;
-      }
-    }
-
     // Overlay the background events to each bunchcrossing in the bunch train
     for (int bxInTrain = 0; bxInTrain < m_NBunchTrain; ++bxInTrain) {
       const int BX_number_in_train = permutation.at(bxInTrain);
@@ -264,16 +277,21 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
               << endmsg;
 
       for (int k = 0; k < NOverlay_to_this_BX; ++k) {
-        info() << "Overlaying background event " << m_bkgEvents->m_nextEntry[groupIndex] << " from group " << groupIndex
-               << " to BX " << bxInTrain << endmsg;
-        if (m_bkgEvents->m_nextEntry[groupIndex] >= m_bkgEvents->m_totalNumberOfEvents[groupIndex] &&
-            !m_allowReusingBackgroundFiles) {
-          throw GaudiException("No more events in background file", name(), StatusCode::FAILURE);
+        // The cursor is only wrapped around here, once the group is exhausted,
+        // so that running out of background events can be detected
+        auto& nextEntry = m_bkgEvents->m_nextEntry[groupIndex];
+        if (nextEntry >= m_bkgEvents->m_totalNumberOfEvents[groupIndex]) {
+          if (!m_allowReusingBackgroundFiles) {
+            throw GaudiException("No more events in background file(s) of group " + std::to_string(groupIndex) +
+                                     ", set AllowReusingBackgroundFiles to start over from the first event",
+                                 name(), StatusCode::FAILURE);
+          }
+          nextEntry = 0;
         }
-        const auto backgroundEvent =
-            m_bkgEvents->m_rootFileReaders[groupIndex].readEvent(m_bkgEvents->m_nextEntry[groupIndex]);
-        m_bkgEvents->m_nextEntry[groupIndex]++;
-        m_bkgEvents->m_nextEntry[groupIndex] %= m_bkgEvents->m_totalNumberOfEvents[groupIndex];
+        debug() << "Overlaying background event " << nextEntry << " from group " << groupIndex << " to BX " << bxInTrain
+                << endmsg;
+        const auto backgroundEvent = m_bkgEvents->m_rootFileReaders[groupIndex].readEvent(nextEntry);
+        ++nextEntry;
         const auto availableCollections = backgroundEvent.getAvailableCollections();
 
         // Either 0 or negative

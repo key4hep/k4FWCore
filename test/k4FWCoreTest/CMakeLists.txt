@@ -214,6 +214,8 @@ add_test_fwcore(FunctionalTransformerRuntimeEmpty options/ExampleFunctionalTrans
 add_test_fwcore(FunctionalTransformerRuntimeCollectionsMultiple options/ExampleFunctionalTransformerRuntimeCollectionsMultiple.py)
 add_test_fwcore(FunctionalTransformerHist options/ExampleFunctionalTransformerHist.py ADD_TO_CHECK_FILES)
 add_test_fwcore(FunctionalCollectionMerger options/ExampleFunctionalCollectionMerger.py PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
+add_test_fwcore(FunctionalCollectionMergerEmpty options/ExampleFunctionalCollectionMergerEmpty.py
+                  PROPERTIES PASS_REGULAR_EXPRESSION "InputCollections must contain at least one collection")
 add_test_fwcore(FunctionalFilterFile options/ExampleFunctionalFilterFile.py ADD_TO_CHECK_FILES)
 add_test_fwcore(FunctionalMetadata options/ExampleFunctionalMetadata.py --MetadataSvc.SkipIfSameValue True ADD_TO_CHECK_FILES PROPERTIES FIXTURES_SETUP FunctionalMetadataFile)
 add_test_fwcore(FunctionalMetadataThrow options/ExampleFunctionalMetadata.py --Producer2.ParticleTime 2.5
@@ -281,6 +283,9 @@ add_test_fwcore(InvalidOutputCommandsNoCrash options/invalidOutputCommandsNoCras
 set_tests_properties(InvalidOutputCommandsNoCrash PROPERTIES FIXTURES_REQUIRED ProducerFile PASS_REGULAR_EXPRESSION "ERROR 'abc' is not a valid command for the KeepDropSwitch")
 
 add_test_fwcore(OverlayTiming options/TestOverlayTiming.py ADD_TO_CHECK_FILES PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile)
+add_test_fwcore(OverlayTimingStartIndex options/TestOverlayTimingBackgroundCursor.py --OverlayTiming.AllowReusingBackgroundFiles True ADD_TO_CHECK_FILES PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile)
+add_test_fwcore(OverlayTimingBackgroundExhausted options/TestOverlayTimingBackgroundCursor.py --IOSvc.Output overlay_background_exhausted.root
+                PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile PASS_REGULAR_EXPRESSION "No more events in background file\\(s\\) of group 0")
 
 add_test(NAME check_broken_pipe
          COMMAND bash -c "[ $(${K4RUN} options/ExampleFunctionalProducer.py | head -n 2 | wc -l) = 2 ]"
