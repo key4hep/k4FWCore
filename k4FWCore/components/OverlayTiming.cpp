@@ -339,8 +339,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
         // The background particles are only looked up when they are merged. If
         // their collection is missing nothing is copied, and the background
         // hits are left without a particle.
-        const bool hasBgParticles = std::find(availableCollections.begin(), availableCollections.end(),
-                                              m_MCParticleCollectionName) != availableCollections.end();
+        const bool hasBgParticles = std::ranges::find(availableCollections, m_MCParticleCollectionName) != availableCollections.end();
         if (m_mergeMCParticles && !hasBgParticles) {
           ++m_missingBackgroundMCParticles;
         }
