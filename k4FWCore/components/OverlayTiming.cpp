@@ -339,7 +339,8 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
         // The background particles are only looked up when they are merged. If
         // their collection is missing nothing is copied, and the background
         // hits are left without a particle.
-        const bool hasBgParticles = std::ranges::find(availableCollections, m_MCParticleCollectionName) != availableCollections.end();
+        const bool hasBgParticles =
+            std::ranges::find(availableCollections, m_MCParticleCollectionName.value()) != availableCollections.end();
         if (m_mergeMCParticles && !hasBgParticles) {
           ++m_missingBackgroundMCParticles;
         }
@@ -406,7 +407,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
               }
             } else if (const auto mcp = simTrackerHit.getParticle(); mcp.isAvailable()) {
               // Without the background particles there is nothing to point at, so
-              // preserve the momentum of the originating particle instead of the 
+              // preserve the momentum of the originating particle instead of the
               // one it had at this hit
               const auto mom = mcp.getMomentum();
               nhit.setMomentum({static_cast<float>(mom.x), static_cast<float>(mom.y), static_cast<float>(mom.z)});
