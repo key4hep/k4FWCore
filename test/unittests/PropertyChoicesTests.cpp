@@ -25,6 +25,7 @@
 
 #include <sstream>
 #include <string>
+#include <type_traits>
 
 namespace {
 enum class Mode { Fast, Precise };
@@ -78,4 +79,47 @@ TEST_CASE("PropertyChoices reports an invalid Gaudi property") {
   REQUIRE(message.find("Mode") != std::string::npos);
   REQUIRE(message.find("'Sloppy'") != std::string::npos);
   REQUIRE(message.find("'Fast', 'Precise'") != std::string::npos);
+}
+
+namespace {
+enum class Color { Red, Green, Blue };
+enum UnscopedLevel { Low, High };
+} // namespace
+
+namespace outer::inner {
+enum class Nested { Alpha, Beta };
+} // namespace outer::inner
+
+TEST_CASE("enum_value_name extracts the unqualified enum value name") {
+  STATIC_REQUIRE(k4FWCore::detail::enum_value_name<Mode::Fast>() == "Fast");
+  STATIC_REQUIRE(k4FWCore::detail::enum_value_name<Color::Green>() == "Green");
+  STATIC_REQUIRE(k4FWCore::detail::enum_value_name<Low>() == "Low");
+  STATIC_REQUIRE(k4FWCore::detail::enum_value_name<outer::inner::Nested::Beta>() == "Beta");
+}
+
+TEST_CASE("makePropertyChoices uses the enumerator names") {
+  const auto choices = k4FWCore::makePropertyChoices<Color::Red, Color::Green, Color::Blue>();
+  STATIC_REQUIRE(std::is_same_v<decltype(choices), const k4FWCore::PropertyChoices<Color>>);
+
+  REQUIRE(choices.parse("Red") == Color::Red);
+  REQUIRE(choices.parse("Green") == Color::Green);
+  REQUIRE(choices.parse("Blue") == Color::Blue);
+  REQUIRE_FALSE(choices.parse("red").has_value());
+  REQUIRE_FALSE(choices.parse("Color::Red").has_value());
+}
+
+TEST_CASE("makePropertyChoices keeps the order of the template arguments") {
+  const auto choices = k4FWCore::makePropertyChoices<Color::Blue, Color::Red>();
+  REQUIRE(choices.list() == "'Blue', 'Red'");
+  REQUIRE_FALSE(choices.parse("Green").has_value());
+}
+
+TEST_CASE("makePropertyChoices works for unscoped and nested enums") {
+  const auto levels = k4FWCore::makePropertyChoices<Low, High>();
+  REQUIRE(levels.list() == "'Low', 'High'");
+  REQUIRE(levels.parse("High") == High);
+
+  const auto nested = k4FWCore::makePropertyChoices<outer::inner::Nested::Alpha, outer::inner::Nested::Beta>();
+  REQUIRE(nested.list() == "'Alpha', 'Beta'");
+  REQUIRE(nested.parse("Alpha") == outer::inner::Nested::Alpha);
 }

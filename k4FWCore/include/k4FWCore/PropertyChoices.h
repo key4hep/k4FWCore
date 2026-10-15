@@ -28,8 +28,10 @@
 #include <algorithm>
 #include <initializer_list>
 #include <optional>
+#include <source_location>
 #include <string>
 #include <string_view>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -109,6 +111,59 @@ public:
 private:
   std::vector<Choice> m_choices;
 };
+
+namespace detail {
+  /// Helper function to determine the *unqualified* name of an enum value (at
+  /// compile time). This is a similar trick that magic_enum also plays
+  template <auto V>
+  consteval std::string_view enum_value_name() {
+    const std::string_view funcName = std::source_location::current().function_name();
+
+    std::size_t start, end;
+    // function_name is not standardized, so compilers have obviously chosen
+    // to do different things
+    if (auto p = funcName.find("V = "); p != funcName.npos) {
+      start = p + 4;
+      end = funcName.find_first_of(";]", start);
+    } else {
+      constexpr std::string_view prefix = "enum_value_name<";
+      start = funcName.find(prefix) + prefix.size();
+      end = funcName.find(">", start);
+    }
+    auto name = funcName.substr(start, end - start);
+
+    if (auto colon = name.rfind("::"); colon != name.npos) {
+      name.remove_prefix(colon + 2);
+    }
+    return name;
+  }
+} // namespace detail
+
+/// @brief Create a PropertyChoices for a set of enum values, using the
+/// (unqualified) names of the enumerators as the allowed strings.
+///
+/// This avoids repeating every enumerator once as a string and once as a value
+/// when the property values should simply match the enumerator names.
+///
+/// @code
+/// enum class Mode { Fast, Precise };
+/// static inline const auto s_modes = k4FWCore::makePropertyChoices<Mode::Fast, Mode::Precise>();
+/// // equivalent to
+/// // k4FWCore::PropertyChoices<Mode> s_modes{{"Fast", Mode::Fast}, {"Precise", Mode::Precise}};
+/// @endcode
+///
+/// The order of the template arguments determines the order in which the
+/// choices are listed by PropertyChoices::list().
+///
+/// @note This only works for values that correspond to a named enumerator
+///
+/// @tparam Vs The enum values that are allowed. They all need to share a common
+///            type, which becomes the value type of the returned PropertyChoices
+template <auto... Vs>
+auto makePropertyChoices() {
+  using T = std::common_type_t<decltype(Vs)...>;
+  return PropertyChoices<T>{{detail::enum_value_name<Vs>(), Vs}...};
+}
 
 } // namespace k4FWCore
 
