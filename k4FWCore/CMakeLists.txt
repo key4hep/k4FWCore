@@ -37,6 +37,7 @@ gaudi_add_module(k4FWCorePlugins
                    components/MetadataSvc.cpp
                    components/OverlayTiming.cpp
                    components/Reader.cpp
+                   components/SimTrackerHitCellMerger.cpp
                    components/UniqueIDGenSvc.cpp
                    components/Writer.cpp
                  LINK Gaudi::GaudiKernel k4FWCore k4FWCore::k4Interface ROOT::Core ROOT::RIO ROOT::Tree EDM4HEP::edm4hep)
