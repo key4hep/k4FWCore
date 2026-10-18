@@ -18,6 +18,13 @@
  */
 #include "EventHeaderCreator.h"
 #include "edm4hep/EventHeaderCollection.h"
+#include <Gaudi/Algorithm.h>
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/EventContext.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/MsgStream.h>
+#include <GaudiKernel/StatusCode.h>
+#include <string>
 
 DECLARE_COMPONENT(EventHeaderCreator)
 

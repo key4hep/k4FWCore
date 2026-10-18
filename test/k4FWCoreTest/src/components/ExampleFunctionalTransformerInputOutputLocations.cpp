@@ -19,6 +19,10 @@
 
 #include "edm4hep/MCParticleCollection.h"
 #include "k4FWCore/Transformer.h"
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/StatusCode.h>
+#include <algorithm>
 
 #include <stdexcept>
 #include <string>

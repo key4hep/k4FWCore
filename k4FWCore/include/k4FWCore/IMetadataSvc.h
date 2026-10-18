@@ -20,6 +20,8 @@
 #define FWCORE_IMETADATASERVICE_H
 
 #include "GaudiKernel/IInterface.h"
+#include <optional>
+#include <string>
 
 #include "edm4hep/utils/ParticleIDUtils.h"
 

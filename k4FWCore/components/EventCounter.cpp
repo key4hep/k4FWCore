@@ -20,6 +20,10 @@
 #include "Gaudi/Accumulators.h"
 #include "Gaudi/Functional/Consumer.h"
 #include "Gaudi/Property.h"
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/EventContext.h>
+#include <GaudiKernel/MsgStream.h>
+#include <GaudiKernel/StatusCode.h>
 
 class EventCounter final : public Gaudi::Functional::Consumer<void(const EventContext&)> {
 public:

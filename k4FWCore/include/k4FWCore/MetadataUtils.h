@@ -20,6 +20,9 @@
 #define FWCORE_METADATAUTILS_H
 
 #include "k4FWCore/IMetadataSvc.h"
+#include <GaudiKernel/MsgStream.h>
+#include <GaudiKernel/StatusCode.h>
+#include <string>
 
 #include <Gaudi/Algorithm.h>
 #include <GaudiKernel/Service.h>

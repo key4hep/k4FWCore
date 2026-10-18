@@ -18,6 +18,10 @@
  */
 
 #include "MetadataSvc.h"
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/MsgStream.h>
+#include <GaudiKernel/StatusCode.h>
+#include <utility>
 
 #include "podio/Frame.h"
 

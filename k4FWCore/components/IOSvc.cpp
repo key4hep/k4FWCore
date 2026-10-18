@@ -18,6 +18,22 @@
  */
 
 #include "IOSvc.h"
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/DataObject.h>
+#include <GaudiKernel/GaudiException.h>
+#include <GaudiKernel/IIncidentSvc.h>
+#include <GaudiKernel/Incident.h>
+#include <GaudiKernel/MsgStream.h>
+#include <GaudiKernel/Service.h>
+#include <GaudiKernel/StatusCode.h>
+#include <algorithm>
+#include <memory>
+#include <podio/CollectionBase.h>
+#include <stdexcept>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 #include "podio/Frame.h"
 #include "podio/FrameCategories.h"

@@ -17,8 +17,13 @@
  * limitations under the License.
  */
 
+#include <edm4hep/ReconstructedParticle.h>
 #include <edm4hep/ReconstructedParticleCollection.h>
 #include <edm4hep/utils/ParticleIDUtils.h>
+#include <fmt/base.h>
+#include <podio/FrameCategories.h>
+#include <string>
+#include <vector>
 
 #include <podio/Reader.h>
 

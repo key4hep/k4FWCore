@@ -18,7 +18,15 @@
  */
 #include "TestUniqueIDGenSvc.h"
 #include "edm4hep/MutableEventHeader.h"
+#include <Gaudi/Accumulators.h>
+#include <Gaudi/Algorithm.h>
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/EventContext.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/StatusCode.h>
 #include <cstdint>
+#include <stdexcept>
+#include <string>
 
 DECLARE_COMPONENT(TestUniqueIDGenSvc)
 

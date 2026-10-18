@@ -23,6 +23,19 @@
 #include "Gaudi/Functional/details.h"
 #include "Gaudi/Functional/utilities.h"
 #include "Gaudi/Property.h"
+#include <GaudiKernel/DataObjID.h>
+#include <GaudiKernel/EventContext.h>
+#include <GaudiKernel/GaudiException.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/MsgStream.h>
+#include <GaudiKernel/StatusCode.h>
+#include <array>
+#include <cstddef>
+#include <podio/CollectionBase.h>
+#include <string>
+#include <string_view>
+#include <tuple>
+#include <vector>
 
 #include "k4FWCore/FunctionalUtils.h"
 

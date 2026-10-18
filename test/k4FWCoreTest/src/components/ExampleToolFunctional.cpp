@@ -20,6 +20,13 @@
 #include "k4FWCore/Consumer.h"
 #include "k4FWCore/GaudiChecks.h"
 #include "k4FWCore/MetadataUtils.h"
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/IInterface.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/MsgStream.h>
+#include <GaudiKernel/StatusCode.h>
+#include <GaudiKernel/extends.h>
+#include <string>
 
 #include <Gaudi/Algorithm.h>
 #include <Gaudi/Property.h>

@@ -18,6 +18,8 @@
  */
 
 #include "Gaudi/Property.h"
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/ISvcLocator.h>
 
 #include "edm4hep/MCParticleCollection.h"
 

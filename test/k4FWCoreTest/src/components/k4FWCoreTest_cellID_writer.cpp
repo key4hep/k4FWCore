@@ -18,6 +18,13 @@
  */
 #include "k4FWCoreTest_cellID_writer.h"
 #include "k4FWCore/MetadataUtils.h"
+#include <Gaudi/Algorithm.h>
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/EventContext.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/StatusCode.h>
+#include <edm4hep/SimTrackerHitCollection.h>
+#include <string>
 
 DECLARE_COMPONENT(k4FWCoreTest_cellID_writer)
 

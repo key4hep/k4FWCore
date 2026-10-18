@@ -20,6 +20,8 @@
 #define FWCORE_IIOSVC_H
 
 #include "GaudiKernel/IInterface.h"
+#include <podio/Frame.h>
+#include <tuple>
 
 #include "podio/CollectionBase.h"
 #include "podio/Writer.h"

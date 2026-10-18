@@ -19,6 +19,11 @@
 
 #include "k4FWCore/MetadataUtils.h"
 #include "k4FWCore/Transformer.h"
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/StatusCode.h>
+#include <cstddef>
+#include <vector>
 
 #include "edm4hep/ParticleIDCollection.h"
 #include "edm4hep/ReconstructedParticleCollection.h"

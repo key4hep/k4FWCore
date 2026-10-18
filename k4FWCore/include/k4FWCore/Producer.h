@@ -20,6 +20,7 @@
 #define FWCORE_PRODUCER_H
 
 #include "k4FWCore/Transformer.h"
+#include <Gaudi/Functional/utilities.h>
 
 #include <tuple>
 

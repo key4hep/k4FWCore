@@ -20,6 +20,7 @@
 #define K4FWCORETEST_TESTSERVICE_H
 
 #include "GaudiKernel/Service.h"
+#include <GaudiKernel/StatusCode.h>
 
 class TestService : public Service {
 public:

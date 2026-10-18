@@ -18,6 +18,13 @@
  */
 
 #include "edm4hep/MCParticleCollection.h"
+#include <Gaudi/Accumulators/StaticHistogram.h>
+#include <Gaudi/Accumulators/StaticRootHistogram.h>
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/StateMachine.h>
+#include <GaudiKernel/StatusCode.h>
+#include <functional>
 
 #include "k4FWCore/Transformer.h"
 

@@ -18,6 +18,13 @@
  */
 
 #include "Gaudi/Property.h"
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <cstddef>
+#include <edm4hep/TrackState.h>
+#include <edm4hep/Vector3d.h>
+#include <tuple>
+#include <utility>
 
 #include "k4FWCore/Producer.h"
 

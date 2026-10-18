@@ -21,6 +21,12 @@
 #include "k4FWCore/Transformer.h"
 #include "k4Interface/IUniqueIDGenSvc.h"
 #include "podio/UserDataCollection.h"
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/MsgStream.h>
+#include <GaudiKernel/SmartIF.h>
+#include <GaudiKernel/StatusCode.h>
+#include <string>
 
 // Example functional algorithms using getUniqueID to seed a PRNG
 // Selected parts of the algorithm are shown as an example in the docs

@@ -28,7 +28,22 @@
 #include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/IDataProviderSvc.h"
 #include "GaudiKernel/ThreadLocalContext.h"
+#include <Gaudi/Algorithm.h>
+#include <GaudiKernel/DataHandle.h>
+#include <GaudiKernel/DataObject.h>
 #include <GaudiKernel/GaudiException.h>
+#include <GaudiKernel/IAlgExecStateSvc.h>
+#include <GaudiKernel/IProperty.h>
+#include <GaudiKernel/MsgStream.h>
+#include <GaudiKernel/StatusCode.h>
+#include <algorithm>
+#include <concepts>
+#include <cstddef>
+#include <iterator>
+#include <string>
+#include <typeinfo>
+#include <utility>
+#include <vector>
 
 #include "podio/CollectionBase.h"
 

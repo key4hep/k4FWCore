@@ -18,6 +18,9 @@
  */
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/TrackCollection.h"
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/MsgStream.h>
+#include <vector>
 
 #include "k4FWCore/Transformer.h"
 

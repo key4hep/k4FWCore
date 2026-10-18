@@ -18,6 +18,18 @@
  */
 
 #include "Gaudi/Property.h"
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/EventContext.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/MsgStream.h>
+#include <GaudiKernel/StatusCode.h>
+#include <cstddef>
+#include <limits>
+#include <mutex>
+#include <set>
+#include <stdexcept>
+#include <tuple>
+#include <utility>
 
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/RecoMCParticleLinkCollection.h"

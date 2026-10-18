@@ -20,6 +20,16 @@
 #define K4FWCORE_DATAHANDLE_H
 
 #include "k4FWCore/DataWrapper.h"
+#include <GaudiKernel/DataHandle.h>
+#include <GaudiKernel/DataObject.h>
+#include <GaudiKernel/EventContext.h>
+#include <GaudiKernel/GaudiException.h>
+#include <GaudiKernel/IDataHandleHolder.h>
+#include <GaudiKernel/IDataProviderSvc.h>
+#include <GaudiKernel/StatusCode.h>
+#include <podio/CollectionBase.h>
+#include <typeinfo>
+#include <utility>
 
 #include "GAUDI_VERSION.h"
 #include <Gaudi/Property.h>

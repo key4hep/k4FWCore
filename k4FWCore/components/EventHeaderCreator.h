@@ -22,8 +22,15 @@
 #include "Gaudi/Algorithm.h"
 #include "Gaudi/Property.h"
 #include "k4FWCore/DataHandle.h"
+#include <GaudiKernel/DataHandle.h>
+#include <GaudiKernel/EventContext.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/StatusCode.h>
 #include <edm4hep/Constants.h>
+#include <edm4hep/EventHeader.h>
 #include <edm4hep/EventHeaderCollection.h>
+#include <string>
+#include <utility>
 /***
  * Algorithm that creates an EventHeader collection and fills it with eventNumber and runNumber
  */

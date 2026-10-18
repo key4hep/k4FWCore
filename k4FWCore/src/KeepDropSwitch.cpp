@@ -17,6 +17,10 @@
  * limitations under the License.
  */
 #include "k4FWCore/KeepDropSwitch.h"
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 #include <format>
 #include <sstream>

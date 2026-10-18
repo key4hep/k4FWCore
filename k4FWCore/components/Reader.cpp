@@ -24,6 +24,17 @@
 #include "GaudiKernel/IDataProviderSvc.h"
 #include "GaudiKernel/SmartIF.h"
 #include "GaudiKernel/StatusCode.h"
+#include <Gaudi/Algorithm.h>
+#include <Gaudi/Functional/details.h>
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/EventContext.h>
+#include <GaudiKernel/GaudiException.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/MsgStream.h>
+#include <GaudiKernel/ServiceHandle.h>
+#include <GaudiKernel/System.h>
+#include <cstddef>
+#include <type_traits>
 
 #include "podio/CollectionBase.h"
 #include "podio/Frame.h"

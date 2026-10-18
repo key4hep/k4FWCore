@@ -17,6 +17,15 @@
  * limitations under the License.
  */
 #include "k4FWCoreTest_CreateExampleEventData.h"
+#include <Gaudi/Algorithm.h>
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/EventContext.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/StatusCode.h>
+#include <cstddef>
+#include <edm4hep/TrackState.h>
+#include <edm4hep/TrackerHit3DCollection.h>
+#include <string>
 
 #include "podio/UserDataCollection.h"
 

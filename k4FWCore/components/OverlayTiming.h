@@ -34,6 +34,14 @@
 
 #include "podio/Frame.h"
 #include "podio/Reader.h"
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/SmartIF.h>
+#include <GaudiKernel/StatusCode.h>
+#include <cstddef>
+#include <memory>
+#include <podio/CollectionBase.h>
+#include <tuple>
+#include <utility>
 
 #include "edm4hep/CaloHitContributionCollection.h"
 #include "edm4hep/EventHeaderCollection.h"

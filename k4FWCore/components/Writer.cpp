@@ -25,6 +25,23 @@
 #include "GaudiKernel/IHiveWhiteBoard.h"
 #include "GaudiKernel/SmartDataPtr.h"
 #include "GaudiKernel/StatusCode.h"
+#include <Gaudi/Interfaces/IOptionsSvc.h>
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/Bootstrap.h>
+#include <GaudiKernel/EventContext.h>
+#include <GaudiKernel/GaudiException.h>
+#include <GaudiKernel/IRegistry.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/MsgStream.h>
+#include <GaudiKernel/ServiceHandle.h>
+#include <GaudiKernel/SmartIF.h>
+#include <cstdlib>
+#include <podio/CollectionBase.h>
+#include <podio/FrameCategories.h>
+#include <podio/Writer.h>
+#include <set>
+#include <tuple>
+#include <vector>
 
 #include "podio/Frame.h"
 

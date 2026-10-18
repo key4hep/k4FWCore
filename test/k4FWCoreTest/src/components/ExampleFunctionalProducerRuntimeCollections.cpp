@@ -18,6 +18,14 @@
  */
 
 #include "edm4hep/MCParticleCollection.h"
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/GaudiException.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/MsgStream.h>
+#include <GaudiKernel/StatusCode.h>
+#include <cstddef>
+#include <utility>
+#include <vector>
 
 #include "k4FWCore/Producer.h"
 

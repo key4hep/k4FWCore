@@ -18,6 +18,10 @@
  */
 
 #include "Gaudi/Functional/Producer.h"
+#include <Gaudi/Algorithm.h>
+#include <Gaudi/Functional/utilities.h>
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/ISvcLocator.h>
 
 #include <string>
 

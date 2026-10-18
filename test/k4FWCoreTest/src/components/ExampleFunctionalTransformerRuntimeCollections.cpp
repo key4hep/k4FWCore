@@ -18,6 +18,11 @@
  */
 
 #include "Gaudi/Property.h"
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <cstddef>
+#include <utility>
+#include <vector>
 
 #include "edm4hep/MCParticleCollection.h"
 

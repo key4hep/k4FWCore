@@ -19,6 +19,12 @@
 
 #include "TFile.h"
 #include "TTree.h"
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/MsgStream.h>
+#include <GaudiKernel/StatusCode.h>
+#include <RtypesCore.h>
+#include <utility>
 
 #include "Gaudi/Property.h"
 

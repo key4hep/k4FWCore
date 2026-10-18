@@ -22,6 +22,10 @@
 // GAUDI
 #include "Gaudi/Algorithm.h"
 #include "Gaudi/Property.h"
+#include <GaudiKernel/EventContext.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/StatusCode.h>
+#include <string>
 
 class k4FWCoreTest_HelloWorldAlg : public Gaudi::Algorithm {
 public:

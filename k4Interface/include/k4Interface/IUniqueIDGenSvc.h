@@ -20,6 +20,10 @@
 #define FWCORE_IUNIQUEIDGENSVC_H
 
 #include "edm4hep/EventHeaderCollection.h"
+#include <GaudiKernel/Kernel.h>
+#include <GaudiKernel/extend_interfaces.h>
+#include <edm4hep/EventHeader.h>
+#include <utility>
 
 #include <cstddef>
 #include <string>

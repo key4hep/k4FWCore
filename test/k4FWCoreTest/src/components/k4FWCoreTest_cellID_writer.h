@@ -22,6 +22,12 @@
 // GAUDI
 #include "Gaudi/Algorithm.h"
 #include "Gaudi/Property.h"
+#include <GaudiKernel/DataHandle.h>
+#include <GaudiKernel/EventContext.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/StatusCode.h>
+#include <string>
+#include <vector>
 
 // key4hep
 #include "k4FWCore/DataHandle.h"

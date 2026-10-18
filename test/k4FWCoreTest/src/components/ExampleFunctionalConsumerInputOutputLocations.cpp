@@ -18,6 +18,10 @@
  */
 
 #include "edm4hep/MCParticleCollection.h"
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/StatusCode.h>
+#include <algorithm>
 
 #include "k4FWCore/Consumer.h"
 
