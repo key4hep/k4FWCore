@@ -26,14 +26,15 @@
 #include <GaudiKernel/EventContext.h>
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/StatusCode.h>
-#include <string>
-#include <vector>
 
 // key4hep
 #include "k4FWCore/DataHandle.h"
 
 // datamodel
 #include "edm4hep/SimTrackerHitCollection.h"
+
+#include <string>
+#include <vector>
 
 const std::string cellIDtest = "M:3,S-1:3,I:9,J:9,K-1:6";
 

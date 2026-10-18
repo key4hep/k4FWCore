@@ -26,6 +26,7 @@
 #include <GaudiKernel/MsgStream.h>
 #include <GaudiKernel/SmartIF.h>
 #include <GaudiKernel/StatusCode.h>
+
 #include <string>
 
 // Example functional algorithms using getUniqueID to seed a PRNG

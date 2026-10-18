@@ -29,11 +29,8 @@
 #include <GaudiKernel/SmartIF.h>
 #include <GaudiKernel/StatusCode.h>
 #include <GaudiKernel/extends.h>
-#include <mutex>
-#include <optional>
 #include <podio/CollectionBase.h>
 #include <podio/Frame.h>
-#include <tuple>
 
 #include "podio/Reader.h"
 #include "podio/Writer.h"
@@ -43,8 +40,11 @@
 #include "k4FWCore/KeepDropSwitch.h"
 
 #include <atomic>
+#include <mutex>
+#include <optional>
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <vector>
 
 class IOSvc : public extends<Service, IIOSvc, IIncidentListener> {

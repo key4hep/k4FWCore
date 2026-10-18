@@ -36,14 +36,6 @@
 #include <GaudiKernel/IProperty.h>
 #include <GaudiKernel/MsgStream.h>
 #include <GaudiKernel/StatusCode.h>
-#include <algorithm>
-#include <concepts>
-#include <cstddef>
-#include <iterator>
-#include <string>
-#include <typeinfo>
-#include <utility>
-#include <vector>
 
 #include "podio/CollectionBase.h"
 
@@ -51,10 +43,18 @@
 
 // #include "GaudiKernel/CommonMessaging.h"
 
+#include <algorithm>
+#include <concepts>
+#include <cstddef>
 #include <format>
+#include <iterator>
 #include <memory>
+#include <string>
 #include <tuple>
 #include <type_traits>
+#include <typeinfo>
+#include <utility>
+#include <vector>
 
 namespace k4FWCore {
 

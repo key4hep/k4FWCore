@@ -20,12 +20,13 @@
 #define K4FWCORE_DATAWRAPPER_H
 
 #include <GaudiKernel/Kernel.h>
-#include <memory>
-#include <type_traits>
-#include <utility>
 
 #include "GaudiKernel/DataObject.h"
 #include "podio/CollectionBase.h"
+
+#include <memory>
+#include <type_traits>
+#include <utility>
 
 // forward declaration
 namespace k4FWCore {

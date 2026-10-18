@@ -22,8 +22,6 @@
 #include <edm4hep/utils/ParticleIDUtils.h>
 #include <fmt/base.h>
 #include <podio/FrameCategories.h>
-#include <string>
-#include <vector>
 
 #include <podio/Reader.h>
 
@@ -31,6 +29,8 @@
 #include <fmt/ranges.h>
 
 #include <algorithm>
+#include <string>
+#include <vector>
 
 bool checkPIDForAlgo(const edm4hep::utils::PIDHandler& pidHandler, const edm4hep::ReconstructedParticle& reco,
                      const edm4hep::utils::ParticleIDMeta& pidMeta, const int paramIndex) {

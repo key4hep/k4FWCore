@@ -24,13 +24,13 @@
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/StateMachine.h>
 #include <GaudiKernel/StatusCode.h>
-#include <functional>
 
 #include "k4FWCore/Transformer.h"
 
 #include "Gaudi/Accumulators/RootHistogram.h"
 #include "Gaudi/Property.h"
 
+#include <functional>
 #include <string>
 
 struct ExampleFunctionalTransformerHist final

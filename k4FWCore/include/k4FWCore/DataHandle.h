@@ -28,8 +28,6 @@
 #include <GaudiKernel/IDataProviderSvc.h>
 #include <GaudiKernel/StatusCode.h>
 #include <podio/CollectionBase.h>
-#include <typeinfo>
-#include <utility>
 
 #include "GAUDI_VERSION.h"
 #include <Gaudi/Property.h>
@@ -43,6 +41,8 @@
 #include <stdexcept>
 #include <string>
 #include <type_traits>
+#include <typeinfo>
+#include <utility>
 
 namespace k4FWCore {
 /**

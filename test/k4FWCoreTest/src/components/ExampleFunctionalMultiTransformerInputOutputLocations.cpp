@@ -22,8 +22,8 @@
 #include <Gaudi/PluginService.h>
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/StatusCode.h>
-#include <algorithm>
 
+#include <algorithm>
 #include <stdexcept>
 #include <string>
 #include <tuple>

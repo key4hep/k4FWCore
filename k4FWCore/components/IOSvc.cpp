@@ -26,14 +26,7 @@
 #include <GaudiKernel/MsgStream.h>
 #include <GaudiKernel/Service.h>
 #include <GaudiKernel/StatusCode.h>
-#include <algorithm>
-#include <memory>
 #include <podio/CollectionBase.h>
-#include <stdexcept>
-#include <string>
-#include <string_view>
-#include <utility>
-#include <vector>
 
 #include "podio/Frame.h"
 #include "podio/FrameCategories.h"
@@ -48,8 +41,15 @@
 
 #include "TROOT.h"
 
+#include <algorithm>
+#include <memory>
 #include <mutex>
+#include <stdexcept>
+#include <string>
+#include <string_view>
 #include <tuple>
+#include <utility>
+#include <vector>
 
 StatusCode IOSvc::initialize() {
   StatusCode sc = Service::initialize();

@@ -25,12 +25,13 @@
 #include <GaudiKernel/EventContext.h>
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/StatusCode.h>
-#include <string>
 
 // key4hep
 #include "k4FWCore/DataHandle.h"
 
 #include "edm4hep/SimTrackerHitCollection.h"
+
+#include <string>
 
 /** @class k4FWCoreTest_cellID
  *  Lightweight reader for edm data to test cellID reading

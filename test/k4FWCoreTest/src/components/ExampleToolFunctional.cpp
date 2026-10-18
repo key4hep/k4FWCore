@@ -26,7 +26,6 @@
 #include <GaudiKernel/MsgStream.h>
 #include <GaudiKernel/StatusCode.h>
 #include <GaudiKernel/extends.h>
-#include <string>
 
 #include <Gaudi/Algorithm.h>
 #include <Gaudi/Property.h>
@@ -34,6 +33,8 @@
 #include <GaudiKernel/GaudiException.h>
 #include <GaudiKernel/IAlgTool.h>
 #include <GaudiKernel/ToolHandle.h>
+
+#include <string>
 
 struct IExampleTool : virtual IAlgTool {
   DeclareInterfaceID(IExampleTool, 1, 0);

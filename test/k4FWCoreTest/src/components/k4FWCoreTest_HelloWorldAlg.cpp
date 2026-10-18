@@ -23,6 +23,7 @@
 #include <GaudiKernel/EventContext.h>
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/StatusCode.h>
+
 #include <string>
 
 DECLARE_COMPONENT(k4FWCoreTest_HelloWorldAlg)

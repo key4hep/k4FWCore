@@ -21,13 +21,13 @@
 
 #include "GaudiKernel/IInterface.h"
 #include <podio/Frame.h>
-#include <tuple>
 
 #include "podio/CollectionBase.h"
 #include "podio/Writer.h"
 
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <vector>
 
 /**

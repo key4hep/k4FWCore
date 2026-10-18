@@ -22,7 +22,6 @@
 #include "k4FWCore/IMetadataSvc.h"
 #include <GaudiKernel/MsgStream.h>
 #include <GaudiKernel/StatusCode.h>
-#include <string>
 
 #include <Gaudi/Algorithm.h>
 #include <GaudiKernel/Service.h>
@@ -36,6 +35,7 @@
 #include <concepts>
 #include <optional>
 #include <ostream>
+#include <string>
 
 namespace k4FWCore {
 

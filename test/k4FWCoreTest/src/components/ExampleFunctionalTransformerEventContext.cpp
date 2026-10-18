@@ -23,16 +23,16 @@
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/MsgStream.h>
 #include <GaudiKernel/StatusCode.h>
-#include <limits>
-#include <mutex>
-#include <set>
-#include <stdexcept>
 
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/MutableMCParticle.h"
 
 #include "k4FWCore/Transformer.h"
 
+#include <limits>
+#include <mutex>
+#include <set>
+#include <stdexcept>
 #include <string>
 
 struct ExampleFunctionalTransformerEventContext final

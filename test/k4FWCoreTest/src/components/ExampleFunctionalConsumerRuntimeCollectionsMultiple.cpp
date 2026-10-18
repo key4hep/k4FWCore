@@ -21,11 +21,6 @@
 #include <Gaudi/PluginService.h>
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/MsgStream.h>
-#include <cmath>
-#include <cstdlib>
-#include <sstream>
-#include <stdexcept>
-#include <vector>
 
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/SimTrackerHitCollection.h"
@@ -33,7 +28,12 @@
 
 #include "k4FWCore/Consumer.h"
 
+#include <cmath>
+#include <cstdlib>
+#include <sstream>
+#include <stdexcept>
 #include <string>
+#include <vector>
 
 struct ExampleFunctionalConsumerRuntimeCollectionsMultiple final
     : k4FWCore::Consumer<void(const std::vector<const edm4hep::MCParticleCollection*>& particleVec,

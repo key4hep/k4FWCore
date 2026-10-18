@@ -26,9 +26,10 @@
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/SmartIF.h>
 #include <GaudiKernel/StatusCode.h>
-#include <string>
 
 #include "k4Interface/IUniqueIDGenSvc.h"
+
+#include <string>
 
 class TestUniqueIDGenSvc : public Gaudi::Algorithm {
 public:

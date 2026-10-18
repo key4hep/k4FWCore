@@ -23,13 +23,13 @@
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/MsgStream.h>
 #include <GaudiKernel/StatusCode.h>
-#include <cstddef>
-#include <utility>
-#include <vector>
 
 #include "k4FWCore/Producer.h"
 
+#include <cstddef>
 #include <string>
+#include <utility>
+#include <vector>
 
 struct ExampleFunctionalProducerRuntimeCollections final
     : k4FWCore::Producer<std::vector<edm4hep::MCParticleCollection>()> {

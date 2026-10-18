@@ -24,7 +24,6 @@
 #include <GaudiKernel/MsgStream.h>
 #include <GaudiKernel/StatusCode.h>
 #include <RtypesCore.h>
-#include <utility>
 
 #include "Gaudi/Property.h"
 
@@ -37,6 +36,7 @@
 #include <memory>
 #include <string>
 #include <tuple>
+#include <utility>
 
 using TFileProducerReturnType =
     std::tuple<podio::UserDataCollection<float>, edm4hep::MCParticleCollection, edm4hep::SimTrackerHitCollection>;

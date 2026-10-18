@@ -24,6 +24,7 @@
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/StatusCode.h>
 #include <edm4hep/SimTrackerHitCollection.h>
+
 #include <string>
 
 DECLARE_COMPONENT(k4FWCoreTest_cellID_writer)

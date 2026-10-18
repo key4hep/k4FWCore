@@ -35,13 +35,9 @@
 #include <GaudiKernel/MsgStream.h>
 #include <GaudiKernel/ServiceHandle.h>
 #include <GaudiKernel/SmartIF.h>
-#include <cstdlib>
 #include <podio/CollectionBase.h>
 #include <podio/FrameCategories.h>
 #include <podio/Writer.h>
-#include <set>
-#include <tuple>
-#include <vector>
 
 #include "podio/Frame.h"
 
@@ -52,10 +48,14 @@
 #include "k4FWCore/IMetadataSvc.h"
 
 #include <algorithm>
+#include <cstdlib>
 #include <memory>
+#include <set>
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <utility>
+#include <vector>
 
 class Writer final : public Gaudi::Functional::Consumer<void(const EventContext&)> {
 public:

@@ -22,8 +22,6 @@
 #include <Gaudi/PluginService.h>
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/StatusCode.h>
-#include <cstddef>
-#include <vector>
 
 #include "edm4hep/ParticleIDCollection.h"
 #include "edm4hep/ReconstructedParticleCollection.h"
@@ -31,7 +29,9 @@
 
 #include "Gaudi/Property.h"
 
+#include <cstddef>
 #include <string>
+#include <vector>
 
 struct ExampleParticleIDProducer final
     : k4FWCore::Transformer<edm4hep::ParticleIDCollection(const edm4hep::ReconstructedParticleCollection&)> {

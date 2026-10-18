@@ -33,8 +33,6 @@
 #include <GaudiKernel/MsgStream.h>
 #include <GaudiKernel/ServiceHandle.h>
 #include <GaudiKernel/System.h>
-#include <cstddef>
-#include <type_traits>
 
 #include "podio/CollectionBase.h"
 #include "podio/Frame.h"
@@ -42,9 +40,11 @@
 #include "IIOSvc.h"
 #include "k4FWCore/FunctionalUtils.h"
 
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <tuple>
+#include <type_traits>
 #include <utility>
 #include <vector>
 

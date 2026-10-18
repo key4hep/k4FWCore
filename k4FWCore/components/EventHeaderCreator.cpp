@@ -24,6 +24,7 @@
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/MsgStream.h>
 #include <GaudiKernel/StatusCode.h>
+
 #include <string>
 
 DECLARE_COMPONENT(EventHeaderCreator)

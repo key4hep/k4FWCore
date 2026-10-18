@@ -22,23 +22,23 @@
 #include <GaudiKernel/MsgStream.h>
 #include <GaudiKernel/SmartIF.h>
 #include <GaudiKernel/StatusCode.h>
-#include <algorithm>
-#include <cstddef>
 #include <edm4hep/EventHeaderCollection.h>
 #include <edm4hep/edm4hep.h>
 #include <fmt/format.h>
 #include <podio/CollectionBase.h>
 #include <podio/utilities/TypeHelpers.h>
-#include <stdexcept>
-#include <string_view>
-#include <vector>
 
 #include "k4FWCore/Transformer.h"
 #include "k4Interface/IUniqueIDGenSvc.h"
 
+#include <algorithm>
+#include <cstddef>
 #include <numeric>
 #include <random>
+#include <stdexcept>
 #include <string>
+#include <string_view>
+#include <vector>
 
 template <typename List1, typename List2>
 struct ConcatTypeLists;

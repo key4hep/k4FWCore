@@ -23,7 +23,6 @@
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/MsgStream.h>
 #include <GaudiKernel/StatusCode.h>
-#include <sstream>
 
 #include "edm4hep/MCParticleCollection.h"
 
@@ -32,6 +31,7 @@
 #include <limits>
 #include <mutex>
 #include <set>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 

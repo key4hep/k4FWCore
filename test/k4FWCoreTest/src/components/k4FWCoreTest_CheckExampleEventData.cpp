@@ -22,12 +22,13 @@
 #include <GaudiKernel/EventContext.h>
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/StatusCode.h>
-#include <sstream>
-#include <stdexcept>
-#include <string>
 
 // datamodel
 #include "edm4hep/MCParticleCollection.h"
+
+#include <sstream>
+#include <stdexcept>
+#include <string>
 
 DECLARE_COMPONENT(k4FWCoreTest_CheckExampleEventData)
 

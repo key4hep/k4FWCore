@@ -22,7 +22,6 @@
 #include <Gaudi/PluginService.h>
 #include <GaudiKernel/ISvcLocator.h>
 #include <edm4hep/EventHeader.h>
-#include <utility>
 
 #include "k4FWCore/Consumer.h"
 
@@ -32,6 +31,7 @@
 #include <format>
 #include <stdexcept>
 #include <string>
+#include <utility>
 
 struct ExampleEventHeaderConsumer final : k4FWCore::Consumer<void(const edm4hep::EventHeaderCollection&)> {
   ExampleEventHeaderConsumer(const std::string& name, ISvcLocator* svcLoc)

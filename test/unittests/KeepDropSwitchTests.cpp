@@ -18,9 +18,10 @@
  */
 
 #include "k4FWCore/KeepDropSwitch.h"
-#include <stdexcept>
 
 #include "catch2/catch_test_macros.hpp"
+
+#include <stdexcept>
 
 using k4FWCore::KeepDropSwitch;
 

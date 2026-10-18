@@ -25,7 +25,6 @@
 #include <GaudiKernel/EventContext.h>
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/StatusCode.h>
-#include <string>
 
 #include "k4FWCore/DataHandle.h"
 
@@ -37,6 +36,8 @@
 #include "edm4hep/SimTrackerHitCollection.h"
 #include "edm4hep/TrackCollection.h"
 #include "edm4hep/TrackerHit3DCollection.h"
+
+#include <string>
 
 /** @class k4FWCoreTest_CreateExampleEventData
  *  Lightweight producer for edm data for tests that do not depend on the actual

@@ -21,7 +21,6 @@
 #include <Gaudi/PluginService.h>
 #include <GaudiKernel/MsgStream.h>
 #include <GaudiKernel/StatusCode.h>
-#include <utility>
 
 #include "podio/Frame.h"
 
@@ -32,6 +31,7 @@
 #include <GaudiKernel/StateMachine.h>
 
 #include <memory>
+#include <utility>
 
 StatusCode MetadataSvc::initialize() {
   StatusCode sc = Service::initialize();

@@ -23,13 +23,6 @@
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/MsgStream.h>
 #include <GaudiKernel/StatusCode.h>
-#include <cstddef>
-#include <limits>
-#include <mutex>
-#include <set>
-#include <stdexcept>
-#include <tuple>
-#include <utility>
 
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/RecoMCParticleLinkCollection.h"
@@ -42,7 +35,14 @@
 
 #include "k4FWCore/Transformer.h"
 
+#include <cstddef>
+#include <limits>
+#include <mutex>
+#include <set>
+#include <stdexcept>
 #include <string>
+#include <tuple>
+#include <utility>
 
 // Which type of collection we are reading
 using FloatColl = podio::UserDataCollection<float>;

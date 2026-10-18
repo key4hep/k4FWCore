@@ -37,11 +37,7 @@
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/SmartIF.h>
 #include <GaudiKernel/StatusCode.h>
-#include <cstddef>
-#include <memory>
 #include <podio/CollectionBase.h>
-#include <tuple>
-#include <utility>
 
 #include "edm4hep/CaloHitContributionCollection.h"
 #include "edm4hep/EventHeaderCollection.h"
@@ -59,10 +55,14 @@
 
 #include "GaudiKernel/GaudiException.h"
 
+#include <cstddef>
 #include <map>
+#include <memory>
 #include <mutex>
 #include <optional>
 #include <string>
+#include <tuple>
+#include <utility>
 #include <vector>
 
 // Holds the background events. Two source strategies are supported, selected by

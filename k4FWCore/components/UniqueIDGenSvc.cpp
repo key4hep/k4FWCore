@@ -20,13 +20,13 @@
 #include <Gaudi/PluginService.h>
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/MsgStream.h>
+
 #include <bitset>
+#include <cstddef>
+#include <format>
 #include <functional>
 #include <limits>
 #include <mutex>
-
-#include <cstddef>
-#include <format>
 #include <stdexcept>
 #include <string>
 

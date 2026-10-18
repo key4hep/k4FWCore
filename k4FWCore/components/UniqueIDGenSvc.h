@@ -24,13 +24,13 @@
 #include "k4Interface/IUniqueIDGenSvc.h"
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/extends.h>
-#include <mutex>
-#include <tuple>
 
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <mutex>
 #include <string>
+#include <tuple>
 #include <unordered_map>
 
 /** @class UniqueIDGenSvc

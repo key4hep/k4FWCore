@@ -24,9 +24,10 @@
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/MsgStream.h>
 #include <GaudiKernel/StatusCode.h>
-#include <string>
 
 #include <k4FWCore/MetadataUtils.h>
+
+#include <string>
 
 DECLARE_COMPONENT(k4FWCoreTest_cellID_reader)
 

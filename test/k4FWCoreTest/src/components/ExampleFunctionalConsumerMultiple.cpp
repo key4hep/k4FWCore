@@ -20,9 +20,6 @@
 #include "Gaudi/Property.h"
 #include <Gaudi/PluginService.h>
 #include <GaudiKernel/ISvcLocator.h>
-#include <cmath>
-#include <cstddef>
-#include <cstdlib>
 #include <edm4hep/MCParticle.h>
 
 #include "edm4hep/MCParticleCollection.h"
@@ -35,6 +32,9 @@
 
 #include "k4FWCore/Consumer.h"
 
+#include <cmath>
+#include <cstddef>
+#include <cstdlib>
 #include <sstream>
 #include <stdexcept>
 #include <string>

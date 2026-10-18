@@ -29,23 +29,23 @@
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/MsgStream.h>
 #include <GaudiKernel/StatusCode.h>
-#include <array>
-#include <cstddef>
 #include <podio/CollectionBase.h>
-#include <string>
-#include <string_view>
-#include <tuple>
-#include <vector>
 
 #include "k4FWCore/FunctionalUtils.h"
 
 // #include "GaudiKernel/CommonMessaging.h"
 
 #include <algorithm>
+#include <array>
+#include <cstddef>
 #include <stdexcept>
+#include <string>
+#include <string_view>
+#include <tuple>
 #include <type_traits>
 #include <utility>
 #include <variant>
+#include <vector>
 
 namespace k4FWCore {
 

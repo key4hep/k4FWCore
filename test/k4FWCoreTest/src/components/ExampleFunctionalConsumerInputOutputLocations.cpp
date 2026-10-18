@@ -21,10 +21,10 @@
 #include <Gaudi/PluginService.h>
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/StatusCode.h>
-#include <algorithm>
 
 #include "k4FWCore/Consumer.h"
 
+#include <algorithm>
 #include <stdexcept>
 #include <string>
 #include <vector>
