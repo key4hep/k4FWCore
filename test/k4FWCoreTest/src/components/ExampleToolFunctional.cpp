@@ -22,6 +22,7 @@
 #include "k4FWCore/MetadataUtils.h"
 
 #include <Gaudi/Algorithm.h>
+#include <Gaudi/Property.h>
 #include <GaudiKernel/AlgTool.h>
 #include <GaudiKernel/GaudiException.h>
 #include <GaudiKernel/IAlgTool.h>

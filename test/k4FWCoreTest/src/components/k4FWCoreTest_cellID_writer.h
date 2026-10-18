@@ -21,6 +21,7 @@
 
 // GAUDI
 #include "Gaudi/Algorithm.h"
+#include "Gaudi/Property.h"
 
 // key4hep
 #include "k4FWCore/DataHandle.h"

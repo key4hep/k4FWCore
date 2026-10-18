@@ -20,6 +20,7 @@
 #define K4FWCORE_K4FWCORETEST_CREATEEXAMPLEEVENTDATA
 
 #include "Gaudi/Algorithm.h"
+#include "Gaudi/Property.h"
 
 #include "k4FWCore/DataHandle.h"
 

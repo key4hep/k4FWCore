@@ -22,6 +22,7 @@
 #include "k4FWCore/Transformer.h"
 
 #include "Gaudi/Accumulators/RootHistogram.h"
+#include "Gaudi/Property.h"
 
 #include <string>
 

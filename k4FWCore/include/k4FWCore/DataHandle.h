@@ -22,7 +22,9 @@
 #include "k4FWCore/DataWrapper.h"
 
 #include "GAUDI_VERSION.h"
+#include <Gaudi/Property.h>
 #include <GaudiKernel/AnyDataWrapper.h>
+#include <GaudiKernel/DataHandleProperty.h>
 #include <GaudiKernel/DataObjectHandle.h>
 #include <GaudiKernel/ServiceHandle.h>
 #include <GaudiKernel/ThreadLocalContext.h>

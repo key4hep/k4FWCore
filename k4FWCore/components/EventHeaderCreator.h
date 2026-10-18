@@ -20,6 +20,7 @@
 #define K4FWCORE_EVENTHEADERCREATOR
 
 #include "Gaudi/Algorithm.h"
+#include "Gaudi/Property.h"
 #include "k4FWCore/DataHandle.h"
 #include <edm4hep/Constants.h>
 #include <edm4hep/EventHeaderCollection.h>

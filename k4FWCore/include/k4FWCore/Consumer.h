@@ -22,6 +22,7 @@
 #include "GAUDI_VERSION.h"
 #include "Gaudi/Functional/details.h"
 #include "Gaudi/Functional/utilities.h"
+#include "Gaudi/Property.h"
 #include "GaudiKernel/FunctionalFilterDecision.h"
 
 // #include "GaudiKernel/CommonMessaging.h"

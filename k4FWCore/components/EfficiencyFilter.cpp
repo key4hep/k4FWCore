@@ -16,6 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <Gaudi/Property.h>
 #include <edm4hep/EventHeaderCollection.h>
 #include <edm4hep/edm4hep.h>
 

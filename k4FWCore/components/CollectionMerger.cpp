@@ -33,6 +33,7 @@
  *  The output collection is specified in the OutputCollection property.
  */
 
+#include <Gaudi/Property.h>
 #include <podio/utilities/TypeHelpers.h>
 
 #include "edm4hep/edm4hep.h"

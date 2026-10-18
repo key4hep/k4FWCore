@@ -18,6 +18,7 @@
  */
 #include "GAUDI_VERSION.h"
 #include "Gaudi/Functional/utilities.h"
+#include "Gaudi/Property.h"
 #include "GaudiKernel/AnyDataWrapper.h"
 #include "GaudiKernel/FunctionalFilterDecision.h"
 #include "GaudiKernel/IDataProviderSvc.h"

@@ -21,6 +21,7 @@
 
 #include "GAUDI_VERSION.h"
 #include "Gaudi/Functional/details.h"
+#include "Gaudi/Property.h"
 #include "GaudiKernel/AnyDataWrapper.h"
 #include "GaudiKernel/DataObjID.h"
 #include "GaudiKernel/DataObjectHandle.h"
