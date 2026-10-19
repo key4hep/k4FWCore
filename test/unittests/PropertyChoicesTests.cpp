@@ -123,3 +123,74 @@ TEST_CASE("makePropertyChoices works for unscoped and nested enums") {
   REQUIRE(nested.list() == "'Alpha', 'Beta'");
   REQUIRE(nested.parse("Alpha") == outer::inner::Nested::Alpha);
 }
+
+TEST_CASE("PropertyChoices maps labels to a non-enum type") {
+  const k4FWCore::PropertyChoices<double> driftVelocities{{"Argon", 0.0023}, {"ArgonIsobutane", 0.0075}};
+  REQUIRE(driftVelocities.parse("Argon") == 0.0023);
+  REQUIRE(driftVelocities.parse("ArgonIsobutane") == 0.0075);
+  REQUIRE_FALSE(driftVelocities.parse("Neon").has_value());
+  REQUIRE(driftVelocities.list() == "'Argon', 'ArgonIsobutane'");
+}
+
+TEST_CASE("makePropertyChoices accepts only the given integers") {
+  const auto layers = k4FWCore::makePropertyChoices<4, 8, 15, 16, 23, 42>();
+  STATIC_REQUIRE(std::is_same_v<decltype(layers), const k4FWCore::PropertyChoices<int, int>>);
+
+  REQUIRE(layers.parse(15) == 15);
+  REQUIRE(layers.parse(42) == 42);
+  REQUIRE_FALSE(layers.parse(5).has_value());
+  REQUIRE(layers.list() == "4, 8, 15, 16, 23, 42");
+}
+
+TEST_CASE("makePropertyChoices works for a single value") {
+  const auto one = k4FWCore::makePropertyChoices<7>();
+  REQUIRE(one.parse(7) == 7);
+  REQUIRE_FALSE(one.parse(8).has_value());
+
+  const auto mode = k4FWCore::makePropertyChoices<Mode::Fast>();
+  REQUIRE(mode.parse("Fast") == Mode::Fast);
+  REQUIRE(mode.list() == "'Fast'");
+}
+
+TEST_CASE("makePropertyChoices accepts only the given strings") {
+  const auto formats = k4FWCore::makePropertyChoices<"root", "rntuple">();
+  STATIC_REQUIRE(std::is_same_v<decltype(formats), const k4FWCore::PropertyChoices<std::string, std::string>>);
+
+  REQUIRE(formats.parse("root") == "root");
+  REQUIRE(formats.parse(std::string_view{"rntuple"}) == "rntuple");
+  REQUIRE_FALSE(formats.parse("hdf5").has_value());
+  REQUIRE_FALSE(formats.parse("").has_value());
+  REQUIRE(formats.list() == "'root', 'rntuple'");
+}
+
+TEST_CASE("PropertyChoices parses an integer Gaudi property") {
+  const auto layers = k4FWCore::makePropertyChoices<4, 8, 15>();
+  FakeComponent comp;
+  int value = 0;
+
+  Gaudi::Property<int> valid{"NumLayers", 8};
+  REQUIRE(layers.parse(valid, value, &comp).isSuccess());
+  REQUIRE(value == 8);
+
+  Gaudi::Property<int> invalid{"NumLayers", 9};
+  REQUIRE(layers.parse(invalid, value, &comp).isFailure());
+  REQUIRE(value == 8);
+  const auto message = comp.log.str();
+  REQUIRE(message.find("NumLayers") != std::string::npos);
+  REQUIRE(message.find("9") != std::string::npos);
+  REQUIRE(message.find("4, 8, 15") != std::string::npos);
+}
+
+TEST_CASE("PropertyChoices parses a string Gaudi property for allowed strings") {
+  const auto formats = k4FWCore::makePropertyChoices<"root", "rntuple">();
+  FakeComponent comp;
+  std::string value;
+
+  Gaudi::Property<std::string> property{"Format", "hdf5"};
+  REQUIRE(formats.parse(property, value, &comp).isFailure());
+  REQUIRE(comp.log.str().find("'hdf5'") != std::string::npos);
+
+  property = "rntuple";
+  REQUIRE(formats.parse(property, value, &comp).isSuccess());
+  REQUIRE(value == "rntuple");
+}
