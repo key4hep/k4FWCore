@@ -179,11 +179,8 @@ namespace k4FWCore {
 ///    Floating point *keys* are not supported at the moment, i.e. a `Gaudi::Property<double>` for
 ///    which the user types the number itself and that may only take a few allowed numbers. Keys
 ///    are looked up by exact comparison with `==`, which is not reliable for floating point
-///    numbers: a number that went through arithmetic, or one that was rounded differently on
-///    its way in (e.g. 0.1 + 0.2 and 0.3), differs in the last bits from the allowed one and is
-///    rejected, with an error message that lists a value looking identical to what was given.
-///    The class therefore refuses to compile for such keys (and makePropertyChoices for
-///    floating point arguments), instead of giving results that are right only most of the time.
+///    numbers. The class therefore refuses to compile for such keys (and makePropertyChoices for
+///    floating point arguments).
 ///    A possible solution is to compare with a tolerance, `|a - b| < eps`. It has issues of its
 ///    own, which is why it is not done here yet: a suitable `eps` depends on the context (an
 ///    absolute tolerance is wrong for numbers spanning many orders of magnitude, a relative one
@@ -191,6 +188,9 @@ namespace k4FWCore {
 ///    makes the allowed values fuzzy, which can be surprising. If the allowed numbers are a
 ///    small fixed set, selecting them by label, as in (4), avoids the issue.
 ///  - The order of the entries is the order in which they are listed by list().
+///  - The order of the template arguments is <ValueType, KeyType>, which is somewhat counter-intuitive.
+///    This is because the key type has a default of std::string, so that it can be omitted in the common case
+///    of a string key. The value type is always required.
 ///
 /// @tparam T   The type the keys are translated to. Any copyable type works, e.g. an
 ///             enum class, a number or a string
