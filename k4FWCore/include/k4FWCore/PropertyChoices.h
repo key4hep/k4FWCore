@@ -74,35 +74,41 @@ namespace k4FWCore {
 ///
 /// @par Choosing how to create the table
 ///
-/// How PropertyChoices works is that ultimately the underlying Gaudi::Property becomes the 'key' to the PropertyChoices table, and the 'value' is what the code works with afterwards. Therefore, in the Gaudi steering file, the user input is the table key, and the type of the Gaudi::Property must match the 'key' type in the PropertyChoices.
-/// For the algorithm developer, there are two ways to create the key-value pairs from the user input.
+/// How PropertyChoices works is that ultimately the underlying Gaudi::Property becomes the 'key' to the PropertyChoices
+/// table, and the 'value' is what the code works with afterwards. Therefore, in the Gaudi steering file, the user input
+/// is the table key, and the type of the Gaudi::Property must match the 'key' type in the PropertyChoices. For the
+/// algorithm developer, there are two ways to create the key-value pairs from the user input.
 ///
 /// **1. Use the makePropertyChoices helper function**
-/// This is a helper function, which automatically creates the key-value pairs from the values given as template arguments.
-/// The key is then derived from the value, and its type is determined by the type of the value. Say, you pass a list of integers as allowed values, then the key type will be the same integer.
-/// Or when using with an enum, the key type will be a string and the key itself will be the name of the enumerator without the enum class name.
-/// So it is basically a helper function to save some hassle of having to write the key-value pairs explicitly, which can be tedious for large lists of allowed values.
-/// Examples:
+/// This is a helper function, which automatically creates the key-value pairs from the values given as template
+/// arguments. The key is then derived from the value, and its type is determined by the type of the value. Say, you
+/// pass a list of integers as allowed values, then the key type will be the same integer. Or when using with an enum,
+/// the key type will be a string and the key itself will be the name of the enumerator without the enum class name. So
+/// it is basically a helper function to save some hassle of having to write the key-value pairs explicitly, which can
+/// be tedious for large lists of allowed values. Examples:
 /// - **An enum, by the name of its enumerators.** The property is a `std::string`, the user writes `"Fast"` and
 ///   the developer can get the corresponding enumerator `Mode::Fast`:
 ///   `makePropertyChoices<Mode::Fast, Mode::Precise>()`
-/// - **One of a few integers.** The property is an `int`, the user writes `15` and the developer can get the corresponding integer `15`:
+/// - **One of a few integers.** The property is an `int`, the user writes `15` and the developer can get the
+///   corresponding integer `15`:
 ///   `makePropertyChoices<4, 8, 15>()`
-/// - **One of a few strings.** The property is a `std::string`, the user writes `"DCH_info"` and the developer can get the corresponding string `"DCH_info"`:
+/// - **One of a few strings.** The property is a `std::string`, the user writes `"DCH_info"` and the developer can
+///   get the corresponding string `"DCH_info"`:
 ///   `makePropertyChoices<"DCH_info", "STT_info">()`
 ///
 /// **2. Write out the `{key, value}` pairs explicitly**
 ///
 /// This is the most direct way to create the PropertyChoices.
-/// It should be used if the developer wants full control over the keys and value pairs, deciding what type each should be.
-/// At the moment, it is also the only way to use floating point numbers as values.
-/// The explicit table works for any copyable value type.
-/// If the developer does not pass the second template argument, the key type defaults to `std::string`.
-/// Note that at the moment the template parameter order is <ValueType, KeyType>, which may be counter-intuitive.
-/// Examples:
-/// - **An enum, by custom labels.** The user writes `2` and the developer can get the corresponding enumerator `Mode::Precise`:
+/// It should be used if the developer wants full control over the keys and value pairs, deciding what type each should
+/// be. At the moment, it is also the only way to use floating point numbers as values. Floating point numbers as keys
+/// are not supported (see the notes at the end of this documentation). The explicit table works for any copyable value
+/// type. If the developer does not pass the second template argument, the key type defaults to `std::string`. Note that
+/// at the moment the template parameter order is <ValueType, KeyType>, which may be counter-intuitive. Examples:
+/// - **An enum, by custom labels.** The user writes `2` and the developer can get the corresponding enumerator
+///   `Mode::Precise`:
 ///   `PropertyChoices<Mode, int>{{1, Mode::Fast}, {2, Mode::Precise}}`
-/// - **A label for a value of any type.** The user writes `"Argon"` and the developer can get the corresponding value e.g. the `double` `0.0023`:
+/// - **A label for a value of any type.** The user writes `"Argon"` and the developer can get the corresponding
+///   value e.g. the `double` `0.0023`:
 ///   `PropertyChoices<double>{{"Argon", 0.0023}, {"ArgonIsobutane", 0.0075}}`
 ///
 /// @par Complete example
