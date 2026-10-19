@@ -28,10 +28,10 @@ from k4FWCore import ApplicationMgr
 
 alg = ExampleFunctionalPropertyChoices(
     "ExampleFunctionalPropertyChoices",
-    Mode="Precise",
-    NumLayers=15,
-    Detector="STT_info",
-    Gas="ArgonIsobutane",
+    Gandalf="TheWhite",
+    NumBreakfasts=0,
+    FellowshipLeader="Frodo",
+    SurvivalRate="WithResurrection",
 )
 
 ApplicationMgr(
