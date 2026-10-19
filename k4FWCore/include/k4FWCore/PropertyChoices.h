@@ -41,7 +41,7 @@ namespace k4FWCore {
 
 /// @brief Restrict a Gaudi property to a fixed set of allowed values.
 ///
-/// Minimal stand-in for the `choices` argument of Python's
+/// Minimal stand-in class for the `choices` argument of Python's
 /// argparse.add_argument(). A PropertyChoices is a table that maps every value
 /// the user may give to a property (the "key") to the value the code works with
 /// (the "value"). It is the one source of truth for
@@ -49,9 +49,19 @@ namespace k4FWCore {
 ///  - the list of allowed values quoted in the property documentation, and
 ///  - the list of allowed values quoted in the error message.
 ///
+/// It can be used in the initialize() method of a Gaudi Functional to ensure
+/// that a given property is filled with one of the allowed values.
+///
+/// Both the key and value type are template parameters for PropertyChoices, so technically any copyable type
+/// can be used. Floating point *values* are fine, but floating point *keys* are not supported at the moment,
+/// because they cannot be compared reliably with `==`. There could be a solution with a tolerance, but this
+/// would come with some overhead, so it is not implemented yet.
+///
 /// Usage always has the same three steps, independent of the types involved:
 /// @code
-/// // 1. Create the table once (static, so that it can be used in the property documentation)
+/// // 1. First, create the table of allowed values once (static, so that it can be used
+/// //    in the property documentation). There are two ways of creating the table, explained below.
+/// //    Here the example uses the helper function makePropertyChoices.
 /// static inline const auto s_choices = k4FWCore::makePropertyChoices<...>();
 ///
 /// // 2. Declare the property and document the allowed values with list()
@@ -64,28 +74,36 @@ namespace k4FWCore {
 ///
 /// @par Choosing how to create the table
 ///
-/// What the user types is the "key", and its type is the type of the Gaudi
-/// property. What the code uses afterwards is the "value".
+/// How PropertyChoices works is that ultimately the underlying Gaudi::Property becomes the 'key' to the PropertyChoices table, and the 'value' is what the code works with afterwards. Therefore, in the Gaudi steering file, the user input is the table key, and the type of the Gaudi::Property must match the 'key' type in the PropertyChoices.
+/// For the algorithm developer, there are two ways to create the key-value pairs from the user input.
 ///
+/// **1. Use the makePropertyChoices helper function**
+/// This is a helper function, which automatically creates the key-value pairs from the values given as template arguments.
+/// The key is then derived from the value, and its type is determined by the type of the value. Say, you pass a list of integers as allowed values, then the key type will be the same integer.
+/// Or when using with an enum, the key type will be a string and the key itself will be the name of the enumerator without the enum class name.
+/// So it is basically a helper function to save some hassle of having to write the key-value pairs explicitly, which can be tedious for large lists of allowed values.
+/// Examples:
 /// - **An enum, by the name of its enumerators.** The property is a `std::string`, the user writes `"Fast"` and
-///   the code gets `Mode::Fast`:
+///   the developer can get the corresponding enumerator `Mode::Fast`:
 ///   `makePropertyChoices<Mode::Fast, Mode::Precise>()`
-/// - **An enum, by custom labels.** The same, but the user writes e.g. `"fast"`:
-///   `PropertyChoices<Mode>{{"fast", Mode::Fast}, {"precise", Mode::Precise}}`
-/// - **One of a few integers.** The property is an `int`, the user writes `15` and the code gets `15`:
+/// - **One of a few integers.** The property is an `int`, the user writes `15` and the developer can get the corresponding integer `15`:
 ///   `makePropertyChoices<4, 8, 15>()`
-/// - **One of a few strings.** The property is a `std::string`, the user writes `"DCH_info"` and the code gets
-///   `"DCH_info"`: `makePropertyChoices<"DCH_info", "STT_info">()`
-/// - **A label for a value of any type.** The property is a `std::string`, the user writes `"Argon"` and the code
-///   gets e.g. the `double` `0.0023`:
-///   `PropertyChoices<double>{{"Argon", 0.0023}, {"ArgonIsobutane", 0.0075}}`
+/// - **One of a few strings.** The property is a `std::string`, the user writes `"DCH_info"` and the developer can get the corresponding string `"DCH_info"`:
+///   `makePropertyChoices<"DCH_info", "STT_info">()`
 ///
-/// The rule behind makePropertyChoices is: the key is the value as it would be
-/// written in the code. For an enum that is its enumerator name, for an integer
-/// the number, and for a string the string itself. Keys and values that cannot
-/// be derived like this (custom labels, values that are not enums, integers or
-/// strings) are given explicitly in a table. The explicit table works for any
-/// copyable value type.
+/// **2. Write out the `{key, value}` pairs explicitly**
+///
+/// This is the most direct way to create the PropertyChoices.
+/// It should be used if the developer wants full control over the keys and value pairs, deciding what type each should be.
+/// At the moment, it is also the only way to use floating point numbers as values.
+/// The explicit table works for any copyable value type.
+/// If the developer does not pass the second template argument, the key type defaults to `std::string`.
+/// Note that at the moment the template parameter order is <ValueType, KeyType>, which may be counter-intuitive.
+/// Examples:
+/// - **An enum, by custom labels.** The user writes `2` and the developer can get the corresponding enumerator `Mode::Precise`:
+///   `PropertyChoices<Mode, int>{{1, Mode::Fast}, {2, Mode::Precise}}`
+/// - **A label for a value of any type.** The user writes `"Argon"` and the developer can get the corresponding value e.g. the `double` `0.0023`:
+///   `PropertyChoices<double>{{"Argon", 0.0023}, {"ArgonIsobutane", 0.0075}}`
 ///
 /// @par Complete example
 ///

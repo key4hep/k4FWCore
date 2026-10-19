@@ -194,3 +194,20 @@ TEST_CASE("PropertyChoices parses a string Gaudi property for allowed strings") 
   REQUIRE(formats.parse(property, value, &comp).isSuccess());
   REQUIRE(value == "rntuple");
 }
+
+TEST_CASE("PropertyChoices with an integer key and an enum value") {
+  const k4FWCore::PropertyChoices<Mode, int> levels{{1, Mode::Fast}, {2, Mode::Precise}};
+  REQUIRE(levels.parse(2) == Mode::Precise);
+  REQUIRE_FALSE(levels.parse(3).has_value());
+  REQUIRE(levels.list() == "1, 2");
+
+  FakeComponent comp;
+  Mode mode = Mode::Fast;
+  Gaudi::Property<int> property{"Level", 2};
+  REQUIRE(levels.parse(property, mode, &comp).isSuccess());
+  REQUIRE(mode == Mode::Precise);
+
+  property = 3;
+  REQUIRE(levels.parse(property, mode, &comp).isFailure());
+  REQUIRE(comp.log.str().find("Invalid Level 3, expected one of 1, 2.") != std::string::npos);
+}
