@@ -26,6 +26,8 @@
 #include <fmt/ranges.h>
 
 #include <algorithm>
+#include <concepts>
+#include <cstddef>
 #include <initializer_list>
 #include <optional>
 #include <source_location>
@@ -37,78 +39,205 @@
 
 namespace k4FWCore {
 
-/// @brief Minimal stand-in for the `choices` argument of Python's
-/// argparse.add_argument(), for string-valued Gaudi properties that may only
-/// take one of a fixed set of values.
+/// @brief Restrict a Gaudi property to a fixed set of allowed values.
 ///
-/// It replaces a hand-written if/else chain by a single table that is also the
-/// one source of truth for the list of valid values quoted in the property
-/// documentation and in error messages.
+/// Minimal stand-in for the `choices` argument of Python's
+/// argparse.add_argument(). A PropertyChoices is a table that maps every value
+/// the user may give to a property (the "key") to the value the code works with
+/// (the "value"). It is the one source of truth for
+///  - validating the property,
+///  - the list of allowed values quoted in the property documentation, and
+///  - the list of allowed values quoted in the error message.
 ///
+/// Usage always has the same three steps, independent of the types involved:
 /// @code
-/// enum class Mode { Fast, Precise };
-/// static inline const k4FWCore::PropertyChoices<Mode> s_modes{{"Fast", Mode::Fast}, {"Precise", Mode::Precise}};
+/// // 1. Create the table once (static, so that it can be used in the property documentation)
+/// static inline const auto s_choices = k4FWCore::makePropertyChoices<...>();
 ///
-/// Gaudi::Property<std::string> m_mode{this, "Mode", "Fast", "One of " + s_modes.list()};
-/// Mode m_modeValue;
+/// // 2. Declare the property and document the allowed values with list()
+/// Gaudi::Property<...> m_property{this, "Name", default, "One of " + s_choices.list()};
 ///
-/// StatusCode initialize() override {
-///   K4_GAUDI_CHECK(s_modes.parse(m_mode, m_modeValue, this));
-///   ...
-/// }
+/// // 3. In initialize(), validate the property and get the value for it. On an invalid value
+/// //    an error naming the property and the allowed values is logged and the job fails
+/// K4_GAUDI_CHECK(s_choices.parse(m_property, m_value, this));
 /// @endcode
 ///
-/// @tparam T The type the strings are translated to. Any copyable type works,
-///           e.g. an enum class, as in the example above
-template <typename T>
+/// @par Choosing how to create the table
+///
+/// What the user types is the "key", and its type is the type of the Gaudi
+/// property. What the code uses afterwards is the "value".
+///
+/// - **An enum, by the name of its enumerators.** The property is a `std::string`, the user writes `"Fast"` and
+///   the code gets `Mode::Fast`:
+///   `makePropertyChoices<Mode::Fast, Mode::Precise>()`
+/// - **An enum, by custom labels.** The same, but the user writes e.g. `"fast"`:
+///   `PropertyChoices<Mode>{{"fast", Mode::Fast}, {"precise", Mode::Precise}}`
+/// - **One of a few integers.** The property is an `int`, the user writes `15` and the code gets `15`:
+///   `makePropertyChoices<4, 8, 15>()`
+/// - **One of a few strings.** The property is a `std::string`, the user writes `"DCH_info"` and the code gets
+///   `"DCH_info"`: `makePropertyChoices<"DCH_info", "STT_info">()`
+/// - **A label for a value of any type.** The property is a `std::string`, the user writes `"Argon"` and the code
+///   gets e.g. the `double` `0.0023`:
+///   `PropertyChoices<double>{{"Argon", 0.0023}, {"ArgonIsobutane", 0.0075}}`
+///
+/// The rule behind makePropertyChoices is: the key is the value as it would be
+/// written in the code. For an enum that is its enumerator name, for an integer
+/// the number, and for a string the string itself. Keys and values that cannot
+/// be derived like this (custom labels, values that are not enums, integers or
+/// strings) are given explicitly in a table. The explicit table works for any
+/// copyable value type.
+///
+/// @par Complete example
+///
+/// A made up Gaudi functional using all of the above. The same code is compiled
+/// and run as a test in test/k4FWCoreTest/src/components/ExampleFunctionalPropertyChoices.cpp.
+/// @code
+/// enum class Mode { Fast, Precise };
+///
+/// struct LayerSimulator final : k4FWCore::Producer<edm4hep::MCParticleCollection()> {
+///   LayerSimulator(const std::string& name, ISvcLocator* svcLoc)
+///       : Producer(name, svcLoc, {}, KeyValue("OutputCollection", "MCParticles")) {}
+///
+///   // (1) An enum selected by the name of the enumerators: the allowed strings are
+///   //     "Fast" and "Precise", the table is built from the enumerator names
+///   static inline const auto s_modes = k4FWCore::makePropertyChoices<Mode::Fast, Mode::Precise>();
+///
+///   // (2) A few allowed integers: the user writes the number, no label is involved
+///   static inline const auto s_numLayers = k4FWCore::makePropertyChoices<4, 8, 15, 16, 23, 42>();
+///
+///   // (3) A few allowed strings, where the string itself is what the code uses,
+///   //     e.g. to look up a detector or to name a collection
+///   static inline const auto s_detectors = k4FWCore::makePropertyChoices<"DCH_info", "STT_info">();
+///
+///   // (4) Labels for values of a type that cannot be derived from a name. The user selects
+///   //     the gas by name and the code gets the drift velocity (in mm/ns)
+///   static inline const k4FWCore::PropertyChoices<double> s_driftVelocities{{"Argon", 0.0023},
+///                                                                           {"ArgonIsobutane", 0.0075}};
+///
+///   // The properties. All of them document their allowed values with list()
+///   Gaudi::Property<std::string> m_mode{this, "Mode", "Fast", "One of " + s_modes.list()};
+///   Gaudi::Property<int> m_numLayers{this, "NumLayers", 8, "One of " + s_numLayers.list()};
+///   Gaudi::Property<std::string> m_detector{this, "Detector", "DCH_info", "One of " + s_detectors.list()};
+///   Gaudi::Property<std::string> m_gas{this, "Gas", "Argon", "One of " + s_driftVelocities.list()};
+///
+///   // What the code works with after validation, filled in initialize()
+///   Mode m_modeValue{};
+///   int m_numLayersValue{};
+///   std::string m_detectorValue;
+///   double m_driftVelocity{};
+///
+///   StatusCode initialize() override {
+///     K4_GAUDI_CHECK(Producer::initialize());
+///     K4_GAUDI_CHECK(s_modes.parse(m_mode, m_modeValue, this));
+///     K4_GAUDI_CHECK(s_numLayers.parse(m_numLayers, m_numLayersValue, this));
+///     K4_GAUDI_CHECK(s_detectors.parse(m_detector, m_detectorValue, this));
+///     K4_GAUDI_CHECK(s_driftVelocities.parse(m_gas, m_driftVelocity, this));
+///     return StatusCode::SUCCESS;
+///   }
+///
+///   edm4hep::MCParticleCollection operator()() const override {
+///     // ... use m_modeValue, m_numLayersValue, m_detectorValue and m_driftVelocity
+///   }
+/// };
+/// @endcode
+///
+/// In the job options the allowed values are given as the user would expect:
+/// @code{.py}
+/// LayerSimulator("LayerSimulator", Mode="Precise", NumLayers=15, Detector="STT_info", Gas="ArgonIsobutane")
+/// @endcode
+/// and an invalid one, e.g. `NumLayers=9`, makes initialize() fail with
+/// `Invalid NumLayers 9, expected one of 4, 8, 15, 16, 23, 42.`
+///
+/// @par Further notes
+///  - parse(key) returns std::optional, if the validation is to be done without a Gaudi
+///    property.
+///  - Floating point *values* are fine, e.g. labels that map to a `double` (see (4) above).
+///    Floating point *keys* are not supported at the moment, i.e. a `Gaudi::Property<double>` for
+///    which the user types the number itself and that may only take a few allowed numbers. Keys
+///    are looked up by exact comparison with `==`, which is not reliable for floating point
+///    numbers: a number that went through arithmetic, or one that was rounded differently on
+///    its way in (e.g. 0.1 + 0.2 and 0.3), differs in the last bits from the allowed one and is
+///    rejected, with an error message that lists a value looking identical to what was given.
+///    The class therefore refuses to compile for such keys (and makePropertyChoices for
+///    floating point arguments), instead of giving results that are right only most of the time.
+///    A possible solution is to compare with a tolerance, `|a - b| < eps`. It has issues of its
+///    own, which is why it is not done here yet: a suitable `eps` depends on the context (an
+///    absolute tolerance is wrong for numbers spanning many orders of magnitude, a relative one
+///    for numbers close to zero), so it would have to be passed by the user. A tolerance also
+///    makes the allowed values fuzzy, which can be surprising. If the allowed numbers are a
+///    small fixed set, selecting them by label, as in (4), avoids the issue.
+///  - The order of the entries is the order in which they are listed by list().
+///
+/// @tparam T   The type the keys are translated to. Any copyable type works, e.g. an
+///             enum class, a number or a string
+/// @tparam Key The type of the property and with it of the allowed values the user can
+///             choose from. Defaults to std::string, which is what is needed whenever the
+///             user selects by a name
+template <typename T, typename Key = std::string>
 class PropertyChoices {
-public:
-  using Choice = std::pair<std::string_view, T>;
+  static_assert(!std::is_floating_point_v<Key>, "Floating point keys cannot be compared reliably");
 
+public:
+  using Choice = std::pair<Key, T>;
+
+  /// Create a table from `{key, value}` entries, e.g.
+  /// `PropertyChoices<Mode>{{"Fast", Mode::Fast}, {"Precise", Mode::Precise}}`
   PropertyChoices(std::initializer_list<Choice> choices) : m_choices(choices) {}
 
-  /// Translate one of the allowed strings into its value, or return
-  /// std::nullopt if the string is not one of the choices
-  std::optional<T> parse(std::string_view value) const {
-    const auto it = std::ranges::find(m_choices, value, &Choice::first);
+  /// Translate one of the allowed keys into its value, or return
+  /// std::nullopt if the key is not one of the choices
+  template <typename K>
+    requires requires(const Key& key, const K& other) {
+      { key == other } -> std::convertible_to<bool>;
+    }
+  std::optional<T> parse(const K& value) const {
+    const auto it = std::ranges::find_if(m_choices, [&value](const Choice& choice) { return choice.first == value; });
     if (it == m_choices.end()) {
       return std::nullopt;
     }
     return it->second;
   }
 
-  /// Translate the value of a string property into @p result. If the value is
-  /// not one of the choices an error listing the valid ones is logged and
+  /// Translate the value of a property into @p result. If the value is not one
+  /// of the choices an error listing the valid ones is logged and
   /// StatusCode::FAILURE is returned, leaving @p result untouched.
   ///
-  /// @param property The property holding the string to translate
+  /// @param property The property holding the key to translate
   /// @param result   Where to store the translated value
   /// @param comp     The Gaudi component (algorithm, tool) that owns the
   ///                 property, typically "this"
   template <typename GaudiComp>
-  StatusCode parse(const Gaudi::Property<std::string>& property, T& result, const GaudiComp* comp) const {
+  StatusCode parse(const Gaudi::Property<Key>& property, T& result, const GaudiComp* comp) const {
     const auto parsed = parse(property.value());
     if (!parsed) {
-      comp->error() << "Invalid " << property.name() << " '" << property.value() << "', expected one of " << list()
-                    << "." << endmsg;
+      comp->error() << "Invalid " << property.name() << " " << format(property.value()) << ", expected one of "
+                    << list() << "." << endmsg;
       return StatusCode::FAILURE;
     }
     result = *parsed;
     return StatusCode::SUCCESS;
   }
 
-  /// The allowed values rendered as `'A', 'B', 'C'`, for property
-  /// documentation and error messages
+  /// The allowed keys rendered as `'A', 'B', 'C'` (strings are quoted) or
+  /// `1, 2, 3`, for property documentation and error messages
   std::string list() const {
-    std::vector<std::string> quoted;
-    quoted.reserve(m_choices.size());
+    std::vector<std::string> formatted;
+    formatted.reserve(m_choices.size());
     for (const auto& choice : m_choices) {
-      quoted.push_back(fmt::format("'{}'", choice.first));
+      formatted.push_back(format(choice.first));
     }
-    return fmt::format("{}", fmt::join(quoted, ", "));
+    return fmt::format("{}", fmt::join(formatted, ", "));
   }
 
 private:
+  static std::string format(const Key& key) {
+    if constexpr (std::is_convertible_v<const Key&, std::string_view>) {
+      return fmt::format("'{}'", key);
+    } else {
+      return fmt::format("{}", key);
+    }
+  }
+
   std::vector<Choice> m_choices;
 };
 
@@ -137,32 +266,72 @@ namespace detail {
     }
     return name;
   }
+
+  /// A string literal that can be used as a template argument. A std::string or a plain
+  /// string literal cannot be, but a class holding the characters in an array can.
+  template <std::size_t N>
+  struct FixedString {
+    char data[N]{};
+    constexpr FixedString(const char (&str)[N]) { std::copy_n(str, N, data); }
+    constexpr std::string_view view() const { return {data, N - 1}; }
+  };
 } // namespace detail
 
-/// @brief Create a PropertyChoices for a set of enum values, using the
-/// (unqualified) names of the enumerators as the allowed strings.
+/// @brief Create a PropertyChoices for a set of enum values or integers. The
+/// keys are the values as they would be written in the code, which saves
+/// writing every allowed value twice.
 ///
-/// This avoids repeating every enumerator once as a string and once as a value
-/// when the property values should simply match the enumerator names.
+/// - For **enum values** the keys are the (unqualified) names of the enumerators, and the value
+///   is the enumerator. The Gaudi property is a `std::string`.
+///   @code
+///   enum class Mode { Fast, Precise };
+///   static inline const auto s_modes = k4FWCore::makePropertyChoices<Mode::Fast, Mode::Precise>();
+///   // equivalent to
+///   // k4FWCore::PropertyChoices<Mode> s_modes{{"Fast", Mode::Fast}, {"Precise", Mode::Precise}};
+///   @endcode
+///   Note that this only works for values that correspond to a named enumerator, and that the
+///   strings the user has to type are always the enumerator names. For different labels create
+///   the PropertyChoices explicitly.
 ///
-/// @code
-/// enum class Mode { Fast, Precise };
-/// static inline const auto s_modes = k4FWCore::makePropertyChoices<Mode::Fast, Mode::Precise>();
-/// // equivalent to
-/// // k4FWCore::PropertyChoices<Mode> s_modes{{"Fast", Mode::Fast}, {"Precise", Mode::Precise}};
-/// @endcode
+/// - For **integers** the keys are the integers themselves and so are the values. The Gaudi
+///   property is of the same integer type.
+///   @code
+///   static inline const auto s_numLayers = k4FWCore::makePropertyChoices<4, 8, 15, 16, 23, 42>();
+///   Gaudi::Property<int> m_numLayers{this, "NumLayers", 8, "One of " + s_numLayers.list()};
+///   @endcode
 ///
 /// The order of the template arguments determines the order in which the
 /// choices are listed by PropertyChoices::list().
 ///
-/// @note This only works for values that correspond to a named enumerator
-///
-/// @tparam Vs The enum values that are allowed. They all need to share a common
-///            type, which becomes the value type of the returned PropertyChoices
+/// @tparam Vs The enum values or integers that are allowed. They all need to be of the same
+///            kind, and for enums of the same type, which becomes the value type of the
+///            returned PropertyChoices
 template <auto... Vs>
+  requires((std::is_enum_v<decltype(Vs)> || std::is_integral_v<decltype(Vs)>) && ...)
 auto makePropertyChoices() {
   using T = std::common_type_t<decltype(Vs)...>;
-  return PropertyChoices<T>{{detail::enum_value_name<Vs>(), Vs}...};
+  if constexpr (std::is_enum_v<T>) {
+    return PropertyChoices<T>{{std::string{detail::enum_value_name<Vs>()}, Vs}...};
+  } else {
+    return PropertyChoices<T, T>{{Vs, Vs}...};
+  }
+}
+
+/// @brief Create a PropertyChoices for a set of allowed strings, where the string
+/// itself is what the code uses afterwards (and not a label for something else).
+///
+/// @code
+/// static inline const auto s_detectors = k4FWCore::makePropertyChoices<"DCH_info", "STT_info">();
+/// Gaudi::Property<std::string> m_detector{this, "Detector", "DCH_info", "One of " + s_detectors.list()};
+/// @endcode
+///
+/// Keys and values are both `std::string`. If the strings are labels for something else
+/// create the PropertyChoices explicitly.
+///
+/// @tparam Ss The allowed strings
+template <detail::FixedString... Ss>
+auto makePropertyChoices() {
+  return PropertyChoices<std::string, std::string>{{std::string{Ss.view()}, std::string{Ss.view()}}...};
 }
 
 } // namespace k4FWCore

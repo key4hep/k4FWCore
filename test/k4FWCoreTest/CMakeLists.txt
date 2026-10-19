@@ -37,6 +37,7 @@ set(k4fwcoretest_plugin_sources
   src/components/ExampleFunctionalProducerMultiple.cpp
   src/components/ExampleFunctionalProducerRuntimeCollections.cpp
   src/components/ExampleFunctionalProducerWithTFile.cpp
+  src/components/ExampleFunctionalPropertyChoices.cpp
   src/components/ExampleFunctionalTransformer.cpp
   src/components/ExampleFunctionalTransformerHist.cpp
   src/components/ExampleFunctionalTransformerMultiple.cpp
@@ -216,6 +217,8 @@ add_test_fwcore(FunctionalTransformerHist options/ExampleFunctionalTransformerHi
 add_test_fwcore(FunctionalCollectionMerger options/ExampleFunctionalCollectionMerger.py PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
 add_test_fwcore(FunctionalCollectionMergerEmpty options/ExampleFunctionalCollectionMergerEmpty.py
                   PROPERTIES PASS_REGULAR_EXPRESSION "InputCollections must contain at least one collection")
+add_test_fwcore(FunctionalPropertyChoices options/ExampleFunctionalPropertyChoices.py
+                  PROPERTIES PASS_REGULAR_EXPRESSION "Mode = Precise, NumLayers = 15, Detector = STT_info, drift velocity = 0.0075 mm/ns for Gas = ArgonIsobutane")
 add_test_fwcore(FunctionalFilterFile options/ExampleFunctionalFilterFile.py ADD_TO_CHECK_FILES)
 add_test_fwcore(FunctionalMetadata options/ExampleFunctionalMetadata.py --MetadataSvc.SkipIfSameValue True ADD_TO_CHECK_FILES PROPERTIES FIXTURES_SETUP FunctionalMetadataFile)
 add_test_fwcore(FunctionalMetadataThrow options/ExampleFunctionalMetadata.py --Producer2.ParticleTime 2.5
