@@ -111,85 +111,19 @@ namespace k4FWCore {
 ///   value e.g. the `double` `0.0023`:
 ///   `PropertyChoices<double>{{"Argon", 0.0023}, {"ArgonIsobutane", 0.0075}}`
 ///
-/// @par Complete example
+/// @par Example
 ///
-/// A made up Gaudi functional using all of the above. The same code is compiled
-/// and run as a test in test/k4FWCoreTest/src/components/ExampleFunctionalPropertyChoices.cpp.
-/// @code
-/// enum class Gandalf { TheGrey, TheWhite };
-/// }
-///
-/// struct ExampleFunctionalPropertyChoices final : k4FWCore::Consumer<void()> {
-///   ExampleFunctionalPropertyChoices(const std::string& name, ISvcLocator* svcLoc) : Consumer(name, svcLoc) {}
-///
-///   // (1) An enum selected by the name of the enumerators: the allowed strings are
-///   //     "TheGrey" and "TheWhite", the table is built from the enumerator names
-///   static inline const auto s_gandalfs = k4FWCore::makePropertyChoices<Gandalf::TheGrey, Gandalf::TheWhite>();
-///
-///   // (2) A few allowed integers: the user writes the number, no label is involved.
-///   //     Anything but breakfast or no breakfast is forbidden
-///   static inline const auto s_numBreakfasts = k4FWCore::makePropertyChoices<0, 1>();
-///
-///   // (3) A few allowed strings, where the string itself is what the code uses,
-///   //     e.g. to look up a detector or to name a collection
-///   static inline const auto s_members = k4FWCore::makePropertyChoices<"Frodo", "Sam", "Merry", "Pippin", "Gandalf",
-///                                                                      "Aragorn", "Legolas", "Gimli", "Boromir">();
-///
-///   // (4) Labels for values of a type that cannot be derived from a name. The user selects
-///   //     the survival rate by name and the code gets the fraction of the Fellowship that survives
-///   static inline const k4FWCore::PropertyChoices<double> s_survivalRates{{"NoResurrection", 7. / 9.},
-///                                                                         {"WithResurrection", 8. / 9.}};
-///
-///   // The properties. All of them document their allowed values with list()
-///   Gaudi::Property<std::string> m_gandalf{this, "Gandalf", "TheGrey", "One of " + s_gandalfs.list()};
-///   Gaudi::Property<int> m_numBreakfasts{this, "NumBreakfasts", 1, "One of " + s_numBreakfasts.list()};
-///   Gaudi::Property<std::string> m_fellowshipLeader{this, "FellowshipLeader", "Frodo", "One of " + s_members.list()};
-///   Gaudi::Property<std::string> m_survivalRate{this, "SurvivalRate", "WithResurrection",
-///                                               "One of " + s_survivalRates.list()};
-///
-///   // What the code works with after the validation, filled in initialize()
-///   Gandalf m_gandalfMode{};
-///   int m_numBreakfastsValue{};
-///   std::string m_fellowshipLeaderValue;
-///   double m_survivalRateValue{};
-///
-///   StatusCode initialize() override {
-///     K4_GAUDI_CHECK(Consumer::initialize());
-///     // Validate the property and translate it. On an invalid value an error naming the
-///     // property and the allowed values is logged and the job fails
-///     K4_GAUDI_CHECK(s_gandalfs.parse(m_gandalf, m_gandalfMode, this));
-///     K4_GAUDI_CHECK(s_numBreakfasts.parse(m_numBreakfasts, m_numBreakfastsValue, this));
-///     K4_GAUDI_CHECK(s_members.parse(m_fellowshipLeader, m_fellowshipLeaderValue, this));
-///     K4_GAUDI_CHECK(s_survivalRates.parse(m_survivalRate, m_survivalRateValue, this));
-///
-///     info() << "Gandalf = " << m_gandalf.value() << ", NumBreakfasts = " << m_numBreakfastsValue
-///            << ", FellowshipLeader = " << m_fellowshipLeaderValue << ", SurvivalRate = " << m_survivalRate.value()
-///            << ", value " << m_survivalRateValue << endmsg;
-///     return StatusCode::SUCCESS;
-///   }
-///
-///   void operator()() const override {
-///     // The enum is used to branch, the other values are used directly
-///     const auto* wizard = m_gandalfMode == Gandalf::TheWhite ? "the White" : "the Grey";
-///     info() << m_fellowshipLeaderValue << " leads the Fellowship with Gandalf " << wizard << " after "
-///            << m_numBreakfastsValue << " breakfast(s), and " << 9 * m_survivalRateValue
-///            << " of the 9 members are expected to survive" << endmsg;
-///   }
-/// };
-/// @endcode
-///
-/// In the job options the allowed values are given as the user would expect:
-/// @code{.py}
-/// ExampleFunctionalPropertyChoices("Fellowship", Gandalf="TheWhite", NumBreakfasts=0, FellowshipLeader="Frodo",
-///                                  SurvivalRate="WithResurrection")
-/// @endcode
-/// and an invalid one, e.g. `NumBreakfasts=2`, makes initialize() fail with
+/// A complete, compiled and tested example of a Gaudi functional that restricts an enum, an integer, a string
+/// and a label that maps to a `double` is given in
+/// test/k4FWCoreTest/src/components/ExampleFunctionalPropertyChoices.cpp, with the job options in
+/// test/k4FWCoreTest/options/ExampleFunctionalPropertyChoices.py. For an invalid value, initialize() fails with
+/// an error naming the property, the given value and the allowed ones, e.g.
 /// `Invalid NumBreakfasts 2, expected one of 0, 1.`
 ///
 /// @par Further notes
 ///  - parse(key) returns std::optional, if the validation is to be done without a Gaudi
 ///    property.
-///  - Floating point *values* are fine, e.g. labels that map to a `double` (see (4) above).
+///  - Floating point *values* are fine, e.g. labels that map to a `double` (see the explicit table examples above).
 ///    Floating point *keys* are not supported at the moment, i.e. a `Gaudi::Property<double>` for
 ///    which the user types the number itself and that may only take a few allowed numbers. Keys
 ///    are looked up by exact comparison with `==`, which is not reliable for floating point
@@ -200,7 +134,7 @@ namespace k4FWCore {
 ///    absolute tolerance is wrong for numbers spanning many orders of magnitude, a relative one
 ///    for numbers close to zero), so it would have to be passed by the user. A tolerance also
 ///    makes the allowed values fuzzy, which can be surprising. If the allowed numbers are a
-///    small fixed set, selecting them by label, as in (4), avoids the issue.
+///    small fixed set, selecting them by label, as in the `double` example above, avoids the issue.
 ///  - The order of the entries is the order in which they are listed by list().
 ///  - The order of the template arguments is <ValueType, KeyType>, which is somewhat counter-intuitive.
 ///    This is because the key type has a default of std::string, so that it can be omitted in the common case
