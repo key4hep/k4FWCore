@@ -152,8 +152,7 @@ class PropertyChoices {
 public:
   using Choice = std::pair<Key, T>;
 
-  /// Create a table from `{key, value}` entries, e.g.
-  /// `PropertyChoices<Mode>{{"Fast", Mode::Fast}, {"Precise", Mode::Precise}}`
+  /// Create a table from `{key, value}` entries
   PropertyChoices(std::initializer_list<Choice> choices) : m_choices(choices) {}
 
   /// Translate one of the allowed keys into its value, or return
