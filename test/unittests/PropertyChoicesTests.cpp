@@ -146,6 +146,7 @@ TEST_CASE("makePropertyChoices works for a single value") {
   const auto one = k4FWCore::makePropertyChoices<7>();
   REQUIRE(one.parse(7) == 7);
   REQUIRE_FALSE(one.parse(8).has_value());
+  REQUIRE(one.list() == "7");
 
   const auto mode = k4FWCore::makePropertyChoices<Mode::Fast>();
   REQUIRE(mode.parse("Fast") == Mode::Fast);
