@@ -30,6 +30,7 @@
 #include <cstddef>
 #include <initializer_list>
 #include <optional>
+#include <ranges>
 #include <source_location>
 #include <string>
 #include <string_view>
@@ -201,12 +202,15 @@ public:
   /// The allowed keys rendered as `'A', 'B', 'C'` (strings are quoted) or
   /// `1, 2, 3`, for property documentation and error messages
   std::string list() const {
-    std::vector<std::string> formatted;
-    formatted.reserve(m_choices.size());
-    for (const auto& choice : m_choices) {
-      formatted.push_back(format(choice.first));
+    if (m_choices.empty()) {
+      return {};
     }
-    return fmt::format("{}", fmt::join(formatted, ", "));
+    const auto keys = std::views::keys(m_choices);
+    if constexpr (std::is_convertible_v<const Key&, std::string_view>) {
+      return fmt::format("'{}'", fmt::join(keys, "', '"));
+    } else {
+      return fmt::format("{}", fmt::join(keys, ", "));
+    }
   }
 
 private:
