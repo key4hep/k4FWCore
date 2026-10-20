@@ -30,7 +30,7 @@
 namespace {
 enum class Mode { Fast, Precise };
 
-const k4FWCore::PropertyChoices<Mode> s_modes{{"Fast", Mode::Fast}, {"Precise", Mode::Precise}};
+const k4FWCore::PropertyChoices<std::string, Mode> s_modes{{"Fast", Mode::Fast}, {"Precise", Mode::Precise}};
 
 /// Stand-in for a Gaudi component, recording what is logged as an error
 struct FakeComponent {
@@ -99,7 +99,7 @@ TEST_CASE("enum_value_name extracts the unqualified enum value name") {
 
 TEST_CASE("makePropertyChoices uses the enumerator names") {
   const auto choices = k4FWCore::makePropertyChoices<Color::Red, Color::Green, Color::Blue>();
-  STATIC_REQUIRE(std::is_same_v<decltype(choices), const k4FWCore::PropertyChoices<Color>>);
+  STATIC_REQUIRE(std::is_same_v<decltype(choices), const k4FWCore::PropertyChoices<std::string, Color>>);
 
   REQUIRE(choices.parse("Red") == Color::Red);
   REQUIRE(choices.parse("Green") == Color::Green);
@@ -125,7 +125,7 @@ TEST_CASE("makePropertyChoices works for unscoped and nested enums") {
 }
 
 TEST_CASE("PropertyChoices maps labels to a non-enum type") {
-  const k4FWCore::PropertyChoices<double> driftVelocities{{"Argon", 0.0023}, {"ArgonIsobutane", 0.0075}};
+  const k4FWCore::PropertyChoices<std::string, double> driftVelocities{{"Argon", 0.0023}, {"ArgonIsobutane", 0.0075}};
   REQUIRE(driftVelocities.parse("Argon") == 0.0023);
   REQUIRE(driftVelocities.parse("ArgonIsobutane") == 0.0075);
   REQUIRE_FALSE(driftVelocities.parse("Neon").has_value());
@@ -196,7 +196,7 @@ TEST_CASE("PropertyChoices parses a string Gaudi property for allowed strings") 
 }
 
 TEST_CASE("PropertyChoices with an integer key and an enum value") {
-  const k4FWCore::PropertyChoices<Mode, int> levels{{1, Mode::Fast}, {2, Mode::Precise}};
+  const k4FWCore::PropertyChoices<int, Mode> levels{{1, Mode::Fast}, {2, Mode::Precise}};
   REQUIRE(levels.parse(2) == Mode::Precise);
   REQUIRE_FALSE(levels.parse(3).has_value());
   REQUIRE(levels.list() == "1, 2");
