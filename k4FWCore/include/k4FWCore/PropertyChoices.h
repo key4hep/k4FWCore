@@ -153,10 +153,17 @@ public:
   using Choice = std::pair<Key, T>;
 
   /// Create a table from `{key, value}` entries
+  ///
+  /// @param choices The allowed keys, each with the value it is translated to. The order is the order in which
+  ///                the keys are listed by list()
   PropertyChoices(std::initializer_list<Choice> choices) : m_choices(choices) {}
 
-  /// Translate one of the allowed keys into its value, or return
-  /// std::nullopt if the key is not one of the choices
+  /// Translate one of the allowed keys into its value
+  ///
+  /// @param value The key to look up. Anything that can be compared with a key can be used, e.g. a string
+  ///              literal or a std::string_view for string keys
+  /// @tparam K    The type of the key to look up
+  /// @return The value that belongs to the key, or std::nullopt if the key is not one of the choices
   template <typename K>
     requires requires(const Key& key, const K& other) {
       { key == other } -> std::convertible_to<bool>;
@@ -177,6 +184,8 @@ public:
   /// @param result   Where to store the translated value
   /// @param comp     The Gaudi component (algorithm, tool) that owns the
   ///                 property, typically "this"
+  /// @tparam GaudiComp The type of the component, deduced from @p comp. It has to provide error()
+  /// @return StatusCode::SUCCESS if the value of the property is one of the choices, otherwise StatusCode::FAILURE
   template <typename GaudiComp>
   StatusCode parse(const Gaudi::Property<Key>& property, T& result, const GaudiComp* comp) const {
     const auto parsed = parse(property.value());
