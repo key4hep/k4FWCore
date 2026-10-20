@@ -211,3 +211,9 @@ TEST_CASE("PropertyChoices with an integer key and an enum value") {
   REQUIRE(levels.parse(property, mode, &comp).isFailure());
   REQUIRE(comp.log.str().find("Invalid Level 3, expected one of 1, 2.") != std::string::npos);
 }
+
+TEST_CASE("PropertyChoices lists nothing for an empty table") {
+  const k4FWCore::PropertyChoices<int, int> empty{};
+  REQUIRE(empty.list().empty());
+  REQUIRE_FALSE(empty.parse(1).has_value());
+}
