@@ -30,7 +30,7 @@
 namespace {
 enum class Mode { Fast, Precise };
 
-const k4FWCore::PropertyChoices<std::string, Mode> s_modes{{"Fast", Mode::Fast}, {"Precise", Mode::Precise}};
+const k4FWCore::PropertyChoices s_modes{std::pair{"Fast", Mode::Fast}, std::pair{"Precise", Mode::Precise}};
 
 /// Stand-in for a Gaudi component, recording what is logged as an error
 struct FakeComponent {
@@ -125,7 +125,7 @@ TEST_CASE("makePropertyChoices works for unscoped and nested enums") {
 }
 
 TEST_CASE("PropertyChoices maps labels to a non-enum type") {
-  const k4FWCore::PropertyChoices<std::string, double> driftVelocities{{"Argon", 0.0023}, {"ArgonIsobutane", 0.0075}};
+  const k4FWCore::PropertyChoices driftVelocities{std::pair{"Argon", 0.0023}, std::pair{"ArgonIsobutane", 0.0075}};
   REQUIRE(driftVelocities.parse("Argon") == 0.0023);
   REQUIRE(driftVelocities.parse("ArgonIsobutane") == 0.0075);
   REQUIRE_FALSE(driftVelocities.parse("Neon").has_value());
@@ -196,7 +196,7 @@ TEST_CASE("PropertyChoices parses a string Gaudi property for allowed strings") 
 }
 
 TEST_CASE("PropertyChoices with an integer key and an enum value") {
-  const k4FWCore::PropertyChoices<int, Mode> levels{{1, Mode::Fast}, {2, Mode::Precise}};
+  const k4FWCore::PropertyChoices levels{std::pair{1, Mode::Fast}, std::pair{2, Mode::Precise}};
   REQUIRE(levels.parse(2) == Mode::Precise);
   REQUIRE_FALSE(levels.parse(3).has_value());
   REQUIRE(levels.list() == "1, 2");
@@ -216,4 +216,41 @@ TEST_CASE("PropertyChoices lists nothing for an empty table") {
   const k4FWCore::PropertyChoices<int, int> empty{};
   REQUIRE(empty.list().empty());
   REQUIRE_FALSE(empty.parse(1).has_value());
+}
+
+TEST_CASE("PropertyChoices deduces its types from the pairs") {
+  // String literals become std::string, other types are kept
+  STATIC_REQUIRE(std::is_same_v<std::remove_const_t<decltype(s_modes)>, k4FWCore::PropertyChoices<std::string, Mode>>);
+
+  const k4FWCore::PropertyChoices levels{std::pair{1, Mode::Fast}, std::pair{2, Mode::Precise}};
+  STATIC_REQUIRE(std::is_same_v<decltype(levels), const k4FWCore::PropertyChoices<int, Mode>>);
+
+  // String values are std::string too
+  const k4FWCore::PropertyChoices names{std::pair{"fast", "Fast"}, std::pair{"precise", "Precise"}};
+  STATIC_REQUIRE(std::is_same_v<decltype(names), const k4FWCore::PropertyChoices<std::string, std::string>>);
+  REQUIRE(names.parse("fast") == "Fast");
+
+  // A single pair is enough
+  const k4FWCore::PropertyChoices single{std::pair{"Argon", 0.0023}};
+  STATIC_REQUIRE(std::is_same_v<decltype(single), const k4FWCore::PropertyChoices<std::string, double>>);
+  REQUIRE(single.parse("Argon") == 0.0023);
+}
+
+TEST_CASE("PropertyChoices deduces the common type of different values") {
+  const k4FWCore::PropertyChoices mixed{std::pair{"a", 0.5}, std::pair{"b", 1}};
+  STATIC_REQUIRE(std::is_same_v<decltype(mixed), const k4FWCore::PropertyChoices<std::string, double>>);
+  REQUIRE(mixed.parse("b") == 1.0);
+
+  // There is no common type of a number and an enum, so the types cannot be deduced
+  const auto deducible = []<typename V1, typename V2>(V1 v1, V2 v2) {
+    return requires { k4FWCore::PropertyChoices{std::pair{"a", v1}, std::pair{"b", v2}}; };
+  };
+  REQUIRE(deducible(1, 2.5));
+  REQUIRE_FALSE(deducible(1, Mode::Fast));
+}
+
+TEST_CASE("PropertyChoices converts the pairs to explicitly given types") {
+  const k4FWCore::PropertyChoices<std::string, double> choices{std::pair{"a", 1}, std::pair{"b", 2}};
+  REQUIRE(choices.parse("b") == 2.0);
+  REQUIRE(choices.list() == "'a', 'b'");
 }
