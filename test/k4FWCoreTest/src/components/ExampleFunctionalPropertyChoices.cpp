@@ -50,8 +50,8 @@ struct ExampleFunctionalPropertyChoices final : k4FWCore::Consumer<void()> {
 
   // (4) Labels for values of a type that cannot be derived from a name. The user selects
   //     the survival rate by name and the code gets the fraction of the Fellowship that survives
-  static inline const k4FWCore::PropertyChoices<double> s_survivalRates{{"NoResurrection", 7. / 9.},
-                                                                        {"WithResurrection", 8. / 9.}};
+  static inline const k4FWCore::PropertyChoices<std::string, double> s_survivalRates{{"NoResurrection", 7. / 9.},
+                                                                                     {"WithResurrection", 8. / 9.}};
 
   // The properties. All of them document their allowed values with list()
   Gaudi::Property<std::string> m_gandalf{this, "Gandalf", "TheGrey", "One of " + s_gandalfs.list()};

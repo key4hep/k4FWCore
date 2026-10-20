@@ -103,14 +103,13 @@ namespace k4FWCore {
 /// It should be used if the developer wants full control over the keys and value pairs, deciding what type each should
 /// be. At the moment, it is also the only way to use floating point numbers as values. Floating point numbers as keys
 /// are not supported (see the notes at the end of this documentation). The explicit table works for any copyable value
-/// type. If the developer does not pass the second template argument, the key type defaults to `std::string`. Note that
-/// at the moment the template parameter order is <ValueType, KeyType>, which may be counter-intuitive. Examples:
+/// type. The template arguments are the key type followed by the value type. Examples:
 /// - **An enum, by custom labels.** The user writes `2` and the developer can get the corresponding enumerator
 ///   `Mode::Precise`:
-///   `PropertyChoices<Mode, int>{{1, Mode::Fast}, {2, Mode::Precise}}`
+///   `PropertyChoices<int, Mode>{{1, Mode::Fast}, {2, Mode::Precise}}`
 /// - **A label for a value of any type.** The user writes `"Argon"` and the developer can get the corresponding
 ///   value e.g. the `double` `0.0023`:
-///   `PropertyChoices<double>{{"Argon", 0.0023}, {"ArgonIsobutane", 0.0075}}`
+///   `PropertyChoices<std::string, double>{{"Argon", 0.0023}, {"ArgonIsobutane", 0.0075}}`
 ///
 /// @par Example
 ///
@@ -137,16 +136,12 @@ namespace k4FWCore {
 ///    makes the allowed values fuzzy, which can be surprising. If the allowed numbers are a
 ///    small fixed set, selecting them by label, as in the `double` example above, avoids the issue.
 ///  - The order of the entries is the order in which they are listed by list().
-///  - The order of the template arguments is <ValueType, KeyType>, which is somewhat counter-intuitive.
-///    This is because the key type has a default of std::string, so that it can be omitted in the common case
-///    of a string key. The value type is always required.
 ///
+/// @tparam Key The type of the property and with it of the allowed values the user can
+///             choose from, e.g. `std::string` whenever the user selects by a name
 /// @tparam T   The type the keys are translated to. Any copyable type works, e.g. an
 ///             enum class, a number or a string
-/// @tparam Key The type of the property and with it of the allowed values the user can
-///             choose from. Defaults to std::string, which is what is needed whenever the
-///             user selects by a name
-template <typename T, typename Key = std::string>
+template <typename Key, typename T>
 class PropertyChoices {
   static_assert(!std::is_floating_point_v<Key>, "Floating point keys cannot be compared reliably");
 
@@ -271,7 +266,7 @@ namespace detail {
 ///   enum class Mode { Fast, Precise };
 ///   static inline const auto s_modes = k4FWCore::makePropertyChoices<Mode::Fast, Mode::Precise>();
 ///   // equivalent to
-///   // k4FWCore::PropertyChoices<Mode> s_modes{{"Fast", Mode::Fast}, {"Precise", Mode::Precise}};
+///   // k4FWCore::PropertyChoices<std::string, Mode> s_modes{{"Fast", Mode::Fast}, {"Precise", Mode::Precise}};
 ///   @endcode
 ///   Note that this only works for values that correspond to a named enumerator, and that the
 ///   strings the user has to type are always the enumerator names. For different labels create
@@ -295,7 +290,7 @@ template <auto... Vs>
 auto makePropertyChoices() {
   using T = std::common_type_t<decltype(Vs)...>;
   if constexpr (std::is_enum_v<T>) {
-    return PropertyChoices<T>{{std::string{detail::enum_value_name<Vs>()}, Vs}...};
+    return PropertyChoices<std::string, T>{{std::string{detail::enum_value_name<Vs>()}, Vs}...};
   } else {
     return PropertyChoices<T, T>{{Vs, Vs}...};
   }
