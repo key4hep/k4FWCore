@@ -28,7 +28,6 @@
 #include <algorithm>
 #include <concepts>
 #include <cstddef>
-#include <initializer_list>
 #include <optional>
 #include <ranges>
 #include <source_location>
@@ -78,38 +77,48 @@ namespace k4FWCore {
 /// How PropertyChoices works is that ultimately the underlying Gaudi::Property becomes the 'key' to the PropertyChoices
 /// table, and the 'value' is what the code works with afterwards. Therefore, in the Gaudi steering file, the user input
 /// is the table key, and the type of the Gaudi::Property must match the 'key' type in the PropertyChoices. For the
-/// algorithm developer, there are two ways to create the key-value pairs from the user input.
+/// algorithm developer, there are two ways to create the key-value pairs.
 ///
 /// **1. Use the makePropertyChoices helper function**
+///
 /// This is a helper function, which automatically creates the key-value pairs from the values given as template
 /// arguments. The key is then derived from the value, and its type is determined by the type of the value. Say, you
-/// pass a list of integers as allowed values, then the key type will be the same integer. Or when using with an enum,
+/// pass a list of integers as allowed values, then the key (type) will be the same integer. Or when using with an enum,
 /// the key type will be a string and the key itself will be the name of the enumerator without the enum class name. So
 /// it is basically a helper function to save some hassle of having to write the key-value pairs explicitly, which can
-/// be tedious for large lists of allowed values. Examples:
+/// be tedious for large lists of allowed values.
+/// Examples:
 /// - **An enum, by the name of its enumerators.** The property is a `std::string`, the user writes `"Fast"` and
 ///   the developer can get the corresponding enumerator `Mode::Fast`:
-///   `makePropertyChoices<Mode::Fast, Mode::Precise>()`
+///   `makePropertyChoices<Mode::Fast, Mode::Precise, Mode::ExtraFast, Mode::SemiPrecise, Mode::UltraPrecise>()`
 /// - **One of a few integers.** The property is an `int`, the user writes `15` and the developer can get the
 ///   corresponding integer `15`:
-///   `makePropertyChoices<4, 8, 15>()`
+///   `makePropertyChoices<4, 8, 15, 16, 23, 42>()`
 /// - **One of a few strings.** The property is a `std::string`, the user writes `"DCH_info"` and the developer can
 ///   get the corresponding string `"DCH_info"`:
-///   `makePropertyChoices<"DCH_info", "STT_info">()`
+///   `makePropertyChoices<"DCH_info", "STT_info", "GLC_info", "ALC_info">()`
 ///
 /// **2. Write out the `{key, value}` pairs explicitly**
 ///
-/// This is the most direct way to create the PropertyChoices.
-/// It should be used if the developer wants full control over the keys and value pairs, deciding what type each should
-/// be. At the moment, it is also the only way to use floating point numbers as values. Floating point numbers as keys
-/// are not supported (see the notes at the end of this documentation). The explicit table works for any copyable value
-/// type. The template arguments are the key type followed by the value type. Examples:
+/// This is the most direct way to create the PropertyChoices. Every entry is a `std::pair` of a key and a value,
+/// and the key and value types of the PropertyChoices are deduced from the entries, so they do not have to be
+/// spelled out. It should be used if the developer wants full control over the keys and value pairs. At the moment,
+/// it is also the only way to use floating point numbers as values. Floating point numbers as keys are not supported
+/// (see the notes at the end of this documentation). The explicit table works for any copyable value type.
+/// Examples:
 /// - **An enum, by custom labels.** The user writes `2` and the developer can get the corresponding enumerator
 ///   `Mode::Precise`:
-///   `PropertyChoices<int, Mode>{{1, Mode::Fast}, {2, Mode::Precise}}`
+///   `PropertyChoices{std::pair{1, Mode::Fast}, std::pair{2, Mode::Precise}}`
 /// - **A label for a value of any type.** The user writes `"Argon"` and the developer can get the corresponding
 ///   value e.g. the `double` `0.0023`:
-///   `PropertyChoices<std::string, double>{{"Argon", 0.0023}, {"ArgonIsobutane", 0.0075}}`
+///   `PropertyChoices{std::pair{"Argon", 0.0023}, std::pair{"ArgonIsobutane", 0.0075}}`
+///
+/// The types are deduced as follows. Keys and values that are strings (such as the string literals above) become
+/// `std::string`. If the keys, or the values, of the entries are of different types they become their common type,
+/// so that for example `0.5` and `1` give `double`. If there is no common type, the code does not compile.
+/// To choose the types explicitly instead, give them as template arguments, key type first, in which case the
+/// entries are converted to them:
+/// `PropertyChoices<std::string, double>{std::pair{"Argon", 1}}`
 ///
 /// @par Example
 ///
@@ -148,11 +157,14 @@ class PropertyChoices {
 public:
   using Choice = std::pair<Key, T>;
 
-  /// Create a table from `{key, value}` entries
+  /// Create a table from `std::pair`s of a key and its value. The key and value types are deduced from the
+  /// pairs, see the documentation of the class
   ///
-  /// @param choices The allowed keys, each with the value it is translated to. The order is the order in which
-  ///                the keys are listed by list()
-  PropertyChoices(std::initializer_list<Choice> choices) : m_choices(choices) {}
+  /// @param choices The allowed keys, each paired with the value it is translated to. The order is the order in
+  ///                which the keys are listed by list()
+  template <typename... Pairs>
+    requires(std::constructible_from<Choice, Pairs> && ...)
+  explicit PropertyChoices(Pairs&&... choices) : m_choices{Choice(std::forward<Pairs>(choices))...} {}
 
   /// Translate one of the allowed keys into its value
   ///
@@ -221,6 +233,20 @@ private:
 };
 
 namespace detail {
+  /// The type that a key or value of a PropertyChoices is deduced as: strings, such as string literals, become a
+  /// std::string and everything else keeps its type
+  template <typename U>
+  using deduced_type_t = std::conditional_t<std::is_convertible_v<U, std::string_view>, std::string, U>;
+} // namespace detail
+
+/// Deduce the key and value type of a PropertyChoices from the pairs it is created from. If the keys or the values
+/// are of different types, the common type is used
+template <typename K, typename V, typename... Ks, typename... Vs>
+PropertyChoices(std::pair<K, V>, std::pair<Ks, Vs>...)
+    -> PropertyChoices<detail::deduced_type_t<std::common_type_t<K, Ks...>>,
+                       detail::deduced_type_t<std::common_type_t<V, Vs...>>>;
+
+namespace detail {
   /// Helper function to determine the *unqualified* name of an enum value (at
   /// compile time). This is a similar trick that magic_enum also plays
   template <auto V>
@@ -266,7 +292,7 @@ namespace detail {
 ///   enum class Mode { Fast, Precise };
 ///   static inline const auto s_modes = k4FWCore::makePropertyChoices<Mode::Fast, Mode::Precise>();
 ///   // equivalent to
-///   // k4FWCore::PropertyChoices<std::string, Mode> s_modes{{"Fast", Mode::Fast}, {"Precise", Mode::Precise}};
+///   // k4FWCore::PropertyChoices s_modes{std::pair{"Fast", Mode::Fast}, std::pair{"Precise", Mode::Precise}};
 ///   @endcode
 ///   Note that this only works for values that correspond to a named enumerator, and that the
 ///   strings the user has to type are always the enumerator names. For different labels create
@@ -290,9 +316,10 @@ template <auto... Vs>
 auto makePropertyChoices() {
   using T = std::common_type_t<decltype(Vs)...>;
   if constexpr (std::is_enum_v<T>) {
-    return PropertyChoices<std::string, T>{{std::string{detail::enum_value_name<Vs>()}, Vs}...};
+    return PropertyChoices<std::string, T>{
+        std::pair<std::string, T>{std::string{detail::enum_value_name<Vs>()}, Vs}...};
   } else {
-    return PropertyChoices<T, T>{{Vs, Vs}...};
+    return PropertyChoices<T, T>{std::pair<T, T>{Vs, Vs}...};
   }
 }
 
@@ -310,7 +337,7 @@ auto makePropertyChoices() {
 /// @tparam Ss The allowed strings
 template <detail::FixedString... Ss>
 auto makePropertyChoices() {
-  return PropertyChoices<std::string, std::string>{{std::string{Ss.view()}, std::string{Ss.view()}}...};
+  return PropertyChoices<std::string, std::string>{std::pair<std::string, std::string>{Ss.view(), Ss.view()}...};
 }
 
 } // namespace k4FWCore
