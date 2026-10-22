@@ -216,6 +216,17 @@ add_test_fwcore(FunctionalTransformerHist options/ExampleFunctionalTransformerHi
 add_test_fwcore(FunctionalCollectionMerger options/ExampleFunctionalCollectionMerger.py PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
 add_test_fwcore(FunctionalCollectionMergerEmpty options/ExampleFunctionalCollectionMergerEmpty.py
                   PROPERTIES PASS_REGULAR_EXPRESSION "InputCollections must contain at least one collection")
+# SimTrackerHitCellMerger: create the input file, run the algorithm, check the output
+set(simtrackerhitmerger_dir ${CMAKE_CURRENT_LIST_DIR}/options/SimTrackerHitCellMerger)
+add_test(NAME SimTrackerHitCellMergerSetup
+         COMMAND python3 ${simtrackerhitmerger_dir}/test_simtrackerhit_cell_merger.py setup --input simtrackerhitmerger_input.root)
+set_tests_properties(SimTrackerHitCellMergerSetup PROPERTIES FIXTURES_SETUP SimTrackerHitMergerInput)
+add_test_fwcore(SimTrackerHitCellMerger options/SimTrackerHitCellMerger/test_simtrackerhit_cell_merger_steer.py
+                  --input simtrackerhitmerger_input.root --output simtrackerhitmerger_output.root
+                  PROPERTIES FIXTURES_REQUIRED SimTrackerHitMergerInput FIXTURES_SETUP SimTrackerHitMergerOutput)
+add_test(NAME SimTrackerHitCellMergerCheck
+         COMMAND python3 ${simtrackerhitmerger_dir}/test_simtrackerhit_cell_merger.py check --output simtrackerhitmerger_output.root)
+set_tests_properties(SimTrackerHitCellMergerCheck PROPERTIES FIXTURES_REQUIRED SimTrackerHitMergerOutput)
 add_test_fwcore(FunctionalFilterFile options/ExampleFunctionalFilterFile.py ADD_TO_CHECK_FILES)
 add_test_fwcore(FunctionalMetadata options/ExampleFunctionalMetadata.py --MetadataSvc.SkipIfSameValue True ADD_TO_CHECK_FILES PROPERTIES FIXTURES_SETUP FunctionalMetadataFile)
 add_test_fwcore(FunctionalMetadataThrow options/ExampleFunctionalMetadata.py --Producer2.ParticleTime 2.5
