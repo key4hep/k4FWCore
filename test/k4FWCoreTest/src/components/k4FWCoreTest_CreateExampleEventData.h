@@ -20,8 +20,11 @@
 #define K4FWCORE_K4FWCORETEST_CREATEEXAMPLEEVENTDATA
 
 #include "Gaudi/Algorithm.h"
-
-#include "k4FWCore/DataHandle.h"
+#include "Gaudi/Property.h"
+#include <GaudiKernel/DataHandle.h>
+#include <GaudiKernel/EventContext.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/StatusCode.h>
 
 #include "podio/UserDataCollection.h"
 
@@ -31,6 +34,10 @@
 #include "edm4hep/SimTrackerHitCollection.h"
 #include "edm4hep/TrackCollection.h"
 #include "edm4hep/TrackerHit3DCollection.h"
+
+#include "k4FWCore/DataHandle.h"
+
+#include <string>
 
 /** @class k4FWCoreTest_CreateExampleEventData
  *  Lightweight producer for edm data for tests that do not depend on the actual

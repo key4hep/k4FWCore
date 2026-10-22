@@ -18,12 +18,15 @@
  */
 
 #include "Gaudi/Property.h"
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/ISvcLocator.h>
 
 #include "edm4hep/MCParticleCollection.h"
 
 #include "k4FWCore/Transformer.h"
 
 #include <string>
+#include <vector>
 
 /* ExampleFunctionalTransformerRuntimeEmpty
  *

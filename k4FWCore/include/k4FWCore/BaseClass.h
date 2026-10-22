@@ -22,6 +22,8 @@
 
 #include "Gaudi/Algorithm.h"
 #include "GaudiKernel/DataObjectHandle.h"
+#include <GaudiKernel/IAlgExecStateSvc.h>
+
 #include "k4FWCore/DataWrapper.h"
 
 // Base class used for the Traits template argument of the

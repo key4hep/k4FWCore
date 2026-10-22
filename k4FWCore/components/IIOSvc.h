@@ -23,9 +23,11 @@
 
 #include "podio/CollectionBase.h"
 #include "podio/Writer.h"
+#include <podio/Frame.h>
 
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <vector>
 
 /**

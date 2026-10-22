@@ -17,7 +17,11 @@
  * limitations under the License.
  */
 #include "OverlayTiming.h"
+
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/GaudiException.h>
 #include <GaudiKernel/MsgStream.h>
+#include <GaudiKernel/StatusCode.h>
 
 #include "podio/FrameCategories.h"
 
@@ -27,15 +31,24 @@
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/SimCalorimeterHitCollection.h"
 #include "edm4hep/SimTrackerHitCollection.h"
+#include <edm4hep/MutableSimCalorimeterHit.h>
 
 #include "k4FWCore/MetadataUtils.h"
+#include <k4Interface/IUniqueIDGenSvc.h>
 
 #include <TMath.h>
 
 #include <algorithm>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <map>
+#include <memory>
 #include <numeric>
 #include <random>
+#include <stdexcept>
 #include <string>
+#include <tuple>
 #include <utility>
 #include <vector>
 

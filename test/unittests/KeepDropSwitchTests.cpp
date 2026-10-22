@@ -21,6 +21,8 @@
 
 #include "catch2/catch_test_macros.hpp"
 
+#include <stdexcept>
+
 using k4FWCore::KeepDropSwitch;
 
 TEST_CASE("KeepDropSwitch default constructor accepts all") {

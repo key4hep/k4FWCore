@@ -25,17 +25,26 @@
 #include "GaudiKernel/IIncidentListener.h"
 #include "GaudiKernel/IIncidentSvc.h"
 #include "GaudiKernel/Service.h"
+#include <GaudiKernel/Incident.h>
+#include <GaudiKernel/SmartIF.h>
+#include <GaudiKernel/StatusCode.h>
+#include <GaudiKernel/extends.h>
 
 #include "podio/Reader.h"
 #include "podio/Writer.h"
+#include <podio/CollectionBase.h>
+#include <podio/Frame.h>
 
 #include "IIOSvc.h"
 #include "k4FWCore/IMetadataSvc.h"
 #include "k4FWCore/KeepDropSwitch.h"
 
 #include <atomic>
+#include <mutex>
+#include <optional>
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <vector>
 
 class IOSvc : public extends<Service, IIOSvc, IIncidentListener> {

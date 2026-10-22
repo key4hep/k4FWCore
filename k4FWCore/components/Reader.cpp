@@ -18,11 +18,21 @@
  */
 #include "GAUDI_VERSION.h"
 #include "Gaudi/Functional/utilities.h"
+#include "Gaudi/Property.h"
 #include "GaudiKernel/AnyDataWrapper.h"
 #include "GaudiKernel/FunctionalFilterDecision.h"
 #include "GaudiKernel/IDataProviderSvc.h"
 #include "GaudiKernel/SmartIF.h"
 #include "GaudiKernel/StatusCode.h"
+#include <Gaudi/Algorithm.h>
+#include <Gaudi/Functional/details.h>
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/EventContext.h>
+#include <GaudiKernel/GaudiException.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/MsgStream.h>
+#include <GaudiKernel/ServiceHandle.h>
+#include <GaudiKernel/System.h>
 
 #include "podio/CollectionBase.h"
 #include "podio/Frame.h"
@@ -30,9 +40,11 @@
 #include "IIOSvc.h"
 #include "k4FWCore/FunctionalUtils.h"
 
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <tuple>
+#include <type_traits>
 #include <utility>
 #include <vector>
 

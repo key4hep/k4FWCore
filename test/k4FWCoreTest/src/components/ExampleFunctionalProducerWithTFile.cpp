@@ -17,20 +17,27 @@
  * limitations under the License.
  */
 
-#include "TFile.h"
-#include "TTree.h"
-
 #include "Gaudi/Property.h"
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/MsgStream.h>
+#include <GaudiKernel/StatusCode.h>
 
-#include "k4FWCore/Producer.h"
+#include "podio/UserDataCollection.h"
 
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/SimTrackerHitCollection.h"
-#include "podio/UserDataCollection.h"
+
+#include "k4FWCore/Producer.h"
+
+#include "TFile.h"
+#include "TTree.h"
+#include <RtypesCore.h>
 
 #include <memory>
 #include <string>
 #include <tuple>
+#include <utility>
 
 using TFileProducerReturnType =
     std::tuple<podio::UserDataCollection<float>, edm4hep::MCParticleCollection, edm4hep::SimTrackerHitCollection>;

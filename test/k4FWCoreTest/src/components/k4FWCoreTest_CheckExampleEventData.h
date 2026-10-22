@@ -19,12 +19,18 @@
 #ifndef K4FWCORE_K4FWCORETEST_CHECKEEXAMPLEEVENTDATA
 #define K4FWCORE_K4FWCORETEST_CHECKEEXAMPLEEVENTDATA
 
-#include "k4FWCore/DataHandle.h"
-
-// GAUDI
 #include "Gaudi/Algorithm.h"
+#include "Gaudi/Property.h"
+#include <GaudiKernel/DataHandle.h>
+#include <GaudiKernel/EventContext.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/StatusCode.h>
 
 #include "podio/UserDataCollection.h"
+
+#include "k4FWCore/DataHandle.h"
+
+#include <string>
 
 // datamodel
 namespace edm4hep {

@@ -21,9 +21,12 @@
 
 #include "GaudiKernel/IInterface.h"
 
+#include "podio/Frame.h"
+
 #include "edm4hep/utils/ParticleIDUtils.h"
 
-#include "podio/Frame.h"
+#include <optional>
+#include <string>
 
 class IMetadataSvc : virtual public IInterface {
   friend class Writer;

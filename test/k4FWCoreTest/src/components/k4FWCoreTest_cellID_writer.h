@@ -19,14 +19,19 @@
 #ifndef K4FWCORE_K4FWCORETEST_CELLID_WRITER
 #define K4FWCORE_K4FWCORETEST_CELLID_WRITER
 
-// GAUDI
 #include "Gaudi/Algorithm.h"
+#include "Gaudi/Property.h"
+#include <GaudiKernel/DataHandle.h>
+#include <GaudiKernel/EventContext.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/StatusCode.h>
 
-// key4hep
+#include "edm4hep/SimTrackerHitCollection.h"
+
 #include "k4FWCore/DataHandle.h"
 
-// datamodel
-#include "edm4hep/SimTrackerHitCollection.h"
+#include <string>
+#include <vector>
 
 const std::string cellIDtest = "M:3,S-1:3,I:9,J:9,K-1:6";
 

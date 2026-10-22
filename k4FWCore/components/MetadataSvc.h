@@ -22,6 +22,9 @@
 #include "Gaudi/Property.h"
 #include "GaudiKernel/IDataProviderSvc.h"
 #include "GaudiKernel/Service.h"
+#include <GaudiKernel/SmartIF.h>
+#include <GaudiKernel/StatusCode.h>
+#include <GaudiKernel/extends.h>
 
 #include "podio/Frame.h"
 

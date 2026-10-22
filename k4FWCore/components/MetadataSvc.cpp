@@ -19,15 +19,19 @@
 
 #include "MetadataSvc.h"
 
-#include "podio/Frame.h"
-
+#include <Gaudi/PluginService.h>
 #include <GaudiKernel/AnyDataWrapper.h>
 #include <GaudiKernel/GaudiException.h>
 #include <GaudiKernel/IDataProviderSvc.h>
+#include <GaudiKernel/MsgStream.h>
 #include <GaudiKernel/Service.h>
 #include <GaudiKernel/StateMachine.h>
+#include <GaudiKernel/StatusCode.h>
+
+#include "podio/Frame.h"
 
 #include <memory>
+#include <utility>
 
 StatusCode MetadataSvc::initialize() {
   StatusCode sc = Service::initialize();

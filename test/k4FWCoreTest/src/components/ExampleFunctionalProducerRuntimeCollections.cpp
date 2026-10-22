@@ -17,11 +17,20 @@
  * limitations under the License.
  */
 
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/GaudiException.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/MsgStream.h>
+#include <GaudiKernel/StatusCode.h>
+
 #include "edm4hep/MCParticleCollection.h"
 
 #include "k4FWCore/Producer.h"
 
+#include <cstddef>
 #include <string>
+#include <utility>
+#include <vector>
 
 struct ExampleFunctionalProducerRuntimeCollections final
     : k4FWCore::Producer<std::vector<edm4hep::MCParticleCollection>()> {

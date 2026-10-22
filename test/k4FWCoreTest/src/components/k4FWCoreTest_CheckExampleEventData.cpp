@@ -17,10 +17,18 @@
  * limitations under the License.
  */
 #include "k4FWCoreTest_CheckExampleEventData.h"
-#include <Gaudi/Algorithm.h>
 
-// datamodel
+#include <Gaudi/Algorithm.h>
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/EventContext.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/StatusCode.h>
+
 #include "edm4hep/MCParticleCollection.h"
+
+#include <sstream>
+#include <stdexcept>
+#include <string>
 
 DECLARE_COMPONENT(k4FWCoreTest_CheckExampleEventData)
 

@@ -19,13 +19,17 @@
 #ifndef K4FWCORE_K4FWCORETEST_CELLID_READER
 #define K4FWCORE_K4FWCORETEST_CELLID_READER
 
-// GAUDI
 #include "Gaudi/Algorithm.h"
-
-// key4hep
-#include "k4FWCore/DataHandle.h"
+#include <GaudiKernel/DataHandle.h>
+#include <GaudiKernel/EventContext.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/StatusCode.h>
 
 #include "edm4hep/SimTrackerHitCollection.h"
+
+#include "k4FWCore/DataHandle.h"
+
+#include <string>
 
 /** @class k4FWCoreTest_cellID
  *  Lightweight reader for edm data to test cellID reading

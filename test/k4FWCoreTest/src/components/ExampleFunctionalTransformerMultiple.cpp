@@ -18,6 +18,10 @@
  */
 
 #include "Gaudi/Property.h"
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/ISvcLocator.h>
+
+#include "podio/UserDataCollection.h"
 
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/RecoMCParticleLinkCollection.h"
@@ -26,11 +30,12 @@
 #include "edm4hep/TrackCollection.h"
 #include "edm4hep/TrackerHit3DCollection.h"
 
-#include "podio/UserDataCollection.h"
-
 #include "k4FWCore/Transformer.h"
 
+#include <cstddef>
 #include <string>
+#include <tuple>
+#include <utility>
 
 // Which type of collection we are reading
 using FloatColl = podio::UserDataCollection<float>;

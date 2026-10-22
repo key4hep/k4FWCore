@@ -22,17 +22,31 @@
 #include "GAUDI_VERSION.h"
 #include "Gaudi/Functional/details.h"
 #include "Gaudi/Functional/utilities.h"
+#include "Gaudi/Property.h"
 #include "GaudiKernel/FunctionalFilterDecision.h"
-
+#include <GaudiKernel/DataObjID.h>
+#include <GaudiKernel/EventContext.h>
+#include <GaudiKernel/GaudiException.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/MsgStream.h>
+#include <GaudiKernel/StatusCode.h>
 // #include "GaudiKernel/CommonMessaging.h"
+
+#include <podio/CollectionBase.h>
 
 #include "k4FWCore/FunctionalUtils.h"
 
 #include <algorithm>
+#include <array>
+#include <cstddef>
 #include <stdexcept>
+#include <string>
+#include <string_view>
+#include <tuple>
 #include <type_traits>
 #include <utility>
 #include <variant>
+#include <vector>
 
 namespace k4FWCore {
 

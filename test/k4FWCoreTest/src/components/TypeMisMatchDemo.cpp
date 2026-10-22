@@ -16,15 +16,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <Gaudi/PluginService.h>
+#include <Gaudi/Property.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/MsgStream.h>
+
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/TrackCollection.h"
 
 #include "k4FWCore/Transformer.h"
 
-#include <Gaudi/Property.h>
-#include <GaudiKernel/ISvcLocator.h>
-
 #include <string>
+#include <vector>
 
 struct TypeMisMatchDemo final : k4FWCore::Transformer<edm4hep::MCParticleCollection(const edm4hep::TrackCollection&)> {
   TypeMisMatchDemo(const std::string& name, ISvcLocator* svcLoc)

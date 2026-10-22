@@ -21,6 +21,10 @@
 #include <format>
 #include <sstream>
 #include <stdexcept>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 namespace {
 int wildcmp(const char* wild, const char* string) noexcept {
