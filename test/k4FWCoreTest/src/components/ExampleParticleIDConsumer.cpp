@@ -17,9 +17,6 @@
  * limitations under the License.
  */
 
-#include "k4FWCore/Consumer.h"
-#include "k4FWCore/MetadataUtils.h"
-
 #include <Gaudi/PluginService.h>
 #include <Gaudi/Property.h>
 #include <GaudiKernel/ISvcLocator.h>
@@ -31,6 +28,9 @@
 #include <edm4hep/ParticleID.h>
 #include <edm4hep/ReconstructedParticle.h>
 #include <edm4hep/ReconstructedParticleCollection.h>
+
+#include "k4FWCore/Consumer.h"
+#include "k4FWCore/MetadataUtils.h"
 
 #include "fmt/format.h"
 #include "fmt/ranges.h"

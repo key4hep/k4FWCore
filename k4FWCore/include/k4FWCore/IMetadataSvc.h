@@ -21,9 +21,9 @@
 
 #include "GaudiKernel/IInterface.h"
 
-#include "edm4hep/utils/ParticleIDUtils.h"
-
 #include "podio/Frame.h"
+
+#include "edm4hep/utils/ParticleIDUtils.h"
 
 #include <optional>
 #include <string>

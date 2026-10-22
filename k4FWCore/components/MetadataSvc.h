@@ -19,8 +19,6 @@
 #ifndef FWCORE_METADATASVC_H
 #define FWCORE_METADATASVC_H
 
-#include "k4FWCore/IMetadataSvc.h"
-
 #include "Gaudi/Property.h"
 #include "GaudiKernel/IDataProviderSvc.h"
 #include "GaudiKernel/Service.h"
@@ -29,6 +27,8 @@
 #include <GaudiKernel/extends.h>
 
 #include "podio/Frame.h"
+
+#include "k4FWCore/IMetadataSvc.h"
 
 #include <map>
 #include <memory>

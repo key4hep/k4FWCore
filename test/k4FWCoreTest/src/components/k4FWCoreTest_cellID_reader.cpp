@@ -18,15 +18,15 @@
  */
 #include "k4FWCoreTest_cellID_reader.h"
 
-#include "k4FWCoreTest_cellID_writer.h"
-#include <k4FWCore/MetadataUtils.h>
-
 #include <Gaudi/Algorithm.h>
 #include <Gaudi/PluginService.h>
 #include <GaudiKernel/EventContext.h>
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/MsgStream.h>
 #include <GaudiKernel/StatusCode.h>
+
+#include "k4FWCoreTest_cellID_writer.h"
+#include <k4FWCore/MetadataUtils.h>
 
 #include <string>
 

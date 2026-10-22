@@ -17,10 +17,6 @@
  * limitations under the License.
  */
 
-#include "k4FWCore/Consumer.h"
-#include "k4FWCore/GaudiChecks.h"
-#include "k4FWCore/MetadataUtils.h"
-
 #include <Gaudi/Algorithm.h>
 #include <Gaudi/PluginService.h>
 #include <Gaudi/Property.h>
@@ -33,6 +29,10 @@
 #include <GaudiKernel/StatusCode.h>
 #include <GaudiKernel/ToolHandle.h>
 #include <GaudiKernel/extends.h>
+
+#include "k4FWCore/Consumer.h"
+#include "k4FWCore/GaudiChecks.h"
+#include "k4FWCore/MetadataUtils.h"
 
 #include <string>
 

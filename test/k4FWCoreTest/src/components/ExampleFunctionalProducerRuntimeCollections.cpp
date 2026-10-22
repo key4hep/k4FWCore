@@ -17,8 +17,6 @@
  * limitations under the License.
  */
 
-#include "k4FWCore/Producer.h"
-
 #include <Gaudi/PluginService.h>
 #include <GaudiKernel/GaudiException.h>
 #include <GaudiKernel/ISvcLocator.h>
@@ -26,6 +24,8 @@
 #include <GaudiKernel/StatusCode.h>
 
 #include "edm4hep/MCParticleCollection.h"
+
+#include "k4FWCore/Producer.h"
 
 #include <cstddef>
 #include <string>

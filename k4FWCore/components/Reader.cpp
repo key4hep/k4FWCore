@@ -16,9 +16,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "IIOSvc.h"
-#include "k4FWCore/FunctionalUtils.h"
-
 #include "GAUDI_VERSION.h"
 #include "Gaudi/Functional/utilities.h"
 #include "Gaudi/Property.h"
@@ -39,6 +36,9 @@
 
 #include "podio/CollectionBase.h"
 #include "podio/Frame.h"
+
+#include "IIOSvc.h"
+#include "k4FWCore/FunctionalUtils.h"
 
 #include <cstddef>
 #include <memory>

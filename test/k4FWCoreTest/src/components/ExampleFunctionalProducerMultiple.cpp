@@ -17,11 +17,11 @@
  * limitations under the License.
  */
 
-#include "k4FWCore/Producer.h"
-
 #include "Gaudi/Property.h"
 #include <Gaudi/PluginService.h>
 #include <GaudiKernel/ISvcLocator.h>
+
+#include "podio/UserDataCollection.h"
 
 #include "edm4hep/CaloHitContributionCollection.h"
 #include "edm4hep/MCParticleCollection.h"
@@ -34,7 +34,7 @@
 #include <edm4hep/TrackState.h>
 #include <edm4hep/Vector3d.h>
 
-#include "podio/UserDataCollection.h"
+#include "k4FWCore/Producer.h"
 
 #include <cstddef>
 #include <string>

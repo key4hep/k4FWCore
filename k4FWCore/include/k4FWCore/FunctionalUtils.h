@@ -19,8 +19,6 @@
 #ifndef FWCORE_FUNCTIONALUTILS_H
 #define FWCORE_FUNCTIONALUTILS_H
 
-#include "k4FWCore/DataWrapper.h"
-
 #include "GAUDI_VERSION.h"
 #include "Gaudi/Functional/details.h"
 #include "Gaudi/Property.h"
@@ -41,6 +39,8 @@
 // #include "GaudiKernel/CommonMessaging.h"
 
 #include "podio/CollectionBase.h"
+
+#include "k4FWCore/DataWrapper.h"
 
 #include <algorithm>
 #include <concepts>

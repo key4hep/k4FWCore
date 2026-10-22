@@ -19,8 +19,6 @@
 #ifndef K4FWCORE_DATAHANDLE_H
 #define K4FWCORE_DATAHANDLE_H
 
-#include "k4FWCore/DataWrapper.h"
-
 #include "GAUDI_VERSION.h"
 #include <Gaudi/Property.h>
 #include <GaudiKernel/AnyDataWrapper.h>
@@ -37,6 +35,8 @@
 #include <GaudiKernel/ThreadLocalContext.h>
 
 #include <podio/CollectionBase.h>
+
+#include "k4FWCore/DataWrapper.h"
 
 #include <memory>
 #include <stdexcept>

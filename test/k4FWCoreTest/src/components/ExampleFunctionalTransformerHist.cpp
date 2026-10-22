@@ -17,8 +17,6 @@
  * limitations under the License.
  */
 
-#include "k4FWCore/Transformer.h"
-
 #include "Gaudi/Accumulators/RootHistogram.h"
 #include "Gaudi/Property.h"
 #include <Gaudi/Accumulators/StaticHistogram.h>
@@ -29,6 +27,8 @@
 #include <GaudiKernel/StatusCode.h>
 
 #include "edm4hep/MCParticleCollection.h"
+
+#include "k4FWCore/Transformer.h"
 
 #include <functional>
 #include <string>

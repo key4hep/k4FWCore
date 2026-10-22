@@ -17,12 +17,12 @@
  * limitations under the License.
  */
 
+#include <podio/FrameCategories.h>
+#include <podio/Reader.h>
+
 #include <edm4hep/ReconstructedParticle.h>
 #include <edm4hep/ReconstructedParticleCollection.h>
 #include <edm4hep/utils/ParticleIDUtils.h>
-
-#include <podio/FrameCategories.h>
-#include <podio/Reader.h>
 
 #include <fmt/base.h>
 #include <fmt/format.h>

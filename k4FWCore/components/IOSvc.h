@@ -19,10 +19,6 @@
 #ifndef FWCORE_IOSVC_H
 #define FWCORE_IOSVC_H
 
-#include "IIOSvc.h"
-#include "k4FWCore/IMetadataSvc.h"
-#include "k4FWCore/KeepDropSwitch.h"
-
 #include "Gaudi/Property.h"
 #include "GaudiKernel/IDataProviderSvc.h"
 #include "GaudiKernel/IHiveWhiteBoard.h"
@@ -38,6 +34,10 @@
 #include "podio/Writer.h"
 #include <podio/CollectionBase.h>
 #include <podio/Frame.h>
+
+#include "IIOSvc.h"
+#include "k4FWCore/IMetadataSvc.h"
+#include "k4FWCore/KeepDropSwitch.h"
 
 #include <atomic>
 #include <mutex>

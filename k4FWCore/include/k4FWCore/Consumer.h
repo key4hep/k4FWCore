@@ -19,8 +19,6 @@
 #ifndef FWCORE_CONSUMER_H
 #define FWCORE_CONSUMER_H
 
-#include "k4FWCore/FunctionalUtils.h"
-
 #include "GAUDI_VERSION.h"
 #include "Gaudi/Functional/details.h"
 #include "Gaudi/Functional/utilities.h"
@@ -35,6 +33,8 @@
 // #include "GaudiKernel/CommonMessaging.h"
 
 #include <podio/CollectionBase.h>
+
+#include "k4FWCore/FunctionalUtils.h"
 
 #include <algorithm>
 #include <array>

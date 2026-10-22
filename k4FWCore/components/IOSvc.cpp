@@ -19,9 +19,6 @@
 
 #include "IOSvc.h"
 
-#include "k4FWCore/FunctionalUtils.h"
-#include "k4FWCore/KeepDropSwitch.h"
-
 #include "GaudiKernel/AnyDataWrapper.h"
 #include "GaudiKernel/IEventProcessor.h"
 #include <Gaudi/PluginService.h>
@@ -38,6 +35,9 @@
 #include "podio/Reader.h"
 #include "podio/podioVersion.h"
 #include <podio/CollectionBase.h>
+
+#include "k4FWCore/FunctionalUtils.h"
+#include "k4FWCore/KeepDropSwitch.h"
 
 #include "TROOT.h"
 

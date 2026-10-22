@@ -20,11 +20,11 @@
 #ifndef K4FWCORE_FUNCTIONALUTILS_H
 #define K4FWCORE_FUNCTIONALUTILS_H
 
-#include "k4FWCore/DataWrapper.h"
-
 #include "Gaudi/Algorithm.h"
 #include "GaudiKernel/DataObjectHandle.h"
 #include <GaudiKernel/IAlgExecStateSvc.h>
+
+#include "k4FWCore/DataWrapper.h"
 
 // Base class used for the Traits template argument of the
 // Gaudi::Functional algorithms

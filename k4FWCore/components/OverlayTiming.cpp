@@ -18,13 +18,12 @@
  */
 #include "OverlayTiming.h"
 
-#include "k4FWCore/MetadataUtils.h"
-#include <k4Interface/IUniqueIDGenSvc.h>
-
 #include <Gaudi/PluginService.h>
 #include <GaudiKernel/GaudiException.h>
 #include <GaudiKernel/MsgStream.h>
 #include <GaudiKernel/StatusCode.h>
+
+#include "podio/FrameCategories.h"
 
 #include "edm4hep/CaloHitContributionCollection.h"
 #include "edm4hep/Constants.h"
@@ -34,7 +33,8 @@
 #include "edm4hep/SimTrackerHitCollection.h"
 #include <edm4hep/MutableSimCalorimeterHit.h>
 
-#include "podio/FrameCategories.h"
+#include "k4FWCore/MetadataUtils.h"
+#include <k4Interface/IUniqueIDGenSvc.h>
 
 #include <TMath.h>
 

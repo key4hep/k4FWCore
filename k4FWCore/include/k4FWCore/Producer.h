@@ -19,9 +19,9 @@
 #ifndef FWCORE_PRODUCER_H
 #define FWCORE_PRODUCER_H
 
-#include "k4FWCore/Transformer.h"
-
 #include <Gaudi/Functional/utilities.h>
+
+#include "k4FWCore/Transformer.h"
 
 #include <tuple>
 
