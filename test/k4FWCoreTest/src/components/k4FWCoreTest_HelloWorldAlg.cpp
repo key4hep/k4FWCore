@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 #include "k4FWCoreTest_HelloWorldAlg.h"
+
 #include "GaudiKernel/MsgStream.h"
 #include <Gaudi/Algorithm.h>
 #include <Gaudi/PluginService.h>

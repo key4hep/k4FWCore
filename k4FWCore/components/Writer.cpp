@@ -17,6 +17,11 @@
  * limitations under the License.
  */
 
+#include "IIOSvc.h"
+#include "k4FWCore/DataWrapper.h"
+#include "k4FWCore/FunctionalUtils.h"
+#include "k4FWCore/IMetadataSvc.h"
+
 #include "Gaudi/Functional/Consumer.h"
 #include "GaudiKernel/AnyDataWrapper.h"
 #include "GaudiKernel/DataObject.h"
@@ -35,17 +40,11 @@
 #include <GaudiKernel/MsgStream.h>
 #include <GaudiKernel/ServiceHandle.h>
 #include <GaudiKernel/SmartIF.h>
+
+#include "podio/Frame.h"
 #include <podio/CollectionBase.h>
 #include <podio/FrameCategories.h>
 #include <podio/Writer.h>
-
-#include "podio/Frame.h"
-
-#include "IIOSvc.h"
-
-#include "k4FWCore/DataWrapper.h"
-#include "k4FWCore/FunctionalUtils.h"
-#include "k4FWCore/IMetadataSvc.h"
 
 #include <algorithm>
 #include <cstdlib>

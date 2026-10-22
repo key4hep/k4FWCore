@@ -17,20 +17,20 @@
  * limitations under the License.
  */
 #include "k4FWCoreTest_CreateExampleEventData.h"
+
 #include <Gaudi/Algorithm.h>
 #include <Gaudi/PluginService.h>
 #include <GaudiKernel/EventContext.h>
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/StatusCode.h>
+
+#include "edm4hep/MCParticleCollection.h"
+#include "edm4hep/SimTrackerHitCollection.h"
+#include "edm4hep/TrackCollection.h"
 #include <edm4hep/TrackState.h>
 #include <edm4hep/TrackerHit3DCollection.h>
 
 #include "podio/UserDataCollection.h"
-
-// datamodel
-#include "edm4hep/MCParticleCollection.h"
-#include "edm4hep/SimTrackerHitCollection.h"
-#include "edm4hep/TrackCollection.h"
 #if __has_include("edm4hep/EDM4hepVersion.h")
 #include "edm4hep/EDM4hepVersion.h"
 #else

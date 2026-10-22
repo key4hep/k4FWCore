@@ -17,13 +17,13 @@
  * limitations under the License.
  */
 #include "k4FWCoreTest_CheckExampleEventData.h"
+
 #include <Gaudi/Algorithm.h>
 #include <Gaudi/PluginService.h>
 #include <GaudiKernel/EventContext.h>
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/StatusCode.h>
 
-// datamodel
 #include "edm4hep/MCParticleCollection.h"
 
 #include <sstream>

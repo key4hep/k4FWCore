@@ -19,7 +19,8 @@
 #ifndef K4FWCORE_K4FWCORETEST_CELLID_WRITER
 #define K4FWCORE_K4FWCORETEST_CELLID_WRITER
 
-// GAUDI
+#include "k4FWCore/DataHandle.h"
+
 #include "Gaudi/Algorithm.h"
 #include "Gaudi/Property.h"
 #include <GaudiKernel/DataHandle.h>
@@ -27,10 +28,6 @@
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/StatusCode.h>
 
-// key4hep
-#include "k4FWCore/DataHandle.h"
-
-// datamodel
 #include "edm4hep/SimTrackerHitCollection.h"
 
 #include <string>

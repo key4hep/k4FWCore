@@ -19,6 +19,8 @@
 
 #include "k4FWCore/MetadataUtils.h"
 #include "k4FWCore/Transformer.h"
+
+#include "Gaudi/Property.h"
 #include <Gaudi/PluginService.h>
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/StatusCode.h>
@@ -26,8 +28,6 @@
 #include "edm4hep/ParticleIDCollection.h"
 #include "edm4hep/ReconstructedParticleCollection.h"
 #include "edm4hep/utils/ParticleIDUtils.h"
-
-#include "Gaudi/Property.h"
 
 #include <cstddef>
 #include <string>

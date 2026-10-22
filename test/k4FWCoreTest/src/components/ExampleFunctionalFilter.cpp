@@ -17,14 +17,15 @@
  * limitations under the License.
  */
 
+#include "k4FWCore/FilterPredicate.h"
+
 #include "Gaudi/Accumulators.h"
-#include "edm4hep/MCParticleCollection.h"
 #include <Gaudi/Functional/FilterPredicate.h>
 #include <Gaudi/PluginService.h>
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/MsgStream.h>
 
-#include "k4FWCore/FilterPredicate.h"
+#include "edm4hep/MCParticleCollection.h"
 
 #include <string>
 

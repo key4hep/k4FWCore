@@ -17,15 +17,15 @@
  * limitations under the License.
  */
 
-#include "edm4hep/Constants.h"
-#include "edm4hep/EventHeaderCollection.h"
-#include <Gaudi/PluginService.h>
-#include <GaudiKernel/ISvcLocator.h>
-#include <edm4hep/EventHeader.h>
-
 #include "k4FWCore/Consumer.h"
 
+#include <Gaudi/PluginService.h>
 #include <Gaudi/Property.h>
+#include <GaudiKernel/ISvcLocator.h>
+
+#include "edm4hep/Constants.h"
+#include "edm4hep/EventHeaderCollection.h"
+#include <edm4hep/EventHeader.h>
 
 #include <atomic>
 #include <format>

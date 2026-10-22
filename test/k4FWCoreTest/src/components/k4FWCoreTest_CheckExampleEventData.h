@@ -20,14 +20,13 @@
 #define K4FWCORE_K4FWCORETEST_CHECKEEXAMPLEEVENTDATA
 
 #include "k4FWCore/DataHandle.h"
+
+#include "Gaudi/Algorithm.h"
+#include "Gaudi/Property.h"
 #include <GaudiKernel/DataHandle.h>
 #include <GaudiKernel/EventContext.h>
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/StatusCode.h>
-
-// GAUDI
-#include "Gaudi/Algorithm.h"
-#include "Gaudi/Property.h"
 
 #include "podio/UserDataCollection.h"
 

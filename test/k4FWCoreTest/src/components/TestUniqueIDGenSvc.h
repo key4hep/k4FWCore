@@ -19,15 +19,14 @@
 #ifndef TEST_UNIQUEIDGENSVC_H
 #define TEST_UNIQUEIDGENSVC_H
 
-// GAUDI
+#include "k4Interface/IUniqueIDGenSvc.h"
+
 #include "Gaudi/Accumulators.h"
 #include "Gaudi/Algorithm.h"
 #include <GaudiKernel/EventContext.h>
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/SmartIF.h>
 #include <GaudiKernel/StatusCode.h>
-
-#include "k4Interface/IUniqueIDGenSvc.h"
 
 #include <string>
 

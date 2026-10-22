@@ -17,6 +17,8 @@
  * limitations under the License.
  */
 
+#include "k4FWCore/Transformer.h"
+
 #include "Gaudi/Property.h"
 #include <Gaudi/PluginService.h>
 #include <GaudiKernel/EventContext.h>
@@ -32,8 +34,6 @@
 #include "edm4hep/TrackerHit3DCollection.h"
 
 #include "podio/UserDataCollection.h"
-
-#include "k4FWCore/Transformer.h"
 
 #include <cstddef>
 #include <limits>

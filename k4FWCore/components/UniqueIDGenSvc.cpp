@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 #include "UniqueIDGenSvc.h"
+
 #include <Gaudi/PluginService.h>
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/MsgStream.h>

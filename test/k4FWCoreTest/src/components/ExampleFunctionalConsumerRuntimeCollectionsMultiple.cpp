@@ -17,6 +17,8 @@
  * limitations under the License.
  */
 
+#include "k4FWCore/Consumer.h"
+
 #include "Gaudi/Property.h"
 #include <Gaudi/PluginService.h>
 #include <GaudiKernel/ISvcLocator.h>
@@ -25,8 +27,6 @@
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/SimTrackerHitCollection.h"
 #include "edm4hep/TrackCollection.h"
-
-#include "k4FWCore/Consumer.h"
 
 #include <cmath>
 #include <cstdlib>

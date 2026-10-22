@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 #include "TestService.h"
+
 #include <Gaudi/PluginService.h>
 #include <GaudiKernel/MsgStream.h>
 #include <GaudiKernel/Service.h>

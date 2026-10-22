@@ -16,15 +16,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "edm4hep/MCParticleCollection.h"
-#include "edm4hep/TrackCollection.h"
-#include <Gaudi/PluginService.h>
-#include <GaudiKernel/MsgStream.h>
-
 #include "k4FWCore/Transformer.h"
 
+#include <Gaudi/PluginService.h>
 #include <Gaudi/Property.h>
 #include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/MsgStream.h>
+
+#include "edm4hep/MCParticleCollection.h"
+#include "edm4hep/TrackCollection.h"
 
 #include <string>
 #include <vector>

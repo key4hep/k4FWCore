@@ -32,12 +32,17 @@
 
 **/
 
-#include "podio/Frame.h"
-#include "podio/Reader.h"
+#include "k4FWCore/Transformer.h"
+#include "k4Interface/IUniqueIDGenSvc.h"
+
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/SmartIF.h>
 #include <GaudiKernel/StatusCode.h>
-#include <podio/CollectionBase.h>
+// Needed for some of the more complex properties
+#include "Gaudi/Accumulators.h"
+#include "Gaudi/Parsers/Factory.h"
+#include "Gaudi/Property.h"
+#include "GaudiKernel/GaudiException.h"
 
 #include "edm4hep/CaloHitContributionCollection.h"
 #include "edm4hep/EventHeaderCollection.h"
@@ -45,15 +50,9 @@
 #include "edm4hep/SimCalorimeterHitCollection.h"
 #include "edm4hep/SimTrackerHitCollection.h"
 
-#include "k4FWCore/Transformer.h"
-#include "k4Interface/IUniqueIDGenSvc.h"
-
-// Needed for some of the more complex properties
-#include "Gaudi/Accumulators.h"
-#include "Gaudi/Parsers/Factory.h"
-#include "Gaudi/Property.h"
-
-#include "GaudiKernel/GaudiException.h"
+#include "podio/Frame.h"
+#include "podio/Reader.h"
+#include <podio/CollectionBase.h>
 
 #include <cstddef>
 #include <map>

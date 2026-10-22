@@ -17,13 +17,13 @@
  * limitations under the License.
  */
 
+#include "k4FWCore/Consumer.h"
+
 #include "Gaudi/Property.h"
 #include <Gaudi/PluginService.h>
 #include <GaudiKernel/ISvcLocator.h>
 
 #include "edm4hep/MCParticleCollection.h"
-
-#include "k4FWCore/Consumer.h"
 
 #include <sstream>
 #include <stdexcept>

@@ -16,20 +16,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "k4FWCore/Transformer.h"
+#include "k4Interface/IUniqueIDGenSvc.h"
+
 #include <Gaudi/PluginService.h>
 #include <Gaudi/Property.h>
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/MsgStream.h>
 #include <GaudiKernel/SmartIF.h>
 #include <GaudiKernel/StatusCode.h>
+
 #include <edm4hep/EventHeaderCollection.h>
 #include <edm4hep/edm4hep.h>
-#include <fmt/format.h>
+
 #include <podio/CollectionBase.h>
 #include <podio/utilities/TypeHelpers.h>
 
-#include "k4FWCore/Transformer.h"
-#include "k4Interface/IUniqueIDGenSvc.h"
+#include <fmt/format.h>
 
 #include <algorithm>
 #include <cstddef>

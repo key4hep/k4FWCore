@@ -17,6 +17,8 @@
  * limitations under the License.
  */
 
+#include "k4FWCore/Transformer.h"
+
 #include "Gaudi/Property.h"
 #include <Gaudi/PluginService.h>
 #include <GaudiKernel/ISvcLocator.h>
@@ -24,8 +26,6 @@
 
 #include "edm4hep/MCParticleCollection.h"
 #include "edm4hep/MutableMCParticle.h"
-
-#include "k4FWCore/Transformer.h"
 
 #include <string>
 

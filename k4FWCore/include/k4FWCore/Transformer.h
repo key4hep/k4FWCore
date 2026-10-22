@@ -19,6 +19,8 @@
 #ifndef FWCORE_TRANSFORMER_H
 #define FWCORE_TRANSFORMER_H
 
+#include "k4FWCore/FunctionalUtils.h"
+
 #include "GAUDI_VERSION.h"
 #include "Gaudi/Functional/details.h"
 #include "Gaudi/Functional/utilities.h"
@@ -29,11 +31,9 @@
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/MsgStream.h>
 #include <GaudiKernel/StatusCode.h>
-#include <podio/CollectionBase.h>
-
-#include "k4FWCore/FunctionalUtils.h"
-
 // #include "GaudiKernel/CommonMessaging.h"
+
+#include <podio/CollectionBase.h>
 
 #include <algorithm>
 #include <array>
