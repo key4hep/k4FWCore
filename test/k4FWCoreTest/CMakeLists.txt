@@ -287,6 +287,20 @@ add_test_fwcore(OverlayTimingStartIndex options/TestOverlayTimingBackgroundCurso
 add_test_fwcore(OverlayTimingBackgroundExhausted options/TestOverlayTimingBackgroundCursor.py --IOSvc.Output overlay_background_exhausted.root
                 PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile PASS_REGULAR_EXPRESSION "No more events in background file\\(s\\) of group 0")
 
+add_test(NAME CreateOverlayBackgroundFiles COMMAND python3 ${CMAKE_CURRENT_LIST_DIR}/scripts/CreateOverlayBackgroundFiles.py)
+set_tests_properties(CreateOverlayBackgroundFiles PROPERTIES FIXTURES_SETUP OverlayBackgroundFiles)
+add_test_fwcore(OverlayTimingRandomMix options/TestOverlayTimingRandomMix.py ADD_TO_CHECK_FILES)
+# Same configuration again, with the same and with a different seed, to check that the draws are reproducible
+add_test_fwcore(OverlayTimingRandomMixRepeat options/TestOverlayTimingRandomMix.py --IOSvc.Output=overlay_random_mix_repeat.root ADD_TO_CHECK_FILES)
+add_test_fwcore(OverlayTimingRandomMixOtherSeed options/TestOverlayTimingRandomMix.py --IOSvc.Output=overlay_random_mix_other_seed.root --UniqueIDGenSvc.Seed=987654321 ADD_TO_CHECK_FILES)
+# Same configuration once more, leaving out the background particles: the background tracker hits have to carry
+# the momentum of the particle they came from and the background calorimeter contributions no particle
+add_test_fwcore(OverlayTimingNoMCParticleMerge options/TestOverlayTimingRandomMix.py --IOSvc.Output=overlay_no_mcparticle_merge.root --OverlayTiming.MergeMCParticles=False ADD_TO_CHECK_FILES)
+# These all overlay the files of CreateOverlayBackgroundFiles on top of the output of FunctionalProducerMultiple
+set(OverlayRandomMixFixtures ProducerMultipleFile OverlayBackgroundFiles)
+set_property(TEST OverlayTimingRandomMix OverlayTimingRandomMixRepeat OverlayTimingRandomMixOtherSeed OverlayTimingNoMCParticleMerge
+             PROPERTY FIXTURES_REQUIRED ${OverlayRandomMixFixtures})
+
 add_test(NAME check_broken_pipe
          COMMAND bash -c "[ $(${K4RUN} options/ExampleFunctionalProducer.py | head -n 2 | wc -l) = 2 ]"
          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
@@ -313,6 +327,7 @@ $ENV{LD_LIBRARY_PATH};\
 PYTHONPATH=\
 ${PROJECT_BINARY_DIR}/${PROJECT_NAME}/genConfDir:\
 ${CMAKE_CURRENT_BINARY_DIR}/genConfDir:\
+${CMAKE_CURRENT_LIST_DIR}/scripts:\
 $ENV{PYTHONPATH};\
 "
 )

@@ -1,0 +1,87 @@
+#
+# Copyright (c) 2014-2024 Key4hep-Project.
+#
+# This file is part of Key4hep.
+# See https://key4hep.github.io/key4hep-doc/ for further info.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Tests RandomMixBackgroundFiles of the OverlayTiming algorithm, overlaying the
+# single-event background files written by CreateOverlayBackgroundFiles.py on
+# top of functional_producer_multiple.root.
+#
+# Group A is the .root files of a directory. Group B mixes the files of a
+# directory with an explicitly listed file. With 6 bunch crossings, group A
+# draws 18 events from its 8 files and group B 6 from its 4, so both wrap around
+# their shuffled list of files at least once.
+#
+# The tests OverlayTimingRandomMixRepeat, OverlayTimingRandomMixOtherSeed and
+# OverlayTimingNoMCParticleMerge run this same file with another output file
+# and, respectively, the same seed, another seed and MergeMCParticles = False.
+
+import glob
+
+from Gaudi.Configuration import INFO
+from Configurables import (
+    EventDataSvc,
+    EventHeaderCreator,
+    OverlayTiming,
+    UniqueIDGenSvc,
+)
+from k4FWCore import ApplicationMgr, IOSvc
+
+# The parameters that the checks of the output depend on are shared with
+# CheckOutputFiles.py. The module is in the scripts directory, which the tests
+# have on their PYTHONPATH.
+from OverlayRandomMixConfig import DELTA_T, N_BX, N_EVENTS, NUMBER_BACKGROUND
+
+uid_svc = UniqueIDGenSvc("UniqueIDGenSvc")
+
+iosvc = IOSvc("IOSvc")
+iosvc.Input = "functional_producer_multiple.root"
+iosvc.Output = "overlay_random_mix.root"
+
+header = EventHeaderCreator("EventHeaderCreator")
+
+overlay = OverlayTiming("OverlayTiming")
+overlay.MCParticles = "MCParticles1"
+overlay.SimTrackerHits = ["SimTrackerHits"]
+overlay.SimCalorimeterHits = ["SimCalorimeterHits"]
+overlay.OutputMCParticles = "OverlayMCParticles"
+overlay.OutputSimTrackerHits = ["OverlaySimTrackerHits"]
+overlay.OutputSimCalorimeterHits = ["OverlaySimCalorimeterHits"]
+overlay.OutputCaloHitContributions = ["OverlayCaloHitContributions"]
+overlay.BackgroundMCParticleCollectionName = "MCParticles"
+overlay.RandomMixBackgroundFiles = True
+overlay.BackgroundFileNames = [
+    sorted(glob.glob("overlay_background/groupA/*.root")),
+    sorted(glob.glob("overlay_background/groupB/*.root"))
+    + ["overlay_background/groupB_extra.root"],
+]
+overlay.NumberBackground = NUMBER_BACKGROUND
+overlay.Poisson_random_NOverlay = [False, False]
+overlay.NBunchtrain = N_BX
+overlay.Delta_t = DELTA_T
+overlay.TimeWindows = {
+    "SimTrackerHits": [-10000, 10000],
+    "SimCalorimeterHits": [-10000, 10000],
+}
+
+ApplicationMgr(
+    TopAlg=[header, overlay],
+    EvtSel="NONE",
+    EvtMax=N_EVENTS,
+    ExtSvc=[EventDataSvc("EventDataSvc"), uid_svc],
+    OutputLevel=INFO,
+)
