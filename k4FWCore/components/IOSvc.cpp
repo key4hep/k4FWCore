@@ -19,27 +19,27 @@
 
 #include "IOSvc.h"
 
-#include "GaudiKernel/AnyDataWrapper.h"
-#include "GaudiKernel/IEventProcessor.h"
 #include <Gaudi/PluginService.h>
+#include <GaudiKernel/AnyDataWrapper.h>
 #include <GaudiKernel/DataObject.h>
 #include <GaudiKernel/GaudiException.h>
+#include <GaudiKernel/IEventProcessor.h>
 #include <GaudiKernel/IIncidentSvc.h>
 #include <GaudiKernel/Incident.h>
 #include <GaudiKernel/MsgStream.h>
 #include <GaudiKernel/Service.h>
 #include <GaudiKernel/StatusCode.h>
 
-#include "podio/Frame.h"
-#include "podio/FrameCategories.h"
-#include "podio/Reader.h"
-#include "podio/podioVersion.h"
 #include <podio/CollectionBase.h>
+#include <podio/Frame.h>
+#include <podio/FrameCategories.h>
+#include <podio/Reader.h>
+#include <podio/podioVersion.h>
 
 #include "k4FWCore/FunctionalUtils.h"
 #include "k4FWCore/KeepDropSwitch.h"
 
-#include "TROOT.h"
+#include <TROOT.h>
 
 #include <algorithm>
 #include <memory>

@@ -24,7 +24,7 @@
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/StatusCode.h>
 
-#include "edm4hep/MCParticleCollection.h"
+#include <edm4hep/MCParticleCollection.h>
 
 #include <sstream>
 #include <stdexcept>

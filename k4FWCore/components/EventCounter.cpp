@@ -17,10 +17,10 @@
  * limitations under the License.
  */
 
-#include "Gaudi/Accumulators.h"
-#include "Gaudi/Functional/Consumer.h"
-#include "Gaudi/Property.h"
+#include <Gaudi/Accumulators.h>
+#include <Gaudi/Functional/Consumer.h>
 #include <Gaudi/PluginService.h>
+#include <Gaudi/Property.h>
 #include <GaudiKernel/EventContext.h>
 #include <GaudiKernel/MsgStream.h>
 #include <GaudiKernel/StatusCode.h>

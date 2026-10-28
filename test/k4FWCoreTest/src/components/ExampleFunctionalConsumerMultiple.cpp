@@ -17,19 +17,19 @@
  * limitations under the License.
  */
 
-#include "Gaudi/Property.h"
 #include <Gaudi/PluginService.h>
+#include <Gaudi/Property.h>
 #include <GaudiKernel/ISvcLocator.h>
 
-#include "podio/UserDataCollection.h"
+#include <podio/UserDataCollection.h>
 
-#include "edm4hep/MCParticleCollection.h"
-#include "edm4hep/RecoMCParticleLinkCollection.h"
-#include "edm4hep/ReconstructedParticleCollection.h"
-#include "edm4hep/SimTrackerHitCollection.h"
-#include "edm4hep/TrackCollection.h"
-#include "edm4hep/TrackerHit3DCollection.h"
 #include <edm4hep/MCParticle.h>
+#include <edm4hep/MCParticleCollection.h>
+#include <edm4hep/RecoMCParticleLinkCollection.h>
+#include <edm4hep/ReconstructedParticleCollection.h>
+#include <edm4hep/SimTrackerHitCollection.h>
+#include <edm4hep/TrackCollection.h>
+#include <edm4hep/TrackerHit3DCollection.h>
 
 #include "k4FWCore/Consumer.h"
 

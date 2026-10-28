@@ -22,14 +22,14 @@
 #include <GaudiKernel/SmartIF.h>
 #include <GaudiKernel/StatusCode.h>
 
-#include "podio/UserDataCollection.h"
+#include <podio/UserDataCollection.h>
 
-#include "edm4hep/EventHeaderCollection.h"
+#include <edm4hep/EventHeaderCollection.h>
 
 #include "k4FWCore/Transformer.h"
 #include "k4Interface/IUniqueIDGenSvc.h"
 
-#include "TRandom3.h"
+#include <TRandom3.h>
 
 #include <string>
 

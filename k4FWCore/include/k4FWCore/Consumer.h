@@ -19,13 +19,13 @@
 #ifndef FWCORE_CONSUMER_H
 #define FWCORE_CONSUMER_H
 
-#include "GAUDI_VERSION.h"
-#include "Gaudi/Functional/details.h"
-#include "Gaudi/Functional/utilities.h"
-#include "Gaudi/Property.h"
-#include "GaudiKernel/FunctionalFilterDecision.h"
+#include <GAUDI_VERSION.h>
+#include <Gaudi/Functional/details.h>
+#include <Gaudi/Functional/utilities.h>
+#include <Gaudi/Property.h>
 #include <GaudiKernel/DataObjID.h>
 #include <GaudiKernel/EventContext.h>
+#include <GaudiKernel/FunctionalFilterDecision.h>
 #include <GaudiKernel/GaudiException.h>
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/MsgStream.h>

@@ -24,15 +24,15 @@
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/StatusCode.h>
 
-#include "podio/UserDataCollection.h"
+#include <podio/UserDataCollection.h>
 
-#include "edm4hep/MCParticleCollection.h"
-#include "edm4hep/SimTrackerHitCollection.h"
-#include "edm4hep/TrackCollection.h"
+#include <edm4hep/MCParticleCollection.h>
+#include <edm4hep/SimTrackerHitCollection.h>
+#include <edm4hep/TrackCollection.h>
 #include <edm4hep/TrackState.h>
 #include <edm4hep/TrackerHit3DCollection.h>
 #if __has_include("edm4hep/EDM4hepVersion.h")
-#include "edm4hep/EDM4hepVersion.h"
+#include <edm4hep/EDM4hepVersion.h>
 #else
 // Copy the necessary parts from the header above to make whatever we need to work here
 #define EDM4HEP_VERSION(major, minor, patch) ((UINT64_C(major) << 32) | (UINT64_C(minor) << 16) | (UINT64_C(patch)))

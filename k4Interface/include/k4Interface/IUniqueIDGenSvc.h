@@ -23,8 +23,8 @@
 #include <GaudiKernel/Kernel.h>
 #include <GaudiKernel/extend_interfaces.h>
 
-#include "edm4hep/EventHeaderCollection.h"
 #include <edm4hep/EventHeader.h>
+#include <edm4hep/EventHeaderCollection.h>
 
 #include <cstddef>
 #include <string>

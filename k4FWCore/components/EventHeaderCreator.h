@@ -19,8 +19,8 @@
 #ifndef K4FWCORE_EVENTHEADERCREATOR
 #define K4FWCORE_EVENTHEADERCREATOR
 
-#include "Gaudi/Algorithm.h"
-#include "Gaudi/Property.h"
+#include <Gaudi/Algorithm.h>
+#include <Gaudi/Property.h>
 #include <GaudiKernel/DataHandle.h>
 #include <GaudiKernel/EventContext.h>
 #include <GaudiKernel/ISvcLocator.h>

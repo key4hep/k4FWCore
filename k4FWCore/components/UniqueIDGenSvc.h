@@ -19,9 +19,9 @@
 #ifndef FWCORE_UNIQUEIDGENSVC_H
 #define FWCORE_UNIQUEIDGENSVC_H
 
-#include "Gaudi/Property.h"
-#include "GaudiKernel/Service.h"
+#include <Gaudi/Property.h>
 #include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/Service.h>
 
 #include "k4Interface/IUniqueIDGenSvc.h"
 

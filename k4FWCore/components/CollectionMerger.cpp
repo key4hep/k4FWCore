@@ -43,7 +43,7 @@
 #include <podio/CollectionBase.h>
 #include <podio/utilities/TypeHelpers.h>
 
-#include "edm4hep/edm4hep.h"
+#include <edm4hep/edm4hep.h>
 
 #include "k4FWCore/GaudiChecks.h"
 #include "k4FWCore/Transformer.h"

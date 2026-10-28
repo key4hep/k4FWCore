@@ -23,18 +23,18 @@
 #include <GaudiKernel/MsgStream.h>
 #include <GaudiKernel/StatusCode.h>
 
-#include "podio/FrameCategories.h"
+#include <podio/FrameCategories.h>
 
-#include "edm4hep/CaloHitContributionCollection.h"
-#include "edm4hep/Constants.h"
-#include "edm4hep/EventHeaderCollection.h"
-#include "edm4hep/MCParticleCollection.h"
-#include "edm4hep/SimCalorimeterHitCollection.h"
-#include "edm4hep/SimTrackerHitCollection.h"
+#include <edm4hep/CaloHitContributionCollection.h>
+#include <edm4hep/Constants.h>
+#include <edm4hep/EventHeaderCollection.h>
+#include <edm4hep/MCParticleCollection.h>
 #include <edm4hep/MutableSimCalorimeterHit.h>
+#include <edm4hep/SimCalorimeterHitCollection.h>
+#include <edm4hep/SimTrackerHitCollection.h>
 
 #include "k4FWCore/MetadataUtils.h"
-#include <k4Interface/IUniqueIDGenSvc.h>
+#include "k4Interface/IUniqueIDGenSvc.h"
 
 #include <TMath.h>
 

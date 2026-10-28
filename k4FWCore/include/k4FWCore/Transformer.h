@@ -19,10 +19,10 @@
 #ifndef FWCORE_TRANSFORMER_H
 #define FWCORE_TRANSFORMER_H
 
-#include "GAUDI_VERSION.h"
-#include "Gaudi/Functional/details.h"
-#include "Gaudi/Functional/utilities.h"
-#include "Gaudi/Property.h"
+#include <GAUDI_VERSION.h>
+#include <Gaudi/Functional/details.h>
+#include <Gaudi/Functional/utilities.h>
+#include <Gaudi/Property.h>
 #include <GaudiKernel/DataObjID.h>
 #include <GaudiKernel/EventContext.h>
 #include <GaudiKernel/GaudiException.h>

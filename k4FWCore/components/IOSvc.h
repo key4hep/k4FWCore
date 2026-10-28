@@ -19,20 +19,20 @@
 #ifndef FWCORE_IOSVC_H
 #define FWCORE_IOSVC_H
 
-#include "Gaudi/Property.h"
-#include "GaudiKernel/IDataProviderSvc.h"
-#include "GaudiKernel/IHiveWhiteBoard.h"
-#include "GaudiKernel/IIncidentListener.h"
-#include "GaudiKernel/IIncidentSvc.h"
-#include "GaudiKernel/Service.h"
+#include <Gaudi/Property.h>
+#include <GaudiKernel/IDataProviderSvc.h>
+#include <GaudiKernel/IHiveWhiteBoard.h>
+#include <GaudiKernel/IIncidentListener.h>
+#include <GaudiKernel/IIncidentSvc.h>
 #include <GaudiKernel/Incident.h>
+#include <GaudiKernel/Service.h>
 #include <GaudiKernel/SmartIF.h>
 #include <GaudiKernel/StatusCode.h>
 
-#include "podio/Reader.h"
-#include "podio/Writer.h"
 #include <podio/CollectionBase.h>
 #include <podio/Frame.h>
+#include <podio/Reader.h>
+#include <podio/Writer.h>
 
 #include "IIOSvc.h"
 #include "k4FWCore/IMetadataSvc.h"

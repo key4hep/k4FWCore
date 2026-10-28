@@ -25,7 +25,7 @@
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/StatusCode.h>
 
-#include "edm4hep/MutableEventHeader.h"
+#include <edm4hep/MutableEventHeader.h>
 
 #include <cstdint>
 #include <stdexcept>

@@ -25,8 +25,8 @@
 #include <GaudiKernel/MsgStream.h>
 #include <GaudiKernel/StatusCode.h>
 
+#include "k4FWCore/MetadataUtils.h"
 #include "k4FWCoreTest_cellID_writer.h"
-#include <k4FWCore/MetadataUtils.h>
 
 #include <string>
 

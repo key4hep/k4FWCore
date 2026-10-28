@@ -21,8 +21,8 @@
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/MsgStream.h>
 
-#include "edm4hep/MCParticleCollection.h"
-#include "edm4hep/TrackCollection.h"
+#include <edm4hep/MCParticleCollection.h>
+#include <edm4hep/TrackCollection.h>
 
 #include "k4FWCore/Transformer.h"
 

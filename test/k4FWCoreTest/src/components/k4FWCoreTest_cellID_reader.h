@@ -19,13 +19,13 @@
 #ifndef K4FWCORE_K4FWCORETEST_CELLID_READER
 #define K4FWCORE_K4FWCORETEST_CELLID_READER
 
-#include "Gaudi/Algorithm.h"
+#include <Gaudi/Algorithm.h>
 #include <GaudiKernel/DataHandle.h>
 #include <GaudiKernel/EventContext.h>
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/StatusCode.h>
 
-#include "edm4hep/SimTrackerHitCollection.h"
+#include <edm4hep/SimTrackerHitCollection.h>
 
 #include "k4FWCore/DataHandle.h"
 

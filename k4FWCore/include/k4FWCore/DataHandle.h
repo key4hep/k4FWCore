@@ -19,7 +19,7 @@
 #ifndef K4FWCORE_DATAHANDLE_H
 #define K4FWCORE_DATAHANDLE_H
 
-#include "GAUDI_VERSION.h"
+#include <GAUDI_VERSION.h>
 #include <Gaudi/Property.h>
 #include <GaudiKernel/AnyDataWrapper.h>
 #include <GaudiKernel/DataHandle.h>

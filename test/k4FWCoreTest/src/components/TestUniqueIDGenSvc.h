@@ -19,8 +19,8 @@
 #ifndef TEST_UNIQUEIDGENSVC_H
 #define TEST_UNIQUEIDGENSVC_H
 
-#include "Gaudi/Accumulators.h"
-#include "Gaudi/Algorithm.h"
+#include <Gaudi/Accumulators.h>
+#include <Gaudi/Algorithm.h>
 #include <GaudiKernel/EventContext.h>
 #include <GaudiKernel/ISvcLocator.h>
 #include <GaudiKernel/SmartIF.h>

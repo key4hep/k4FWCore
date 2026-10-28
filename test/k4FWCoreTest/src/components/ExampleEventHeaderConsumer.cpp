@@ -21,9 +21,9 @@
 #include <Gaudi/Property.h>
 #include <GaudiKernel/ISvcLocator.h>
 
-#include "edm4hep/Constants.h"
-#include "edm4hep/EventHeaderCollection.h"
+#include <edm4hep/Constants.h>
 #include <edm4hep/EventHeader.h>
+#include <edm4hep/EventHeaderCollection.h>
 
 #include "k4FWCore/Consumer.h"
 

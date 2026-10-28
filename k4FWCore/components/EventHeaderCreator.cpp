@@ -25,7 +25,7 @@
 #include <GaudiKernel/MsgStream.h>
 #include <GaudiKernel/StatusCode.h>
 
-#include "edm4hep/EventHeaderCollection.h"
+#include <edm4hep/EventHeaderCollection.h>
 
 #include <string>
 

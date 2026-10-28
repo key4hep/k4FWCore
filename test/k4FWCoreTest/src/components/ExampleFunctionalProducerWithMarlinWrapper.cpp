@@ -20,9 +20,9 @@
 #include <Gaudi/PluginService.h>
 #include <GaudiKernel/ISvcLocator.h>
 
-#include "podio/CollectionBase.h"
+#include <podio/CollectionBase.h>
 
-#include "edm4hep/MCParticleCollection.h"
+#include <edm4hep/MCParticleCollection.h>
 
 #include "k4FWCore/Producer.h"
 
