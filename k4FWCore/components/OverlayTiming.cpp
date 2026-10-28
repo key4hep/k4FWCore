@@ -53,6 +53,16 @@ inline int overlaid_particle_index(int oldIndex, int offset, int nBgParticles) {
   return (oldIndex >= 0 && oldIndex < nBgParticles) ? offset + oldIndex : -1;
 }
 
+// Whether at least one contribution of the hit, shifted by timeShift, is inside (start, stop).
+// Such a hit is kept whole: time windows on the individual contributions are left to the digitization
+inline bool has_contribution_in_window(const edm4hep::SimCalorimeterHit& hit, float timeShift, float start,
+                                       float stop) {
+  const auto contribs = hit.getContributions();
+  return std::any_of(contribs.begin(), contribs.end(), [&](const auto& contrib) {
+    return (contrib.getTime() + timeShift > start) && (contrib.getTime() + timeShift < stop);
+  });
+}
+
 std::pair<float, float> OverlayTiming::define_time_windows(const std::string& collection_name) const {
   try {
     return {m_timeWindows.value().at(collection_name)[0], m_timeWindows.value().at(collection_name)[1]};
@@ -213,7 +223,8 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
     osimTrackerHits.emplace_back(std::move(ocoll));
   }
 
-  // Copy the SimCalorimeterHits and crop them together with the contributions
+  // Copy the SimCalorimeterHits that have at least one contribution in the time window,
+  // whole: with all their contributions and their energy
   std::map<int, std::map<uint64_t, edm4hep::MutableSimCalorimeterHit>> cellIDsMap;
   for (size_t i = 0; i < simCaloHits.size(); ++i) {
     const auto& coll = simCaloHits[i];
@@ -224,28 +235,20 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
     auto& caloHitContribs = ocaloHitContribs[i];
     for (const auto&& simCaloHit : *coll) {
       const float tof = time_of_flight(simCaloHit.getPosition());
-      bool within_time_window = false;
-      std::vector<int> thisContribs;
+      if (!has_contribution_in_window(simCaloHit, 0, this_start + tof, this_stop + tof)) {
+        continue;
+      }
+      auto newhit = simCaloHit.clone(false);
       for (const auto& contrib : simCaloHit.getContributions()) {
-        if (!((contrib.getTime() > this_start + tof) && (contrib.getTime() < this_stop + tof))) {
-          continue;
-        }
-        within_time_window = true;
         // TODO: Make sure a contribution is not added twice
         auto newContrib = contrib.clone(false);
         if (const auto index = contrib.getParticle().getObjectID().index; index >= 0) {
           newContrib.setParticle(oparticles.at(index));
         }
-        thisContribs.push_back(caloHitContribs.size());
-        caloHitContribs.push_back(std::move(newContrib));
+        newhit.addToContributions(newContrib);
+        caloHitContribs.push_back(newContrib);
       }
-      if (within_time_window) {
-        auto newhit = simCaloHit.clone(false);
-        for (const auto& contrib : thisContribs) {
-          newhit.addToContributions(caloHitContribs.at(contrib));
-        }
-        calHitMap.emplace(simCaloHit.getCellID(), std::move(newhit));
-      }
+      calHitMap.emplace(simCaloHit.getCellID(), std::move(newhit));
     }
   }
 
@@ -448,36 +451,32 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
           auto& calHitMap = cellIDsMap[i];
           auto& calHitContribs = ocaloHitContribs[i];
           for (const auto&& simCaloHit : backgroundEvent.get<edm4hep::SimCalorimeterHitCollection>(name)) {
-            if (calHitMap.find(simCaloHit.getCellID()) == calHitMap.end()) {
-              // There is no hit at this position. The new hit can be added, if it is not outside the window
+            // A background hit with at least one contribution in the window is overlaid whole
+            if (!has_contribution_in_window(simCaloHit, timeOffset, this_start, this_stop)) {
+              continue;
+            }
+            if (auto it = calHitMap.find(simCaloHit.getCellID()); it == calHitMap.end()) {
+              // There is no hit at this position: copy the background hit
               auto calhit = edm4hep::MutableSimCalorimeterHit();
-              bool add = false;
+              calhit.setCellID(simCaloHit.getCellID());
+              calhit.setEnergy(simCaloHit.getEnergy());
+              calhit.setPosition(simCaloHit.getPosition());
               for (const auto& contrib : simCaloHit.getContributions()) {
-                if ((contrib.getTime() + timeOffset > this_start) && (contrib.getTime() + timeOffset < this_stop)) {
-                  add = true;
-                  // TODO: Make sure a contribution is not added twice
-                  auto newContrib = cloneContribution(contrib);
-                  calhit.addToContributions(newContrib);
-                  calHitContribs.push_back(newContrib);
-                }
+                // TODO: Make sure a contribution is not added twice
+                auto newContrib = cloneContribution(contrib);
+                calhit.addToContributions(newContrib);
+                calHitContribs.push_back(newContrib);
               }
-              if (add) {
-                calhit.setCellID(simCaloHit.getCellID());
-                calhit.setEnergy(simCaloHit.getEnergy());
-                calhit.setPosition(simCaloHit.getPosition());
-                calHitMap[calhit.getCellID()] = calhit;
-              }
+              calHitMap.emplace(simCaloHit.getCellID(), std::move(calhit));
             } else {
               // There is already a hit at this position. Its energy grows by the energy
               // of each contribution that is merged into it
-              auto& calhit = calHitMap[simCaloHit.getCellID()];
+              auto& calhit = it->second;
               for (const auto& contrib : simCaloHit.getContributions()) {
-                if ((contrib.getTime() + timeOffset > this_start) && (contrib.getTime() + timeOffset < this_stop)) {
-                  // TODO: Make sure a contribution is not added twice
-                  auto newContrib = cloneContribution(contrib);
-                  calhit.addMCParticleContribution(newContrib);
-                  calHitContribs.push_back(newContrib);
-                }
+                // TODO: Make sure a contribution is not added twice
+                auto newContrib = cloneContribution(contrib);
+                calhit.addMCParticleContribution(newContrib);
+                calHitContribs.push_back(newContrib);
               }
             }
           }
