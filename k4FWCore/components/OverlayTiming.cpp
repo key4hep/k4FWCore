@@ -468,13 +468,14 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
                 calHitMap[calhit.getCellID()] = calhit;
               }
             } else {
-              // there is already a hit at this position
+              // There is already a hit at this position. Its energy grows by the energy
+              // of each contribution that is merged into it
               auto& calhit = calHitMap[simCaloHit.getCellID()];
               for (const auto& contrib : simCaloHit.getContributions()) {
                 if ((contrib.getTime() + timeOffset > this_start) && (contrib.getTime() + timeOffset < this_stop)) {
                   // TODO: Make sure a contribution is not added twice
                   auto newContrib = cloneContribution(contrib);
-                  calhit.addToContributions(newContrib);
+                  calhit.addMCParticleContribution(newContrib);
                   calHitContribs.push_back(newContrib);
                 }
               }
