@@ -19,12 +19,16 @@
 #ifndef FWCORE_IUNIQUEIDGENSVC_H
 #define FWCORE_IUNIQUEIDGENSVC_H
 
-#include "edm4hep/EventHeaderCollection.h"
+#include <GaudiKernel/IInterface.h>
+#include <GaudiKernel/Kernel.h>
+#include <GaudiKernel/extend_interfaces.h>
+
+#include <edm4hep/EventHeader.h>
+#include <edm4hep/EventHeaderCollection.h>
 
 #include <cstddef>
 #include <string>
-
-#include <GaudiKernel/IInterface.h>
+#include <utility>
 
 /** @class IUniqueIDGenSvc
  *

@@ -26,7 +26,7 @@
 #ifndef K4FWCORE_K4_CHECK_H
 #define K4FWCORE_K4_CHECK_H
 
-#include "GaudiKernel/StatusCode.h"
+#include <GaudiKernel/StatusCode.h>
 
 /**
  * @brief Helper to check return codes in a Gaudi component.

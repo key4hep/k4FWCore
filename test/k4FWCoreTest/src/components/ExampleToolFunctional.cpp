@@ -17,15 +17,23 @@
  * limitations under the License.
  */
 
+#include <Gaudi/Algorithm.h>
+#include <Gaudi/PluginService.h>
+#include <Gaudi/Property.h>
+#include <GaudiKernel/AlgTool.h>
+#include <GaudiKernel/GaudiException.h>
+#include <GaudiKernel/IAlgTool.h>
+#include <GaudiKernel/IInterface.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/MsgStream.h>
+#include <GaudiKernel/StatusCode.h>
+#include <GaudiKernel/ToolHandle.h>
+
 #include "k4FWCore/Consumer.h"
 #include "k4FWCore/GaudiChecks.h"
 #include "k4FWCore/MetadataUtils.h"
 
-#include <Gaudi/Algorithm.h>
-#include <GaudiKernel/AlgTool.h>
-#include <GaudiKernel/GaudiException.h>
-#include <GaudiKernel/IAlgTool.h>
-#include <GaudiKernel/ToolHandle.h>
+#include <string>
 
 struct IExampleTool : virtual IAlgTool {
   DeclareInterfaceID(IExampleTool, 1, 0);

@@ -19,11 +19,13 @@
 #ifndef FWCORE_METADATASVC_H
 #define FWCORE_METADATASVC_H
 
-#include "Gaudi/Property.h"
-#include "GaudiKernel/IDataProviderSvc.h"
-#include "GaudiKernel/Service.h"
+#include <Gaudi/Property.h>
+#include <GaudiKernel/IDataProviderSvc.h>
+#include <GaudiKernel/Service.h>
+#include <GaudiKernel/SmartIF.h>
+#include <GaudiKernel/StatusCode.h>
 
-#include "podio/Frame.h"
+#include <podio/Frame.h>
 
 #include "k4FWCore/IMetadataSvc.h"
 

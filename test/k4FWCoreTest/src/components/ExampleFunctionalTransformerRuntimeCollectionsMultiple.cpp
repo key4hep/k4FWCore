@@ -17,20 +17,31 @@
  * limitations under the License.
  */
 
-#include "Gaudi/Property.h"
+#include <Gaudi/PluginService.h>
+#include <Gaudi/Property.h>
+#include <GaudiKernel/ISvcLocator.h>
 
-#include "edm4hep/MCParticleCollection.h"
-#include "edm4hep/RecoMCParticleLinkCollection.h"
-#include "edm4hep/ReconstructedParticleCollection.h"
-#include "edm4hep/SimTrackerHitCollection.h"
-#include "edm4hep/TrackCollection.h"
-#include "edm4hep/TrackerHit3DCollection.h"
-#include "podio/UserDataCollection.h"
+#include <podio/UserDataCollection.h>
+
+#include <edm4hep/MCParticle.h>
+#include <edm4hep/MCParticleCollection.h>
+#include <edm4hep/RecoMCParticleLinkCollection.h>
+#include <edm4hep/ReconstructedParticleCollection.h>
+#include <edm4hep/SimTrackerHitCollection.h>
+#include <edm4hep/TrackCollection.h>
+#include <edm4hep/TrackerHit3DCollection.h>
 
 #include "k4FWCore/Transformer.h"
 
+#include <cmath>
+#include <cstddef>
+#include <cstdlib>
+#include <sstream>
 #include <stdexcept>
 #include <string>
+#include <tuple>
+#include <utility>
+#include <vector>
 
 // Which type of collection we are reading (vectors of pointers for runtime collections)
 using FloatCollVec = std::vector<const podio::UserDataCollection<float>*>;

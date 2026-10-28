@@ -20,6 +20,8 @@
 #define EXAMPLES_KEEPDROPSWITCH_H
 
 #include <string>
+#include <string_view>
+#include <tuple>
 #include <vector>
 
 namespace k4FWCore {

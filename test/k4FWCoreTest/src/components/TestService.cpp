@@ -18,6 +18,11 @@
  */
 #include "TestService.h"
 
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/MsgStream.h>
+#include <GaudiKernel/Service.h>
+#include <GaudiKernel/StatusCode.h>
+
 DECLARE_COMPONENT(TestService)
 
 StatusCode TestService::initialize() {

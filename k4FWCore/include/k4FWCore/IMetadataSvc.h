@@ -19,11 +19,14 @@
 #ifndef FWCORE_IMETADATASERVICE_H
 #define FWCORE_IMETADATASERVICE_H
 
-#include "GaudiKernel/IInterface.h"
+#include <GaudiKernel/IInterface.h>
 
-#include "edm4hep/utils/ParticleIDUtils.h"
+#include <podio/Frame.h>
 
-#include "podio/Frame.h"
+#include <edm4hep/utils/ParticleIDUtils.h>
+
+#include <optional>
+#include <string>
 
 class IMetadataSvc : virtual public IInterface {
   friend class Writer;

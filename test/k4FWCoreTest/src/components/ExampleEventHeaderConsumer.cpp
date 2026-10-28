@@ -17,17 +17,21 @@
  * limitations under the License.
  */
 
-#include "edm4hep/Constants.h"
-#include "edm4hep/EventHeaderCollection.h"
+#include <Gaudi/PluginService.h>
+#include <Gaudi/Property.h>
+#include <GaudiKernel/ISvcLocator.h>
+
+#include <edm4hep/Constants.h>
+#include <edm4hep/EventHeader.h>
+#include <edm4hep/EventHeaderCollection.h>
 
 #include "k4FWCore/Consumer.h"
-
-#include <Gaudi/Property.h>
 
 #include <atomic>
 #include <format>
 #include <stdexcept>
 #include <string>
+#include <utility>
 
 struct ExampleEventHeaderConsumer final : k4FWCore::Consumer<void(const edm4hep::EventHeaderCollection&)> {
   ExampleEventHeaderConsumer(const std::string& name, ISvcLocator* svcLoc)

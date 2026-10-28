@@ -16,11 +16,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "TRandom3.h"
-#include "edm4hep/EventHeaderCollection.h"
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/MsgStream.h>
+#include <GaudiKernel/SmartIF.h>
+#include <GaudiKernel/StatusCode.h>
+
+#include <podio/UserDataCollection.h>
+
+#include <edm4hep/EventHeaderCollection.h>
+
 #include "k4FWCore/Transformer.h"
 #include "k4Interface/IUniqueIDGenSvc.h"
-#include "podio/UserDataCollection.h"
+
+#include <TRandom3.h>
+
+#include <string>
 
 // Example functional algorithms using getUniqueID to seed a PRNG
 // Selected parts of the algorithm are shown as an example in the docs

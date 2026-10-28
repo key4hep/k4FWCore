@@ -20,7 +20,10 @@
 #ifndef IGEOSVC_H
 #define IGEOSVC_H
 
-#include "GaudiKernel/IService.h"
+#include <GaudiKernel/IService.h>
+#include <GaudiKernel/Kernel.h>
+
+#include <string>
 
 namespace dd4hep {
 class Detector;
