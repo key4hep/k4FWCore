@@ -22,7 +22,6 @@
 #include "Gaudi/Property.h"
 #include "GaudiKernel/Service.h"
 #include <GaudiKernel/ISvcLocator.h>
-#include <GaudiKernel/extends.h>
 
 #include "k4Interface/IUniqueIDGenSvc.h"
 

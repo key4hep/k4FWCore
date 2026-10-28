@@ -28,7 +28,6 @@
 #include <GaudiKernel/Incident.h>
 #include <GaudiKernel/SmartIF.h>
 #include <GaudiKernel/StatusCode.h>
-#include <GaudiKernel/extends.h>
 
 #include "podio/Reader.h"
 #include "podio/Writer.h"
