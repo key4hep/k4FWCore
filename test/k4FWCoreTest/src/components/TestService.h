@@ -19,7 +19,8 @@
 #ifndef K4FWCORETEST_TESTSERVICE_H
 #define K4FWCORETEST_TESTSERVICE_H
 
-#include "GaudiKernel/Service.h"
+#include <GaudiKernel/Service.h>
+#include <GaudiKernel/StatusCode.h>
 
 class TestService : public Service {
 public:

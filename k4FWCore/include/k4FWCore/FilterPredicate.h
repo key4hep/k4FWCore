@@ -17,8 +17,8 @@
  * limitations under the License.
  */
 
-#include "Gaudi/Functional/FilterPredicate.h"
 #include "k4FWCore/FunctionalUtils.h"
+#include <Gaudi/Functional/FilterPredicate.h>
 
 namespace k4FWCore {
 

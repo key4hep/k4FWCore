@@ -19,13 +19,15 @@
 #ifndef FWCORE_IIOSVC_H
 #define FWCORE_IIOSVC_H
 
-#include "GaudiKernel/IInterface.h"
+#include <GaudiKernel/IInterface.h>
 
-#include "podio/CollectionBase.h"
-#include "podio/Writer.h"
+#include <podio/CollectionBase.h>
+#include <podio/Frame.h>
+#include <podio/Writer.h>
 
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <vector>
 
 /**

@@ -17,13 +17,18 @@
  * limitations under the License.
  */
 
-#include "Gaudi/Property.h"
+#include <Gaudi/PluginService.h>
+#include <Gaudi/Property.h>
+#include <GaudiKernel/ISvcLocator.h>
 
-#include "edm4hep/MCParticleCollection.h"
+#include <edm4hep/MCParticleCollection.h>
 
 #include "k4FWCore/Consumer.h"
 
+#include <sstream>
+#include <stdexcept>
 #include <string>
+#include <vector>
 
 struct ExampleFunctionalConsumerRuntimeCollections final
     : k4FWCore::Consumer<void(const std::vector<const edm4hep::MCParticleCollection*>& input)> {

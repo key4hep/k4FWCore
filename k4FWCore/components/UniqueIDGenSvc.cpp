@@ -18,8 +18,16 @@
  */
 #include "UniqueIDGenSvc.h"
 
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/MsgStream.h>
+
+#include <bitset>
 #include <cstddef>
 #include <format>
+#include <functional>
+#include <limits>
+#include <mutex>
 #include <stdexcept>
 #include <string>
 

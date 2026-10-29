@@ -19,20 +19,22 @@
 #ifndef FWCORE_METADATAUTILS_H
 #define FWCORE_METADATAUTILS_H
 
-#include "k4FWCore/IMetadataSvc.h"
-
 #include <Gaudi/Algorithm.h>
+#include <GaudiKernel/GaudiException.h>
+#include <GaudiKernel/MsgStream.h>
 #include <GaudiKernel/Service.h>
+#include <GaudiKernel/StatusCode.h>
 
 #include <podio/FrameCategories.h>
 
 #include <edm4hep/Constants.h>
 
-#include <GaudiKernel/GaudiException.h>
+#include "k4FWCore/IMetadataSvc.h"
 
 #include <concepts>
 #include <optional>
 #include <ostream>
+#include <string>
 
 namespace k4FWCore {
 

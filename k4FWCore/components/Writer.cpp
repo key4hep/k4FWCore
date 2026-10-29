@@ -17,28 +17,44 @@
  * limitations under the License.
  */
 
-#include "Gaudi/Functional/Consumer.h"
-#include "GaudiKernel/AnyDataWrapper.h"
-#include "GaudiKernel/DataObject.h"
-#include "GaudiKernel/IDataManagerSvc.h"
-#include "GaudiKernel/IDataProviderSvc.h"
-#include "GaudiKernel/IHiveWhiteBoard.h"
-#include "GaudiKernel/SmartDataPtr.h"
-#include "GaudiKernel/StatusCode.h"
+#include <Gaudi/Functional/Consumer.h>
+#include <Gaudi/Interfaces/IOptionsSvc.h>
+#include <Gaudi/PluginService.h>
+#include <GaudiKernel/AnyDataWrapper.h>
+#include <GaudiKernel/Bootstrap.h>
+#include <GaudiKernel/DataObject.h>
+#include <GaudiKernel/EventContext.h>
+#include <GaudiKernel/GaudiException.h>
+#include <GaudiKernel/IDataManagerSvc.h>
+#include <GaudiKernel/IDataProviderSvc.h>
+#include <GaudiKernel/IHiveWhiteBoard.h>
+#include <GaudiKernel/IRegistry.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/MsgStream.h>
+#include <GaudiKernel/ServiceHandle.h>
+#include <GaudiKernel/SmartDataPtr.h>
+#include <GaudiKernel/SmartIF.h>
+#include <GaudiKernel/StatusCode.h>
 
-#include "podio/Frame.h"
+#include <podio/CollectionBase.h>
+#include <podio/Frame.h>
+#include <podio/FrameCategories.h>
+#include <podio/Writer.h>
 
 #include "IIOSvc.h"
-
 #include "k4FWCore/DataWrapper.h"
 #include "k4FWCore/FunctionalUtils.h"
 #include "k4FWCore/IMetadataSvc.h"
 
 #include <algorithm>
+#include <cstdlib>
 #include <memory>
+#include <set>
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <utility>
+#include <vector>
 
 class Writer final : public Gaudi::Functional::Consumer<void(const EventContext&)> {
 public:

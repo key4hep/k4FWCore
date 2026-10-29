@@ -19,26 +19,41 @@
 #ifndef FWCORE_FUNCTIONALUTILS_H
 #define FWCORE_FUNCTIONALUTILS_H
 
-#include "GAUDI_VERSION.h"
-#include "Gaudi/Functional/details.h"
-#include "GaudiKernel/AnyDataWrapper.h"
-#include "GaudiKernel/DataObjID.h"
-#include "GaudiKernel/DataObjectHandle.h"
-#include "GaudiKernel/EventContext.h"
-#include "GaudiKernel/IDataProviderSvc.h"
-#include "GaudiKernel/ThreadLocalContext.h"
+#include <GAUDI_VERSION.h>
+#include <Gaudi/Algorithm.h>
+#include <Gaudi/Functional/details.h>
+#include <Gaudi/Property.h>
+#include <GaudiKernel/AnyDataWrapper.h>
+#include <GaudiKernel/DataHandle.h>
+#include <GaudiKernel/DataObjID.h>
+#include <GaudiKernel/DataObject.h>
+#include <GaudiKernel/DataObjectHandle.h>
+#include <GaudiKernel/EventContext.h>
 #include <GaudiKernel/GaudiException.h>
+#include <GaudiKernel/IAlgExecStateSvc.h>
+#include <GaudiKernel/IDataProviderSvc.h>
+#include <GaudiKernel/IProperty.h>
+#include <GaudiKernel/MsgStream.h>
+#include <GaudiKernel/StatusCode.h>
+#include <GaudiKernel/ThreadLocalContext.h>
+// #include "GaudiKernel/CommonMessaging.h"
 
-#include "podio/CollectionBase.h"
+#include <podio/CollectionBase.h>
 
 #include "k4FWCore/DataWrapper.h"
 
-// #include "GaudiKernel/CommonMessaging.h"
-
+#include <algorithm>
+#include <concepts>
+#include <cstddef>
 #include <format>
+#include <iterator>
 #include <memory>
+#include <string>
 #include <tuple>
 #include <type_traits>
+#include <typeinfo>
+#include <utility>
+#include <vector>
 
 namespace k4FWCore {
 

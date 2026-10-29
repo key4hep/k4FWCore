@@ -33,15 +33,26 @@
  *  The output collection is specified in the OutputCollection property.
  */
 
+#include <Gaudi/PluginService.h>
+#include <Gaudi/Property.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/MsgStream.h>
+#include <GaudiKernel/StatusCode.h>
+#include <GaudiKernel/System.h>
+
+#include <podio/CollectionBase.h>
 #include <podio/utilities/TypeHelpers.h>
 
-#include "edm4hep/edm4hep.h"
+#include <edm4hep/edm4hep.h>
 
 #include "k4FWCore/GaudiChecks.h"
 #include "k4FWCore/Transformer.h"
 
+#include <algorithm>
+#include <iterator>
 #include <map>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <vector>

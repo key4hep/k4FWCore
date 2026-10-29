@@ -17,21 +17,28 @@
  * limitations under the License.
  */
 
+#include <Gaudi/PluginService.h>
+#include <Gaudi/Property.h>
+#include <GaudiKernel/ISvcLocator.h>
+#include <GaudiKernel/MsgStream.h>
+#include <GaudiKernel/StatusCode.h>
+
+#include <edm4hep/ParticleID.h>
+#include <edm4hep/ParticleIDCollection.h>
+#include <edm4hep/ReconstructedParticle.h>
+#include <edm4hep/ReconstructedParticleCollection.h>
+#include <edm4hep/utils/ParticleIDUtils.h>
+
 #include "k4FWCore/Consumer.h"
 #include "k4FWCore/MetadataUtils.h"
-#include <edm4hep/ReconstructedParticleCollection.h>
 
-#include "edm4hep/ParticleIDCollection.h"
-#include "edm4hep/utils/ParticleIDUtils.h"
-
-#include <Gaudi/Property.h>
-
-#include "fmt/format.h"
-#include "fmt/ranges.h"
+#include <fmt/format.h>
+#include <fmt/ranges.h>
 
 #include <algorithm>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 struct ExampleParticleIDConsumer final
     : k4FWCore::Consumer<void(const edm4hep::ParticleIDCollection&, const edm4hep::ParticleIDCollection&,
