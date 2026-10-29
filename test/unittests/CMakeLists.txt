@@ -62,7 +62,7 @@ else()
   set_target_properties(Catch2::Catch2 PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${CATCH2_IF_INC_DIRS}")
 endif()
 
-add_executable(unittests_k4FWCore KeepDropSwitchTests.cpp)
+add_executable(unittests_k4FWCore KeepDropSwitchTests.cpp PropertyChoicesTests.cpp)
 target_link_libraries(unittests_k4FWCore
   PUBLIC
   k4FWCore::k4FWCore
