@@ -42,7 +42,7 @@
 /// enum class Mode { Fast, Precise, Experimental };
 /// // Register the enumerators that can be selected by name. This has to be done in the global namespace, right after
 /// // the declaration of the enum, before any Gaudi::Property<Mode> is used
-/// K4FWCORE_ENUM_PROPERTY(Mode, Mode::Fast, Mode::Precise, Mode::Experimental);
+/// K4FWCORE_ENUM_PROPERTY(Mode, Fast, Precise, Experimental);
 ///
 /// struct MyAlg : k4FWCore::Transformer<...> {
 ///   // The user writes Mode="Precise", the code gets Mode::Precise
@@ -316,37 +316,43 @@ struct Gaudi::Details::Property::StringConverter<E> {
 ///
 /// @code
 /// enum class Mode { Fast, Precise };
-/// K4FWCORE_ENUM_PROPERTY(Mode, Mode::Fast, Mode::Precise);
+/// K4FWCORE_ENUM_PROPERTY(Mode, Fast, Precise);
 /// // The user writes "Fast" or "Precise"
 /// Gaudi::Property<Mode> m_mode{this, "Mode", Mode::Fast, "One of " + k4FWCore::enumNameList<Mode>()};
 /// @endcode
 ///
 /// It has to be used in the global namespace, after the declaration of the enum and before any Gaudi::Property<E>
-/// is used. Enumerators that are not listed cannot be selected.
+/// is used. Enumerators that are not listed cannot be selected. The enumerators are in scope (via `using enum`), so
+/// they can be given without the name of the enum, but `Mode::Fast` works as well.
 ///
 /// @param E   The enum type
 /// @param ... The enumerators that can be selected, in the order in which they are listed by enumNameList()
 #define K4FWCORE_ENUM_PROPERTY(E, ...)                                                                                 \
   template <>                                                                                                          \
-  struct k4FWCore::EnumNames<E> : k4FWCore::Enumerators<__VA_ARGS__> {};                                               \
+  struct k4FWCore::EnumNames<E> {                                                                                      \
+    using enum E;                                                                                                      \
+    static constexpr auto values = k4FWCore::Enumerators<__VA_ARGS__>::values;                                         \
+  };                                                                                                                   \
   K4FWCORE_DETAIL_ENUM_TOSTREAM(E)
 
 /// @brief Register an enum, so that it can be the type of a Gaudi::Property, selected by custom names.
 ///
 /// @code
 /// enum class Mode { Fast, Precise };
-/// K4FWCORE_ENUM_PROPERTY_NAMES(Mode, {Mode::Fast, "fast"}, {Mode::Precise, "precise"});
+/// K4FWCORE_ENUM_PROPERTY_NAMES(Mode, {Fast, "fast"}, {Precise, "precise"});
 /// // The user writes "fast" or "precise"
 /// Gaudi::Property<Mode> m_mode{this, "Mode", Mode::Fast, "One of " + k4FWCore::enumNameList<Mode>()};
 /// @endcode
 ///
-/// See K4FWCORE_ENUM_PROPERTY for where it has to be used.
+/// See K4FWCORE_ENUM_PROPERTY for where it has to be used. As there, the enumerators can be given with or without
+/// the name of the enum.
 ///
 /// @param E   The enum type
 /// @param ... `{enumerator, name}` pairs, in the order in which they are listed by enumNameList()
 #define K4FWCORE_ENUM_PROPERTY_NAMES(E, ...)                                                                           \
   template <>                                                                                                          \
   struct k4FWCore::EnumNames<E> {                                                                                      \
+    using enum E;                                                                                                      \
     static constexpr std::pair<E, std::string_view> values[] = {__VA_ARGS__};                                          \
   };                                                                                                                   \
   K4FWCORE_DETAIL_ENUM_TOSTREAM(E)
