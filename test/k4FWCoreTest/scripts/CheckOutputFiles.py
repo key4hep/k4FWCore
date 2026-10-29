@@ -533,7 +533,10 @@ for frame in reader.get("events"):
                 raise RuntimeError(
                     f"The contributions of the hit at cellID {hit.getCellID()} of {name} should have no particle"
                 )
-    for name in ("OverlayCaloHitContributions", "OverlayCaloHitContributionsWithoutParticleRelations"):
+    for name in (
+        "OverlayCaloHitContributions",
+        "OverlayCaloHitContributionsWithoutParticleRelations",
+    ):
         if len(frame.get(name)) != 6:
             raise RuntimeError(f"Expected 6 contributions in {name}, got {len(frame.get(name))}")
 
