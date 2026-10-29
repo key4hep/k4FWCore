@@ -218,7 +218,16 @@ add_test_fwcore(FunctionalCollectionMerger options/ExampleFunctionalCollectionMe
 add_test_fwcore(FunctionalCollectionMergerEmpty options/ExampleFunctionalCollectionMergerEmpty.py
                   PROPERTIES PASS_REGULAR_EXPRESSION "InputCollections must contain at least one collection")
 add_test_fwcore(FunctionalPropertyChoices options/ExampleFunctionalPropertyChoices.py
-                  PROPERTIES PASS_REGULAR_EXPRESSION "Gandalf = TheWhite, NumBreakfasts = 0, FellowshipLeader = Frodo, SurvivalRate = WithResurrection, value 0.888889")
+                  PROPERTIES PASS_REGULAR_EXPRESSION "Gandalf = TheWhite, NumBreakfasts = 0, FellowshipLeader = Frodo, SurvivalRate = WithResurrection")
+add_test_fwcore(FunctionalPropertyChoicesInvalidEnum options/ExampleFunctionalPropertyChoices.py
+                  --ExampleFunctionalPropertyChoices.Gandalf TheBlue
+                  PROPERTIES PASS_REGULAR_EXPRESSION "'TheBlue' is not one of 'TheGrey', 'TheWhite'")
+add_test_fwcore(FunctionalPropertyChoicesInvalidInt options/ExampleFunctionalPropertyChoices.py
+                  --ExampleFunctionalPropertyChoices.NumBreakfasts 2
+                  PROPERTIES PASS_REGULAR_EXPRESSION "2 is not one of 0, 1")
+add_test_fwcore(FunctionalPropertyChoicesInvalidString options/ExampleFunctionalPropertyChoices.py
+                  --ExampleFunctionalPropertyChoices.FellowshipLeader Sauron
+                  PROPERTIES PASS_REGULAR_EXPRESSION "'Sauron' is not one of 'Frodo', 'Sam'")
 add_test_fwcore(FunctionalFilterFile options/ExampleFunctionalFilterFile.py ADD_TO_CHECK_FILES)
 add_test_fwcore(FunctionalMetadata options/ExampleFunctionalMetadata.py --MetadataSvc.SkipIfSameValue True ADD_TO_CHECK_FILES PROPERTIES FIXTURES_SETUP FunctionalMetadataFile)
 add_test_fwcore(FunctionalMetadataThrow options/ExampleFunctionalMetadata.py --Producer2.ParticleTime 2.5

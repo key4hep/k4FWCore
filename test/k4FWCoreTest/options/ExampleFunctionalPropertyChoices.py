@@ -18,8 +18,8 @@
 #
 
 # This is an example of an algorithm with properties that are restricted to a
-# fixed set of allowed values with k4FWCore::PropertyChoices: an enum selected
-# by name, an integer, a string and a label that is translated to a number
+# fixed set of allowed values with the helpers from k4FWCore/PropertyChoices.h:
+# two enums selected by name, an integer and a string
 
 from Gaudi.Configuration import INFO
 from Configurables import ExampleFunctionalPropertyChoices

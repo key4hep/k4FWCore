@@ -18,7 +18,7 @@
  */
 
 // This example shows how to restrict Gaudi properties to a fixed set of allowed
-// values with k4FWCore::PropertyChoices, for the different kinds of properties.
+// values with the helpers from k4FWCore/PropertyChoices.h, for the different kinds of properties.
 
 #include "Gaudi/Property.h"
 
@@ -30,62 +30,51 @@
 
 namespace {
 enum class Gandalf { TheGrey, TheWhite };
-}
+enum class Resurrection { None, Gandalf };
+} // namespace
+
+// Register the enums, so that they can be the type of a Gaudi::Property.
+// (1) By the names of the enumerators: the user writes "TheGrey" or "TheWhite"
+K4FWCORE_ENUM_PROPERTY(Gandalf, Gandalf::TheGrey, Gandalf::TheWhite);
+// (2) By custom names: the user writes "NoResurrection" or "WithResurrection"
+K4FWCORE_ENUM_PROPERTY_NAMES(Resurrection, {Resurrection::None, "NoResurrection"},
+                             {Resurrection::Gandalf, "WithResurrection"});
 
 struct ExampleFunctionalPropertyChoices final : k4FWCore::Consumer<void()> {
   ExampleFunctionalPropertyChoices(const std::string& name, ISvcLocator* svcLoc) : Consumer(name, svcLoc) {}
 
-  // (1) An enum selected by the name of the enumerators: the allowed strings are
-  //     "TheGrey" and "TheWhite", the table is built from the enumerator names
-  static inline const auto s_gandalfs = k4FWCore::makePropertyChoices<Gandalf::TheGrey, Gandalf::TheWhite>();
+  // Enum properties: set by name from the steering file, the code works with the enumerator
+  Gaudi::Property<Gandalf> m_gandalf{this, "Gandalf", Gandalf::TheGrey, "One of " + k4FWCore::enumNameList<Gandalf>()};
+  Gaudi::Property<Resurrection> m_resurrection{this, "SurvivalRate", Resurrection::Gandalf,
+                                               "One of " + k4FWCore::enumNameList<Resurrection>()};
 
-  // (2) A few allowed integers: the user writes the number, no label is involved.
-  //     Anything but breakfast or no breakfast is forbidden
-  static inline const auto s_numBreakfasts = k4FWCore::makePropertyChoices<0, 1>();
+  // (3) A few allowed integers: anything but breakfast or no breakfast is forbidden
+  using BreakfastChoices = k4FWCore::OneOf<0, 1>;
+  Gaudi::Property<int, BreakfastChoices> m_numBreakfasts{this, "NumBreakfasts", 1,
+                                                         "One of " + BreakfastChoices::list()};
 
-  // (3) A few allowed strings, where the string itself is what the code uses,
+  // (4) A few allowed strings, where the string itself is what the code uses,
   //     e.g. to look up a detector or to name a collection
-  static inline const auto s_members = k4FWCore::makePropertyChoices<"Frodo", "Sam", "Merry", "Pippin", "Gandalf",
-                                                                     "Aragorn", "Legolas", "Gimli", "Boromir">();
-
-  // (4) Labels for values of a type that cannot be derived from a name. The user selects
-  //     the survival rate by name and the code gets the fraction of the Fellowship that survives
-  static inline const k4FWCore::PropertyChoices s_survivalRates{std::pair{"NoResurrection", 7. / 9.},
-                                                                std::pair{"WithResurrection", 8. / 9.}};
-
-  // The properties. All of them document their allowed values with list()
-  Gaudi::Property<std::string> m_gandalf{this, "Gandalf", "TheGrey", "One of " + s_gandalfs.list()};
-  Gaudi::Property<int> m_numBreakfasts{this, "NumBreakfasts", 1, "One of " + s_numBreakfasts.list()};
-  Gaudi::Property<std::string> m_fellowshipLeader{this, "FellowshipLeader", "Frodo", "One of " + s_members.list()};
-  Gaudi::Property<std::string> m_survivalRate{this, "SurvivalRate", "WithResurrection",
-                                              "One of " + s_survivalRates.list()};
-
-  // What the code works with after the validation, filled in initialize()
-  Gandalf m_gandalfMode{};
-  int m_numBreakfastsValue{};
-  std::string m_fellowshipLeaderValue;
-  double m_survivalRateValue{};
+  using MemberChoices =
+      k4FWCore::OneOfStrings<"Frodo", "Sam", "Merry", "Pippin", "Gandalf", "Aragorn", "Legolas", "Gimli", "Boromir">;
+  Gaudi::Property<std::string, MemberChoices> m_fellowshipLeader{this, "FellowshipLeader", "Frodo",
+                                                                 "One of " + MemberChoices::list()};
 
   StatusCode initialize() override {
     K4_GAUDI_CHECK(Consumer::initialize());
-    // Validate the property and translate it. On an invalid value an error naming the
-    // property and the allowed values is logged and the job fails
-    K4_GAUDI_CHECK(s_gandalfs.parse(m_gandalf, m_gandalfMode, this));
-    K4_GAUDI_CHECK(s_numBreakfasts.parse(m_numBreakfasts, m_numBreakfastsValue, this));
-    K4_GAUDI_CHECK(s_members.parse(m_fellowshipLeader, m_fellowshipLeaderValue, this));
-    K4_GAUDI_CHECK(s_survivalRates.parse(m_survivalRate, m_survivalRateValue, this));
-
-    info() << "Gandalf = " << m_gandalf.value() << ", NumBreakfasts = " << m_numBreakfastsValue
-           << ", FellowshipLeader = " << m_fellowshipLeaderValue << ", SurvivalRate = " << m_survivalRate.value()
-           << ", value " << m_survivalRateValue << endmsg;
+    // Nothing to validate here, the properties cannot hold an invalid value
+    info() << "Gandalf = " << m_gandalf.toString() << ", NumBreakfasts = " << m_numBreakfasts.value()
+           << ", FellowshipLeader = " << m_fellowshipLeader.value() << ", SurvivalRate = " << m_resurrection.toString()
+           << endmsg;
     return StatusCode::SUCCESS;
   }
 
   void operator()() const override {
-    // The enum is used to branch, the other values are used directly
-    const auto* wizard = m_gandalfMode == Gandalf::TheWhite ? "the White" : "the Grey";
-    info() << m_fellowshipLeaderValue << " leads the Fellowship with Gandalf " << wizard << " after "
-           << m_numBreakfastsValue << " breakfast(s), and " << 9 * m_survivalRateValue
+    // The enums are used to branch, the other values are used directly
+    const auto* wizard = m_gandalf == Gandalf::TheWhite ? "the White" : "the Grey";
+    const int survivors = m_resurrection == Resurrection::Gandalf ? 8 : 7;
+    info() << m_fellowshipLeader.value() << " leads the Fellowship with Gandalf " << wizard << " after "
+           << m_numBreakfasts.value() << " breakfast(s), and " << survivors
            << " of the 9 members are expected to survive" << endmsg;
   }
 };
