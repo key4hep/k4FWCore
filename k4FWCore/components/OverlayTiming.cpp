@@ -71,7 +71,7 @@ inline int overlaid_particle_index(int oldIndex, int offset, int nBgParticles) {
 inline bool has_contribution_in_window(const edm4hep::SimCalorimeterHit& hit, float timeShift, float start,
                                        float stop) {
   const auto contribs = hit.getContributions();
-  return std::any_of(contribs.begin(), contribs.end(), [&](const auto& contrib) {
+  return std::ranges::any_of(contribs, [&](const auto& contrib) {
     return (contrib.getTime() + timeShift > start) && (contrib.getTime() + timeShift < stop);
   });
 }
