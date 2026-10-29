@@ -35,10 +35,9 @@ enum class Resurrection { None, Gandalf };
 
 // Register the enums, so that they can be the type of a Gaudi::Property.
 // (1) By the names of the enumerators: the user writes "TheGrey" or "TheWhite"
-K4FWCORE_ENUM_PROPERTY(Gandalf, Gandalf::TheGrey, Gandalf::TheWhite);
+K4FWCORE_ENUM_PROPERTY(Gandalf, TheGrey, TheWhite);
 // (2) By custom names: the user writes "NoResurrection" or "WithResurrection"
-K4FWCORE_ENUM_PROPERTY_NAMES(Resurrection, {Resurrection::None, "NoResurrection"},
-                             {Resurrection::Gandalf, "WithResurrection"});
+K4FWCORE_ENUM_PROPERTY_NAMES(Resurrection, {None, "NoResurrection"}, {Gandalf, "WithResurrection"});
 
 struct ExampleFunctionalPropertyChoices final : k4FWCore::Consumer<void()> {
   ExampleFunctionalPropertyChoices(const std::string& name, ISvcLocator* svcLoc) : Consumer(name, svcLoc) {}

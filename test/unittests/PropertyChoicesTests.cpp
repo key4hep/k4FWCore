@@ -40,11 +40,11 @@ namespace outer::inner {
 enum class Nested { Alpha, Beta };
 } // namespace outer::inner
 
-// Experimental is deliberately not registered
-K4FWCORE_ENUM_PROPERTY(Mode, Mode::Fast, Mode::Precise);
-K4FWCORE_ENUM_PROPERTY_NAMES(Label, {Label::First, "first"}, {Label::Second, "second"});
+// Experimental is deliberately not registered. The enumerators are given with and without the name of the enum
+K4FWCORE_ENUM_PROPERTY(Mode, Fast, Precise);
+K4FWCORE_ENUM_PROPERTY_NAMES(Label, {Label::First, "first"}, {Second, "second"});
 K4FWCORE_ENUM_PROPERTY(Level, Low, High);
-K4FWCORE_ENUM_PROPERTY(Holder::Kind, Holder::Kind::A, Holder::Kind::B);
+K4FWCORE_ENUM_PROPERTY(Holder::Kind, A, Holder::Kind::B);
 K4FWCORE_ENUM_PROPERTY(outer::inner::Nested, outer::inner::Nested::Alpha, outer::inner::Nested::Beta);
 
 namespace {
