@@ -27,7 +27,7 @@ It uses [`UniqueIDGenSvc`](uniqueIDGen.md) to seed the internal random number ge
 
 - `MCParticleCollection` from signal and background are merged into a single output collection. Background particles are flagged with `isOverlay = true`.
 - `SimTrackerHit` collections are cropped to a configurable time window and overlaid. Background hits are flagged with `isOverlay = true`.
-- `SimCalorimeterHit` collections are overlaid by merging hits that share the same cell ID. A hit (signal or background) is kept if at least one of its `CaloHitContribution`s is inside the time window, and it is then kept whole. When a background hit is merged into an existing one, its contributions are attached to that hit and their energies are added to its energy.
+- `SimCalorimeterHit` collections are overlaid by merging hits that share the same cell ID. A hit (signal or background) is kept if at least one of its `CaloHitContribution`s is inside the time window. By default it is then kept whole, with all its contributions, leaving the time selection to the digitization; with `KeepWholeCaloHits = false` only the contributions inside the time window are kept. When a background hit is merged into an existing one, its contributions are attached to that hit. In all cases the energy of a hit is the sum of the energies of the contributions it keeps.
 
 ## Properties
 
@@ -45,6 +45,7 @@ It uses [`UniqueIDGenSvc`](uniqueIDGen.md) to seed the internal random number ge
 | `AllowReusingBackgroundFiles` | `false` | If true, start over from the first event of a group once all of its events have been overlaid. If false, running out of background events is an error. With `RandomMixBackgroundFiles` the files of a group are drawn again once all of them have been used, regardless of this option |
 | `RandomMixBackgroundFiles` | `false` | Treat every file of a background group as an independent (pseudo-)event source and draw one at random for each overlaid event |
 | `MergeMCParticles` | `true` | Copy the background MCParticles into the output. If `false` they are left out entirely and background hits have no particle relation. The momentum stored in a background tracker hit, i.e. the momentum of the particle at the hit, is then replaced by the momentum of its originating particle at production, which would otherwise be lost. Calorimeter contributions are otherwise unchanged |
+| `KeepWholeCaloHits` | `true` | If true, a `SimCalorimeterHit` with at least one `CaloHitContribution` inside the time window is kept with all its contributions. If false, only the contributions inside the time window are kept. The energy of a hit is the sum of the energies of its kept contributions |
 | `CopyCellIDMetadata` | `false` | Copy cell ID encoding metadata from input to output collections |
 | `StartBackgroundEventIndex` | `-1` | Index of the background event every group starts reading from, once at the beginning of the job (`-1` means start from the beginning) |
 
