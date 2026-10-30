@@ -18,8 +18,10 @@
 #
 
 # Tests how OverlayTiming merges calorimeter hits: hits with only some
-# contributions in the time window are kept whole, and background hits landing
-# on occupied cells add their contributions and energies to the hits there.
+# contributions in the time window are kept whole (or, with
+# --OverlayTiming.KeepWholeCaloHits=False, only with those contributions), and
+# background hits landing on occupied cells add their contributions and energies
+# to the hits there.
 # Signal and background are calo_merge_signal.root and calo_merge_background.root,
 # written by CreateOverlayBackgroundFiles.py, overlaid in a single bunch crossing.
 
