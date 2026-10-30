@@ -254,6 +254,12 @@ private:
       "stored: the momentum of a background tracker hit (the momentum at the hit) is replaced by the momentum of "
       "its originating particle (the momentum at production), as the link to that particle is lost, and "
       "calorimeter contributions have no particle link."};
+  Gaudi::Property<bool> m_keepWholeCaloHits{
+      this, "KeepWholeCaloHits", true,
+      "If true, a SimCalorimeterHit with at least one CaloHitContribution inside the time window is kept with all "
+      "its contributions, leaving the time selection to the digitization. If false, only the contributions inside "
+      "the time window are kept. In both cases the energy of a hit is the sum of the energies of its kept "
+      "contributions"};
   Gaudi::Property<bool> m_copyCellIDMetadata{this, "CopyCellIDMetadata", false,
                                              "Copy cell ID encoding metadata from input to output collections"};
 
