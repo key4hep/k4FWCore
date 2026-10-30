@@ -470,10 +470,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
             }
             if (auto it = calHitMap.find(simCaloHit.getCellID()); it == calHitMap.end()) {
               // There is no hit at this position: copy the background hit
-              auto calhit = edm4hep::MutableSimCalorimeterHit();
-              calhit.setCellID(simCaloHit.getCellID());
-              calhit.setEnergy(simCaloHit.getEnergy());
-              calhit.setPosition(simCaloHit.getPosition());
+              auto calhit = simCaloHit.clone(false);
               for (const auto& contrib : simCaloHit.getContributions()) {
                 // TODO: Make sure a contribution is not added twice
                 auto newContrib = cloneContribution(contrib);
