@@ -66,8 +66,7 @@ inline int overlaid_particle_index(int oldIndex, int offset, int nBgParticles) {
   return (oldIndex >= 0 && oldIndex < nBgParticles) ? offset + oldIndex : -1;
 }
 
-// Whether at least one contribution of the hit, shifted by timeShift, is inside (start, stop).
-// Such a hit is kept whole: time windows on the individual contributions are left to the digitization
+// Whether at least one contribution of the hit, shifted by timeShift, is inside (start, stop)
 inline bool has_contribution_in_window(const edm4hep::SimCalorimeterHit& hit, float timeShift, float start,
                                        float stop) {
   const auto contribs = hit.getContributions();
@@ -237,7 +236,8 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
   }
 
   // Copy the SimCalorimeterHits that have at least one contribution in the time window,
-  // whole: with all their contributions and their energy
+  // whole: with all their contributions and their energy. Time windows on the individual
+  // contributions are left to the digitization
   std::map<int, std::map<uint64_t, edm4hep::MutableSimCalorimeterHit>> cellIDsMap;
   for (size_t i = 0; i < simCaloHits.size(); ++i) {
     const auto& coll = simCaloHits[i];
