@@ -118,3 +118,7 @@ each one of the above-mentioned algorithms. In addition, there are tests that
 have either multiple inputs and / or multiple outputs (like
 `ExampleFunctionalProducerMultiple`) that can be used as a template for the more
 typical case when working with multiple inputs or outputs.
+
+Properties that select a behaviour of an algorithm can be enums, which are set
+by name in the steering file. See the [documentation](doc/enumProperties.md) for
+more information.
