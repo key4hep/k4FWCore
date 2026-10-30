@@ -28,6 +28,7 @@ set(k4fwcoretest_plugin_sources
   src/components/ExampleFunctionalConsumerRuntimeCollectionsMultiple.cpp
   src/components/ExampleFunctionalConsumerInputOutputLocations.cpp
   src/components/ExampleFunctionalConsumerEventContext.cpp
+  src/components/ExampleFunctionalEnumProperties.cpp
   src/components/ExampleFunctionalFilter.cpp
   src/components/ExampleFunctionalMetadataConsumer.cpp
   src/components/ExampleFunctionalMetadataProducer.cpp
@@ -216,6 +217,17 @@ add_test_fwcore(FunctionalTransformerHist options/ExampleFunctionalTransformerHi
 add_test_fwcore(FunctionalCollectionMerger options/ExampleFunctionalCollectionMerger.py PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
 add_test_fwcore(FunctionalCollectionMergerEmpty options/ExampleFunctionalCollectionMergerEmpty.py
                   PROPERTIES PASS_REGULAR_EXPRESSION "InputCollections must contain at least one collection")
+add_test_fwcore(FunctionalEnumProperties options/ExampleFunctionalEnumProperties.py
+                  PROPERTIES PASS_REGULAR_EXPRESSION "Gandalf = TheWhite, SurvivalRate = WithResurrection, Fellowship = \\[ 'Frodo' , 'Sam' , 'Gandalf' \\]")
+add_test_fwcore(FunctionalEnumPropertiesInvalidEnum options/ExampleFunctionalEnumProperties.py
+                  --ExampleFunctionalEnumProperties.Gandalf TheBlue
+                  PROPERTIES PASS_REGULAR_EXPRESSION "expected one of 'TheGrey', 'TheWhite'")
+add_test_fwcore(FunctionalEnumPropertiesInvalidNested options/ExampleFunctionalEnumProperties.py
+                  --ExampleFunctionalEnumProperties.SurvivalRate Gandalf
+                  PROPERTIES PASS_REGULAR_EXPRESSION "expected one of 'NoResurrection', 'WithResurrection'")
+add_test_fwcore(FunctionalEnumPropertiesInvalidList options/ExampleFunctionalEnumProperties.py
+                  --ExampleFunctionalEnumProperties.Fellowship Frodo Sauron
+                  PROPERTIES PASS_REGULAR_EXPRESSION "for property 'Fellowship' .*cannot parse .*Sauron")
 add_test_fwcore(FunctionalFilterFile options/ExampleFunctionalFilterFile.py ADD_TO_CHECK_FILES)
 add_test_fwcore(FunctionalMetadata options/ExampleFunctionalMetadata.py --MetadataSvc.SkipIfSameValue True ADD_TO_CHECK_FILES PROPERTIES FIXTURES_SETUP FunctionalMetadataFile)
 add_test_fwcore(FunctionalMetadataThrow options/ExampleFunctionalMetadata.py --Producer2.ParticleTime 2.5
