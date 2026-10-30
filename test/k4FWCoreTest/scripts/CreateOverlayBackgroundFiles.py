@@ -113,7 +113,7 @@ def write_background_file(path, tag):
 # so there is no time of flight. They are overlaid in a single bunch crossing,
 # so the background times are not shifted either. A hit is overlaid if at least
 # one of its contributions is inside CALO_MERGE_WINDOW, with all its contributions
-# (KeepWholeCaloHits, the default) or only with those inside the window, and a
+# (KeepAllHitContributions, the default) or only with those inside the window, and a
 # background hit on an occupied cell adds its contributions and their energies to
 # the hit there. Each hit is given as (cellID, [(contribution PDG, time in ns, energy), ...]),
 # and its energy is the sum of the energies of its contributions. Signal PDGs
@@ -132,8 +132,8 @@ CALO_MERGE_BACKGROUND_HITS = [
     (5, [(206, 5.0, 512.0), (207, 50.0, 1024.0)]),  # partly inside: new hit
 ]
 # The overlaid hits, as {cellID: ([contribution PDG, ...], hit energy)}, keeping
-# the hits whole (KeepWholeCaloHits = True) and keeping only the contributions
-# inside the window (KeepWholeCaloHits = False)
+# all the contributions of the hits (KeepAllHitContributions = True) and keeping
+# only the contributions inside the window (KeepAllHitContributions = False)
 CALO_MERGE_EXPECTED = {
     1: ([101, 102, 201, 202], 51.0),
     2: ([203], 64.0),
