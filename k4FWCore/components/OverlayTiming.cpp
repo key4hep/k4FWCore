@@ -42,6 +42,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <iterator>
 #include <map>
 #include <memory>
 #include <numeric>
@@ -71,12 +72,20 @@ inline bool is_in_window(const edm4hep::CaloHitContribution& contrib, float time
   return (contrib.getTime() + timeShift > start) && (contrib.getTime() + timeShift < stop);
 }
 
-// Whether at least one contribution of the hit, shifted by timeShift, is inside (start, stop)
-inline bool has_contribution_in_window(const edm4hep::SimCalorimeterHit& hit, float timeShift, float start,
-                                       float stop) {
+// The contributions of the hit to overlay, shifted by timeShift and selected in (start, stop): none if no
+// contribution is inside, otherwise all of them if keepAll, or only those inside if not
+inline std::vector<edm4hep::CaloHitContribution> contributions_to_overlay(const edm4hep::SimCalorimeterHit& hit,
+                                                                          float timeShift, float start, float stop,
+                                                                          bool keepAll) {
   const auto contribs = hit.getContributions();
-  return std::ranges::any_of(contribs,
-                             [&](const auto& contrib) { return is_in_window(contrib, timeShift, start, stop); });
+  const auto inWindow = [&](const auto& contrib) { return is_in_window(contrib, timeShift, start, stop); };
+  std::vector<edm4hep::CaloHitContribution> selected;
+  if (!keepAll) {
+    std::ranges::copy_if(contribs, std::back_inserter(selected), inWindow);
+  } else if (std::ranges::any_of(contribs, inWindow)) {
+    selected.assign(contribs.begin(), contribs.end());
+  }
+  return selected;
 }
 
 std::pair<float, float> OverlayTiming::define_time_windows(const std::string& collection_name) const {
@@ -253,15 +262,14 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
     auto& caloHitContribs = ocaloHitContribs[i];
     for (const auto&& simCaloHit : *coll) {
       const float tof = time_of_flight(simCaloHit.getPosition());
-      if (!has_contribution_in_window(simCaloHit, 0, this_start + tof, this_stop + tof)) {
+      const auto contribs =
+          contributions_to_overlay(simCaloHit, 0, this_start + tof, this_stop + tof, m_keepAllHitContributions);
+      if (contribs.empty()) {
         continue;
       }
       auto newhit = simCaloHit.clone(false);
       newhit.setEnergy(0);
-      for (const auto& contrib : simCaloHit.getContributions()) {
-        if (!m_keepAllHitContributions && !is_in_window(contrib, 0, this_start + tof, this_stop + tof)) {
-          continue;
-        }
+      for (const auto& contrib : contribs) {
         // TODO: Make sure a contribution is not added twice
         auto newContrib = contrib.clone(false);
         if (const auto index = contrib.getParticle().getObjectID().index; index >= 0) {
@@ -475,7 +483,9 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
           for (const auto&& simCaloHit : backgroundEvent.get<edm4hep::SimCalorimeterHitCollection>(name)) {
             // Only background hits with at least one contribution in the window are overlaid,
             // with their contributions selected as for the signal hits
-            if (!has_contribution_in_window(simCaloHit, timeOffset, this_start, this_stop)) {
+            const auto contribs =
+                contributions_to_overlay(simCaloHit, timeOffset, this_start, this_stop, m_keepAllHitContributions);
+            if (contribs.empty()) {
               continue;
             }
             auto it = calHitMap.find(simCaloHit.getCellID());
@@ -487,10 +497,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
             }
             // Either way the energy of the hit grows by the energy of each contribution added to it
             auto& calhit = it->second;
-            for (const auto& contrib : simCaloHit.getContributions()) {
-              if (!m_keepAllHitContributions && !is_in_window(contrib, timeOffset, this_start, this_stop)) {
-                continue;
-              }
+            for (const auto& contrib : contribs) {
               // TODO: Make sure a contribution is not added twice
               auto newContrib = cloneContribution(contrib);
               calhit.addMCParticleContribution(newContrib);
