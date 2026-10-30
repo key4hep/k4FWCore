@@ -111,31 +111,40 @@ def write_background_file(path, tag):
 
 # The calo_merge files hold one event each, with calorimeter hits at the origin,
 # so there is no time of flight. They are overlaid in a single bunch crossing,
-# so the background times are not shifted either. A hit is overlaid whole if at
-# least one of its contributions is inside CALO_MERGE_WINDOW, and a background
-# hit on an occupied cell adds its contributions and their energies to the hit
-# there. Each hit is given as (cellID, [(contribution PDG, time in ns, energy), ...]),
+# so the background times are not shifted either. A hit is overlaid if at least
+# one of its contributions is inside CALO_MERGE_WINDOW, with all its contributions
+# (KeepWholeCaloHits, the default) or only with those inside the window, and a
+# background hit on an occupied cell adds its contributions and their energies to
+# the hit there. Each hit is given as (cellID, [(contribution PDG, time in ns, energy), ...]),
 # and its energy is the sum of the energies of its contributions. Signal PDGs
 # are 1xx, background PDGs 2xx. The energies are powers of two, to have exact sums.
 CALO_MERGE_WINDOW = [0.0, 10.0]  # ns
 CALO_MERGE_SIGNAL_HITS = [
-    (1, [(101, 5.0, 1.0), (102, 20.0, 2.0)]),  # partly inside: kept whole
+    (1, [(101, 5.0, 1.0), (102, 20.0, 2.0)]),  # partly inside
     (2, [(103, 20.0, 4.0)]),  # outside: dropped
     (3, [(104, 5.0, 8.0)]),  # inside
 ]
 CALO_MERGE_BACKGROUND_HITS = [
-    (1, [(201, 5.0, 16.0), (202, 30.0, 32.0)]),  # partly inside: merged whole into cell 1
+    (1, [(201, 5.0, 16.0), (202, 30.0, 32.0)]),  # partly inside: merged into cell 1
     (2, [(203, 5.0, 64.0)]),  # inside, on the cell of a dropped signal hit: new hit
     (3, [(204, 40.0, 128.0)]),  # outside: not merged into cell 3
     (4, [(205, 30.0, 256.0)]),  # outside: dropped
-    (5, [(206, 5.0, 512.0), (207, 50.0, 1024.0)]),  # partly inside: new hit, kept whole
+    (5, [(206, 5.0, 512.0), (207, 50.0, 1024.0)]),  # partly inside: new hit
 ]
-# The overlaid hits, as {cellID: ([contribution PDG, ...], hit energy)}
+# The overlaid hits, as {cellID: ([contribution PDG, ...], hit energy)}, keeping
+# the hits whole (KeepWholeCaloHits = True) and keeping only the contributions
+# inside the window (KeepWholeCaloHits = False)
 CALO_MERGE_EXPECTED = {
     1: ([101, 102, 201, 202], 51.0),
     2: ([203], 64.0),
     3: ([104], 8.0),
     5: ([206, 207], 1536.0),
+}
+CALO_MERGE_EXPECTED_CROPPED = {
+    1: ([101, 201], 17.0),
+    2: ([203], 64.0),
+    3: ([104], 8.0),
+    5: ([206], 512.0),
 }
 
 

@@ -302,6 +302,8 @@ set_property(TEST OverlayTimingRandomMix OverlayTimingRandomMixRepeat OverlayTim
              PROPERTY FIXTURES_REQUIRED ${OverlayRandomMixFixtures})
 # Calorimeter hits with only some contributions in the time window, merged into occupied cells
 add_test_fwcore(OverlayTimingCaloMerge options/TestOverlayTimingCaloMerge.py ADD_TO_CHECK_FILES PROPERTIES FIXTURES_REQUIRED OverlayBackgroundFiles)
+# Same, keeping only the contributions inside the time window
+add_test_fwcore(OverlayTimingCaloMergeCropped options/TestOverlayTimingCaloMerge.py --IOSvc.Output=overlay_calo_merge_cropped.root --OverlayTiming.KeepWholeCaloHits=False ADD_TO_CHECK_FILES PROPERTIES FIXTURES_REQUIRED OverlayBackgroundFiles)
 
 add_test(NAME check_broken_pipe
          COMMAND bash -c "[ $(${K4RUN} options/ExampleFunctionalProducer.py | head -n 2 | wc -l) = 2 ]"

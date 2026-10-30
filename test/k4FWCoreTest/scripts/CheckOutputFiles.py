@@ -29,6 +29,7 @@ from collections import Counter
 
 from CreateOverlayBackgroundFiles import (
     CALO_MERGE_EXPECTED,
+    CALO_MERGE_EXPECTED_CROPPED,
     GROUP_A,
     GROUP_B,
     HIT_MOMENTUM,
@@ -843,9 +844,9 @@ check_events("overlay_no_mcparticle_merge.root", N_EVENTS)
 check_no_mcparticle_merge_overlay("overlay_no_mcparticle_merge.root")
 
 
-def check_calo_merge_overlay(filename):
-    """Checks the output of OverlayTimingCaloMerge (see CALO_MERGE_WINDOW in
-    CreateOverlayBackgroundFiles.py): which hits are overlaid, which contributions
+def check_calo_merge_overlay(filename, expected):
+    """Checks an output of OverlayTimingCaloMerge (see CALO_MERGE_WINDOW in
+    CreateOverlayBackgroundFiles.py) against the expected hits: which hits are overlaid, which contributions
     they hold, in which order, and that the energy of each hit is the sum of the
     energies of its contributions. Signal contributions (PDG 1xx) have to point
     at the signal particle, background ones (PDG 2xx) at the overlaid one."""
@@ -857,9 +858,9 @@ def check_calo_merge_overlay(filename):
         hit.getCellID(): ([c.getPDG() for c in hit.getContributions()], hit.getEnergy())
         for hit in calo_hits
     }
-    if overlaid != CALO_MERGE_EXPECTED:
+    if overlaid != expected:
         raise RuntimeError(
-            f"Expected the calorimeter hits {CALO_MERGE_EXPECTED} "
+            f"Expected the calorimeter hits {expected} "
             f"(cellID: (contribution PDGs, hit energy)), got {overlaid}"
         )
     for hit in calo_hits:
@@ -871,7 +872,7 @@ def check_calo_merge_overlay(filename):
         for c in contribs:
             if c.getParticle().isOverlay() != (c.getPDG() >= 200):
                 raise RuntimeError(f"Contribution {c.getPDG()} points at the wrong particle")
-    n_contributions = sum(len(pdgs) for pdgs, _ in CALO_MERGE_EXPECTED.values())
+    n_contributions = sum(len(pdgs) for pdgs, _ in expected.values())
     if len(frame.get("OverlayCaloHitContributions")) != n_contributions:
         raise RuntimeError(
             f"Expected {n_contributions} contributions in OverlayCaloHitContributions, "
@@ -879,7 +880,8 @@ def check_calo_merge_overlay(filename):
         )
 
 
-check_calo_merge_overlay("overlay_calo_merge.root")
+check_calo_merge_overlay("overlay_calo_merge.root", CALO_MERGE_EXPECTED)
+check_calo_merge_overlay("overlay_calo_merge_cropped.root", CALO_MERGE_EXPECTED_CROPPED)
 
 reader = podio.reading.get_reader("functional_random_filter.root")
 frames = reader.get("events")
