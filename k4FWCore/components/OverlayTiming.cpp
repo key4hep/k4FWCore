@@ -240,7 +240,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
   }
 
   // Copy the SimCalorimeterHits that have at least one contribution in the time window. With
-  // KeepWholeCaloHits they keep all their contributions, leaving the time selection to the
+  // KeepAllHitContributions they keep all their contributions, leaving the time selection to the
   // digitization, otherwise only those inside the window. In both cases the energy of a hit is
   // the sum of the energies of the contributions it keeps
   std::map<int, std::map<uint64_t, edm4hep::MutableSimCalorimeterHit>> cellIDsMap;
@@ -259,7 +259,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
       auto newhit = simCaloHit.clone(false);
       newhit.setEnergy(0);
       for (const auto& contrib : simCaloHit.getContributions()) {
-        if (!m_keepWholeCaloHits && !is_in_window(contrib, 0, this_start + tof, this_stop + tof)) {
+        if (!m_keepAllHitContributions && !is_in_window(contrib, 0, this_start + tof, this_stop + tof)) {
           continue;
         }
         // TODO: Make sure a contribution is not added twice
@@ -488,7 +488,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
             // Either way the energy of the hit grows by the energy of each contribution added to it
             auto& calhit = it->second;
             for (const auto& contrib : simCaloHit.getContributions()) {
-              if (!m_keepWholeCaloHits && !is_in_window(contrib, timeOffset, this_start, this_stop)) {
+              if (!m_keepAllHitContributions && !is_in_window(contrib, timeOffset, this_start, this_stop)) {
                 continue;
               }
               // TODO: Make sure a contribution is not added twice
