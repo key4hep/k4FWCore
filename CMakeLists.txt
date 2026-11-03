@@ -35,9 +35,10 @@ if (NOT EDM4HEP_FOUND)
 endif()
 find_package(fmt REQUIRED)
 
+include(GNUInstallDirs)
+
 include(cmake/Key4hepConfig.cmake)
 
-include(GNUInstallDirs)
 include(CTest)
 
 add_subdirectory(k4FWCore)
