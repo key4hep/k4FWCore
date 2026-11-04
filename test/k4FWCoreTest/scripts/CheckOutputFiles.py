@@ -28,6 +28,8 @@ import ROOT
 from collections import Counter
 
 from CreateOverlayBackgroundFiles import (
+    CALO_MERGE_EXPECTED,
+    CALO_MERGE_EXPECTED_CROPPED,
     GROUP_A,
     GROUP_B,
     HIT_MOMENTUM,
@@ -495,6 +497,50 @@ for frame in reader.get("events"):
     if sim_hit_overlay_flags[n_signal_sim:] != [True] * n_background_sim:
         raise RuntimeError("Background sim tracker hits should be flagged as overlay")
 
+    # The background is the signal file itself, so every background calorimeter
+    # hit lands on the signal hit with the same cellID (1-3) and is merged into
+    # it: one signal and one background contribution, each with energy 1, and
+    # the energy of the merged hit is their sum. With particle relations, the
+    # signal contribution points at the first signal particle and the background
+    # one at the first particle of the overlaid background block.
+    for name, with_particles in (
+        ("OverlaySimCalorimeterHits", True),
+        ("OverlaySimCalorimeterHitsWithoutParticleRelations", False),
+    ):
+        calo_hits = frame.get(name)
+        if sorted(hit.getCellID() for hit in calo_hits) != [1, 2, 3]:
+            raise RuntimeError(
+                f"Expected the cellIDs [1, 2, 3] in {name}, got {[hit.getCellID() for hit in calo_hits]}"
+            )
+        for hit in calo_hits:
+            contribs = hit.getContributions()
+            if len(contribs) != 2:
+                raise RuntimeError(
+                    f"Expected 2 contributions in the hit at cellID {hit.getCellID()} of {name}, got {len(contribs)}"
+                )
+            if hit.getEnergy() != 2.0 or [c.getEnergy() for c in contribs] != [1.0, 1.0]:
+                raise RuntimeError(
+                    f"Expected energy 2 and contribution energies [1, 1] for the hit at cellID {hit.getCellID()} "
+                    f"of {name}, got {hit.getEnergy()} and {[c.getEnergy() for c in contribs]}"
+                )
+            particles = [c.getParticle() for c in contribs]
+            if with_particles:
+                if particles != [overlaid_particles[0], overlaid_particles[n_signal_mc]]:
+                    raise RuntimeError(
+                        f"The contributions of the hit at cellID {hit.getCellID()} of {name} do not point at "
+                        "the first signal and the first background particle"
+                    )
+            elif any(p.isAvailable() for p in particles):
+                raise RuntimeError(
+                    f"The contributions of the hit at cellID {hit.getCellID()} of {name} should have no particle"
+                )
+    for name in (
+        "OverlayCaloHitContributions",
+        "OverlayCaloHitContributionsWithoutParticleRelations",
+    ):
+        if len(frame.get(name)) != 6:
+            raise RuntimeError(f"Expected 6 contributions in {name}, got {len(frame.get(name))}")
+
 # Check which background events OverlayTiming read (TestOverlayTimingBackgroundCursor.py).
 # Signal and background both come from output_k4test_exampledata.root, where
 # every event has two MCParticles:
@@ -796,6 +842,46 @@ def check_no_mcparticle_merge_overlay(filename):
 
 check_events("overlay_no_mcparticle_merge.root", N_EVENTS)
 check_no_mcparticle_merge_overlay("overlay_no_mcparticle_merge.root")
+
+
+def check_calo_merge_overlay(filename, expected):
+    """Checks an output of OverlayTimingCaloMerge (see CALO_MERGE_WINDOW in
+    CreateOverlayBackgroundFiles.py) against the expected hits: which hits are overlaid, which contributions
+    they hold, in which order, and that the energy of each hit is the sum of the
+    energies of its contributions. Signal contributions (PDG 1xx) have to point
+    at the signal particle, background ones (PDG 2xx) at the overlaid one."""
+    print(f'Checking file "{filename}" for the merging of calorimeter hits')
+    check_events(filename, 1)
+    frame = next(iter(podio.reading.get_reader(filename).get("events")))
+    calo_hits = frame.get("OverlaySimCalorimeterHits")
+    overlaid = {
+        hit.getCellID(): ([c.getPDG() for c in hit.getContributions()], hit.getEnergy())
+        for hit in calo_hits
+    }
+    if overlaid != expected:
+        raise RuntimeError(
+            f"Expected the calorimeter hits {expected} "
+            f"(cellID: (contribution PDGs, hit energy)), got {overlaid}"
+        )
+    for hit in calo_hits:
+        contribs = hit.getContributions()
+        if hit.getEnergy() != sum(c.getEnergy() for c in contribs):
+            raise RuntimeError(
+                f"The energy of the hit at cellID {hit.getCellID()} is not the sum of its contributions"
+            )
+        for c in contribs:
+            if c.getParticle().isOverlay() != (c.getPDG() >= 200):
+                raise RuntimeError(f"Contribution {c.getPDG()} points at the wrong particle")
+    n_contributions = sum(len(pdgs) for pdgs, _ in expected.values())
+    if len(frame.get("OverlayCaloHitContributions")) != n_contributions:
+        raise RuntimeError(
+            f"Expected {n_contributions} contributions in OverlayCaloHitContributions, "
+            f"got {len(frame.get('OverlayCaloHitContributions'))}"
+        )
+
+
+check_calo_merge_overlay("overlay_calo_merge.root", CALO_MERGE_EXPECTED)
+check_calo_merge_overlay("overlay_calo_merge_cropped.root", CALO_MERGE_EXPECTED_CROPPED)
 
 reader = podio.reading.get_reader("functional_random_filter.root")
 frames = reader.get("events")
