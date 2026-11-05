@@ -30,10 +30,9 @@ property is preferable over using a `std::string`:
   warnings about unhandled cases in a `switch`), instead of comparing strings.
 - In the steering file the values are still set by name.
 
-This is implemented in `k4FWCore/EnumProperty.h`. All names below are in the
-`k4FWCore` namespace.
+This is implemented in `k4FWCore/EnumProperty.h`.
 
-## Registering an enum
+## Registering an enum for use in a `Gaudi::Property`
 
 An enum can only be the type of a `Gaudi::Property` after it has been
 registered. The names that can be used in the steering file are the names of the
@@ -72,11 +71,13 @@ struct ExampleFunctionalEnumProperties final : k4FWCore::Consumer<void()> {
 };
 ```
 
-The registration has to come after the enum and before its first use as the type
-of a property. Otherwise the compilation usually fails, e.g. with an error about
+```{note}
+The registration has to come **after the enum and before its first use as the type
+of a property.** Otherwise the compilation usually fails, e.g. with an error about
 a specialization after instantiation, or with an obscure error about a missing
 `operator<<` in `toStream`. The same obscure error appears if the macro is
 missing.
+```
 
 ## Using enum properties
 
@@ -96,7 +97,7 @@ Gaudi::Property<std::vector<Member>> m_fellowship{this, "Fellowship", {Member::F
 In the code the property holds the enumerator:
 
 ```cpp
-const auto* wizard = m_gandalf == Gandalf::TheWhite ? "the White" : "the Grey";
+const std::string wizard = m_gandalf == Gandalf::TheWhite ? "the White" : "the Grey";
 ```
 
 `toString()` of the property gives the name of the enumerator (e.g. `TheWhite`),

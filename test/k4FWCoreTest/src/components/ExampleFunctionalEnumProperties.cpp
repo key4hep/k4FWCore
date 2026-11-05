@@ -84,7 +84,7 @@ struct ExampleFunctionalEnumProperties final : k4FWCore::Consumer<void()> {
 
   void operator()() const override {
     // The enums are used to branch
-    const auto* wizard = m_gandalf == Gandalf::TheWhite ? "the White" : "the Grey";
+    const std::string wizard = m_gandalf == Gandalf::TheWhite ? "the White" : "the Grey";
     const auto& fellowship = m_fellowship.value();
     const auto size = std::ranges::ssize(fellowship);
     const bool withGandalf = std::ranges::find(fellowship, Member::Gandalf) != fellowship.end();
