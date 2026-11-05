@@ -37,9 +37,9 @@ struct ExampleFunctionalPropertyVerifiers final : k4FWCore::Consumer<void()> {
                                                          "One of " + BreakfastChoices::list()};
 
   // A few allowed strings, where the string itself is what the code uses,
-  // e.g. to look up a detector or to name a collection
+  // e.g. to look up a detector or to name a collection. The allowed values can also be given as a braced list
   using MemberChoices =
-      k4FWCore::OneOf<"Frodo", "Sam", "Merry", "Pippin", "Gandalf", "Aragorn", "Legolas", "Gimli", "Boromir">;
+      k4FWCore::OneOf<{"Frodo", "Sam", "Merry", "Pippin", "Gandalf", "Aragorn", "Legolas", "Gimli", "Boromir"}>;
   Gaudi::Property<std::string, MemberChoices> m_fellowshipLeader{this, "FellowshipLeader", "Frodo",
                                                                  "One of " + MemberChoices::list()};
 

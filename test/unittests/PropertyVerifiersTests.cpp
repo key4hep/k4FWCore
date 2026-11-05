@@ -23,6 +23,8 @@
 
 #include "catch2/catch_test_macros.hpp"
 
+#include <array>
+#include <cstdint>
 #include <stdexcept>
 #include <string>
 
@@ -38,8 +40,10 @@ bool setFromString(Gaudi::Details::PropertyBase& property, const std::string& va
 }
 
 /// Whether OneOf can be instantiated with the given allowed values
-template <k4FWCore::detail::Choice... Allowed>
+template <k4FWCore::detail::Choices... Allowed>
 concept ValidOneOf = requires { typename k4FWCore::OneOf<Allowed...>; };
+
+constexpr std::array layerCounts{4, 8, 15};
 } // namespace
 
 TEST_CASE("OneOf accepts only the given integers") {
@@ -89,5 +93,68 @@ TEST_CASE("OneOf accepts only the given strings") {
 TEST_CASE("OneOf takes either integers or strings") {
   STATIC_REQUIRE(ValidOneOf<1, 2>);
   STATIC_REQUIRE(ValidOneOf<"a", "b">);
+  STATIC_REQUIRE(ValidOneOf<{1, 2}>);
+  STATIC_REQUIRE(ValidOneOf<{"a", "b"}>);
+  STATIC_REQUIRE(ValidOneOf<layerCounts>);
   STATIC_REQUIRE_FALSE(ValidOneOf<1, "b">);
+  STATIC_REQUIRE_FALSE(ValidOneOf<{1, 2}, "b">);
+}
+
+TEST_CASE("OneOf does not take booleans or characters") {
+  STATIC_REQUIRE(ValidOneOf<std::int8_t{1}>);
+  STATIC_REQUIRE(ValidOneOf<std::uint8_t{1}>);
+  STATIC_REQUIRE(ValidOneOf<1ull>);
+  STATIC_REQUIRE_FALSE(ValidOneOf<true>);
+  STATIC_REQUIRE_FALSE(ValidOneOf<{true, false}>);
+  STATIC_REQUIRE_FALSE(ValidOneOf<'a'>);
+  STATIC_REQUIRE_FALSE(ValidOneOf<{'a', 'b'}>);
+  STATIC_REQUIRE_FALSE(ValidOneOf<std::array{'a', 'b'}>);
+  STATIC_REQUIRE_FALSE(ValidOneOf<u8'a'>);
+}
+
+TEST_CASE("OneOf takes the allowed values as a braced list") {
+  using Layers = k4FWCore::OneOf<{4, 8, 15}>;
+  REQUIRE(Layers::list() == "4, 8, 15");
+  Gaudi::Property<int, Layers> property{"NumLayers", 8};
+  REQUIRE(setFromString(property, "15"));
+  REQUIRE_FALSE(setFromString(property, "16"));
+  REQUIRE(property.value() == 15);
+
+  using Trackers = k4FWCore::OneOf<{"DCH", "STT"}>;
+  REQUIRE(Trackers::list() == "'DCH', 'STT'");
+  Gaudi::Property<std::string, Trackers> tracker{"Tracker", "DCH"};
+  REQUIRE(setFromString(tracker, "'STT'"));
+  REQUIRE_FALSE(setFromString(tracker, "'TPC'"));
+  REQUIRE(tracker.value() == "STT");
+}
+
+TEST_CASE("OneOf takes the allowed values as a std::array") {
+  using Layers = k4FWCore::OneOf<layerCounts>;
+  REQUIRE(Layers::list() == "4, 8, 15");
+  Gaudi::Property<int, Layers> property{"NumLayers", 8};
+  REQUIRE(setFromString(property, "15"));
+  REQUIRE_FALSE(setFromString(property, "16"));
+  REQUIRE(property.value() == 15);
+  REQUIRE(k4FWCore::OneOf<std::array{1, 2}>::list() == "1, 2");
+}
+
+TEST_CASE("OneOf combines the different ways of giving the allowed values") {
+  using Layers = k4FWCore::OneOf<1, {2, 3}, layerCounts>;
+  REQUIRE(Layers::list() == "1, 2, 3, 4, 8, 15");
+  REQUIRE_NOTHROW(Layers{}(3));
+  REQUIRE_NOTHROW(Layers{}(15));
+  REQUIRE_THROWS_AS(Layers{}(5), std::invalid_argument);
+
+  REQUIRE(k4FWCore::OneOf<"DCH", {"STT", "TPC"}>::list() == "'DCH', 'STT', 'TPC'");
+}
+
+TEST_CASE("OneOf compares strings of different lengths exactly") {
+  using Names = k4FWCore::OneOf<{"A", "ABC", ""}>;
+  REQUIRE(Names::list() == "'A', 'ABC', ''");
+  REQUIRE_NOTHROW(Names{}("A"));
+  REQUIRE_NOTHROW(Names{}("ABC"));
+  REQUIRE_NOTHROW(Names{}(""));
+  REQUIRE_THROWS_AS(Names{}("AB"), std::invalid_argument);
+  REQUIRE_THROWS_AS(Names{}("ABCD"), std::invalid_argument);
+  REQUIRE_THROWS_AS(Names{}(std::string("A\0", 2)), std::invalid_argument);
 }
