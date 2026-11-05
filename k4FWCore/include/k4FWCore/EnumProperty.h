@@ -39,7 +39,6 @@
 #include <string>
 #include <string_view>
 #include <type_traits>
-#include <typeinfo>
 #include <utility>
 #include <vector>
 
@@ -400,7 +399,7 @@ struct Gaudi::Details::Property::StringConverter<E> {
 };
 
 /** Register an enum whose names are registered with k4FWCore::EnumNames, so
- *  that it can be the type of a Gaudi::Property
+ *  that it can be the type of a Gaudi::Property and be parsed properly
  *
  *  @code
  *  enum class Mode { Fast, Precise };
@@ -413,15 +412,8 @@ struct Gaudi::Details::Property::StringConverter<E> {
  *
  *  It has to be used at global namespace scope, after the specialization of
  *  k4FWCore::EnumNames and before the first use of the enum as the type of a
- *  Gaudi::Property (see the documentation at the top of
- *  k4FWCore/EnumProperty.h). For an enum declared inside a class use
+ *  Gaudi::Property. For an enum declared inside a class use
  *  K4FWCORE_REGISTER_ALG_ENUM_FOR_PROPERTY.
- *
- *  Gaudi::Property prints its value with Gaudi::Utils::toStream, whose generic
- *  version uses `operator<<`. A generic overload for all named enums would not
- *  be found from inside Gaudi, so this macro defines an explicit specialization
- *  of Gaudi::Utils::toStream for @p E, see k4FWCore::details::enumToStream.
- *  Parsing needs no registration.
  *
  *  @param E the enum type
  */
@@ -435,7 +427,8 @@ struct Gaudi::Details::Property::StringConverter<E> {
   static_assert(true, "require a semicolon after the macro")
 
 /** Register an enum declared inside a class, whose names are registered via
- *  `k4FWCoreEnumNames`, so that it can be the type of a Gaudi::Property
+ *  `k4FWCoreEnumNames`, so that it can be the type of a Gaudi::Property and be
+ *  parsed properly
  *
  *  @code
  *  struct MyAlg : k4FWCore::Consumer<void()> {
@@ -449,12 +442,8 @@ struct Gaudi::Details::Property::StringConverter<E> {
  *
  *  It has to be used inside the class that declares the enum, after
  *  `k4FWCoreEnumNames` and before the first use of the enum as the type of a
- *  Gaudi::Property (see the documentation at the top of
- *  k4FWCore/EnumProperty.h). This also works if the enum is the type of a
- *  property of the same class. It defines the friend function
- *  `toStream(const E&, std::ostream&)`, which is found by argument-dependent
- *  lookup and prints the enum, see k4FWCore::details::enumToStream.
- *
+ *  Gaudi::Property. This also works if the enum is the type of a
+ *  property of the same class.
  *  @param E the enum type
  */
 #define K4FWCORE_REGISTER_ALG_ENUM_FOR_PROPERTY(E)                                                                     \
