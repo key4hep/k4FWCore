@@ -39,28 +39,27 @@ An enum can only be the type of a `Gaudi::Property` after it has been
 registered. The names that can be used in the steering file are the names of the
 enumerators. There are two ways to register an enum.
 
-The first one is the `K4FWCORE_ENUM_PROPERTY` macro, which takes the enum and
-the enumerators that can be selected. It has to be used at global scope, so it
-works for an enum declared at namespace scope:
+The first one is the `K4FWCORE_REGISTER_ENUM_FOR_PROPERTY` macro, which takes
+the enum and the enumerators that can be selected. It has to be used at global
+scope, so it works for an enum declared at namespace scope:
 
 ```cpp
 #include "k4FWCore/EnumProperty.h"
 
 enum class Gandalf { TheGrey, TheWhite };
 
-K4FWCORE_ENUM_PROPERTY(Gandalf, TheGrey, TheWhite);
+K4FWCORE_REGISTER_ENUM_FOR_PROPERTY(Gandalf, TheGrey, TheWhite);
 ```
 
-The second one is the `K4FWCORE_ENUM_PROPERTY_FRIEND` macro, which is used
-inside a class, next to the enum. It defines two friend functions, which are
-found by argument-dependent lookup. Here the enumerators have to be given with
+The second one is the `K4FWCORE_REGISTER_ALG_ENUM_FOR_PROPERTY` macro, which is
+used inside a class, next to the enum. Here the enumerators have to be given with
 the name of the enum. This is the only way to register an enum that is declared
 inside the algorithm that uses it:
 
 ```cpp
 struct ExampleFunctionalEnumProperties final : k4FWCore::Consumer<void()> {
   enum class Resurrection { NoResurrection, WithResurrection };
-  K4FWCORE_ENUM_PROPERTY_FRIEND(Resurrection, Resurrection::NoResurrection, Resurrection::WithResurrection);
+  K4FWCORE_REGISTER_ALG_ENUM_FOR_PROPERTY(Resurrection, Resurrection::NoResurrection, Resurrection::WithResurrection);
   // ...
 };
 ```

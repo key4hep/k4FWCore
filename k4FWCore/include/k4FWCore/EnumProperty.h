@@ -48,16 +48,17 @@
  *  Machinery to make it possible to use enums as the type of a Gaudi::Property
  *  such that setting it via the enum name is possible from python.
  *
- *  The mechanism implemented requires to opt-in via K4FWCORE_ENUM_PROPERTY,
- *  which lists the enumerators that can be selected. They are selected by their
- *  names in the code. Enumerators that are not listed cannot be selected, i.e.
- *  it is possible to restrict the values to a subset of the enumerators:
+ *  The mechanism implemented requires to opt-in via
+ *  K4FWCORE_REGISTER_ENUM_FOR_PROPERTY, which lists the enumerators that can be
+ *  selected. They are selected by their names in the code. Enumerators that are
+ *  not listed cannot be selected, i.e. it is possible to restrict the values to
+ *  a subset of the enumerators:
  *
  *  @code
  *  enum class Mode { Fast, Precise, Experimental };
  *
  *  // Opt in; names are taken from the enumerators. Experimental is not selectable.
- *  K4FWCORE_ENUM_PROPERTY(Mode, Fast, Precise);
+ *  K4FWCORE_REGISTER_ENUM_FOR_PROPERTY(Mode, Fast, Precise);
  *
  *  struct MyAlg : k4FWCore::Consumer<void()> {
  *    Gaudi::Property<Mode>              m_mode{this, "Mode", Mode::Fast, "One of " + k4FWCore::enumNameList<Mode>()};
@@ -66,15 +67,15 @@
  *  @endcode
  *
  *  An enum declared inside a class, in particular inside the class that uses it
- *  as the type of a property, is registered with K4FWCORE_ENUM_PROPERTY_FRIEND
- *  instead, inside the class. It defines two friend functions, which are found
- *  by argument-dependent lookup (ADL). Here the enumerators have to be given
- *  with the name of the enum:
+ *  as the type of a property, is registered with
+ *  K4FWCORE_REGISTER_ALG_ENUM_FOR_PROPERTY instead, inside the class. It defines
+ *  two friend functions, which are found by argument-dependent lookup (ADL).
+ *  Here the enumerators have to be given with the name of the enum:
  *
  *  @code
  *  struct MyAlg : k4FWCore::Consumer<void()> {
  *    enum class Mode { Fast, Precise, Experimental };
- *    K4FWCORE_ENUM_PROPERTY_FRIEND(Mode, Mode::Fast, Mode::Precise);
+ *    K4FWCORE_REGISTER_ALG_ENUM_FOR_PROPERTY(Mode, Mode::Fast, Mode::Precise);
  *
  *    Gaudi::Property<Mode> m_mode{this, "Mode", Mode::Fast, "One of " + k4FWCore::enumNameList<Mode>()};
  *  };
@@ -89,9 +90,9 @@
  *  `Gaudi::Utils::toStream` for the enum, which is needed to print the
  *  property.
  *
- *  @attention K4FWCORE_ENUM_PROPERTY must be used at global namespace scope,
- *  K4FWCORE_ENUM_PROPERTY_FRIEND in the class that declares the enum. Both have
- *  to come after the enum and before the first use of `Gaudi::Property<E>`,
+ *  @attention K4FWCORE_REGISTER_ENUM_FOR_PROPERTY must be used at global
+ *  namespace scope, K4FWCORE_REGISTER_ALG_ENUM_FOR_PROPERTY in the class that
+ *  declares the enum. Both have to come after the enum and before the first use of `Gaudi::Property<E>`,
  *  `Gaudi::Property<std::vector<E>>`, `Gaudi::Property<std::set<E>>`,
  *  `Gaudi::Utils::toStream` or anything else that checks k4FWCore::NamedEnum
  *  for this enum. A late registration usually makes the compilation fail, either with an error about
@@ -186,11 +187,11 @@ namespace details {
  *
  *  A specialization provides a `static constexpr` member `values` of type
  *  `std::array<std::pair<E, std::string_view>, N>` that maps each selectable enumerator to its name, in the order
- *  in which the names are listed by k4FWCore::enumNameList. It is specialized by K4FWCORE_ENUM_PROPERTY, which is
- *  the only way in which it should be specialized.
+ *  in which the names are listed by k4FWCore::enumNameList. It is specialized by K4FWCORE_REGISTER_ENUM_FOR_PROPERTY,
+ *  which is the only way in which it should be specialized.
  *
  *  If it is not specialized, `values` is taken from the return type of `k4FWCoreEnumNames(E)`, if such a function is
- *  found by argument-dependent lookup (declared by K4FWCORE_ENUM_PROPERTY_FRIEND), and is missing otherwise.
+ *  found by argument-dependent lookup (declared by K4FWCORE_REGISTER_ALG_ENUM_FOR_PROPERTY), and is missing otherwise.
  *
  *  @tparam E the enum type
  */
@@ -200,14 +201,16 @@ struct EnumNames {};
 template <details::HasEnumNamesFunction E>
 struct EnumNames<E> : decltype(k4FWCoreEnumNames(std::declval<E>())){};
 
-/// An enum registered with k4FWCore::EnumNames (via K4FWCORE_ENUM_PROPERTY or
-/// K4FWCORE_ENUM_PROPERTY_FRIEND), which can therefore be the type of a Gaudi::Property
+/// An enum registered with k4FWCore::EnumNames (via K4FWCORE_REGISTER_ENUM_FOR_PROPERTY or
+/// K4FWCORE_REGISTER_ALG_ENUM_FOR_PROPERTY), which can therefore be the type of a
+/// Gaudi::Property
 template <typename E>
 concept NamedEnum = std::is_enum_v<E> && requires { EnumNames<E>::values; } &&
                     details::isEnumNameTable<E, std::remove_cv_t<decltype(EnumNames<E>::values)>>;
 
 /** Register enumerators with k4FWCore::EnumNames under the names they have in
-    the code. Used by K4FWCORE_ENUM_PROPERTY and K4FWCORE_ENUM_PROPERTY_FRIEND.
+    the code. Used by K4FWCORE_REGISTER_ENUM_FOR_PROPERTY and
+    K4FWCORE_REGISTER_ALG_ENUM_FOR_PROPERTY.
  *
  *  @tparam V0, Vs the enumerators that can be selected, in the order in which they are listed by
  *                 k4FWCore::enumNameList. They have to be named enumerators of the same enum, with distinct values.
@@ -280,7 +283,7 @@ std::string enumNameList() {
 namespace details {
   /// The printout of an enum registered with k4FWCore::EnumNames: the name of the enumerator, quoted a'la Python (an
   /// unregistered value is printed as its underlying integer). The implementation of the `toStream` that
-  /// K4FWCORE_ENUM_PROPERTY and K4FWCORE_ENUM_PROPERTY_FRIEND provide
+  /// K4FWCORE_REGISTER_ENUM_FOR_PROPERTY and K4FWCORE_REGISTER_ALG_ENUM_FOR_PROPERTY provide
   template <NamedEnum E>
   std::ostream& enumToStream(const E& obj, std::ostream& s) {
     if (const auto name = k4FWCore::enumToName(obj)) {
@@ -380,8 +383,8 @@ struct Gaudi::Details::Property::StringConverter<E> {
   }
 };
 
-/** Implementation detail of K4FWCORE_ENUM_PROPERTY: the printout of the enum
- *  @p E, see k4FWCore::details::enumToStream.
+/** Implementation detail of K4FWCORE_REGISTER_ENUM_FOR_PROPERTY: the printout of
+ *  the enum @p E, see k4FWCore::details::enumToStream.
  *
  *  Gaudi::Property prints its value with Gaudi::Utils::toStream, whose generic
  *  version uses `operator<<`. A generic overload for all named enums would not
@@ -400,7 +403,7 @@ struct Gaudi::Details::Property::StringConverter<E> {
  *
  *  @code
  *  enum class Mode { Fast, Precise };
- *  K4FWCORE_ENUM_PROPERTY(Mode, Fast, Precise);
+ *  K4FWCORE_REGISTER_ENUM_FOR_PROPERTY(Mode, Fast, Precise);
  *  // The user writes "Fast" or "Precise"
  *  Gaudi::Property<Mode> m_mode{this, "Mode", Mode::Fast, "One of " + k4FWCore::enumNameList<Mode>()};
  *  @endcode
@@ -408,17 +411,17 @@ struct Gaudi::Details::Property::StringConverter<E> {
  *  It has to be used at global namespace scope, after the declaration of the
  *  enum and before its first use as the type of a Gaudi::Property (see the
  *  documentation at the top of k4FWCore/EnumProperty.h). For an enum declared
- *  inside a class use K4FWCORE_ENUM_PROPERTY_FRIEND. Enumerators that are not
- *  listed cannot be selected. The enumerators are in scope (via `using enum`),
- *  so they can be given without the name of the enum, but `Mode::Fast` works as
- *  well.
+ *  inside a class use K4FWCORE_REGISTER_ALG_ENUM_FOR_PROPERTY. Enumerators that
+ *  are not listed cannot be selected. The enumerators are in scope (via `using
+ *  enum`), so they can be given without the name of the enum, but `Mode::Fast`
+ *  works as well.
  *
  *  @param E   the enum type
  *  @param ... the enumerators that can be selected, in the order in which they
  *             are listed by k4FWCore::enumNameList. They have to be named
  *             enumerators of E, with distinct values.
  */
-#define K4FWCORE_ENUM_PROPERTY(E, ...)                                                                                 \
+#define K4FWCORE_REGISTER_ENUM_FOR_PROPERTY(E, ...)                                                                    \
   template <>                                                                                                          \
   struct k4FWCore::EnumNames<E> {                                                                                      \
     using enum E;                                                                                                      \
@@ -432,7 +435,7 @@ struct Gaudi::Details::Property::StringConverter<E> {
  *  @code
  *  struct MyAlg : k4FWCore::Consumer<void()> {
  *    enum class Mode { Fast, Precise };
- *    K4FWCORE_ENUM_PROPERTY_FRIEND(Mode, Mode::Fast, Mode::Precise);
+ *    K4FWCORE_REGISTER_ALG_ENUM_FOR_PROPERTY(Mode, Mode::Fast, Mode::Precise);
  *    // The user writes "Fast" or "Precise"
  *    Gaudi::Property<Mode> m_mode{this, "Mode", Mode::Fast, "One of " + k4FWCore::enumNameList<Mode>()};
  *  };
@@ -445,15 +448,15 @@ struct Gaudi::Details::Property::StringConverter<E> {
  *  functions, which are found by argument-dependent lookup: the names are taken
  *  from the return type of `k4FWCoreEnumNames(E)` (it is never called), and
  *  `toStream(const E&, std::ostream&)` prints the enum. Enumerators that are
- *  not listed cannot be selected. Unlike for K4FWCORE_ENUM_PROPERTY the
- *  enumerators have to be given with the name of the enum (`Mode::Fast`).
+ *  not listed cannot be selected. Unlike for K4FWCORE_REGISTER_ENUM_FOR_PROPERTY
+ *  the enumerators have to be given with the name of the enum (`Mode::Fast`).
  *
  *  @param E   the enum type
  *  @param ... the enumerators that can be selected, in the order in which they
  *             are listed by k4FWCore::enumNameList. They have to be named
  *             enumerators of E, with distinct values.
  */
-#define K4FWCORE_ENUM_PROPERTY_FRIEND(E, ...)                                                                          \
+#define K4FWCORE_REGISTER_ALG_ENUM_FOR_PROPERTY(E, ...)                                                                \
   friend constexpr k4FWCore::Enumerators<__VA_ARGS__> k4FWCoreEnumNames [[maybe_unused]] (E) { return {}; }            \
   friend std::ostream& toStream(const E& obj, std::ostream& s) { return k4FWCore::details::enumToStream(obj, s); }     \
   static_assert(true, "require a semicolon after the macro")

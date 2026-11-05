@@ -80,7 +80,7 @@ namespace {
 enum class Mode { Fast, Precise, Experimental };
 } // namespace
 // Experimental is deliberately not registered
-K4FWCORE_ENUM_PROPERTY(Mode, Fast, Precise);
+K4FWCORE_REGISTER_ENUM_FOR_PROPERTY(Mode, Fast, Precise);
 
 TEST_CASE("EnumProperty: enumValueName gives the unqualified enumerator name") {
   using k4FWCore::details::enumValueName;
@@ -95,9 +95,9 @@ TEST_CASE("EnumProperty: enumValueName gives the unqualified enumerator name") {
 //
 // enum class Bad { A = 0, B = 0 };
 // // a value without an enumerator name
-// K4FWCORE_ENUM_PROPERTY(Bad, A, static_cast<Bad>(7));
+// K4FWCORE_REGISTER_ENUM_FOR_PROPERTY(Bad, A, static_cast<Bad>(7));
 // // two enumerators with the same value, both are named "A"
-// K4FWCORE_ENUM_PROPERTY(Bad, A, B);
+// K4FWCORE_REGISTER_ENUM_FOR_PROPERTY(Bad, A, B);
 // static_assert(k4FWCore::NamedEnum<Bad>);
 
 TEST_CASE("EnumProperty: name validation") {
@@ -247,7 +247,7 @@ TEST_CASE("EnumProperty: only registered enums are NamedEnums") {
 namespace {
 enum Level { Low, High };
 } // namespace
-K4FWCORE_ENUM_PROPERTY(Level, Low, High);
+K4FWCORE_REGISTER_ENUM_FOR_PROPERTY(Level, Low, High);
 
 TEST_CASE("EnumProperty: unscoped enum") {
   STATIC_REQUIRE(k4FWCore::details::enumValueName<Low>() == "Low");
@@ -263,7 +263,7 @@ namespace {
 enum class Small : unsigned char { X, Y, Z };
 } // namespace
 // Z is deliberately not registered
-K4FWCORE_ENUM_PROPERTY(Small, X, Y);
+K4FWCORE_REGISTER_ENUM_FOR_PROPERTY(Small, X, Y);
 
 TEST_CASE("EnumProperty: enum with a character as underlying type") {
   STATIC_REQUIRE(k4FWCore::details::enumValueName<Small::Y>() == "Y");
@@ -283,7 +283,7 @@ struct Holder {
 };
 } // namespace
 // The enumerators can be given with and without the name of the enum
-K4FWCORE_ENUM_PROPERTY(Holder::Kind, A, Holder::Kind::B);
+K4FWCORE_REGISTER_ENUM_FOR_PROPERTY(Holder::Kind, A, Holder::Kind::B);
 
 TEST_CASE("EnumProperty: enum nested in a class") {
   STATIC_REQUIRE(k4FWCore::details::enumValueName<Holder::Kind::B>() == "B");
@@ -299,7 +299,7 @@ TEST_CASE("EnumProperty: enum nested in a class") {
 namespace outer::inner {
 enum class Nested { Alpha, Beta };
 } // namespace outer::inner
-K4FWCORE_ENUM_PROPERTY(outer::inner::Nested, outer::inner::Nested::Alpha, outer::inner::Nested::Beta);
+K4FWCORE_REGISTER_ENUM_FOR_PROPERTY(outer::inner::Nested, outer::inner::Nested::Alpha, outer::inner::Nested::Beta);
 
 TEST_CASE("EnumProperty: enum in a nested namespace") {
   STATIC_REQUIRE(k4FWCore::details::enumValueName<outer::inner::Nested::Beta>() == "Beta");
@@ -315,11 +315,11 @@ TEST_CASE("EnumProperty: enum in a nested namespace") {
 
 namespace {
 // The enum is used as the type of a property of the class that declares it.
-// This is the case which requires K4FWCORE_ENUM_PROPERTY_FRIEND
+// This is the case which requires K4FWCORE_REGISTER_ALG_ENUM_FOR_PROPERTY
 struct Owner {
   enum class Mode { On, Off, Standby };
   // Standby is deliberately not registered
-  K4FWCORE_ENUM_PROPERTY_FRIEND(Mode, Mode::On, Mode::Off);
+  K4FWCORE_REGISTER_ALG_ENUM_FOR_PROPERTY(Mode, Mode::On, Mode::Off);
 
   Gaudi::Property<Mode> mode{"Mode", Mode::Off, "One of " + k4FWCore::enumNameList<Mode>()};
   Gaudi::Property<std::vector<Mode>> modes{"Modes", {Mode::On}};
