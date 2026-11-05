@@ -243,8 +243,9 @@ struct Enumerators {
                 "k4FWCore::Enumerators: all values must be named enumerators (a value like static_cast<E>(7) "
                 "has no name)");
   static_assert(details::hasUniqueNames(values),
-                "k4FWCore::Enumerators: all values must be different (enumerators with the same value have the same "
-                "name)");
+                "k4FWCore::Enumerators: each enumerator can only be listed once, and enumerators with the same "
+                "value (e.g. enum class E { A = 0, B = 0 }) cannot be listed together, because they cannot be "
+                "told apart and get the same name");
 };
 
 /** Look up the enumerator with the given name (exact, case-sensitive match)
