@@ -80,7 +80,9 @@ namespace {
 enum class Mode { Fast, Precise, Experimental };
 } // namespace
 // Experimental is deliberately not registered
-K4FWCORE_REGISTER_ENUM_FOR_PROPERTY(Mode, Fast, Precise);
+template <>
+struct k4FWCore::EnumNames<Mode> : k4FWCore::Enumerators<Mode::Fast, Mode::Precise> {};
+K4FWCORE_REGISTER_ENUM_FOR_PROPERTY(Mode);
 
 TEST_CASE("EnumProperty: enumValueName gives the unqualified enumerator name") {
   using k4FWCore::details::enumValueName;
@@ -95,9 +97,11 @@ TEST_CASE("EnumProperty: enumValueName gives the unqualified enumerator name") {
 //
 // enum class Bad { A = 0, B = 0 };
 // // a value without an enumerator name
-// K4FWCORE_REGISTER_ENUM_FOR_PROPERTY(Bad, A, static_cast<Bad>(7));
+// template <>
+// struct k4FWCore::EnumNames<Bad> : k4FWCore::Enumerators<Bad::A, static_cast<Bad>(7)> {};
 // // two enumerators with the same value, both are named "A"
-// K4FWCORE_REGISTER_ENUM_FOR_PROPERTY(Bad, A, B);
+// template <>
+// struct k4FWCore::EnumNames<Bad> : k4FWCore::Enumerators<Bad::A, Bad::B> {};
 // static_assert(k4FWCore::NamedEnum<Bad>);
 
 TEST_CASE("EnumProperty: name validation") {
@@ -247,7 +251,9 @@ TEST_CASE("EnumProperty: only registered enums are NamedEnums") {
 namespace {
 enum Level { Low, High };
 } // namespace
-K4FWCORE_REGISTER_ENUM_FOR_PROPERTY(Level, Low, High);
+template <>
+struct k4FWCore::EnumNames<Level> : k4FWCore::Enumerators<Low, High> {};
+K4FWCORE_REGISTER_ENUM_FOR_PROPERTY(Level);
 
 TEST_CASE("EnumProperty: unscoped enum") {
   STATIC_REQUIRE(k4FWCore::details::enumValueName<Low>() == "Low");
@@ -263,7 +269,9 @@ namespace {
 enum class Small : unsigned char { X, Y, Z };
 } // namespace
 // Z is deliberately not registered
-K4FWCORE_REGISTER_ENUM_FOR_PROPERTY(Small, X, Y);
+template <>
+struct k4FWCore::EnumNames<Small> : k4FWCore::Enumerators<Small::X, Small::Y> {};
+K4FWCORE_REGISTER_ENUM_FOR_PROPERTY(Small);
 
 TEST_CASE("EnumProperty: enum with a character as underlying type") {
   STATIC_REQUIRE(k4FWCore::details::enumValueName<Small::Y>() == "Y");
@@ -282,8 +290,9 @@ struct Holder {
   enum class Kind { A, B };
 };
 } // namespace
-// The enumerators can be given with and without the name of the enum
-K4FWCORE_REGISTER_ENUM_FOR_PROPERTY(Holder::Kind, A, Holder::Kind::B);
+template <>
+struct k4FWCore::EnumNames<Holder::Kind> : k4FWCore::Enumerators<Holder::Kind::A, Holder::Kind::B> {};
+K4FWCORE_REGISTER_ENUM_FOR_PROPERTY(Holder::Kind);
 
 TEST_CASE("EnumProperty: enum nested in a class") {
   STATIC_REQUIRE(k4FWCore::details::enumValueName<Holder::Kind::B>() == "B");
@@ -299,7 +308,10 @@ TEST_CASE("EnumProperty: enum nested in a class") {
 namespace outer::inner {
 enum class Nested { Alpha, Beta };
 } // namespace outer::inner
-K4FWCORE_REGISTER_ENUM_FOR_PROPERTY(outer::inner::Nested, outer::inner::Nested::Alpha, outer::inner::Nested::Beta);
+template <>
+struct k4FWCore::EnumNames<outer::inner::Nested>
+    : k4FWCore::Enumerators<outer::inner::Nested::Alpha, outer::inner::Nested::Beta> {};
+K4FWCORE_REGISTER_ENUM_FOR_PROPERTY(outer::inner::Nested);
 
 TEST_CASE("EnumProperty: enum in a nested namespace") {
   STATIC_REQUIRE(k4FWCore::details::enumValueName<outer::inner::Nested::Beta>() == "Beta");
@@ -314,12 +326,34 @@ TEST_CASE("EnumProperty: enum in a nested namespace") {
 }
 
 namespace {
+// Registration with k4FWCoreEnumNames, found by argument-dependent lookup. [[maybe_unused]] avoids a Clang warning
+// because of the anonymous namespace
+enum class Colour { Red, Green, Blue };
+constexpr k4FWCore::Enumerators<Colour::Red, Colour::Green> k4FWCoreEnumNames [[maybe_unused]] (Colour) { return {}; }
+} // namespace
+K4FWCORE_REGISTER_ENUM_FOR_PROPERTY(Colour);
+
+TEST_CASE("EnumProperty: registration with k4FWCoreEnumNames") {
+  STATIC_REQUIRE(k4FWCore::NamedEnum<Colour>);
+  REQUIRE(k4FWCore::enumNameList<Colour>() == "'Red', 'Green'");
+
+  Gaudi::Property<Colour> colour{"Colour", Colour::Red};
+  REQUIRE(setFromString(colour, "'Green'"));
+  REQUIRE(colour.value() == Colour::Green);
+  REQUIRE_FALSE(setFromString(colour, "Blue"));
+  REQUIRE(colour.toString() == "Green");
+  REQUIRE(streamed(colour) == "'Green'");
+}
+
+namespace {
 // The enum is used as the type of a property of the class that declares it.
-// This is the case which requires K4FWCORE_REGISTER_ALG_ENUM_FOR_PROPERTY
+// This is the case which requires k4FWCoreEnumNames and K4FWCORE_REGISTER_ALG_ENUM_FOR_PROPERTY
 struct Owner {
   enum class Mode { On, Off, Standby };
   // Standby is deliberately not registered
-  K4FWCORE_REGISTER_ALG_ENUM_FOR_PROPERTY(Mode, Mode::On, Mode::Off);
+  // [[maybe_unused]] avoids a Clang warning because of the anonymous namespace
+  friend constexpr k4FWCore::Enumerators<Mode::On, Mode::Off> k4FWCoreEnumNames [[maybe_unused]] (Mode) { return {}; }
+  K4FWCORE_REGISTER_ALG_ENUM_FOR_PROPERTY(Mode);
 
   Gaudi::Property<Mode> mode{"Mode", Mode::Off, "One of " + k4FWCore::enumNameList<Mode>()};
   Gaudi::Property<std::vector<Mode>> modes{"Modes", {Mode::On}};
@@ -345,4 +379,17 @@ TEST_CASE("EnumProperty: an enum declared in the class that has the property") {
   owner.mode = Owner::Mode::Standby;
   REQUIRE(owner.mode.toString() == "2");
   REQUIRE(streamed(owner.mode) == "2");
+}
+
+namespace {
+// Registered in both ways
+enum class Both { A, B };
+constexpr k4FWCore::Enumerators<Both::A, Both::B> k4FWCoreEnumNames [[maybe_unused]] (Both) { return {}; }
+} // namespace
+template <>
+struct k4FWCore::EnumNames<Both> : k4FWCore::Enumerators<Both::B> {};
+
+TEST_CASE("EnumProperty: a specialization of EnumNames takes precedence over k4FWCoreEnumNames") {
+  REQUIRE(k4FWCore::enumNameList<Both>() == "'B'");
+  STATIC_REQUIRE_FALSE(k4FWCore::enumFromName<Both>("A").has_value());
 }

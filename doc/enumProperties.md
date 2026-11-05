@@ -39,27 +39,35 @@ An enum can only be the type of a `Gaudi::Property` after it has been
 registered. The names that can be used in the steering file are the names of the
 enumerators. There are two ways to register an enum.
 
-The first one is the `K4FWCORE_REGISTER_ENUM_FOR_PROPERTY` macro, which takes
-the enum and the enumerators that can be selected. It has to be used at global
-scope, so it works for an enum declared at namespace scope:
+The first one is to specialize `k4FWCore::EnumNames` and derive from
+`k4FWCore::Enumerators` with the enumerators that can be selected. Then the enum
+has to be registered with the `K4FWCORE_REGISTER_ENUM_FOR_PROPERTY` macro, which
+has to be used at global scope:
 
 ```cpp
 #include "k4FWCore/EnumProperty.h"
 
 enum class Gandalf { TheGrey, TheWhite };
 
-K4FWCORE_REGISTER_ENUM_FOR_PROPERTY(Gandalf, TheGrey, TheWhite);
+template <>
+struct k4FWCore::EnumNames<Gandalf> : k4FWCore::Enumerators<Gandalf::TheGrey, Gandalf::TheWhite> {};
+K4FWCORE_REGISTER_ENUM_FOR_PROPERTY(Gandalf);
 ```
 
-The second one is the `K4FWCORE_REGISTER_ALG_ENUM_FOR_PROPERTY` macro, which is
-used inside a class, next to the enum. Here the enumerators have to be given with
-the name of the enum. This is the only way to register an enum that is declared
-inside the algorithm that uses it:
+The second one is to declare a function `k4FWCoreEnumNames` next to the enum.
+Only its return type is used, which has to be spelled out (`auto` does not
+work). Then the enum has to be registered with the
+`K4FWCORE_REGISTER_ALG_ENUM_FOR_PROPERTY` macro, inside the class. This is the
+only way to register an enum that is declared inside the algorithm that uses it:
 
 ```cpp
 struct ExampleFunctionalEnumProperties final : k4FWCore::Consumer<void()> {
   enum class Resurrection { NoResurrection, WithResurrection };
-  K4FWCORE_REGISTER_ALG_ENUM_FOR_PROPERTY(Resurrection, Resurrection::NoResurrection, Resurrection::WithResurrection);
+  friend constexpr k4FWCore::Enumerators<Resurrection::NoResurrection, Resurrection::WithResurrection>
+  k4FWCoreEnumNames(Resurrection) {
+    return {};
+  }
+  K4FWCORE_REGISTER_ALG_ENUM_FOR_PROPERTY(Resurrection);
   // ...
 };
 ```
@@ -67,7 +75,8 @@ struct ExampleFunctionalEnumProperties final : k4FWCore::Consumer<void()> {
 The registration has to come after the enum and before its first use as the type
 of a property. Otherwise the compilation usually fails, e.g. with an error about
 a specialization after instantiation, or with an obscure error about a missing
-`operator<<` in `toStream`.
+`operator<<` in `toStream`. The same obscure error appears if the macro is
+missing.
 
 ## Using enum properties
 

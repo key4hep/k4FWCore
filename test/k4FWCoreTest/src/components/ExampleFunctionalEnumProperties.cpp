@@ -36,18 +36,29 @@ enum class Gandalf { TheGrey, TheWhite };
 enum class Member { Frodo, Sam, Merry, Pippin, Gandalf, Aragorn, Legolas, Gimli, Boromir };
 } // namespace
 
-// (1) Register the enums with K4FWCORE_REGISTER_ENUM_FOR_PROPERTY, before they
-//     are used as the type of a property. The names are the enumerators: the
-//     user writes "TheGrey" or "TheWhite"
-K4FWCORE_REGISTER_ENUM_FOR_PROPERTY(Gandalf, TheGrey, TheWhite);
-K4FWCORE_REGISTER_ENUM_FOR_PROPERTY(Member, Frodo, Sam, Merry, Pippin, Gandalf, Aragorn, Legolas, Gimli, Boromir);
+// (1) Register the enums by specializing k4FWCore::EnumNames and with
+//     K4FWCORE_REGISTER_ENUM_FOR_PROPERTY, before they are used as the type of
+//     a property. The names are the enumerators: the user writes "TheGrey" or
+//     "TheWhite"
+template <>
+struct k4FWCore::EnumNames<Gandalf> : k4FWCore::Enumerators<Gandalf::TheGrey, Gandalf::TheWhite> {};
+K4FWCORE_REGISTER_ENUM_FOR_PROPERTY(Gandalf);
+template <>
+struct k4FWCore::EnumNames<Member>
+    : k4FWCore::Enumerators<Member::Frodo, Member::Sam, Member::Merry, Member::Pippin, Member::Gandalf, Member::Aragorn,
+                            Member::Legolas, Member::Gimli, Member::Boromir> {};
+K4FWCORE_REGISTER_ENUM_FOR_PROPERTY(Member);
 
 struct ExampleFunctionalEnumProperties final : k4FWCore::Consumer<void()> {
-  // (2) An enum declared inside the algorithm is registered with
-  //     K4FWCORE_REGISTER_ALG_ENUM_FOR_PROPERTY inside the class; the enumerators
-  //     have to be given with the name of the enum
+  // (2) An enum declared inside the algorithm can only be registered with a
+  //     k4FWCoreEnumNames function; only its return type is used. Then it is
+  //     registered with K4FWCORE_REGISTER_ALG_ENUM_FOR_PROPERTY
   enum class Resurrection { NoResurrection, WithResurrection };
-  K4FWCORE_REGISTER_ALG_ENUM_FOR_PROPERTY(Resurrection, Resurrection::NoResurrection, Resurrection::WithResurrection);
+  friend constexpr k4FWCore::Enumerators<Resurrection::NoResurrection, Resurrection::WithResurrection>
+  k4FWCoreEnumNames(Resurrection) {
+    return {};
+  }
+  K4FWCORE_REGISTER_ALG_ENUM_FOR_PROPERTY(Resurrection);
 
   ExampleFunctionalEnumProperties(const std::string& name, ISvcLocator* svcLoc) : Consumer(name, svcLoc) {}
 
