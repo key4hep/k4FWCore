@@ -22,7 +22,9 @@ import os
 
 class IOSvc:
     def __init__(self, *args, **kwargs):
-        self._svc = IO(**kwargs, ImportedFromk4FWCore=True)
+        self._svc = IO(*args, ImportedFromk4FWCore=True)
+        for attr, value in kwargs.items():
+            setattr(self, attr, value)
         MetadataSvc("MetadataSvc")
 
     def __getattr__(self, attr):
