@@ -42,11 +42,11 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
-#include <iterator>
 #include <map>
 #include <memory>
 #include <numeric>
 #include <random>
+#include <ranges>
 #include <stdexcept>
 #include <string>
 #include <tuple>
@@ -72,20 +72,21 @@ inline bool is_in_window(const edm4hep::CaloHitContribution& contrib, float time
   return (contrib.getTime() + timeShift > start) && (contrib.getTime() + timeShift < stop);
 }
 
-// The contributions of the hit to overlay, shifted by timeShift and selected in (start, stop): none if no
-// contribution is inside, otherwise all of them if keepAll, or only those inside if not
-inline std::vector<edm4hep::CaloHitContribution> contributions_to_overlay(const edm4hep::SimCalorimeterHit& hit,
-                                                                          float timeShift, float start, float stop,
-                                                                          bool keepAll) {
-  const auto contribs = hit.getContributions();
-  const auto inWindow = [&](const auto& contrib) { return is_in_window(contrib, timeShift, start, stop); };
-  std::vector<edm4hep::CaloHitContribution> selected;
-  if (!keepAll) {
-    std::ranges::copy_if(contribs, std::back_inserter(selected), inWindow);
-  } else if (std::ranges::any_of(contribs, inWindow)) {
-    selected.assign(contribs.begin(), contribs.end());
-  }
-  return selected;
+// The contributions of the hit to overlay: all of them if keepAll, otherwise only those inside
+// (start, stop) once shifted by timeShift
+inline auto contributions_to_overlay(const edm4hep::SimCalorimeterHit& hit, float timeShift, float start, float stop,
+                                     bool keepAll) {
+  return hit.getContributions() | std::views::filter([=](const auto& contrib) {
+           return keepAll || is_in_window(contrib, timeShift, start, stop);
+         });
+}
+
+// Whether at least one of the contributions, shifted by timeShift, is inside (start, stop).
+// Taken by reference, so that a filter view remembers the first contribution it has found
+// and iterating over it afterwards does not search for it again
+inline bool has_contribution_in_window(auto& contribs, float timeShift, float start, float stop) {
+  return std::ranges::any_of(contribs,
+                             [&](const auto& contrib) { return is_in_window(contrib, timeShift, start, stop); });
 }
 
 std::pair<float, float> OverlayTiming::define_time_windows(const std::string& collection_name) const {
@@ -262,9 +263,9 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
     auto& caloHitContribs = ocaloHitContribs[i];
     for (const auto&& simCaloHit : *coll) {
       const float tof = time_of_flight(simCaloHit.getPosition());
-      const auto contribs =
+      auto contribs =
           contributions_to_overlay(simCaloHit, 0, this_start + tof, this_stop + tof, m_keepAllHitContributions);
-      if (contribs.empty()) {
+      if (!has_contribution_in_window(contribs, 0, this_start + tof, this_stop + tof)) {
         continue;
       }
       auto newhit = simCaloHit.clone(false);
@@ -483,9 +484,9 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
           for (const auto&& simCaloHit : backgroundEvent.get<edm4hep::SimCalorimeterHitCollection>(name)) {
             // Only background hits with at least one contribution in the window are overlaid,
             // with their contributions selected as for the signal hits
-            const auto contribs =
+            auto contribs =
                 contributions_to_overlay(simCaloHit, timeOffset, this_start, this_stop, m_keepAllHitContributions);
-            if (contribs.empty()) {
+            if (!has_contribution_in_window(contribs, timeOffset, this_start, this_stop)) {
               continue;
             }
             auto it = calHitMap.find(simCaloHit.getCellID());
