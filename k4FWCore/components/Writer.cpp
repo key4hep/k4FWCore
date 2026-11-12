@@ -309,6 +309,11 @@ public:
           std::unique_ptr<podio::CollectionBase> uptr(
               const_cast<podio::CollectionBase*>(old_collection->collectionBase()));
           ptr->getData().put(std::move(uptr), coll);
+          // The Frame owns the collection now. Detach it from the wrapper, which
+          // we also have to delete to avoid a leak, since it is no longer
+          // managed by the store
+          old_collection->resetData();
+          delete old_collection;
         }
       }
     }
