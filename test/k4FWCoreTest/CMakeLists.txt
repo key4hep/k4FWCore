@@ -132,6 +132,7 @@ add_test_fwcore(CreateExampleEventData options/createExampleEventData.py)
 set_tests_properties(CreateExampleEventData PROPERTIES FIXTURES_SETUP ExampleEventDataFile)
 add_test_fwcore(CreateExampleEventDataInDirectory options/createExampleEventDataInDirectory.py)
 add_test(NAME IOSvcConstructor COMMAND python3 ${CMAKE_CURRENT_LIST_DIR}/scripts/TestIOSvcConstructor.py)
+add_test(NAME IOSvcOutputDirectory COMMAND python3 ${CMAKE_CURRENT_LIST_DIR}/scripts/TestIOSvcOutputDirectory.py ${K4RUN})
 
 add_test_fwcore(CheckExampleEventData options/checkExampleEventData.py PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile)
 add_test_fwcore(CheckExampleEventData_noCollections options/checkExampleEventData.py --collections= PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile)
