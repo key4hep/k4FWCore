@@ -35,4 +35,5 @@ for args, kwargs, expected_name in [
         assert svc.getName() == expected_name
         assert svc.Input == ["input.root"]
         assert svc.Output == str(output)
-        assert output.parent.is_dir()
+        # Configuring an output path must not touch the filesystem.
+        assert not output.parent.exists()
