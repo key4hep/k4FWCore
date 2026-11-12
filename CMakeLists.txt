@@ -28,8 +28,8 @@ set(${PROJECT_NAME}_VERSION "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_
 
 find_package(ROOT COMPONENTS RIO Tree REQUIRED)
 find_package(Gaudi REQUIRED)
-find_package(podio 1.3 REQUIRED)
-find_package(EDM4HEP 1.0)
+find_package(podio 1.7 REQUIRED)
+find_package(EDM4HEP 1.3)
 if (NOT EDM4HEP_FOUND)
   find_package(EDM4HEP 0.99 REQUIRED)
 endif()
