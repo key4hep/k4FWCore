@@ -37,6 +37,7 @@ set(k4fwcoretest_plugin_sources
   src/components/ExampleFunctionalProducerMultiple.cpp
   src/components/ExampleFunctionalProducerRuntimeCollections.cpp
   src/components/ExampleFunctionalProducerWithTFile.cpp
+  src/components/ExampleFunctionalPropertyVerifiers.cpp
   src/components/ExampleFunctionalTransformer.cpp
   src/components/ExampleFunctionalTransformerHist.cpp
   src/components/ExampleFunctionalTransformerMultiple.cpp
@@ -217,6 +218,14 @@ add_test_fwcore(FunctionalTransformerHist options/ExampleFunctionalTransformerHi
 add_test_fwcore(FunctionalCollectionMerger options/ExampleFunctionalCollectionMerger.py PROPERTIES FIXTURES_REQUIRED ProducerMultipleFile ADD_TO_CHECK_FILES)
 add_test_fwcore(FunctionalCollectionMergerEmpty options/ExampleFunctionalCollectionMergerEmpty.py
                   PROPERTIES PASS_REGULAR_EXPRESSION "InputCollections must contain at least one collection")
+add_test_fwcore(FunctionalPropertyVerifiers options/ExampleFunctionalPropertyVerifiers.py
+                  PROPERTIES PASS_REGULAR_EXPRESSION "NumBreakfasts = 0, FellowshipLeader = Sam")
+add_test_fwcore(FunctionalPropertyVerifiersInvalidInt options/ExampleFunctionalPropertyVerifiers.py
+                  --ExampleFunctionalPropertyVerifiers.NumBreakfasts 2
+                  PROPERTIES PASS_REGULAR_EXPRESSION "2 is not one of 0, 1")
+add_test_fwcore(FunctionalPropertyVerifiersInvalidString options/ExampleFunctionalPropertyVerifiers.py
+                  --ExampleFunctionalPropertyVerifiers.FellowshipLeader Sauron
+                  PROPERTIES PASS_REGULAR_EXPRESSION "'Sauron' is not one of 'Frodo', 'Sam'")
 add_test_fwcore(FunctionalFilterFile options/ExampleFunctionalFilterFile.py ADD_TO_CHECK_FILES)
 add_test_fwcore(FunctionalMetadata options/ExampleFunctionalMetadata.py --MetadataSvc.SkipIfSameValue True ADD_TO_CHECK_FILES PROPERTIES FIXTURES_SETUP FunctionalMetadataFile)
 add_test_fwcore(FunctionalMetadataThrow options/ExampleFunctionalMetadata.py --Producer2.ParticleTime 2.5
