@@ -40,13 +40,16 @@
 #include "k4FWCore/KeepDropSwitch.h"
 
 #include <TROOT.h>
+#include <TUrl.h>
 
 #include <algorithm>
+#include <filesystem>
 #include <memory>
 #include <mutex>
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <system_error>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -128,6 +131,28 @@ StatusCode IOSvc::initialize() {
 }
 
 StatusCode IOSvc::finalize() { return Service::finalize(); }
+
+podio::Writer& IOSvc::getWriter() {
+  if (!m_writer) {
+    const auto& filename = m_writingFileName.value();
+    // Interpret URLs as ROOT does, and only create directories for local files.
+    const TUrl url(filename.c_str(), true);
+    if (url.IsValid() && std::string_view(url.GetProtocol()) == "file") {
+      const auto parent = std::filesystem::path(url.GetFile()).parent_path();
+      if (!parent.empty()) {
+        std::error_code error;
+        std::filesystem::create_directories(parent, error);
+        if (error) {
+          throw GaudiException("Cannot create output directory '" + parent.string() + "' for '" + filename +
+                                   "': " + error.message(),
+                               name(), StatusCode::FAILURE);
+        }
+      }
+    }
+    m_writer = podio::makeWriter(filename, m_outputType);
+  }
+  return *m_writer;
+}
 
 std::tuple<std::vector<podio::CollectionBase*>, std::vector<std::string>, podio::Frame> IOSvc::next() {
   podio::Frame frame;
