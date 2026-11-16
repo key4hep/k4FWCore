@@ -53,8 +53,9 @@
 #include <utility>
 #include <vector>
 
+namespace {
 template <typename T>
-inline float time_of_flight(const T& pos) {
+float time_of_flight(const T& pos) {
   // Returns the time of flight to the radius in ns
   // Assumming positions in mm, then mm/m/s = 10^-3 s = 10^6 ns
   return std::sqrt((pos[0] * pos[0]) + (pos[1] * pos[1]) + (pos[2] * pos[2])) / TMath::C() * 1e6;
@@ -63,19 +64,19 @@ inline float time_of_flight(const T& pos) {
 // Index of the copied background particle a relation should point at.
 // An index outside the background collection leaves the relation unset, which
 // covers both podio::ObjectID::untracked (-1) and podio::ObjectID::invalid (-2).
-inline int overlaid_particle_index(int oldIndex, int offset, int nBgParticles) {
+int overlaid_particle_index(int oldIndex, int offset, int nBgParticles) {
   return (oldIndex >= 0 && oldIndex < nBgParticles) ? offset + oldIndex : -1;
 }
 
 // Whether the contribution, shifted by timeShift, is inside (start, stop)
-inline bool is_in_window(const edm4hep::CaloHitContribution& contrib, float timeShift, float start, float stop) {
+bool is_in_window(const edm4hep::CaloHitContribution& contrib, float timeShift, float start, float stop) {
   return (contrib.getTime() + timeShift > start) && (contrib.getTime() + timeShift < stop);
 }
 
 // The contributions of the hit to overlay: all of them if keepAll, otherwise only those inside
 // (start, stop) once shifted by timeShift
-inline auto contributions_to_overlay(const edm4hep::SimCalorimeterHit& hit, float timeShift, float start, float stop,
-                                     bool keepAll) {
+auto contributions_to_overlay(const edm4hep::SimCalorimeterHit& hit, float timeShift, float start, float stop,
+                              bool keepAll) {
   return hit.getContributions() | std::views::filter([=](const auto& contrib) {
            return keepAll || is_in_window(contrib, timeShift, start, stop);
          });
@@ -84,10 +85,11 @@ inline auto contributions_to_overlay(const edm4hep::SimCalorimeterHit& hit, floa
 // Whether at least one of the contributions, shifted by timeShift, is inside (start, stop).
 // Taken by reference, so that a filter view remembers the first contribution it has found
 // and iterating over it afterwards does not search for it again
-inline bool has_contribution_in_window(auto& contribs, float timeShift, float start, float stop) {
+bool has_contribution_in_window(auto& contribs, float timeShift, float start, float stop) {
   return std::ranges::any_of(contribs,
                              [&](const auto& contrib) { return is_in_window(contrib, timeShift, start, stop); });
 }
+} // namespace
 
 std::pair<float, float> OverlayTiming::define_time_windows(const std::string& collection_name) const {
   try {
