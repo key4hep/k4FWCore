@@ -43,6 +43,7 @@
 #include <string_view>
 #include <vector>
 
+namespace {
 template <typename List1, typename List2>
 struct ConcatTypeLists;
 
@@ -50,6 +51,7 @@ template <template <typename...> class List, typename... Ts, typename... Us>
 struct ConcatTypeLists<List<Ts...>, List<Us...>> {
   using type = List<Ts..., Us...>;
 };
+} // namespace
 
 struct EfficiencyFilter final : k4FWCore::Transformer<podio::CollectionBase*(const podio::CollectionBase&,
                                                                              const edm4hep::EventHeaderCollection&)> {
