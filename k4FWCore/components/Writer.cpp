@@ -48,6 +48,7 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <exception>
 #include <memory>
 #include <set>
 #include <string>
@@ -128,6 +129,19 @@ public:
   }
 
   StatusCode finalize() override {
+    // Frames from the input that IOSvc was configured to copy (CopyInputCategories)
+    StatusCode sc = StatusCode::SUCCESS;
+    for (const auto& [category, frame] : iosvc->getInputFramesToCopy()) {
+      try {
+        iosvc->getWriter().writeFrame(frame, category);
+      } catch (const std::exception& e) {
+        // e.g. the frames of a category in different input files have different collections
+        error() << "Error when copying a frame of category '" << category << "' from the input: " << e.what() << endmsg;
+        sc = StatusCode::FAILURE;
+        break;
+      }
+    }
+
     m_metadataSvc->applyDeferredParameters();
     if (const auto* metadata_frame = m_metadataSvc->getFrame(); metadata_frame) {
       iosvc->getWriter().writeFrame(*metadata_frame, podio::Category::Metadata);
@@ -135,7 +149,7 @@ public:
 
     iosvc->deleteWriter();
 
-    return StatusCode::SUCCESS;
+    return sc;
   }
 
   std::set<std::pair<std::string, std::string_view>> getOutputCollections() const {

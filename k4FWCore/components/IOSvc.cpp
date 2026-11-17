@@ -42,6 +42,9 @@
 #include <TROOT.h>
 
 #include <algorithm>
+#include <array>
+#include <exception>
+#include <iterator>
 #include <memory>
 #include <mutex>
 #include <stdexcept>
@@ -117,6 +120,10 @@ StatusCode IOSvc::initialize() {
     }
   }
 
+  if (readInputFramesToCopy().isFailure()) {
+    return StatusCode::FAILURE;
+  }
+
   m_hiveWhiteBoard = service("EventDataSvc");
   if (m_hiveWhiteBoard) {
     // Needs to enabled following the recommendation in
@@ -158,6 +165,67 @@ std::tuple<std::vector<podio::CollectionBase*>, std::vector<std::string>, podio:
   }
 
   return std::make_tuple(collections, m_collectionNames, std::move(frame));
+}
+
+StatusCode IOSvc::readInputFramesToCopy() {
+  if (m_copyInputCategories.empty()) {
+    return StatusCode::SUCCESS;
+  }
+  if (!m_reader) {
+    warning() << "CopyInputCategories is set but there are no input files, nothing will be copied" << endmsg;
+    return StatusCode::SUCCESS;
+  }
+
+  // Categories handled by the framework itself, which are never copied
+  static constexpr std::array<std::string_view, 3> reserved{podio::Category::Event, podio::Category::Metadata,
+                                                            "configuration_metadata"};
+  const auto isReserved = [](std::string_view cat) {
+    return std::find(reserved.begin(), reserved.end(), cat) != reserved.end();
+  };
+
+  std::vector<std::string> available;
+  for (const auto& cat : m_reader->getAvailableCategories()) {
+    available.emplace_back(cat);
+  }
+
+  const bool copyAll =
+      std::find(m_copyInputCategories.begin(), m_copyInputCategories.end(), "*") != m_copyInputCategories.end();
+  std::vector<std::string> toCopy;
+  if (copyAll) {
+    std::copy_if(available.begin(), available.end(), std::back_inserter(toCopy),
+                 [&](const auto& cat) { return !isReserved(cat); });
+  } else {
+    for (const auto& cat : m_copyInputCategories) {
+      if (isReserved(cat)) {
+        warning() << "Frame category '" << cat << "' is handled by the framework and cannot be copied, ignoring it"
+                  << endmsg;
+        continue;
+      }
+      if (std::find(available.begin(), available.end(), cat) == available.end()) {
+        warning() << "Frame category '" << cat << "' requested in CopyInputCategories is not present in the input files"
+                  << endmsg;
+        continue;
+      }
+      if (std::find(toCopy.begin(), toCopy.end(), cat) == toCopy.end()) {
+        toCopy.push_back(cat);
+      }
+    }
+  }
+
+  for (const auto& cat : toCopy) {
+    const auto nEntries = m_reader->getEntries(cat);
+    try {
+      for (size_t i = 0; i < nEntries; ++i) {
+        m_inputFramesToCopy.emplace_back(cat, m_reader->readFrame(cat, i));
+      }
+    } catch (const std::exception& e) {
+      error() << "Error when reading frame category '" << cat << "' from the input files: " << e.what() << endmsg;
+      return StatusCode::FAILURE;
+    }
+    info() << "Will copy " << nEntries << " frame(s) of category '" << cat << "' from the input to the output"
+           << endmsg;
+  }
+  return StatusCode::SUCCESS;
 }
 
 // After every event if there is still a frame in the TES

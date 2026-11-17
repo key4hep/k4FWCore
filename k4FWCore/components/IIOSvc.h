@@ -28,6 +28,7 @@
 #include <string>
 #include <string_view>
 #include <tuple>
+#include <utility>
 #include <vector>
 
 /**
@@ -46,6 +47,10 @@ public:
   virtual std::vector<std::string> getAvailableCollections() = 0;
 
   virtual podio::Writer& getWriter() = 0;
+  /**
+   * @brief Frames from the input files (category name, frame) that should be written unchanged to the output
+   */
+  virtual const std::vector<std::pair<std::string, podio::Frame>>& getInputFramesToCopy() const = 0;
   virtual void deleteWriter() = 0;
   virtual void deleteReader() = 0;
   virtual bool checkIfWriteCollection(const std::string& collName, const std::string_view collType) const = 0;

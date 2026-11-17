@@ -44,6 +44,7 @@
 #include <string>
 #include <string_view>
 #include <tuple>
+#include <utility>
 #include <vector>
 
 class IOSvc : public extends<Service, IIOSvc, IIncidentListener> {
@@ -71,6 +72,13 @@ protected:
       this, "ImportedFromk4FWCore", false,
       "This is set to true when IOSvc is imported from k4FWCore instead of Configurables in python"};
   Gaudi::Property<int> m_firstEventEntry{this, "FirstEventEntry", 0, "First event entry to read"};
+  Gaudi::Property<std::vector<std::string>> m_copyInputCategories{
+      this,
+      "CopyInputCategories",
+      {},
+      "Frame categories to copy unchanged from the input files to the output file, e.g. ['runs']. '*' selects all "
+      "categories except 'events', 'metadata' and 'configuration_metadata', which are always handled by the "
+      "framework. Empty (default) copies nothing"};
 
   std::mutex m_changeBufferLock;
 
@@ -96,6 +104,15 @@ protected:
   SmartIF<IHiveWhiteBoard> m_hiveWhiteBoard;
   SmartIF<IMetadataSvc> m_metadataSvc;
   void handle(const Incident& incident) override;
+
+  // Frames from the input files to be copied unchanged to the output, in the
+  // order they were read (category name, frame). Read in initialize() since
+  // the reader may be deleted before the Writer is finalized
+  std::vector<std::pair<std::string, podio::Frame>> m_inputFramesToCopy;
+  const std::vector<std::pair<std::string, podio::Frame>>& getInputFramesToCopy() const override {
+    return m_inputFramesToCopy;
+  }
+  StatusCode readInputFramesToCopy();
 
   int m_entries{0};
   std::atomic<int> m_nextEntry{0};
