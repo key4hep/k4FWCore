@@ -24,14 +24,10 @@ from k4FWCore import ApplicationMgr, IOSvc
 from k4FWCore.parseArgs import parser
 
 parser.add_argument("--output", default="output/nested/output.root")
-parser.add_argument("--mode", choices=["constructor", "assignment"], default="assignment")
 args, _ = parser.parse_known_args()
 
-if args.mode == "constructor":
-    svc = IOSvc(Output=args.output)
-else:
-    svc = IOSvc()
-    svc.Output = args.output
+svc = IOSvc()
+svc.Output = args.output
 
 ApplicationMgr(
     TopAlg=[k4FWCoreTest_CreateExampleEventData()],
