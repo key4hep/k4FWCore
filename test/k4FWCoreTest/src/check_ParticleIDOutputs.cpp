@@ -32,6 +32,8 @@
 #include <string>
 #include <vector>
 
+namespace {
+
 bool checkPIDForAlgo(const edm4hep::utils::PIDHandler& pidHandler, const edm4hep::ReconstructedParticle& reco,
                      const edm4hep::utils::ParticleIDMeta& pidMeta, const int paramIndex) {
   auto maybePID = pidHandler.getPID(reco, pidMeta.algoType());
@@ -71,6 +73,8 @@ bool checkAlgoMetadata(const edm4hep::utils::ParticleIDMeta& pidMeta, const std:
 
   return true;
 }
+
+} // namespace
 
 // Test configuration (this needs to match the settings in
 // options/ExampleParticleIDMetadata.py)
