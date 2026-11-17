@@ -5,6 +5,7 @@ Checks: >-
   clang-diagnostic-*,
   misc-string-compare,
   misc-uniqueptr-reset-release,
+  misc-use-internal-linkage,
   modernize-deprecated-headers,
   modernize-use-bool-literals,
   modernize-use-equals-delete,
@@ -27,6 +28,10 @@ Checks: >-
 WarningsAsErrors: ''
 HeaderFilterRegex: ''
 CheckOptions:
+  # Gaudi registers components under their demangled type name, so types
+  # must not be moved into anonymous namespaces
+  - key: misc-use-internal-linkage.AnalyzeTypes
+    value: false
   - key: cppcoreguidelines-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
     value: '1'
   - key: readability-braces-around-statements.ShortStatementLines
