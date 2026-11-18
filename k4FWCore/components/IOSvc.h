@@ -79,12 +79,7 @@ protected:
   std::optional<podio::Reader> m_reader;
   std::optional<podio::Writer> m_writer;
 
-  podio::Writer& getWriter() override {
-    if (!m_writer) {
-      m_writer = podio::makeWriter(m_writingFileName.value(), m_outputType);
-    }
-    return *m_writer;
-  }
+  podio::Writer& getWriter() override;
 
   // Gaudi doesn't always run the destructor of the Services so we have to
   // manually ask for the writer to be deleted so it will call finish()
