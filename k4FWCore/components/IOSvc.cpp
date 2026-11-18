@@ -172,7 +172,8 @@ StatusCode IOSvc::readInputFramesToCopy() {
     return StatusCode::SUCCESS;
   }
   if (!m_reader) {
-    warning() << "CopyInputCategories is set but there are no input files, nothing will be copied" << endmsg;
+    // Nothing to copy without input files (the default is to copy all categories)
+    debug() << "No input files, no frame categories will be copied" << endmsg;
     return StatusCode::SUCCESS;
   }
 

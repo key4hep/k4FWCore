@@ -200,12 +200,12 @@ Unlike event data, metadata is not exposed to users through the Gaudi TES and ca
 
 ### Copying other frame categories from the input
 
-Input files can contain frame categories other than `events` and `metadata`, for example the `runs` frame written by `ddsim`, which holds the provenance of the simulation (command line, steering file, software versions, ...). By default these are not written to the output. The `CopyInputCategories` property of `IOSvc` selects categories that are copied unchanged from the input files to the output file:
+Input files can contain frame categories other than `events` and `metadata`, for example the `runs` frame written by `ddsim`, which holds the provenance of the simulation (command line, steering file, software versions, ...). By default all of them are copied unchanged from the input files to the output file. The `CopyInputCategories` property of `IOSvc` selects which categories are copied:
 
 ```python
+io_svc.CopyInputCategories = ["*"]     # default, copy all categories not handled by the framework
 io_svc.CopyInputCategories = ["runs"]  # copy only the listed categories
-io_svc.CopyInputCategories = ["*"]     # copy all categories not handled by the framework
-io_svc.CopyInputCategories = []        # default, copy nothing
+io_svc.CopyInputCategories = []        # copy nothing
 ```
 
 or from the command line:

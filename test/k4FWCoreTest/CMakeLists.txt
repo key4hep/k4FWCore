@@ -255,8 +255,8 @@ add_test_fwcore(ReadLimitedInputsAllEventsIOSvc options/ExampleIOSvcLimitInputCo
 # Copying frame categories other than events and metadata from the input (IOSvc.CopyInputCategories)
 add_test(NAME CreateFilesWithExtraCategories COMMAND python3 ${CMAKE_CURRENT_LIST_DIR}/scripts/CreateFilesWithExtraCategories.py)
 set_tests_properties(CreateFilesWithExtraCategories PROPERTIES FIXTURES_SETUP ExtraCategoriesFiles)
-add_test_fwcore(CopyInputCategoriesNone options/ExampleIOSvcCopyInputCategories.py PROPERTIES FIXTURES_REQUIRED ExtraCategoriesFiles ADD_TO_CHECK_FILES)
-add_test_fwcore(CopyInputCategoriesAll options/ExampleIOSvcCopyInputCategories.py --IOSvc.Output "functional_copy_input_categories_all.root" --IOSvc.CopyInputCategories "*" PROPERTIES FIXTURES_REQUIRED ExtraCategoriesFiles ADD_TO_CHECK_FILES)
+add_test_fwcore(CopyInputCategoriesNone options/ExampleIOSvcCopyInputCategories.py --no-copy --IOSvc.Output "functional_copy_input_categories_none.root" PROPERTIES FIXTURES_REQUIRED ExtraCategoriesFiles ADD_TO_CHECK_FILES)
+add_test_fwcore(CopyInputCategoriesAll options/ExampleIOSvcCopyInputCategories.py PROPERTIES FIXTURES_REQUIRED ExtraCategoriesFiles ADD_TO_CHECK_FILES)
 add_test_fwcore(CopyInputCategoriesSelected options/ExampleIOSvcCopyInputCategories.py --IOSvc.Output "functional_copy_input_categories_runs.root" --IOSvc.CopyInputCategories runs metadata nonexisting
                 PROPERTIES FIXTURES_REQUIRED ExtraCategoriesFiles ADD_TO_CHECK_FILES
                 PASS_REGULAR_EXPRESSION "Frame category 'metadata' is handled by the framework.*Frame category 'nonexisting' requested in CopyInputCategories is not present")

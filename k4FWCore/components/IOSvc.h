@@ -75,10 +75,10 @@ protected:
   Gaudi::Property<std::vector<std::string>> m_copyInputCategories{
       this,
       "CopyInputCategories",
-      {},
-      "Frame categories to copy unchanged from the input files to the output file, e.g. ['runs']. '*' selects all "
-      "categories except 'events', 'metadata' and 'configuration_metadata', which are always handled by the "
-      "framework. Empty (default) copies nothing"};
+      {"*"},
+      "Frame categories to copy unchanged from the input files to the output file, e.g. ['runs']. '*' (default) "
+      "selects all categories except 'events', 'metadata' and 'configuration_metadata', which are always handled by "
+      "the framework. Empty copies nothing"};
 
   std::mutex m_changeBufferLock;
 
