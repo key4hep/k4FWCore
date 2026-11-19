@@ -202,7 +202,8 @@ TOF_BACKGROUND_HITS = [
     (11, False, 5.0),  # inside either way, in the first bunch crossing
     (12, True, 5.0),  # inside only by its absolute time, in the first bunch crossing
     (13, True, 15.0),  # inside only relative to the time of flight, in the first bunch crossing
-    (14, False, -15.0),  # inside only in the second bunch crossing, which is skipped with the time of flight
+    # inside only in the second bunch crossing, which is skipped with the time of flight
+    (14, False, -15.0),
 ]
 # The overlaid cellIDs, with and without ApplyTimeOfFlight, and the shift of the
 # time of each overlaid background hit
@@ -280,9 +281,7 @@ def main():
         CALO_MERGE_BACKGROUND_HITS,
     )
     write_tof_file(os.path.join(args.output_dir, "tof_signal.root"), TOF_SIGNAL_HITS)
-    write_tof_file(
-        os.path.join(args.output_dir, "tof_background.root"), TOF_BACKGROUND_HITS
-    )
+    write_tof_file(os.path.join(args.output_dir, "tof_background.root"), TOF_BACKGROUND_HITS)
 
 
 if __name__ == "__main__":
