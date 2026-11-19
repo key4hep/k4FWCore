@@ -29,6 +29,15 @@ It uses [`UniqueIDGenSvc`](uniqueIDGen.md) to seed the internal random number ge
 - `SimTrackerHit` collections are cropped to a configurable time window and overlaid. Background hits are flagged with `isOverlay = true`.
 - `SimCalorimeterHit` collections are overlaid by merging hits that share the same cell ID. A hit (signal or background) is kept if at least one of its `CaloHitContribution`s is inside the time window. By default it then keeps all its contributions, leaving the time selection to the digitization; with `KeepAllHitContributions = false` it only keeps the contributions inside the time window. When a background hit is merged into an existing one, its contributions are attached to that hit. In all cases the energy of a hit is the sum of the energies of the contributions it keeps.
 
+## Time windows
+
+Every `SimTrackerHit` and `SimCalorimeterHit` collection has its own time window, set with `TimeWindows`. Background hits, contributions and particles are first shifted by the time of their bunch crossing relative to the one of the physics event, `Delta_t` times the number of bunch crossings between them. The window is then applied in the same way to every hit, signal and background, tracker and calorimeter (to the contributions of a calorimeter hit):
+
+- With `ApplyTimeOfFlight = True` (the default) the window is relative to the time light takes from the interaction point to the position of the hit (for a calorimeter hit, the position of its cell). A hit is kept if its time minus that time of flight is inside the window, so the same window fits subdetectors at any distance from the interaction point.
+- With `ApplyTimeOfFlight = False` the window applies to the absolute time of the hit.
+
+With `ApplyTimeOfFlight = True`, the background collections of a bunch crossing that starts after the window closes are skipped as a whole, as no hit coming from the interaction point can reach the window from there. Hits arriving earlier than light from the interaction point would, such as those of particles produced away from it, are then lost. Without the time of flight there is no such bound, and every collection is selected hit by hit.
+
 ## Properties
 
 | Property | Default | Description |
@@ -40,7 +49,8 @@ It uses [`UniqueIDGenSvc`](uniqueIDGen.md) to seed the internal random number ge
 | `PhysicsBX` | `1` | Position of the physics event within the bunch train |
 | `RandomBx` | `false` | If true, place the physics event at a random bunch crossing (overrides `PhysicsBX`) |
 | `Delta_t` | `0.5` | Time between consecutive bunch crossings (ns) |
-| `TimeWindows` | `{}` | Map from collection name to `[t_min, t_max]` (ns) defining the acceptance window. Required for every `SimTrackerHit` and `SimCalorimeterHit` collection. |
+| `TimeWindows` | `{}` | Map from collection name to `[t_min, t_max]` (ns) defining the acceptance window. Required for every `SimTrackerHit` and `SimCalorimeterHit` collection. See [Time windows](#time-windows) |
+| `ApplyTimeOfFlight` | `true` | If true, the `TimeWindows` are relative to the time of flight of light from the interaction point to the hit. If false, they apply to the absolute hit time. See [Time windows](#time-windows) |
 | `BackgroundMCParticleCollectionName` | `"MCParticle"` | Name of the MCParticle collection in the background files |
 | `AllowReusingBackgroundFiles` | `false` | If true, start over from the first event of a group once all of its events have been overlaid. If false, running out of background events is an error. With `RandomMixBackgroundFiles` the files of a group are drawn again once all of them have been used, regardless of this option |
 | `RandomMixBackgroundFiles` | `false` | Treat every file of a background group as an independent (pseudo-)event source and draw one at random for each overlaid event |
