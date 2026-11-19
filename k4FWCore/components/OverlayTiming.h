@@ -239,6 +239,12 @@ private:
       this, "TimeWindows", std::map<std::string, std::vector<float>>(),
       "Map from collection name to [t_min, t_max] (ns) defining the acceptance window. Required for every "
       "SimTrackerHit and SimCalorimeterHit collection."};
+  Gaudi::Property<bool> m_applyTimeOfFlight{
+      this, "ApplyTimeOfFlight", true,
+      "If true, the TimeWindows are relative to the time of flight of light from the interaction point to the hit "
+      "position, i.e. a hit is kept if its time minus that time of flight is inside the window. If false, the "
+      "TimeWindows apply to the absolute hit time. Applied in the same way to signal and background, tracker and "
+      "calorimeter hits"};
   Gaudi::Property<bool> m_allowReusingBackgroundFiles{
       this, "AllowReusingBackgroundFiles", false,
       "If true, start over from the first event of a group once all of its events have been overlaid; otherwise "
