@@ -375,6 +375,19 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
         // Either 0 or negative
         const auto timeOffset = BX_number_in_train * m_deltaT;
 
+        // With the time of flight applied, a background hit is kept if its time + timeOffset - tof
+        // is inside the window. Nothing reaches a hit before light from the interaction point does
+        // (time >= tof), so once the window closes before timeOffset no hit of the collection can
+        // be kept and it is skipped as a whole. Without the time of flight the hit times have no
+        // such lower bound, so every collection is processed hit by hit
+        const auto afterIntegrationWindow = [&](const std::string& name, float stop) {
+          if (m_applyTimeOfFlight && stop <= timeOffset) {
+            debug() << "Skipping collection " << name << " as it is not in the integration window" << endmsg;
+            return true;
+          }
+          return false;
+        };
+
         // The background particles are copied in order, so the copy of background
         // particle i ends up at offset + i. Both stay 0 when the background
         // particles are not merged, which leaves every relation into them unset.
@@ -428,9 +441,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
             continue;
           }
           const auto [this_start, this_stop] = define_time_windows(name);
-          // There are only contributions to the readout if the hits are in the integration window
-          if (this_stop <= (BX_number_in_train - physBX) * m_deltaT) {
-            info() << "Skipping collection " << name << " as it is not in the integration window" << endmsg;
+          if (afterIntegrationWindow(name, this_stop)) {
             continue;
           }
           auto& ocoll = osimTrackerHits[i];
@@ -483,9 +494,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
             continue;
           }
           const auto [this_start, this_stop] = define_time_windows(name);
-          // There are only contributions to the readout if the hits are in the integration window
-          if (this_stop <= (BX_number_in_train - physBX) * m_deltaT) {
-            info() << "Skipping collection " << name << " as it is not in the integration window" << endmsg;
+          if (afterIntegrationWindow(name, this_stop)) {
             continue;
           }
 
