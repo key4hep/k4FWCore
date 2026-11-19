@@ -260,6 +260,9 @@ add_test_fwcore(CopyInputCategoriesAll options/ExampleIOSvcCopyInputCategories.p
 add_test_fwcore(CopyInputCategoriesSelected options/ExampleIOSvcCopyInputCategories.py --IOSvc.Output "functional_copy_input_categories_runs.root" --IOSvc.CopyInputCategories runs metadata nonexisting
                 PROPERTIES FIXTURES_REQUIRED ExtraCategoriesFiles ADD_TO_CHECK_FILES
                 PASS_REGULAR_EXPRESSION "Frame category 'metadata' is handled by the framework.*Frame category 'nonexisting' requested in CopyInputCategories is not present")
+add_test_fwcore(CopyInputCategoriesAllAndNamesFails options/ExampleIOSvcCopyInputCategories.py --IOSvc.Output "functional_copy_input_categories_invalid.root" --IOSvc.CopyInputCategories "*" runs
+                PROPERTIES FIXTURES_REQUIRED ExtraCategoriesFiles
+                PASS_REGULAR_EXPRESSION "'\\*' selects all categories and cannot be combined with explicit category names")
 
 # Tests that ensure that load_file populates the necessary python globals
 # accordingly to make loaded files work like imported files

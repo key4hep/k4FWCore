@@ -214,7 +214,7 @@ or from the command line:
 k4run <steering-file> --IOSvc.CopyInputCategories runs
 ```
 
-All the entries of a copied category are written, from all the input files, so when reading several files there is one `runs` frame per input file in the output. The categories `events`, `metadata` and `configuration_metadata` are always handled by the framework and are never copied: requesting them explicitly results in a warning, as does requesting a category that is not present in the input.
+All the entries of a copied category are written, from all the input files, so when reading several files there is one `runs` frame per input file in the output. The categories `events`, `metadata` and `configuration_metadata` are always handled by the framework and are never copied: requesting them explicitly results in a warning, as does requesting a category that is not present in the input. Combining `"*"` with explicit category names is a configuration error. The copied frames are written when the job starts, before any event.
 
 
 ## Migrating from the legacy `k4DataSvc`

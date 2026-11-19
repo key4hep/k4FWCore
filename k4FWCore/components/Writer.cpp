@@ -44,11 +44,11 @@
 #include "IIOSvc.h"
 #include "k4FWCore/DataWrapper.h"
 #include "k4FWCore/FunctionalUtils.h"
+#include "k4FWCore/GaudiChecks.h"
 #include "k4FWCore/IMetadataSvc.h"
 
 #include <algorithm>
 #include <cstdlib>
-#include <exception>
 #include <memory>
 #include <set>
 #include <string>
@@ -125,23 +125,15 @@ public:
     }
     iosvc->getWriter().writeFrame(config_metadata_frame, "configuration_metadata");
 
+    // Frames from the input that IOSvc was configured to copy (CopyInputCategories).
+    // Written here, while the input files are still open, so that nothing in the
+    // event loop can interfere and the frames do not have to be kept in memory
+    K4_GAUDI_CHECK(iosvc->copyInputFrames());
+
     return StatusCode::SUCCESS;
   }
 
   StatusCode finalize() override {
-    // Frames from the input that IOSvc was configured to copy (CopyInputCategories)
-    StatusCode sc = StatusCode::SUCCESS;
-    for (const auto& [category, frame] : iosvc->getInputFramesToCopy()) {
-      try {
-        iosvc->getWriter().writeFrame(frame, category);
-      } catch (const std::exception& e) {
-        // e.g. the frames of a category in different input files have different collections
-        error() << "Error when copying a frame of category '" << category << "' from the input: " << e.what() << endmsg;
-        sc = StatusCode::FAILURE;
-        break;
-      }
-    }
-
     m_metadataSvc->applyDeferredParameters();
     if (const auto* metadata_frame = m_metadataSvc->getFrame(); metadata_frame) {
       iosvc->getWriter().writeFrame(*metadata_frame, podio::Category::Metadata);
@@ -149,7 +141,7 @@ public:
 
     iosvc->deleteWriter();
 
-    return sc;
+    return StatusCode::SUCCESS;
   }
 
   std::set<std::pair<std::string, std::string_view>> getOutputCollections() const {

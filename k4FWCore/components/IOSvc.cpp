@@ -37,6 +37,7 @@
 #include <podio/podioVersion.h>
 
 #include "k4FWCore/FunctionalUtils.h"
+#include "k4FWCore/GaudiChecks.h"
 #include "k4FWCore/KeepDropSwitch.h"
 
 #include <TROOT.h>
@@ -44,7 +45,6 @@
 #include <algorithm>
 #include <array>
 #include <exception>
-#include <iterator>
 #include <memory>
 #include <mutex>
 #include <stdexcept>
@@ -120,9 +120,7 @@ StatusCode IOSvc::initialize() {
     }
   }
 
-  if (readInputFramesToCopy().isFailure()) {
-    return StatusCode::FAILURE;
-  }
+  K4_GAUDI_CHECK(selectCategoriesToCopy());
 
   m_hiveWhiteBoard = service("EventDataSvc");
   if (m_hiveWhiteBoard) {
@@ -167,9 +165,15 @@ std::tuple<std::vector<podio::CollectionBase*>, std::vector<std::string>, podio:
   return std::make_tuple(collections, m_collectionNames, std::move(frame));
 }
 
-StatusCode IOSvc::readInputFramesToCopy() {
+StatusCode IOSvc::selectCategoriesToCopy() {
   if (m_copyInputCategories.empty()) {
     return StatusCode::SUCCESS;
+  }
+  const bool copyAll = std::ranges::find(m_copyInputCategories, "*") != m_copyInputCategories.end();
+  if (copyAll && m_copyInputCategories.size() > 1) {
+    error() << "CopyInputCategories: '*' selects all categories and cannot be combined with explicit category names"
+            << endmsg;
+    return StatusCode::FAILURE;
   }
   if (!m_reader) {
     // Nothing to copy without input files (the default is to copy all categories)
@@ -180,51 +184,45 @@ StatusCode IOSvc::readInputFramesToCopy() {
   // Categories handled by the framework itself, which are never copied
   static constexpr std::array<std::string_view, 3> reserved{podio::Category::Event, podio::Category::Metadata,
                                                             "configuration_metadata"};
-  const auto isReserved = [](std::string_view cat) {
-    return std::find(reserved.begin(), reserved.end(), cat) != reserved.end();
-  };
+  const auto isReserved = [](std::string_view cat) { return std::ranges::find(reserved, cat) != reserved.end(); };
 
-  std::vector<std::string> available;
-  for (const auto& cat : m_reader->getAvailableCategories()) {
-    available.emplace_back(cat);
-  }
-
-  const bool copyAll =
-      std::find(m_copyInputCategories.begin(), m_copyInputCategories.end(), "*") != m_copyInputCategories.end();
-  std::vector<std::string> toCopy;
+  const auto available = m_reader->getAvailableCategories();
   if (copyAll) {
-    std::copy_if(available.begin(), available.end(), std::back_inserter(toCopy),
-                 [&](const auto& cat) { return !isReserved(cat); });
-  } else {
-    for (const auto& cat : m_copyInputCategories) {
-      if (isReserved(cat)) {
-        warning() << "Frame category '" << cat << "' is handled by the framework and cannot be copied, ignoring it"
-                  << endmsg;
-        continue;
-      }
-      if (std::find(available.begin(), available.end(), cat) == available.end()) {
-        warning() << "Frame category '" << cat << "' requested in CopyInputCategories is not present in the input files"
-                  << endmsg;
-        continue;
-      }
-      if (std::find(toCopy.begin(), toCopy.end(), cat) == toCopy.end()) {
-        toCopy.push_back(cat);
+    for (const auto cat : available) {
+      if (!isReserved(cat)) {
+        m_categoriesToCopy.emplace(cat);
       }
     }
+    return StatusCode::SUCCESS;
   }
 
-  for (const auto& cat : toCopy) {
+  for (const auto& cat : m_copyInputCategories) {
+    if (isReserved(cat)) {
+      warning() << "Frame category '" << cat << "' is handled by the framework and cannot be copied, ignoring it"
+                << endmsg;
+    } else if (std::ranges::find(available, cat) == available.end()) {
+      warning() << "Frame category '" << cat << "' requested in CopyInputCategories is not present in the input files"
+                << endmsg;
+    } else {
+      m_categoriesToCopy.insert(cat);
+    }
+  }
+  return StatusCode::SUCCESS;
+}
+
+StatusCode IOSvc::copyInputFrames() {
+  for (const auto& cat : m_categoriesToCopy) {
     const auto nEntries = m_reader->getEntries(cat);
     try {
       for (size_t i = 0; i < nEntries; ++i) {
-        m_inputFramesToCopy.emplace_back(cat, m_reader->readFrame(cat, i));
+        getWriter().writeFrame(m_reader->readFrame(cat, i), cat);
       }
     } catch (const std::exception& e) {
-      error() << "Error when reading frame category '" << cat << "' from the input files: " << e.what() << endmsg;
+      // e.g. the frames of a category in different input files have different collections
+      error() << "Error when copying frame category '" << cat << "' from the input files: " << e.what() << endmsg;
       return StatusCode::FAILURE;
     }
-    info() << "Will copy " << nEntries << " frame(s) of category '" << cat << "' from the input to the output"
-           << endmsg;
+    info() << "Copied " << nEntries << " frame(s) of category '" << cat << "' from the input to the output" << endmsg;
   }
   return StatusCode::SUCCESS;
 }

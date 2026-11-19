@@ -41,10 +41,10 @@
 #include <atomic>
 #include <mutex>
 #include <optional>
+#include <set>
 #include <string>
 #include <string_view>
 #include <tuple>
-#include <utility>
 #include <vector>
 
 class IOSvc : public extends<Service, IIOSvc, IIncidentListener> {
@@ -78,7 +78,7 @@ protected:
       {"*"},
       "Frame categories to copy unchanged from the input files to the output file, e.g. ['runs']. '*' (default) "
       "selects all categories except 'events', 'metadata' and 'configuration_metadata', which are always handled by "
-      "the framework. Empty copies nothing"};
+      "the framework, and cannot be combined with other names. Empty copies nothing"};
 
   std::mutex m_changeBufferLock;
 
@@ -105,14 +105,11 @@ protected:
   SmartIF<IMetadataSvc> m_metadataSvc;
   void handle(const Incident& incident) override;
 
-  // Frames from the input files to be copied unchanged to the output, in the
-  // order they were read (category name, frame). Read in initialize() since
-  // the reader may be deleted before the Writer is finalized
-  std::vector<std::pair<std::string, podio::Frame>> m_inputFramesToCopy;
-  const std::vector<std::pair<std::string, podio::Frame>>& getInputFramesToCopy() const override {
-    return m_inputFramesToCopy;
-  }
-  StatusCode readInputFramesToCopy();
+  // Frame categories of the input files to be copied unchanged to the output,
+  // selected in initialize() from CopyInputCategories
+  std::set<std::string> m_categoriesToCopy;
+  StatusCode selectCategoriesToCopy();
+  StatusCode copyInputFrames() override;
 
   int m_entries{0};
   std::atomic<int> m_nextEntry{0};
