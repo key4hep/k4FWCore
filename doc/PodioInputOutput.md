@@ -198,6 +198,24 @@ When both the `Input` and `Output` properties of `IOSvc` are defined, all the me
 
 Unlike event data, metadata is not exposed to users through the Gaudi TES and cannot be accessed directly by algorithms in the same way. Instead, handling metadata is encapsulated within the algorithm implementation itself. For more details on how this is managed, refer to the developer documentation.
 
+### Copying other frame categories from the input
+
+Input files can contain frame categories other than `events` and `metadata`, for example the `runs` frame written by `ddsim`, which holds the provenance of the simulation (command line, steering file, software versions, ...). By default all of them are copied unchanged from the input files to the output file. The `CopyInputCategories` property of `IOSvc` selects which categories are copied:
+
+```python
+io_svc.CopyInputCategories = ["*"]     # default, copy all categories not handled by the framework
+io_svc.CopyInputCategories = ["runs"]  # copy only the listed categories
+io_svc.CopyInputCategories = []        # copy nothing
+```
+
+or from the command line:
+
+```bash
+k4run <steering-file> --IOSvc.CopyInputCategories runs
+```
+
+All the entries of a copied category are written, from all the input files, so when reading several files there is one `runs` frame per input file in the output. The categories `events`, `metadata` and `configuration_metadata` are always handled by the framework and are never copied: requesting them explicitly results in a warning, as does requesting a category that is not present in the input. Combining `"*"` with explicit category names is a configuration error. The copied frames are written when the job starts, before any event.
+
 
 ## Migrating from the legacy `k4DataSvc`
 

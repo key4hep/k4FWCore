@@ -41,6 +41,7 @@
 #include <atomic>
 #include <mutex>
 #include <optional>
+#include <set>
 #include <string>
 #include <string_view>
 #include <tuple>
@@ -71,6 +72,13 @@ protected:
       this, "ImportedFromk4FWCore", false,
       "This is set to true when IOSvc is imported from k4FWCore instead of Configurables in python"};
   Gaudi::Property<int> m_firstEventEntry{this, "FirstEventEntry", 0, "First event entry to read"};
+  Gaudi::Property<std::vector<std::string>> m_copyInputCategories{
+      this,
+      "CopyInputCategories",
+      {"*"},
+      "Frame categories to copy unchanged from the input files to the output file, e.g. ['runs']. '*' (default) "
+      "selects all categories except 'events', 'metadata' and 'configuration_metadata', which are always handled by "
+      "the framework, and cannot be combined with other names. Empty copies nothing"};
 
   std::mutex m_changeBufferLock;
 
@@ -96,6 +104,12 @@ protected:
   SmartIF<IHiveWhiteBoard> m_hiveWhiteBoard;
   SmartIF<IMetadataSvc> m_metadataSvc;
   void handle(const Incident& incident) override;
+
+  // Frame categories of the input files to be copied unchanged to the output,
+  // selected in initialize() from CopyInputCategories
+  std::set<std::string> m_categoriesToCopy;
+  StatusCode selectCategoriesToCopy();
+  StatusCode copyInputFrames() override;
 
   int m_entries{0};
   std::atomic<int> m_nextEntry{0};

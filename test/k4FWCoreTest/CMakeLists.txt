@@ -252,6 +252,18 @@ add_test_fwcore(GaudiFunctional options/ExampleGaudiFunctional.py PROPERTIES FIX
 add_test_fwcore(ReadLimitedInputsIOSvc options/ExampleIOSvcLimitInputCollections.py PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile ADD_TO_CHECK_FILES)
 add_test_fwcore(ReadLimitedInputsAllEventsIOSvc options/ExampleIOSvcLimitInputCollections.py --IOSvc.Output "functional_limited_input_all_events.root" -n -1 PROPERTIES FIXTURES_REQUIRED ExampleEventDataFile ADD_TO_CHECK_FILES)
 
+# Copying frame categories other than events and metadata from the input (IOSvc.CopyInputCategories)
+add_test(NAME CreateFilesWithExtraCategories COMMAND python3 ${CMAKE_CURRENT_LIST_DIR}/scripts/CreateFilesWithExtraCategories.py)
+set_tests_properties(CreateFilesWithExtraCategories PROPERTIES FIXTURES_SETUP ExtraCategoriesFiles)
+add_test_fwcore(CopyInputCategoriesNone options/ExampleIOSvcCopyInputCategories.py --no-copy --IOSvc.Output "functional_copy_input_categories_none.root" PROPERTIES FIXTURES_REQUIRED ExtraCategoriesFiles ADD_TO_CHECK_FILES)
+add_test_fwcore(CopyInputCategoriesAll options/ExampleIOSvcCopyInputCategories.py PROPERTIES FIXTURES_REQUIRED ExtraCategoriesFiles ADD_TO_CHECK_FILES)
+add_test_fwcore(CopyInputCategoriesSelected options/ExampleIOSvcCopyInputCategories.py --IOSvc.Output "functional_copy_input_categories_runs.root" --IOSvc.CopyInputCategories runs metadata nonexisting
+                PROPERTIES FIXTURES_REQUIRED ExtraCategoriesFiles ADD_TO_CHECK_FILES
+                PASS_REGULAR_EXPRESSION "Frame category 'metadata' is handled by the framework.*Frame category 'nonexisting' requested in CopyInputCategories is not present")
+add_test_fwcore(CopyInputCategoriesAllAndNamesFails options/ExampleIOSvcCopyInputCategories.py --IOSvc.Output "functional_copy_input_categories_invalid.root" --IOSvc.CopyInputCategories "*" runs
+                PROPERTIES FIXTURES_REQUIRED ExtraCategoriesFiles
+                PASS_REGULAR_EXPRESSION "'\\*' selects all categories and cannot be combined with explicit category names")
+
 # Tests that ensure that load_file populates the necessary python globals
 # accordingly to make loaded files work like imported files
 # __file__ points to the loaded file and not k4FWCore/python/utils.py
