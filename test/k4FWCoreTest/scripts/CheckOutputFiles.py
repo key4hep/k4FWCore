@@ -35,6 +35,10 @@ from CreateOverlayBackgroundFiles import (
     HIT_MOMENTUM,
     N_FILES_GROUP_A,
     N_FILES_GROUP_B,
+    TOF_BACKGROUND_HITS,
+    TOF_EXPECTED,
+    TOF_EXPECTED_SHIFT,
+    TOF_SIGNAL_HITS,
     background_tag,
     particle_momentum,
 )
@@ -882,6 +886,39 @@ def check_calo_merge_overlay(filename, expected):
 
 check_calo_merge_overlay("overlay_calo_merge.root", CALO_MERGE_EXPECTED)
 check_calo_merge_overlay("overlay_calo_merge_cropped.root", CALO_MERGE_EXPECTED_CROPPED)
+
+
+def check_tof_overlay(filename, apply_time_of_flight):
+    """Checks an output of OverlayTimingTimeOfFlight (see TOF_WINDOW in
+    CreateOverlayBackgroundFiles.py): that the same hits are overlaid in the
+    tracker and the calorimeter collections, which ones, and that the background
+    hits are shifted by the time of the bunch crossing they are overlaid in"""
+    print(f'Checking file "{filename}" for the time of flight selection')
+    check_events(filename, 1)
+    frame = next(iter(podio.reading.get_reader(filename).get("events")))
+    expected = TOF_EXPECTED[apply_time_of_flight]
+    times = {cell_id: time for cell_id, _, time in TOF_SIGNAL_HITS + TOF_BACKGROUND_HITS}
+    tracker_hits = frame.get("OverlaySimTrackerHits")
+    calo_hits = frame.get("OverlaySimCalorimeterHits")
+    for name, cell_ids in (
+        ("tracker", sorted(hit.getCellID() for hit in tracker_hits)),
+        ("calorimeter", sorted(hit.getCellID() for hit in calo_hits)),
+    ):
+        if cell_ids != expected:
+            raise RuntimeError(f"Expected the {name} hits {expected}, got {cell_ids}")
+    overlaid_times = [(hit.getCellID(), hit.getTime()) for hit in tracker_hits] + [
+        (hit.getCellID(), c.getTime()) for hit in calo_hits for c in hit.getContributions()
+    ]
+    for cell_id, time in overlaid_times:
+        expected_time = times[cell_id] + TOF_EXPECTED_SHIFT.get(cell_id, 0.0)
+        if time != expected_time:
+            raise RuntimeError(
+                f"Expected the hit at cellID {cell_id} at {expected_time} ns, got {time} ns"
+            )
+
+
+check_tof_overlay("overlay_tof.root", True)
+check_tof_overlay("overlay_no_tof.root", False)
 
 reader = podio.reading.get_reader("functional_random_filter.root")
 frames = reader.get("events")

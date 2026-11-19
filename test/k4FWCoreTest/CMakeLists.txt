@@ -305,6 +305,10 @@ set_property(TEST OverlayTimingRandomMix OverlayTimingRandomMixRepeat OverlayTim
 add_test_fwcore(OverlayTimingCaloMerge options/TestOverlayTimingCaloMerge.py ADD_TO_CHECK_FILES PROPERTIES FIXTURES_REQUIRED OverlayBackgroundFiles)
 # Same, keeping only the contributions inside the time window
 add_test_fwcore(OverlayTimingCaloMergeCropped options/TestOverlayTimingCaloMerge.py --IOSvc.Output=overlay_calo_merge_cropped.root --OverlayTiming.KeepAllHitContributions=False ADD_TO_CHECK_FILES PROPERTIES FIXTURES_REQUIRED OverlayBackgroundFiles)
+# Tracker and calorimeter hits, signal and background, selected relative to the time of flight
+add_test_fwcore(OverlayTimingTimeOfFlight options/TestOverlayTimingTimeOfFlight.py ADD_TO_CHECK_FILES PROPERTIES FIXTURES_REQUIRED OverlayBackgroundFiles)
+# Same, selected by their absolute time
+add_test_fwcore(OverlayTimingNoTimeOfFlight options/TestOverlayTimingTimeOfFlight.py --IOSvc.Output=overlay_no_tof.root --OverlayTiming.ApplyTimeOfFlight=False ADD_TO_CHECK_FILES PROPERTIES FIXTURES_REQUIRED OverlayBackgroundFiles)
 
 add_test(NAME check_broken_pipe
          COMMAND bash -c "[ $(${K4RUN} options/ExampleFunctionalProducer.py | head -n 2 | wc -l) = 2 ]"
