@@ -302,11 +302,11 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
       debug() << "Physics Event was placed in the " << physBX << " bunch crossing!" << endmsg;
     }
 
-    // define a permutation for the events to overlay -- the physics event is per definition at position 0
+    // The bunch crossings of the train, numbered relative to the one of the physics event, which is
+    // 0 by definition. With the physics event at position physBX (counted from 1) of a train of
+    // NBunchtrain crossings, they run from -(physBX - 1), the crossings before it, to
+    // NBunchtrain - physBX, the crossings after it. They are visited in a random order
     std::vector<int> permutation;
-
-    // Permutation has negative values and the last one is 0
-    // if (!m_randomBX) then physBX (default = 1)
     for (int i = -(physBX - 1); i < m_NBunchTrain - (physBX - 1); ++i) {
       permutation.push_back(i);
     }
@@ -372,7 +372,8 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
         const auto backgroundEvent = m_bkgEvents->getFrame(groupIndex, fileIndex);
         const auto availableCollections = backgroundEvent.getAvailableCollections();
 
-        // Either 0 or negative
+        // The time of this bunch crossing relative to the one of the physics event: negative before
+        // it, 0 for it and positive after it. With the default PhysicsBX = 1 it is never negative
         const auto timeOffset = BX_number_in_train * m_deltaT;
 
         // With the time of flight applied, a background hit is kept if its time + timeOffset - tof
