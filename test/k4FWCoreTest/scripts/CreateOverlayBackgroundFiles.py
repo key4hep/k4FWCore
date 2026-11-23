@@ -185,9 +185,9 @@ def write_calo_merge_file(path, hits):
 # by its absolute time without it. The background is overlaid in two bunch crossings,
 # TOF_DELTA_T apart, with the physics event in the first one, so every background hit
 # is overlaid once unshifted and once TOF_DELTA_T later. The window closes before
-# the later bunch crossing, so with ApplyTimeOfFlight its collections are skipped as
-# a whole. Without it they are not, which only cell 14 notices: it is inside the
-# window once shifted. Each hit is given as (cellID, at TOF_DISTANCE, time in ns),
+# the later bunch crossing starts, but its collections must still be selected hit by
+# hit: cell 14 comes before t = 0, like beam-induced background, and is inside the
+# window only once shifted, with and without ApplyTimeOfFlight. Each hit is given as (cellID, at TOF_DISTANCE, time in ns),
 # with the same hit in the tracker and the calorimeter collections. Signal cellIDs
 # are 1-3, background cellIDs 11-14.
 TOF_WINDOW = [0.0, 10.0]  # ns
@@ -202,12 +202,12 @@ TOF_BACKGROUND_HITS = [
     (11, False, 5.0),  # inside either way, in the first bunch crossing
     (12, True, 5.0),  # inside only by its absolute time, in the first bunch crossing
     (13, True, 15.0),  # inside only relative to the time of flight, in the first bunch crossing
-    # inside only in the second bunch crossing, which is skipped with the time of flight
+    # before t = 0, inside either way, only in the second bunch crossing
     (14, False, -15.0),
 ]
 # The overlaid cellIDs, with and without ApplyTimeOfFlight, and the shift of the
 # time of each overlaid background hit
-TOF_EXPECTED = {True: [1, 3, 11, 13], False: [1, 2, 11, 12, 14]}
+TOF_EXPECTED = {True: [1, 3, 11, 13, 14], False: [1, 2, 11, 12, 14]}
 TOF_EXPECTED_SHIFT = {14: TOF_DELTA_T}
 
 

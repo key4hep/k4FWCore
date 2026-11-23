@@ -36,7 +36,7 @@ Every `SimTrackerHit` and `SimCalorimeterHit` collection has its own time window
 - With `ApplyTimeOfFlight = True` (the default) the window is relative to the time light takes from the interaction point to the position of the hit (for a calorimeter hit, the position of its cell). A hit is kept if its time minus that time of flight is inside the window, so the same window fits subdetectors at any distance from the interaction point.
 - With `ApplyTimeOfFlight = False` the window applies to the absolute time of the hit.
 
-With `ApplyTimeOfFlight = True`, the background collections of a bunch crossing that starts after the window closes are skipped as a whole, as no hit coming from the interaction point can reach the window from there. Hits arriving earlier than light from the interaction point would, such as those of particles produced away from it, are then lost. Without the time of flight there is no such bound, and every collection is selected hit by hit.
+Every background collection is selected hit by hit, whatever the bunch crossing. A collection is never skipped as a whole, since hits can arrive earlier than light from the interaction point would, for example those of particles produced before t = 0 or away from the interaction point, as in beam-induced background.
 
 ## Properties
 

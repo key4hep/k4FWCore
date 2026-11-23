@@ -20,8 +20,8 @@
 # Tests that OverlayTiming selects every hit, signal and background, tracker and
 # calorimeter, in the same way: relative to the time of flight from the interaction
 # point (ApplyTimeOfFlight, the default), or by its absolute time with
-# --OverlayTiming.ApplyTimeOfFlight=False. It also tests that only with the time of
-# flight the collections of a bunch crossing after the time window are skipped.
+# --OverlayTiming.ApplyTimeOfFlight=False. It also tests that a background hit from
+# before t = 0 is kept from a bunch crossing that starts after the time window.
 # Signal and background are tof_signal.root and tof_background.root, written by
 # CreateOverlayBackgroundFiles.py, overlaid in two bunch crossings.
 
