@@ -23,6 +23,7 @@ gaudi_add_library(k4FWCore
                   SOURCES src/KeepDropSwitch.cpp
                   LINK Gaudi::GaudiKernel podio::podioIO ROOT::Core ROOT::RIO ROOT::Tree EDM4HEP::utils
                   )
+target_compile_features(k4FWCore PUBLIC cxx_std_23)
 target_include_directories(k4FWCore PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)

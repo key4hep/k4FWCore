@@ -242,7 +242,7 @@ public:
                 << endmsg;
         if (doWrite) {
           m_collectionsToSave.push_back(name);
-          if (std::find(frameCollections.begin(), frameCollections.end(), name) == frameCollections.end()) {
+          if (!std::ranges::contains(frameCollections, name)) {
             debug() << name << " has to be added to the Frame" << endmsg;
             m_collectionsToAdd.push_back(name);
           }

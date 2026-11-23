@@ -272,7 +272,7 @@ add_test_fwcore(FunctionalMultiTransformerInputOutputLocations options/ExampleFu
 add_test_fwcore(FunctionalConsumerInputOutputLocations options/ExampleFunctionalConsumerInputOutputLocations.py)
 
 add_executable(check_ParticleIDOutputs src/check_ParticleIDOutputs.cpp)
-target_link_libraries(check_ParticleIDOutputs PRIVATE podio::podioIO EDM4HEP::edm4hep EDM4HEP::utils fmt::fmt)
+target_link_libraries(check_ParticleIDOutputs PRIVATE podio::podioIO EDM4HEP::edm4hep EDM4HEP::utils)
 add_test(NAME check_ParticleIDOutputs COMMAND check_ParticleIDOutputs example_with_particleids.root)
 set_tests_properties(check_ParticleIDOutputs PROPERTIES FIXTURES_REQUIRED ParticleIDMetadataFile)
 add_test_fwcore(TypeMisMatchDemo options/TypeMisMatchDemo.py PROPERTIES PASS_REGULAR_EXPRESSION "Failed to cast collection MCParticles to the required type")

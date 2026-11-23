@@ -16,7 +16,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ]]
-CMAKE_MINIMUM_REQUIRED(VERSION 3.15)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.20)
 
 project(k4FWCore LANGUAGES CXX)
 
@@ -33,11 +33,16 @@ find_package(EDM4HEP 1.3)
 if (NOT EDM4HEP_FOUND)
   find_package(EDM4HEP 0.99 REQUIRED)
 endif()
-find_package(fmt REQUIRED)
 
 include(GNUInstallDirs)
 
 include(cmake/Key4hepConfig.cmake)
+
+# The shared Key4hep defaults still allow C++20. Raise the minimum in this project
+# without changing the standard for sibling projects in a superbuild.
+if(CMAKE_CXX_STANDARD LESS 23)
+  set(CMAKE_CXX_STANDARD 23)
+endif()
 
 include(CTest)
 

@@ -62,7 +62,7 @@ struct CollectionMerger final
   CollectionMerger(const std::string& name, ISvcLocator* svcLoc)
       : Transformer(name, svcLoc, {KeyValues("InputCollections", {"MCParticles"})},
                     {KeyValue("OutputCollection", "NewMCParticles")}) {
-    if (System::cmdLineArgs()[0].find("genconf") != std::string::npos) {
+    if (System::cmdLineArgs()[0].contains("genconf")) {
       return;
     }
 

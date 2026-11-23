@@ -110,8 +110,8 @@ StatusCode OverlayTiming::initialize() {
   // An empty group, e.g. from a glob that matched nothing, would otherwise
   // only fail once the first background event is requested
   const auto& inputFiles = m_inputFileNames.value();
-  for (size_t i = 0; i < inputFiles.size(); ++i) {
-    if (inputFiles[i].empty()) {
+  for (const auto& [i, files] : inputFiles | std::views::enumerate) {
+    if (files.empty()) {
       error() << "Background group " << i << " contains no files" << endmsg;
       return StatusCode::FAILURE;
     }
@@ -184,12 +184,12 @@ StatusCode OverlayTiming::initialize() {
     for (const auto& [input, output] :
          {std::make_pair(inputLocations("SimTrackerHits"), outputLocations("OutputSimTrackerHits")),
           std::make_pair(inputLocations("SimCalorimeterHits"), outputLocations("OutputSimCalorimeterHits"))}) {
-      for (size_t i = 0; i < input.size(); ++i) {
-        const auto value = k4FWCore::getCellIDEncoding(input[i], this);
+      for (const auto& [i, name] : input | std::views::enumerate) {
+        const auto value = k4FWCore::getCellIDEncoding(name, this);
         if (value.has_value()) {
           k4FWCore::putCellIDEncoding(output[i], value.value(), this);
         } else {
-          warning() << "No metadata found for " << input[i] << " when copying CellID metadata was requested" << endmsg;
+          warning() << "No metadata found for " << name << " when copying CellID metadata was requested" << endmsg;
         }
       }
     }
@@ -209,23 +209,23 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
   auto oparticles = edm4hep::MCParticleCollection();
   auto osimTrackerHits = std::vector<edm4hep::SimTrackerHitCollection>();
   auto osimCaloHits = std::vector<edm4hep::SimCalorimeterHitCollection>();
-  auto ocaloHitContribs = std::vector<edm4hep::CaloHitContributionCollection>();
-  for (size_t i = 0; i < simCaloHits.size(); ++i) {
-    ocaloHitContribs.emplace_back();
-  }
+  auto ocaloHitContribs = std::vector<edm4hep::CaloHitContributionCollection>(simCaloHits.size());
+
+  const auto trackerHitNames = inputLocations(SIMTRACKERHIT_INDEX_POSITION);
+  const auto caloHitNames = inputLocations(SIMCALOHIT_INDEX_POSITION);
 
   // Copy MCParticles for physics event into a new collection
   for (const auto&& part : particles) {
     oparticles.push_back(part.clone(false));
   }
   // Fix relations to point to the new particles
-  for (size_t i = 0; i < particles.size(); ++i) {
-    for (const auto& parent : particles.at(i).getParents()) {
+  for (const auto& [i, particle] : particles | std::views::enumerate) {
+    for (const auto& parent : particle.getParents()) {
       if (const auto index = parent.getObjectID().index; index >= 0) {
         oparticles.at(i).addToParents(oparticles.at(index));
       }
     }
-    for (const auto& daughter : particles.at(i).getDaughters()) {
+    for (const auto& daughter : particle.getDaughters()) {
       if (const auto index = daughter.getObjectID().index; index >= 0) {
         oparticles.at(i).addToDaughters(oparticles.at(index));
       }
@@ -233,9 +233,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
   }
 
   // Copy the SimTrackerHits and crop them
-  for (size_t i = 0; i < simTrackerHits.size(); ++i) {
-    const auto& coll = simTrackerHits[i];
-    const auto name = inputLocations(SIMTRACKERHIT_INDEX_POSITION)[i];
+  for (const auto& [coll, name] : std::views::zip(simTrackerHits, trackerHitNames)) {
     const auto [this_start, this_stop] = define_time_windows(name);
     auto ocoll = edm4hep::SimTrackerHitCollection();
     for (const auto&& simTrackerHit : *coll) {
@@ -255,14 +253,10 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
   // KeepAllHitContributions they keep all their contributions, leaving the time selection to the
   // digitization, otherwise only those inside the window. In both cases the energy of a hit is
   // the sum of the energies of the contributions it keeps
-  std::map<int, std::map<uint64_t, edm4hep::MutableSimCalorimeterHit>> cellIDsMap;
-  for (size_t i = 0; i < simCaloHits.size(); ++i) {
-    const auto& coll = simCaloHits[i];
-    const auto name = inputLocations(SIMCALOHIT_INDEX_POSITION)[i];
+  auto calHitsByCellID = std::vector<std::map<uint64_t, edm4hep::MutableSimCalorimeterHit>>(simCaloHits.size());
+  for (auto&& [coll, name, calHitMap, caloHitContribs] :
+       std::views::zip(simCaloHits, caloHitNames, calHitsByCellID, ocaloHitContribs)) {
     const auto [this_start, this_stop] = define_time_windows(name);
-    // operator[] on purpose: this is where the entry for this collection is created
-    auto& calHitMap = cellIDsMap[i];
-    auto& caloHitContribs = ocaloHitContribs[i];
     for (const auto&& simCaloHit : *coll) {
       const float tof = time_of_flight(simCaloHit.getPosition());
       auto contribs =
@@ -306,7 +300,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
     // In random-mix mode the files of the group are drawn in a random order.
     // In sequential mode the file index is ignored, so this stays trivial.
     std::vector<int> fileIndices(m_bkgEvents->m_fileNames[groupIndex].size());
-    std::iota(fileIndices.begin(), fileIndices.end(), 0);
+    std::ranges::iota(fileIndices, 0);
     if (m_randomMix) {
       std::shuffle(fileIndices.begin(), fileIndices.end(), rng_engine);
     }
@@ -375,8 +369,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
         // The background particles are only looked up when they are merged. If
         // their collection is missing nothing is copied, and the background
         // hits are left without a particle.
-        const bool hasBgParticles =
-            std::ranges::find(availableCollections, m_MCParticleCollectionName.value()) != availableCollections.end();
+        const bool hasBgParticles = std::ranges::contains(availableCollections, m_MCParticleCollectionName.value());
         if (m_mergeMCParticles && !hasBgParticles) {
           ++m_missingBackgroundMCParticles;
         }
@@ -386,23 +379,23 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
           offset = static_cast<int>(oparticles.size());
           nBgParticles = static_cast<int>(bgParticles.size());
 
-          for (int i = 0; i < nBgParticles; ++i) {
-            auto npart = bgParticles[i].clone(false);
-            npart.setTime(bgParticles[i].getTime() + timeOffset);
+          for (const auto& particle : bgParticles) {
+            auto npart = particle.clone(false);
+            npart.setTime(particle.getTime() + timeOffset);
             npart.setOverlay(true);
             oparticles.push_back(npart);
           }
 
           // The relations can only be wired up once every particle has been copied.
           // Relations pointing outside the background collection are left unset.
-          for (int i = 0; i < nBgParticles; ++i) {
-            for (const auto& parent : bgParticles[i].getParents()) {
+          for (const auto& [i, particle] : bgParticles | std::views::enumerate) {
+            for (const auto& parent : particle.getParents()) {
               if (const auto index = overlaid_particle_index(parent.getObjectID().index, offset, nBgParticles);
                   index >= 0) {
                 oparticles.at(offset + i).addToParents(oparticles.at(index));
               }
             }
-            for (const auto& daughter : bgParticles[i].getDaughters()) {
+            for (const auto& daughter : particle.getDaughters()) {
               if (const auto index = overlaid_particle_index(daughter.getObjectID().index, offset, nBgParticles);
                   index >= 0) {
                 oparticles.at(offset + i).addToDaughters(oparticles.at(index));
@@ -411,10 +404,9 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
           }
         }
 
-        for (size_t i = 0; i < simTrackerHits.size(); ++i) {
-          const auto name = inputLocations(SIMTRACKERHIT_INDEX_POSITION)[i];
+        for (auto&& [name, ocoll] : std::views::zip(trackerHitNames, osimTrackerHits)) {
           debug() << "Processing collection " << name << endmsg;
-          if (std::find(availableCollections.begin(), availableCollections.end(), name) == availableCollections.end()) {
+          if (!std::ranges::contains(availableCollections, name)) {
             warning() << "Collection " << name << " not found in background event" << endmsg;
             continue;
           }
@@ -424,7 +416,6 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
             info() << "Skipping collection " << name << " as it is not in the integration window" << endmsg;
             continue;
           }
-          auto& ocoll = osimTrackerHits[i];
           for (const auto&& simTrackerHit : backgroundEvent.get<edm4hep::SimTrackerHitCollection>(name)) {
             const float tof = time_of_flight(simTrackerHit.getPosition());
 
@@ -467,10 +458,10 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
           return newContrib;
         };
 
-        for (size_t i = 0; i < simCaloHits.size(); ++i) {
-          const auto name = inputLocations(SIMCALOHIT_INDEX_POSITION)[i];
+        for (auto&& [name, calHitMap, caloHitContribs] :
+             std::views::zip(caloHitNames, calHitsByCellID, ocaloHitContribs)) {
           debug() << "Processing collection " << name << endmsg;
-          if (std::find(availableCollections.begin(), availableCollections.end(), name) == availableCollections.end()) {
+          if (!std::ranges::contains(availableCollections, name)) {
             warning() << "Collection " << name << " not found in background event" << endmsg;
             continue;
           }
@@ -481,8 +472,6 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
             continue;
           }
 
-          auto& calHitMap = cellIDsMap[i];
-          auto& calHitContribs = ocaloHitContribs[i];
           for (const auto&& simCaloHit : backgroundEvent.get<edm4hep::SimCalorimeterHitCollection>(name)) {
             // Only background hits with at least one contribution in the window are overlaid,
             // with their contributions selected as for the signal hits
@@ -504,7 +493,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
               // TODO: Make sure a contribution is not added twice
               auto newContrib = cloneContribution(contrib);
               calhit.addMCParticleContribution(newContrib);
-              calHitContribs.push_back(newContrib);
+              caloHitContribs.push_back(newContrib);
             }
           }
         }
@@ -514,10 +503,10 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
   // Move the SimCalorimeterHitCollections to the output vector
   // So far they are stored in a map with the cellID as key
   // but they don't belong to any collection yet
-  for (const auto& [index, calHitMap] : cellIDsMap) {
+  for (const auto& calHitMap : calHitsByCellID) {
     auto ocoll = edm4hep::SimCalorimeterHitCollection();
-    for (const auto& [cellID, hit] : calHitMap) {
-      ocoll.push_back(std::move(hit));
+    for (const auto& hit : calHitMap | std::views::values) {
+      ocoll.push_back(hit);
     }
     osimCaloHits.emplace_back(std::move(ocoll));
   }

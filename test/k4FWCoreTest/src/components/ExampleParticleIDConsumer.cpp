@@ -32,10 +32,8 @@
 #include "k4FWCore/Consumer.h"
 #include "k4FWCore/MetadataUtils.h"
 
-#include <fmt/format.h>
-#include <fmt/ranges.h>
-
 #include <algorithm>
+#include <format>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -51,7 +49,7 @@ struct ExampleParticleIDConsumer final
   bool checkAlgoMetadata(const edm4hep::utils::ParticleIDMeta& pidMeta, const Gaudi::Property<std::string>& algoName,
                          const Gaudi::Property<std::vector<std::string>>& paramNames) const {
     if (pidMeta.algoName != algoName) {
-      fatal() << fmt::format(
+      fatal() << std::format(
                      "The PID algorithm name from metadata does not match the expected one from the properties: "
                      "(expected {}, actual {})",
                      algoName.value(), pidMeta.algoName)
@@ -60,7 +58,7 @@ struct ExampleParticleIDConsumer final
     }
 
     if (!std::ranges::equal(pidMeta.paramNames, paramNames)) {
-      fatal() << fmt::format(
+      fatal() << std::format(
                      "The PID parameter names retrieved from metadata does not match the expected ones from the "
                      "properties: (expected {}, actual {})",
                      paramNames.value(), pidMeta.paramNames)
@@ -76,7 +74,7 @@ struct ExampleParticleIDConsumer final
     auto maybePID = pidHandler.getPID(reco, pidMeta.algoType());
     if (!maybePID) {
       throw std::runtime_error(
-          fmt::format("Could net retrieve the {} PID object for reco particle {}", pidMeta.algoName, reco.id().index));
+          std::format("Could not retrieve the {} PID object for reco particle {}", pidMeta.algoName, reco.id().index));
     }
     const auto& pid = maybePID.value();
     auto paramVal = pid.getParameters()[paramIndex];
@@ -84,7 +82,7 @@ struct ExampleParticleIDConsumer final
     // As set in the producer
     if (paramVal != paramIndex * 0.5f) {
       throw std::runtime_error(
-          fmt::format("Could not retrieve the correct parameter value for param {} (expected {}, actual {})",
+          std::format("Could not retrieve the correct parameter value for param {} (expected {}, actual {})",
                       pidMeta.paramNames[paramIndex], paramIndex * 0.5f, paramVal));
     }
   }
@@ -106,7 +104,7 @@ struct ExampleParticleIDConsumer final
     m_paramIndex1 = edm4hep::utils::getParamIndex(m_pidMeta1, m_paramOfInterest1.value()).value_or(-1);
     m_paramIndex2 = edm4hep::utils::getParamIndex(m_pidMeta2, m_paramOfInterest2.value()).value_or(-1);
     if (m_paramIndex1 == -1 || m_paramIndex2 == -1) {
-      error() << fmt::format("Could not get a parameter index for {} (got {}) or {} (got {})",
+      error() << std::format("Could not get a parameter index for {} (got {}) or {} (got {})",
                              m_paramOfInterest1.value(), m_paramIndex1, m_paramOfInterest2.value(), m_paramIndex2)
               << endmsg;
     }
@@ -124,7 +122,7 @@ struct ExampleParticleIDConsumer final
       auto pids = pidHandler.getPIDs(r);
       if (pids.size() != 2) {
         throw std::runtime_error(
-            fmt::format("Could not get 2 ParticleID objects related to reco particle {}", r.id().index));
+            std::format("Could not get 2 ParticleID objects related to reco particle {}", r.id().index));
       }
 
       checkPIDForAlgo(pidHandler, r, m_pidMeta1, m_paramIndex1);

@@ -32,10 +32,9 @@
 #include "k4FWCore/Transformer.h"
 #include "k4Interface/IUniqueIDGenSvc.h"
 
-#include <fmt/format.h>
-
 #include <algorithm>
 #include <cstddef>
+#include <format>
 #include <numeric>
 #include <random>
 #include <stdexcept>
@@ -90,7 +89,7 @@ struct EfficiencyFilter final : k4FWCore::Transformer<podio::CollectionBase*(con
     using AllTypes = typename ConcatTypeLists<edm4hep::edm4hepDataTypes, edm4hep::edm4hepLinkTypes>::type;
     auto ptr = dispatchByType(coll, uid, AllTypes{});
     if (!ptr) {
-      throw std::runtime_error(fmt::format(
+      throw std::runtime_error(std::format(
           "EfficiencyFilter: No createSubsetCollection function found for collection type '{}'", coll.getTypeName()));
     }
     return ptr;
@@ -137,7 +136,7 @@ private:
       const auto nToKeep = static_cast<size_t>(static_cast<double>(sourceColl->size()) * m_efficiency);
 
       std::vector<size_t> indexes(sourceColl->size());
-      std::iota(indexes.begin(), indexes.end(), 0);
+      std::ranges::iota(indexes, size_t{0});
       std::ranges::shuffle(indexes, randomGen);
       // Preserve the original ordering
       indexes.resize(nToKeep);
