@@ -295,14 +295,14 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
     for (int i = -(physBX - 1); i < m_NBunchTrain - (physBX - 1); ++i) {
       permutation.push_back(i);
     }
-    std::shuffle(permutation.begin(), permutation.end(), rng_engine);
+    std::ranges::shuffle(permutation, rng_engine);
 
     // In random-mix mode the files of the group are drawn in a random order.
     // In sequential mode the file index is ignored, so this stays trivial.
     std::vector<int> fileIndices(m_bkgEvents->m_fileNames[groupIndex].size());
     std::ranges::iota(fileIndices, 0);
     if (m_randomMix) {
-      std::shuffle(fileIndices.begin(), fileIndices.end(), rng_engine);
+      std::ranges::shuffle(fileIndices, rng_engine);
     }
 
     // TODO: Check that there is anything to overlay
@@ -343,7 +343,7 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
         int fileIndex = 0;
         if (m_randomMix) {
           if (fileCursor == fileIndices.size()) {
-            std::shuffle(fileIndices.begin(), fileIndices.end(), rng_engine);
+            std::ranges::shuffle(fileIndices, rng_engine);
             fileCursor = 0;
           }
           fileIndex = fileIndices[fileCursor++];
