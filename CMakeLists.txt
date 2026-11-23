@@ -38,12 +38,6 @@ include(GNUInstallDirs)
 
 include(cmake/Key4hepConfig.cmake)
 
-# The shared Key4hep defaults still allow C++20. Raise the minimum in this project
-# without changing the standard for sibling projects in a superbuild.
-if(CMAKE_CXX_STANDARD LESS 23)
-  set(CMAKE_CXX_STANDARD 23)
-endif()
-
 include(CTest)
 
 add_subdirectory(k4FWCore)
