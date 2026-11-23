@@ -72,7 +72,7 @@ struct CollectionMerger final
 
   StatusCode initialize() override {
     K4_GAUDI_CHECK(Transformer::initialize());
-    if (inputLocations(0).empty()) {
+    if (m_inputLocationsVector.front().value().empty()) {
       error() << "InputCollections must contain at least one collection" << endmsg;
       return StatusCode::FAILURE;
     }
