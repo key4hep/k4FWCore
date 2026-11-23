@@ -40,8 +40,8 @@
 #include "IIOSvc.h"
 #include "k4FWCore/FunctionalUtils.h"
 
-#include <cstddef>
 #include <memory>
+#include <ranges>
 #include <string>
 #include <tuple>
 #include <type_traits>
@@ -62,7 +62,7 @@ public:
                                                            {},
                                                            [this](Gaudi::Details::PropertyBase&) {
                                                              const std::string cmd = System::cmdLineArgs()[0];
-                                                             if (cmd.find("genconf") != std::string::npos) {
+                                                             if (cmd.contains("genconf")) {
                                                                return;
                                                              }
                                                              for (const auto& c : m_inputCollections.value()) {
@@ -105,15 +105,12 @@ public:
 
   StatusCode execute([[maybe_unused]] const EventContext& ctx) const final {
     try {
-      const auto readData = nextCollections();
-
-      auto readCollections = std::get<0>(readData);
-
-      for (size_t i = 0; i != readCollections.size(); ++i) {
+      const auto readCollections = nextCollections();
+      for (const auto [i, collection] : readCollections | std::views::enumerate) {
 #if GAUDI_VERSION >= CALC_GAUDI_VERSION(41, 1)
-        m_outputs[i].put(ctx, std::unique_ptr<podio::CollectionBase>(readCollections[i]));
+        m_outputs[i].put(ctx, std::unique_ptr<podio::CollectionBase>(collection));
 #else
-        m_outputs[i].put(std::unique_ptr<podio::CollectionBase>(readCollections[i]));
+        m_outputs[i].put(std::unique_ptr<podio::CollectionBase>(collection));
 #endif
       }
       return Gaudi::Functional::FilterDecision::PASSED;
@@ -127,7 +124,7 @@ private:
   // The IOSvc takes care of reading and passing the data
   // By convention the Frame is pushed to the store
   // so that it's deleted at the right time
-  std::tuple<std::vector<podio::CollectionBase*>, std::vector<std::string>> nextCollections() const {
+  std::vector<podio::CollectionBase*> nextCollections() const {
 
     auto nextData = m_iosvc->next();
 
@@ -137,7 +134,7 @@ private:
       error() << "Failed to register Frame object" << endmsg;
     }
 
-    return std::make_tuple(std::get<0>(nextData), std::get<1>(nextData));
+    return std::get<0>(std::move(nextData));
   }
 
   Gaudi::Property<std::vector<std::string>> m_inputCollections;

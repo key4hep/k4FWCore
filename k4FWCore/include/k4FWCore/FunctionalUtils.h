@@ -42,12 +42,11 @@
 
 #include "k4FWCore/DataWrapper.h"
 
-#include <algorithm>
 #include <concepts>
 #include <cstddef>
 #include <format>
-#include <iterator>
 #include <memory>
+#include <ranges>
 #include <string>
 #include <tuple>
 #include <type_traits>
@@ -261,7 +260,7 @@ namespace details {
           // When the type of the collection is different from the one requested, this can happen because
           // 1. a mistake was made in the input types of a functional algorithm
           // 2. the data was produced using the old DataHandle, which is never going to be in the input type
-          if (e.message().find("different from") != std::string::npos) {
+          if (e.message().contains("different from")) {
             thisClass->debug() << "Trying to cast the collection " << std::get<Index>(handles)[0].objKey()
                                << " to the requested type didn't work " << endmsg;
             DataObject* dataObject;
@@ -301,22 +300,20 @@ namespace details {
   void putVectorOutputs(std::tuple<Handles...>&& handles, const auto& outputs, auto thisClass,
                         const EventContext& ctx) {
     if constexpr (Index < sizeof...(Handles)) {
-      auto& outputHandles = std::get<Index>(handles); // Can not be const to allow std::move(value) below
+      auto& outputValues = std::get<Index>(handles);
       if constexpr (isVectorLike_v<std::tuple_element_t<Index, std::tuple<Out...>>>) {
-        const auto& outputVector = std::get<Index>(outputs);
-        if (outputHandles.size() != outputVector.size()) {
+        const auto& outputHandles = std::get<Index>(outputs);
+        if (outputValues.size() != outputHandles.size()) {
           throw GaudiException(std::format("Size of the output vector {} with type {} does not match the expected size "
                                            "from the steering file {}",
-                                           outputHandles.size(), typeid(outputHandles).name(), outputVector.size()),
+                                           outputValues.size(), typeid(outputValues).name(), outputHandles.size()),
                                thisClass->name(), StatusCode::FAILURE);
         }
-        size_t index = 0;
-        for (auto& value : outputHandles) {
-          putHandle(ctx, outputVector[index], convertToUniquePtr(std::move(value)));
-          ++index;
+        for (auto&& [value, handle] : std::views::zip(outputValues, outputHandles)) {
+          putHandle(ctx, handle, convertToUniquePtr(std::move(value)));
         }
       } else {
-        putHandle(ctx, std::get<Index>(outputs)[0], convertToUniquePtr(std::move(outputHandles)));
+        putHandle(ctx, std::get<Index>(outputs)[0], convertToUniquePtr(std::move(outputValues)));
       }
 
       // Recursive call for the next index
@@ -325,14 +322,15 @@ namespace details {
   }
 
   inline std::vector<DataObjID> to_DataObjID(const std::vector<std::string>& inputStrings) {
-    std::vector<DataObjID> outputIds;
-    outputIds.reserve(inputStrings.size());
-    std::transform(inputStrings.begin(), inputStrings.end(), std::back_inserter(outputIds),
-                   [](const std::string& str) { return DataObjID{str}; });
-    return outputIds;
+    return inputStrings | std::views::transform([](const std::string& str) { return DataObjID{str}; }) |
+           std::ranges::to<std::vector>();
   }
 
   inline std::vector<DataObjID> to_DataObjID(const std::string& inputString) { return {DataObjID{inputString}}; }
+
+  inline std::vector<std::string> dataObjIDKeys(const std::vector<DataObjID>& ids) {
+    return ids | std::views::transform(&DataObjID::key) | std::ranges::to<std::vector<std::string>>();
+  }
 
   // Functional handles
   // This is currently used so that the FilterPredicate can be used together with the

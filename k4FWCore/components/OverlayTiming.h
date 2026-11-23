@@ -59,6 +59,7 @@
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <ranges>
 #include <string>
 #include <tuple>
 #include <utility>
@@ -98,16 +99,16 @@ struct EventHolder {
       : m_fileNames(fileNames), m_randomMix(randomMix), m_allowReuse(allowReuse), m_algName(algName) {
     m_totalNumberOfEvents.resize(m_fileNames.size());
     m_nextEntry.resize(m_fileNames.size());
-    for (size_t group = 0; group < m_fileNames.size(); ++group) {
+    for (auto&& [files, eventCounts, nextEntries] : std::views::zip(m_fileNames, m_totalNumberOfEvents, m_nextEntry)) {
       if (m_randomMix) {
         // One independent event source per file; the counts are filled in lazily.
-        m_totalNumberOfEvents[group].resize(m_fileNames[group].size(), 0);
-        m_nextEntry[group].resize(m_fileNames[group].size(), 0);
+        eventCounts.resize(files.size(), 0);
+        nextEntries.resize(files.size(), 0);
       } else {
         // The whole group is read as a single logical stream.
-        m_rootFileReaders.emplace_back(podio::makeReader(m_fileNames[group]));
-        m_totalNumberOfEvents[group].push_back(m_rootFileReaders.back().getEntries("events"));
-        m_nextEntry[group].push_back(0);
+        m_rootFileReaders.emplace_back(podio::makeReader(files));
+        eventCounts.push_back(m_rootFileReaders.back().getEntries("events"));
+        nextEntries.push_back(0);
       }
     }
   }

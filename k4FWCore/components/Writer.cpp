@@ -242,7 +242,7 @@ public:
                 << endmsg;
         if (doWrite) {
           m_collectionsToSave.push_back(name);
-          if (std::find(frameCollections.begin(), frameCollections.end(), name) == frameCollections.end()) {
+          if (!std::ranges::contains(frameCollections, name)) {
             debug() << name << " has to be added to the Frame" << endmsg;
             m_collectionsToAdd.push_back(name);
           }
@@ -274,7 +274,7 @@ public:
       delete storePtr;
     }
 
-    std::vector<std::string_view> collectionsToRemove;
+    std::vector<std::string> collectionsToRemove;
     for (const auto& coll : m_collectionsToAdd) {
       debug() << "Adding collection " << coll << " to the IOSvc Frame" << endmsg;
       DataObject* storeCollection;
@@ -303,8 +303,7 @@ public:
           // Collections to remove in m_collectionsToAdd are saved for later
           // not to modify the vector while iterating over it
           collectionsToRemove.push_back(coll);
-          m_collectionsToSave.erase(std::remove(m_collectionsToSave.begin(), m_collectionsToSave.end(), coll),
-                                    m_collectionsToSave.end());
+          std::erase(m_collectionsToSave, coll);
         } else {
           std::unique_ptr<podio::CollectionBase> uptr(
               const_cast<podio::CollectionBase*>(old_collection->collectionBase()));
@@ -319,8 +318,7 @@ public:
     }
 
     for (const auto& coll : collectionsToRemove) {
-      m_collectionsToAdd.erase(std::remove(m_collectionsToAdd.begin(), m_collectionsToAdd.end(), coll),
-                               m_collectionsToAdd.end());
+      std::erase(m_collectionsToAdd, coll);
     }
 
     debug() << "Writing frame" << endmsg;

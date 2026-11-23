@@ -19,7 +19,7 @@
 #include "k4FWCore/KeepDropSwitch.h"
 
 #include <format>
-#include <sstream>
+#include <ranges>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -56,18 +56,6 @@ int wildcmp(const char* wild, const char* string) noexcept {
     wild++;
   }
   return !*wild;
-}
-
-std::vector<std::string> split(const std::string& s, char delim) {
-  std::vector<std::string> elems;
-  std::stringstream ss(s);
-  std::string item;
-  while (std::getline(ss, item, delim)) {
-    if (!item.empty()) {
-      elems.push_back(item);
-    }
-  }
-  return elems;
 }
 } // namespace
 
@@ -113,12 +101,14 @@ KeepDropSwitch::Cmd KeepDropSwitch::fromString(const std::string_view cmd) noexc
 }
 
 KeepDropSwitch::OutputCommand KeepDropSwitch::extractCommand(const std::string& cmdline) const {
-  auto words = split(cmdline, ' ');
+  const auto words = cmdline | std::views::split(' ') | std::views::filter([](auto word) { return !word.empty(); }) |
+                     std::views::transform([](auto word) { return std::string_view{word}; }) |
+                     std::ranges::to<std::vector>();
   if (words.size() == 2) {
-    return {fromString(words[0]), Kind::Name, words[1]};
+    return {fromString(words[0]), Kind::Name, std::string(words[1])};
   }
   if (words.size() == 3 && words[1] == "type") {
-    return {fromString(words[0]), Kind::Type, words[2]};
+    return {fromString(words[0]), Kind::Type, std::string(words[2])};
   }
 
   // For invalid commands the Kind doesn't matter really

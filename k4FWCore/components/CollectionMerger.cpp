@@ -62,7 +62,7 @@ struct CollectionMerger final
   CollectionMerger(const std::string& name, ISvcLocator* svcLoc)
       : Transformer(name, svcLoc, {KeyValues("InputCollections", {"MCParticles"})},
                     {KeyValue("OutputCollection", "NewMCParticles")}) {
-    if (System::cmdLineArgs()[0].find("genconf") != std::string::npos) {
+    if (System::cmdLineArgs()[0].contains("genconf")) {
       return;
     }
 
@@ -72,7 +72,7 @@ struct CollectionMerger final
 
   StatusCode initialize() override {
     K4_GAUDI_CHECK(Transformer::initialize());
-    if (inputLocations(0).empty()) {
+    if (m_inputLocationsVector.front().value().empty()) {
       error() << "InputCollections must contain at least one collection" << endmsg;
       return StatusCode::FAILURE;
     }

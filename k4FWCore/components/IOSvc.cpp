@@ -44,6 +44,7 @@
 #include <algorithm>
 #include <memory>
 #include <mutex>
+#include <ranges>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -109,8 +110,7 @@ StatusCode IOSvc::initialize() {
     return StatusCode::FAILURE;
   }
   if (m_reader) {
-    auto categories = m_reader->getAvailableCategories();
-    if (std::find(categories.begin(), categories.end(), podio::Category::Metadata) != categories.end() &&
+    if (std::ranges::contains(m_reader->getAvailableCategories(), podio::Category::Metadata) &&
         m_reader->getEntries(podio::Category::Metadata) > 0) {
       info() << "Setting metadata frame" << endmsg;
       m_metadataSvc->setFrame(m_reader->readFrame(podio::Category::Metadata, 0));
@@ -150,14 +150,11 @@ std::tuple<std::vector<podio::CollectionBase*>, std::vector<std::string>, podio:
     }
   }
 
-  std::vector<podio::CollectionBase*> collections;
-
-  for (const auto& name : m_collectionNames) {
-    auto ptr = const_cast<podio::CollectionBase*>(frame.get(name));
-    collections.push_back(ptr);
-  }
-
-  return std::make_tuple(collections, m_collectionNames, std::move(frame));
+  auto collections = m_collectionNames.value() | std::views::transform([&frame](const auto& name) {
+                       return const_cast<podio::CollectionBase*>(frame.get(name));
+                     }) |
+                     std::ranges::to<std::vector>();
+  return {std::move(collections), m_collectionNames.value(), std::move(frame)};
 }
 
 // After every event if there is still a frame in the TES

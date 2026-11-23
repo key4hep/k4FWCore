@@ -74,7 +74,15 @@ TEST_CASE("KeepDropSwitch keep and drop with ? wildcard") {
   REQUIRE(keepDropSwitch.isOn("CollectionXYZ"));
 }
 
+TEST_CASE("KeepDropSwitch ignores extra spaces between command words") {
+  const auto keepDropSwitch = KeepDropSwitch({"  drop   RecoParticles ", " drop  type MCParticleCollection  "});
+  REQUIRE_FALSE(keepDropSwitch.isOn("RecoParticles"));
+  REQUIRE_FALSE(keepDropSwitch.isOn("MCParticles", "MCParticleCollection"));
+  REQUIRE(keepDropSwitch.isOn("OtherNames"));
+}
+
 TEST_CASE("KeepDropSwitch malformed cmd inputs") {
+  REQUIRE_THROWS_AS(KeepDropSwitch({"   "}), std::invalid_argument);
   REQUIRE_THROWS_AS(KeepDropSwitch({"abc"}), std::invalid_argument);
   REQUIRE_THROWS_AS(KeepDropSwitch({"foobar MCParticles"}), std::invalid_argument);
   REQUIRE_THROWS_AS(KeepDropSwitch({"keep anything-but-type collType"}), std::invalid_argument);

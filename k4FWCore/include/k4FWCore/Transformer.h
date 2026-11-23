@@ -143,15 +143,10 @@ namespace details {
         throw std::out_of_range("Called inputLocations with an index out of range, index: " + std::to_string(i) +
                                 ", number of inputs: " + std::to_string(N_in));
       }
-      std::vector<std::string> names;
       if (!m_inputLocationsSingle[i].name().empty()) {
-        names.push_back(m_inputLocationsSingle[i].value().key());
-      } else {
-        for (const auto& id : m_inputLocationsVector[i].value()) {
-          names.push_back(id.key());
-        }
+        return {m_inputLocationsSingle[i].value().key()};
       }
-      return names;
+      return dataObjIDKeys(m_inputLocationsVector[i].value());
     }
     /**
      * @brief       Get the input locations for a given input name
@@ -159,23 +154,14 @@ namespace details {
      * @return      A range of the input locations
      */
     std::vector<std::string> inputLocations(std::string_view name) const {
-      std::vector<std::string> names;
-      const auto it =
-          std::ranges::find_if(m_inputLocationsVector, [&name](const auto& prop) { return prop.name() == name; });
-      if (it != m_inputLocationsVector.end()) {
-        for (const auto& id : it->value()) {
-          names.push_back(id.key());
-        }
-      } else {
-        const auto it2 =
-            std::ranges::find_if(m_inputLocationsSingle, [&name](const auto& prop) { return prop.name() == name; });
-        if (it2 == m_inputLocationsSingle.end()) {
-          throw std::out_of_range("Called inputLocations with a name that does not exist: " + std::string(name));
-        } else {
-          names.push_back(it2->value().key());
-        }
+      const auto hasName = [name](const auto& prop) { return prop.name() == name; };
+      if (const auto it = std::ranges::find_if(m_inputLocationsVector, hasName); it != m_inputLocationsVector.end()) {
+        return dataObjIDKeys(it->value());
       }
-      return names;
+      if (const auto it = std::ranges::find_if(m_inputLocationsSingle, hasName); it != m_inputLocationsSingle.end()) {
+        return {it->value().key()};
+      }
+      throw std::out_of_range("Called inputLocations with a name that does not exist: " + std::string(name));
     }
 
     /**
@@ -183,15 +169,10 @@ namespace details {
      * @return   A range of the output locations
      */
     std::vector<std::string> outputLocations() const {
-      std::vector<std::string> names;
       if (!m_outputLocationsSingle.name().empty()) {
-        names.push_back(m_outputLocationsSingle.value().key());
-      } else {
-        for (const auto& id : m_outputLocationsVector.value()) {
-          names.push_back(id.key());
-        }
+        return {m_outputLocationsSingle.value().key()};
       }
-      return names;
+      return dataObjIDKeys(m_outputLocationsVector.value());
     }
     /**
      * @brief       Get the output locations for a given output name
@@ -199,17 +180,13 @@ namespace details {
      * @return      A range of the output locations
      */
     std::vector<std::string> outputLocations(std::string_view name) const {
-      std::vector<std::string> names;
       if (m_outputLocationsSingle.name() == name) {
-        names.push_back(m_outputLocationsSingle.value().key());
-      } else if (m_outputLocationsVector.name() == name) {
-        for (const auto& id : m_outputLocationsVector.value()) {
-          names.push_back(id.key());
-        }
-      } else {
-        throw std::runtime_error("Called outputLocations with an unknown name: " + std::string(name));
+        return {m_outputLocationsSingle.value().key()};
       }
-      return names;
+      if (m_outputLocationsVector.name() == name) {
+        return dataObjIDKeys(m_outputLocationsVector.value());
+      }
+      throw std::runtime_error("Called outputLocations with an unknown name: " + std::string(name));
     }
     static constexpr std::size_t inputLocationsSize() { return N_in; }
 
@@ -293,15 +270,10 @@ namespace details {
         throw std::out_of_range("Called inputLocations with an index out of range, index: " + std::to_string(i) +
                                 ", number of inputs: " + std::to_string(N_in));
       }
-      std::vector<std::string> names;
       if (!m_inputLocationsSingle[i].name().empty()) {
-        names.push_back(m_inputLocationsSingle[i].value().key());
-      } else {
-        for (const auto& id : m_inputLocationsVector[i].value()) {
-          names.push_back(id.key());
-        }
+        return {m_inputLocationsSingle[i].value().key()};
       }
-      return names;
+      return dataObjIDKeys(m_inputLocationsVector[i].value());
     }
     /**
      * @brief       Get the input locations for a given input name
@@ -309,23 +281,14 @@ namespace details {
      * @return      A range of the input locations
      */
     std::vector<std::string> inputLocations(std::string_view name) const {
-      std::vector<std::string> names;
-      const auto it =
-          std::ranges::find_if(m_inputLocationsVector, [&name](const auto& prop) { return prop.name() == name; });
-      if (it != m_inputLocationsVector.end()) {
-        for (const auto& id : it->value()) {
-          names.push_back(id.key());
-        }
-      } else {
-        const auto it2 =
-            std::ranges::find_if(m_inputLocationsSingle, [&name](const auto& prop) { return prop.name() == name; });
-        if (it2 == m_inputLocationsSingle.end()) {
-          throw std::out_of_range("Called inputLocations with a name that does not exist: " + std::string(name));
-        } else {
-          names.push_back(it2->value().key());
-        }
+      const auto hasName = [name](const auto& prop) { return prop.name() == name; };
+      if (const auto it = std::ranges::find_if(m_inputLocationsVector, hasName); it != m_inputLocationsVector.end()) {
+        return dataObjIDKeys(it->value());
       }
-      return names;
+      if (const auto it = std::ranges::find_if(m_inputLocationsSingle, hasName); it != m_inputLocationsSingle.end()) {
+        return {it->value().key()};
+      }
+      throw std::out_of_range("Called inputLocations with a name that does not exist: " + std::string(name));
     }
 
     /**
@@ -337,15 +300,10 @@ namespace details {
       if (i >= N_out) {
         throw std::out_of_range("Called outputLocations with an index out of range");
       }
-      std::vector<std::string> names;
       if (!m_outputLocationsSingle[i].name().empty()) {
-        names.push_back(m_outputLocationsSingle[i].value().key());
-      } else {
-        for (const auto& id : m_outputLocationsVector[i].value()) {
-          names.push_back(id.key());
-        }
+        return {m_outputLocationsSingle[i].value().key()};
       }
-      return names;
+      return dataObjIDKeys(m_outputLocationsVector[i].value());
     }
     /**
      * @brief       Get the output locations for a given output name
@@ -353,23 +311,14 @@ namespace details {
      * @return      A range of the output locations
      */
     std::vector<std::string> outputLocations(std::string_view name) const {
-      std::vector<std::string> names;
-      const auto it =
-          std::ranges::find_if(m_outputLocationsVector, [&name](const auto& prop) { return prop.name() == name; });
-      if (it != m_outputLocationsVector.end()) {
-        for (const auto& id : it->value()) {
-          names.push_back(id.key());
-        }
-      } else {
-        const auto it2 =
-            std::ranges::find_if(m_outputLocationsSingle, [&name](const auto& prop) { return prop.name() == name; });
-        if (it2 == m_outputLocationsSingle.end()) {
-          throw std::out_of_range("Called outputLocations with a name that does not exist: " + std::string(name));
-        } else {
-          names.push_back(it2->value().key());
-        }
+      const auto hasName = [name](const auto& prop) { return prop.name() == name; };
+      if (const auto it = std::ranges::find_if(m_outputLocationsVector, hasName); it != m_outputLocationsVector.end()) {
+        return dataObjIDKeys(it->value());
       }
-      return names;
+      if (const auto it = std::ranges::find_if(m_outputLocationsSingle, hasName); it != m_outputLocationsSingle.end()) {
+        return {it->value().key()};
+      }
+      throw std::out_of_range("Called outputLocations with a name that does not exist: " + std::string(name));
     }
 
     static constexpr std::size_t inputLocationsSize() { return N_in; }

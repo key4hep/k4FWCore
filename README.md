@@ -72,15 +72,15 @@ print(my_opts[0].foo)
 
 ## Dependencies
 
-* ROOT
+* CMake 3.20 or newer, and a C++23 compiler and standard library with support for C++23 ranges, range formatting, and `<print>`.
+
+* ROOT (use a build configured for C++23 to match k4FWCore).
 
 * PODIO
 
 * Gaudi
 
 * EDM4HEP
-
-* fmt
 
 ## Installation and downstream usage.
 
