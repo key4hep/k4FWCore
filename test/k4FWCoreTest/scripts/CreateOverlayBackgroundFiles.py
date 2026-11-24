@@ -26,6 +26,8 @@
 #     groupB_extra.root                      group 2, file 3, listed next to the glob of groupB
 #     calo_merge_signal.root                 signal and background of the calorimeter
 #     calo_merge_background.root             merging test, see CALO_MERGE_WINDOW
+#     tof_signal.root                        signal and background of the
+#     tof_background.root                    time of flight test, see TOF_WINDOW
 #
 # Each file is identified by the tag 100 * group + file, so that every overlaid
 # object can be traced back to the file it was read from. Each object stores
@@ -176,6 +178,76 @@ def write_calo_merge_file(path, hits):
     writer.write_frame(frame, "events")
 
 
+# The tof files hold one event each, with tracker and calorimeter hits either at the
+# origin or at TOF_DISTANCE, where light from the interaction point arrives after
+# 10 ns. They test that every hit, signal and background, tracker and calorimeter,
+# is selected in the same way: relative to the time of flight with ApplyTimeOfFlight,
+# by its absolute time without it. The background is overlaid in two bunch crossings,
+# TOF_DELTA_T apart, with the physics event in the first one, so every background hit
+# is overlaid once unshifted and once TOF_DELTA_T later. The window closes before
+# the later bunch crossing starts, but its collections must still be selected hit by
+# hit: cell 14 comes before t = 0, like beam-induced background, and is inside the
+# window only once shifted, with and without ApplyTimeOfFlight. Each hit is given as (cellID, at TOF_DISTANCE, time in ns),
+# with the same hit in the tracker and the calorimeter collections. Signal cellIDs
+# are 1-3, background cellIDs 11-14.
+TOF_WINDOW = [0.0, 10.0]  # ns
+TOF_DISTANCE = 2997.92458  # mm, travelled by light in 10 ns
+TOF_DELTA_T = 20.0  # ns
+TOF_SIGNAL_HITS = [
+    (1, False, 5.0),  # inside either way
+    (2, True, 5.0),  # inside only by its absolute time
+    (3, True, 15.0),  # inside only relative to the time of flight
+]
+TOF_BACKGROUND_HITS = [
+    (11, False, 5.0),  # inside either way, in the first bunch crossing
+    (12, True, 5.0),  # inside only by its absolute time, in the first bunch crossing
+    (13, True, 15.0),  # inside only relative to the time of flight, in the first bunch crossing
+    # before t = 0, inside either way, only in the second bunch crossing
+    (14, False, -15.0),
+]
+# The overlaid cellIDs, with and without ApplyTimeOfFlight, and the shift of the
+# time of each overlaid background hit
+TOF_EXPECTED = {True: [1, 3, 11, 13, 14], False: [1, 2, 11, 12, 14]}
+TOF_EXPECTED_SHIFT = {14: TOF_DELTA_T}
+
+
+def write_tof_file(path, hits):
+    """Writes one event with the hits, in the tracker and the calorimeter
+    collections, all pointing at the only MCParticle"""
+    particles = edm4hep.MCParticleCollection()
+    particle = particles.create()
+    tracker_hits = edm4hep.SimTrackerHitCollection()
+    calo_hits = edm4hep.SimCalorimeterHitCollection()
+    contributions = edm4hep.CaloHitContributionCollection()
+    for cell_id, far, time in hits:
+        z = TOF_DISTANCE if far else 0.0
+        tracker_hit = tracker_hits.create()
+        tracker_hit.setCellID(cell_id)
+        tracker_hit.setPosition(edm4hep.Vector3d(0.0, 0.0, z))
+        tracker_hit.setTime(time)
+        tracker_hit.setParticle(particle)
+
+        contribution = contributions.create()
+        contribution.setPDG(cell_id)
+        contribution.setTime(time)
+        contribution.setEnergy(1.0)
+        contribution.setParticle(particle)
+        calo_hit = calo_hits.create()
+        calo_hit.setCellID(cell_id)
+        calo_hit.setPosition(edm4hep.Vector3f(0.0, 0.0, z))
+        calo_hit.setEnergy(1.0)
+        calo_hit.addToContributions(contribution)
+
+    frame = podio.Frame()
+    frame.put(particles, "MCParticles")
+    frame.put(tracker_hits, "SimTrackerHits")
+    frame.put(calo_hits, "SimCalorimeterHits")
+    frame.put(contributions, "CaloHitContributions")
+
+    writer = podio.root_io.Writer(path)
+    writer.write_frame(frame, "events")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Write the background input for the OverlayTiming tests"
@@ -208,6 +280,8 @@ def main():
         os.path.join(args.output_dir, "calo_merge_background.root"),
         CALO_MERGE_BACKGROUND_HITS,
     )
+    write_tof_file(os.path.join(args.output_dir, "tof_signal.root"), TOF_SIGNAL_HITS)
+    write_tof_file(os.path.join(args.output_dir, "tof_background.root"), TOF_BACKGROUND_HITS)
 
 
 if __name__ == "__main__":

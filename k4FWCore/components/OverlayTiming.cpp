@@ -61,6 +61,21 @@ float time_of_flight(const T& pos) {
   return std::sqrt((pos[0] * pos[0]) + (pos[1] * pos[1]) + (pos[2] * pos[2])) / TMath::C() * 1e6;
 }
 
+// The (start, stop) time window for a hit at pos. With applyTimeOfFlight the window is moved by
+// the time of flight of light from the interaction point to pos, otherwise it is left as is.
+// Used for every hit, signal and background, tracker and calorimeter, so that they are all
+// selected in the same way
+template <typename T>
+std::pair<float, float> hit_time_window(const T& pos, float start, float stop, bool applyTimeOfFlight) {
+  const float tof = applyTimeOfFlight ? time_of_flight(pos) : 0.f;
+  return {start + tof, stop + tof};
+}
+
+// Whether time is inside the window (start, stop)
+bool is_in_window(float time, const std::pair<float, float>& window) {
+  return (time > window.first) && (time < window.second);
+}
+
 // Index of the copied background particle a relation should point at.
 // An index outside the background collection leaves the relation unset, which
 // covers both podio::ObjectID::untracked (-1) and podio::ObjectID::invalid (-2).
@@ -68,26 +83,21 @@ int overlaid_particle_index(int oldIndex, int offset, int nBgParticles) {
   return (oldIndex >= 0 && oldIndex < nBgParticles) ? offset + oldIndex : -1;
 }
 
-// Whether the contribution, shifted by timeShift, is inside (start, stop)
-bool is_in_window(const edm4hep::CaloHitContribution& contrib, float timeShift, float start, float stop) {
-  return (contrib.getTime() + timeShift > start) && (contrib.getTime() + timeShift < stop);
-}
-
 // The contributions of the hit to overlay: all of them if keepAll, otherwise only those inside
-// (start, stop) once shifted by timeShift
-auto contributions_to_overlay(const edm4hep::SimCalorimeterHit& hit, float timeShift, float start, float stop,
-                              bool keepAll) {
+// the window once shifted by timeShift
+auto contributions_to_overlay(const edm4hep::SimCalorimeterHit& hit, float timeShift,
+                              const std::pair<float, float>& window, bool keepAll) {
   return hit.getContributions() | std::views::filter([=](const auto& contrib) {
-           return keepAll || is_in_window(contrib, timeShift, start, stop);
+           return keepAll || is_in_window(contrib.getTime() + timeShift, window);
          });
 }
 
-// Whether at least one of the contributions, shifted by timeShift, is inside (start, stop).
+// Whether at least one of the contributions, shifted by timeShift, is inside the window.
 // Taken by reference, so that a filter view remembers the first contribution it has found
 // and iterating over it afterwards does not search for it again
-bool has_contribution_in_window(auto& contribs, float timeShift, float start, float stop) {
+bool has_contribution_in_window(auto& contribs, float timeShift, const std::pair<float, float>& window) {
   return std::ranges::any_of(contribs,
-                             [&](const auto& contrib) { return is_in_window(contrib, timeShift, start, stop); });
+                             [&](const auto& contrib) { return is_in_window(contrib.getTime() + timeShift, window); });
 }
 } // namespace
 
@@ -239,8 +249,8 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
     const auto [this_start, this_stop] = define_time_windows(name);
     auto ocoll = edm4hep::SimTrackerHitCollection();
     for (const auto&& simTrackerHit : *coll) {
-      const float tof = time_of_flight(simTrackerHit.getPosition());
-      if ((simTrackerHit.getTime() > this_start + tof) && (simTrackerHit.getTime() < this_stop + tof)) {
+      const auto window = hit_time_window(simTrackerHit.getPosition(), this_start, this_stop, m_applyTimeOfFlight);
+      if (is_in_window(simTrackerHit.getTime(), window)) {
         auto nhit = simTrackerHit.clone(false);
         if (const auto index = simTrackerHit.getParticle().getObjectID().index; index >= 0) {
           nhit.setParticle(oparticles.at(index));
@@ -264,10 +274,9 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
     auto& calHitMap = cellIDsMap[i];
     auto& caloHitContribs = ocaloHitContribs[i];
     for (const auto&& simCaloHit : *coll) {
-      const float tof = time_of_flight(simCaloHit.getPosition());
-      auto contribs =
-          contributions_to_overlay(simCaloHit, 0, this_start + tof, this_stop + tof, m_keepAllHitContributions);
-      if (!has_contribution_in_window(contribs, 0, this_start + tof, this_stop + tof)) {
+      const auto window = hit_time_window(simCaloHit.getPosition(), this_start, this_stop, m_applyTimeOfFlight);
+      auto contribs = contributions_to_overlay(simCaloHit, 0, window, m_keepAllHitContributions);
+      if (!has_contribution_in_window(contribs, 0, window)) {
         continue;
       }
       auto newhit = simCaloHit.clone(false);
@@ -293,11 +302,11 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
       debug() << "Physics Event was placed in the " << physBX << " bunch crossing!" << endmsg;
     }
 
-    // define a permutation for the events to overlay -- the physics event is per definition at position 0
+    // The bunch crossings of the train, numbered relative to the one of the physics event, which is
+    // 0 by definition. With the physics event at position physBX (counted from 1) of a train of
+    // NBunchtrain crossings, they run from -(physBX - 1), the crossings before it, to
+    // NBunchtrain - physBX, the crossings after it. They are visited in a random order
     std::vector<int> permutation;
-
-    // Permutation has negative values and the last one is 0
-    // if (!m_randomBX) then physBX (default = 1)
     for (int i = -(physBX - 1); i < m_NBunchTrain - (physBX - 1); ++i) {
       permutation.push_back(i);
     }
@@ -363,7 +372,8 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
         const auto backgroundEvent = m_bkgEvents->getFrame(groupIndex, fileIndex);
         const auto availableCollections = backgroundEvent.getAvailableCollections();
 
-        // Either 0 or negative
+        // The time of this bunch crossing relative to the one of the physics event: negative before
+        // it, 0 for it and positive after it. With the default PhysicsBX = 1 it is never negative
         const auto timeOffset = BX_number_in_train * m_deltaT;
 
         // The background particles are copied in order, so the copy of background
@@ -419,17 +429,11 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
             continue;
           }
           const auto [this_start, this_stop] = define_time_windows(name);
-          // There are only contributions to the readout if the hits are in the integration window
-          if (this_stop <= (BX_number_in_train - physBX) * m_deltaT) {
-            info() << "Skipping collection " << name << " as it is not in the integration window" << endmsg;
-            continue;
-          }
           auto& ocoll = osimTrackerHits[i];
           for (const auto&& simTrackerHit : backgroundEvent.get<edm4hep::SimTrackerHitCollection>(name)) {
-            const float tof = time_of_flight(simTrackerHit.getPosition());
-
-            if (!((simTrackerHit.getTime() + timeOffset > this_start + tof) &&
-                  (simTrackerHit.getTime() + timeOffset < this_stop + tof))) {
+            const auto window =
+                hit_time_window(simTrackerHit.getPosition(), this_start, this_stop, m_applyTimeOfFlight);
+            if (!is_in_window(simTrackerHit.getTime() + timeOffset, window)) {
               continue;
             }
             auto nhit = simTrackerHit.clone(false);
@@ -475,20 +479,14 @@ retType OverlayTiming::operator()(const edm4hep::EventHeaderCollection& headers,
             continue;
           }
           const auto [this_start, this_stop] = define_time_windows(name);
-          // There are only contributions to the readout if the hits are in the integration window
-          if (this_stop <= (BX_number_in_train - physBX) * m_deltaT) {
-            info() << "Skipping collection " << name << " as it is not in the integration window" << endmsg;
-            continue;
-          }
-
           auto& calHitMap = cellIDsMap[i];
           auto& calHitContribs = ocaloHitContribs[i];
           for (const auto&& simCaloHit : backgroundEvent.get<edm4hep::SimCalorimeterHitCollection>(name)) {
             // Only background hits with at least one contribution in the window are overlaid,
             // with their contributions selected as for the signal hits
-            auto contribs =
-                contributions_to_overlay(simCaloHit, timeOffset, this_start, this_stop, m_keepAllHitContributions);
-            if (!has_contribution_in_window(contribs, timeOffset, this_start, this_stop)) {
+            const auto window = hit_time_window(simCaloHit.getPosition(), this_start, this_stop, m_applyTimeOfFlight);
+            auto contribs = contributions_to_overlay(simCaloHit, timeOffset, window, m_keepAllHitContributions);
+            if (!has_contribution_in_window(contribs, timeOffset, window)) {
               continue;
             }
             auto it = calHitMap.find(simCaloHit.getCellID());

@@ -23,12 +23,19 @@
     background events are read from sets of input files, and the signal events
     are the input in the main event loop.
 
-    The MCParticleCollection in signal are background are overlaid into one
-    collection. The SimTrackerHit collections are cropped and overlayed if they
-    are in the time window. The SimCalorimeterHit collections are overlayed
+    The MCParticleCollections in signal and background are overlaid into one
+    collection. The SimTrackerHit collections are cropped and overlaid if they
+    are in the time window. The SimCalorimeterHit collections are overlaid
     based on the cellID. If a signal hit has the same cellID as a background
     hit, they are combined into a single hit. Only hits that have
-    CaloHitContributions in the time range are considered.
+    CaloHitContributions in the time window are considered.
+
+    Background hits are first shifted by the time of their bunch crossing
+    relative to the one of the physics event. Each collection has its own time
+    window (TimeWindows), which is applied in the same way to signal and
+    background, tracker and calorimeter hits. With ApplyTimeOfFlight (the
+    default) it is relative to the time light takes from the interaction point
+    to the hit position, otherwise it applies to the absolute hit time.
 
 **/
 
@@ -239,6 +246,12 @@ private:
       this, "TimeWindows", std::map<std::string, std::vector<float>>(),
       "Map from collection name to [t_min, t_max] (ns) defining the acceptance window. Required for every "
       "SimTrackerHit and SimCalorimeterHit collection."};
+  Gaudi::Property<bool> m_applyTimeOfFlight{
+      this, "ApplyTimeOfFlight", true,
+      "If true, the TimeWindows are relative to the time of flight of light from the interaction point to the hit "
+      "position, i.e. a hit is kept if its time minus that time of flight is inside the window. If false, the "
+      "TimeWindows apply to the absolute hit time. Applied in the same way to signal and background, tracker and "
+      "calorimeter hits"};
   Gaudi::Property<bool> m_allowReusingBackgroundFiles{
       this, "AllowReusingBackgroundFiles", false,
       "If true, start over from the first event of a group once all of its events have been overlaid; otherwise "
