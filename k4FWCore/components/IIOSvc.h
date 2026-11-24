@@ -20,6 +20,7 @@
 #define FWCORE_IIOSVC_H
 
 #include <GaudiKernel/IInterface.h>
+#include <GaudiKernel/StatusCode.h>
 
 #include <podio/CollectionBase.h>
 #include <podio/Frame.h>
@@ -46,6 +47,10 @@ public:
   virtual std::vector<std::string> getAvailableCollections() = 0;
 
   virtual podio::Writer& getWriter() = 0;
+  /**
+   * @brief Write the frames of the input file categories selected by CopyInputCategories unchanged to the output
+   */
+  virtual StatusCode copyInputFrames() = 0;
   virtual void deleteWriter() = 0;
   virtual void deleteReader() = 0;
   virtual bool checkIfWriteCollection(const std::string& collName, const std::string_view collType) const = 0;

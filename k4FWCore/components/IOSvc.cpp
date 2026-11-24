@@ -37,11 +37,14 @@
 #include <podio/podioVersion.h>
 
 #include "k4FWCore/FunctionalUtils.h"
+#include "k4FWCore/GaudiChecks.h"
 #include "k4FWCore/KeepDropSwitch.h"
 
 #include <TROOT.h>
 
 #include <algorithm>
+#include <array>
+#include <exception>
 #include <memory>
 #include <mutex>
 #include <stdexcept>
@@ -117,6 +120,8 @@ StatusCode IOSvc::initialize() {
     }
   }
 
+  K4_GAUDI_CHECK(selectCategoriesToCopy());
+
   m_hiveWhiteBoard = service("EventDataSvc");
   if (m_hiveWhiteBoard) {
     // Needs to enabled following the recommendation in
@@ -158,6 +163,68 @@ std::tuple<std::vector<podio::CollectionBase*>, std::vector<std::string>, podio:
   }
 
   return std::make_tuple(collections, m_collectionNames, std::move(frame));
+}
+
+StatusCode IOSvc::selectCategoriesToCopy() {
+  if (m_copyInputCategories.empty()) {
+    return StatusCode::SUCCESS;
+  }
+  const bool copyAll = std::ranges::find(m_copyInputCategories, "*") != m_copyInputCategories.end();
+  if (copyAll && m_copyInputCategories.size() > 1) {
+    error() << "CopyInputCategories: '*' selects all categories and cannot be combined with explicit category names"
+            << endmsg;
+    return StatusCode::FAILURE;
+  }
+  if (!m_reader) {
+    // Nothing to copy without input files (the default is to copy all categories)
+    debug() << "No input files, no frame categories will be copied" << endmsg;
+    return StatusCode::SUCCESS;
+  }
+
+  // Categories handled by the framework itself, which are never copied
+  static constexpr std::array<std::string_view, 3> reserved{podio::Category::Event, podio::Category::Metadata,
+                                                            "configuration_metadata"};
+  const auto isReserved = [](std::string_view cat) { return std::ranges::find(reserved, cat) != reserved.end(); };
+
+  const auto available = m_reader->getAvailableCategories();
+  if (copyAll) {
+    for (const auto cat : available) {
+      if (!isReserved(cat)) {
+        m_categoriesToCopy.emplace(cat);
+      }
+    }
+    return StatusCode::SUCCESS;
+  }
+
+  for (const auto& cat : m_copyInputCategories) {
+    if (isReserved(cat)) {
+      warning() << "Frame category '" << cat << "' is handled by the framework and cannot be copied, ignoring it"
+                << endmsg;
+    } else if (std::ranges::find(available, cat) == available.end()) {
+      warning() << "Frame category '" << cat << "' requested in CopyInputCategories is not present in the input files"
+                << endmsg;
+    } else {
+      m_categoriesToCopy.insert(cat);
+    }
+  }
+  return StatusCode::SUCCESS;
+}
+
+StatusCode IOSvc::copyInputFrames() {
+  for (const auto& cat : m_categoriesToCopy) {
+    const auto nEntries = m_reader->getEntries(cat);
+    try {
+      for (size_t i = 0; i < nEntries; ++i) {
+        getWriter().writeFrame(m_reader->readFrame(cat, i), cat);
+      }
+    } catch (const std::exception& e) {
+      // e.g. the frames of a category in different input files have different collections
+      error() << "Error when copying frame category '" << cat << "' from the input files: " << e.what() << endmsg;
+      return StatusCode::FAILURE;
+    }
+    info() << "Copied " << nEntries << " frame(s) of category '" << cat << "' from the input to the output" << endmsg;
+  }
+  return StatusCode::SUCCESS;
 }
 
 // After every event if there is still a frame in the TES

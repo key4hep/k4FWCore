@@ -43,6 +43,7 @@ from CreateOverlayBackgroundFiles import (
     particle_momentum,
 )
 from OverlayRandomMixConfig import DELTA_T, N_BX, N_EVENTS, NUMBER_BACKGROUND
+import CreateFilesWithExtraCategories as extra_categories
 
 # (group, number of files, number of draws per bunch crossing) of the background
 # overlaid by TestOverlayTimingRandomMix.py, in the order of BackgroundFileNames
@@ -954,3 +955,62 @@ if mytree.GetEntries() == 0:
     raise RuntimeError(
         "output_TestAlgorithmWithTFile_myTFile.root contains TTree mytree with no entries"
     )
+
+
+def check_copy_input_categories(filename, copied_categories):
+    """Check the output of ExampleIOSvcCopyInputCategories.py: the framework
+    categories are always there and only the requested input categories have
+    been copied, with all their entries from all the input files"""
+    print(f'Checking file "{filename}" for copied input categories {copied_categories}')
+    reader = podio.reading.get_reader(filename)
+    expected = {"events", "metadata", "configuration_metadata"} | set(copied_categories)
+    if set(reader.categories) != expected:
+        raise RuntimeError(
+            f"Expected frame categories {expected} but got {set(reader.categories)}"
+        )
+
+    n_events = extra_categories.N_FILES * extra_categories.N_EVENTS
+    if len(reader.get("events")) != n_events:
+        raise RuntimeError(f"Expected {n_events} events, got {len(reader.get('events'))}")
+    # The framework categories are not duplicated by copying from the input
+    for cat in ("metadata", "configuration_metadata"):
+        if len(reader.get(cat)) != 1:
+            raise RuntimeError(f"Expected exactly one {cat} frame, got {len(reader.get(cat))}")
+    config = reader.get("configuration_metadata")[0].get_parameter("gaudiConfigOptions")
+    if any("PreviousJob" in opt for opt in config):
+        raise RuntimeError(
+            "configuration_metadata of the input must not replace the one of the current job"
+        )
+
+    if "runs" in copied_categories:
+        runs = reader.get("runs")
+        if len(runs) != extra_categories.N_FILES:
+            raise RuntimeError(f"Expected {extra_categories.N_FILES} runs frames, got {len(runs)}")
+        for i, run in enumerate(runs):
+            if run.get_parameter("runNumber") != extra_categories.RUN_NUMBER_OFFSET + i:
+                raise RuntimeError(
+                    f"Wrong runNumber in runs frame {i}: {run.get_parameter('runNumber')}"
+                )
+            if run.get_parameter("CommandLine") != extra_categories.run_command_line(i):
+                raise RuntimeError(
+                    f"Wrong CommandLine in runs frame {i}: {run.get_parameter('CommandLine')}"
+                )
+
+    if "other" in copied_categories:
+        others = reader.get("other")
+        n_other = extra_categories.N_FILES * extra_categories.OTHER_ENTRIES
+        if len(others) != n_other:
+            raise RuntimeError(f"Expected {n_other} 'other' frames, got {len(others)}")
+        for k, frame in enumerate(others):
+            i, j = divmod(k, extra_categories.OTHER_ENTRIES)
+            tag = extra_categories.other_tag(i, j)
+            if frame.get_parameter("tag") != tag:
+                raise RuntimeError(f"Wrong tag in 'other' frame {k}: {frame.get_parameter('tag')}")
+            coll = frame.get("OtherParticles")
+            if len(coll) != 1 or coll[0].getPDG() != tag:
+                raise RuntimeError(f"Collection in 'other' frame {k} was not copied correctly")
+
+
+check_copy_input_categories("functional_copy_input_categories_none.root", [])
+check_copy_input_categories("functional_copy_input_categories_all.root", ["runs", "other"])
+check_copy_input_categories("functional_copy_input_categories_runs.root", ["runs"])

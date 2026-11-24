@@ -44,6 +44,7 @@
 #include "IIOSvc.h"
 #include "k4FWCore/DataWrapper.h"
 #include "k4FWCore/FunctionalUtils.h"
+#include "k4FWCore/GaudiChecks.h"
 #include "k4FWCore/IMetadataSvc.h"
 
 #include <algorithm>
@@ -123,6 +124,11 @@ public:
       config_metadata_frame.putParameter("key4hepstack", env_key4hep_stack);
     }
     iosvc->getWriter().writeFrame(config_metadata_frame, "configuration_metadata");
+
+    // Frames from the input that IOSvc was configured to copy (CopyInputCategories).
+    // Written here, while the input files are still open, so that nothing in the
+    // event loop can interfere and the frames do not have to be kept in memory
+    K4_GAUDI_CHECK(iosvc->copyInputFrames());
 
     return StatusCode::SUCCESS;
   }
